@@ -1,0 +1,38 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
+import { useParams } from "next/navigation";
+import Layout from "../../components/Layout";
+import ChatForm from "@/app/components/ChatForm";
+import { useEffect, useState } from "react";
+
+export default function ChatPage() {
+  const { chatId } = useParams(); // dynamic route param
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [chats, setChats] = useState<any[]>([]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    fetch("/api/chats")
+      .then((res) => res.json())
+      .then(setChats)
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const onChatUpdate = () => {
+    setIsLoading(true);
+    fetch("/api/chats")
+      .then((res) => res.json())
+      .then(setChats)
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  };
+
+  return (
+    <Layout chats={chats} isLoading={isLoading}>
+      <ChatForm chatId={chatId as string} onChatUpdate={onChatUpdate} />
+    </Layout>
+  );
+}
