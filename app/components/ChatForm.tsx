@@ -9,6 +9,7 @@ import clsx from "clsx";
 
 import { createClient } from "@supabase/supabase-js";
 import Image from "next/image";
+import Echart from "./Echart";
 
 export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,6 +27,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
+
   const {
     messages,
     input,
@@ -53,6 +55,9 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
       }
       if (toolCall.toolName === "uploadImage") {
         console.log("uploadImage", toolCall);
+      }
+      if (toolCall.toolName === "visualizeData") {
+        console.log("visualizeData", toolCall);
       }
     },
     onFinish: async () => {
@@ -136,6 +141,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
               messages.length > 0 && "h-[calc(100vh-250px)]"
             )}
           >
+            {/* <Echart /> */}
             {messages.map((message) => {
               const isUser = message.role === "user";
               return (
@@ -381,6 +387,74 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                       srcDoc={rawHtml}
                                     />
                                   )
+                                )}
+                              </div>
+                            );
+                          }
+
+                          if (
+                            part.toolInvocation.toolName === "visualizeData"
+                          ) {
+                            return (
+                              <div key={index} className="space-y-2">
+                                <p className="text-sm font-semibold">
+                                  🟠 Tool: visualizeData ✅
+                                </p>
+                                {part.toolInvocation.result?.type &&
+                                  part.toolInvocation.result?.type !==
+                                    "table" && (
+                                    <Echart
+                                      type={part.toolInvocation.result?.type}
+                                      option={
+                                        part.toolInvocation.result?.chartData
+                                      }
+                                    />
+                                  )}
+
+                                {part.toolInvocation.result?.type ===
+                                  "table" && (
+                                  <div className="overflow-x-auto w-[400px] rounded-lg shadow border bg-white text-black text-sm">
+                                    <table className="min-w-full text-left table-auto">
+                                      <thead className="bg-gray-100">
+                                        <tr>
+                                          {(
+                                            part.toolInvocation.result
+                                              ?.chartData?.xAxisLabels ?? [
+                                              "Name",
+                                              "Value",
+                                            ]
+                                          ).map((header: any, idx: any) => (
+                                            <th
+                                              key={idx}
+                                              className="px-4 py-2 font-semibold text-gray-600 whitespace-nowrap"
+                                            >
+                                              {header}
+                                            </th>
+                                          ))}
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {part.toolInvocation.result?.chartData?.seriesData?.map(
+                                          (row: any, i: any) => (
+                                            <tr key={i} className="border-t">
+                                              <td className="px-4 py-2">
+                                                {row.name}
+                                              </td>
+                                              <td className="px-4 py-2">
+                                                {new Intl.NumberFormat(
+                                                  "en-US",
+                                                  {
+                                                    notation: "standard",
+                                                    compactDisplay: "short",
+                                                  }
+                                                ).format(row.value)}
+                                              </td>
+                                            </tr>
+                                          )
+                                        )}
+                                      </tbody>
+                                    </table>
+                                  </div>
                                 )}
                               </div>
                             );

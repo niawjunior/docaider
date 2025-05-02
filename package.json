@@ -15,6 +15,8 @@
     "@supabase/supabase-js": "^2.49.4",
     "ai": "^4.3.10",
     "clsx": "^2.1.1",
+    "echarts": "^5.6.0",
+    "echarts-for-react": "^3.0.2",
     "next": "15.3.1",
     "openai": "^4.96.2",
     "react": "^19.0.0",

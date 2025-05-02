@@ -171,6 +171,58 @@ export async function POST(req: Request) {
           return { type, code: object.code };
         },
       }),
+      visualizeData: tool({
+        description:
+          "When the user asks to visualize data, generate a chart configuration for ECharts. Always ask for the data and chart type.",
+        parameters: z.object({
+          type: z
+            .enum(["pie", "bar", "table"])
+            .describe("The chart type to render"),
+          title: z.string().optional().describe("The chart title"),
+          xAxisLabels: z.array(z.string()).optional().describe("X-axis labels"),
+          seriesData: z
+            .array(
+              z.object({
+                name: z.string(),
+                value: z.number(),
+                color: z.string().optional(),
+              })
+            )
+            .optional()
+            .describe("Series data with optional color"),
+
+          prompt: z
+            .string()
+            .describe("Describe the dataset and labels for the chart."),
+        }),
+        execute: async ({ type, title, xAxisLabels, seriesData, prompt }) => {
+          const { object } = await generateObject({
+            model: openai("gpt-4o-mini"),
+            schema: z.object({
+              title: z.string().optional(),
+              xAxisLabels: z.array(z.string()).optional(),
+              seriesData: z
+                .array(
+                  z.object({
+                    name: z.string(),
+                    value: z.number(),
+                    color: z.string().optional(),
+                  })
+                )
+                .optional(),
+            }),
+            prompt: `Generate ECharts-compatible option config for a ${type} chart based on this description:\n${prompt}\n\nTitle: ${title}\nX-axis labels: ${JSON.stringify(
+              xAxisLabels
+            )}\nSeries data: ${JSON.stringify(seriesData, null, 2)}`,
+          });
+
+          return {
+            type,
+            chartData: object,
+            tableData: seriesData ?? [],
+          };
+        },
+      }),
     },
     async onFinish({ response }) {
       const finalMessages = appendResponseMessages({
