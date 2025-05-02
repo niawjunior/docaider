@@ -20,7 +20,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${prompt.className} antialiased`}>{children}</body>
+      <body
+        className={`${prompt.className} antialiased bg-zinc-900`}
+        suppressHydrationWarning
+      >
+        {children}
+      </body>
     </html>
   );
 }
