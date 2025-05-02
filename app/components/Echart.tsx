@@ -70,7 +70,7 @@ export default function Echart({ type, option }: EchartProps) {
         },
         xAxis: {
           type: "category",
-          data: [],
+          data: option.seriesData?.map((item: any) => item.name) ?? [],
           axisLine: { lineStyle: { color: "#fff" } },
           axisLabel: { color: "#fff", fontFamily: "Prompt, sans-serif" },
         },
@@ -104,9 +104,6 @@ export default function Echart({ type, option }: EchartProps) {
   };
 
   const defaultOption = getDefaultOption() as any;
-  if (type === "bar" && option?.xAxisLabels) {
-    defaultOption.xAxis.data = option.xAxisLabels;
-  }
   const mergedOption = {
     ...defaultOption,
     ...option,

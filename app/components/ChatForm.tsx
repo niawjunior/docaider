@@ -501,16 +501,20 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                               part.toolInvocation as unknown as {
                                                 result: {
                                                   chartData: {
-                                                    xAxisLabels: string[];
-                                                    seriesData: {
+                                                    title: string;
+                                                    tableData: {
                                                       name: string;
                                                       value: number;
                                                     }[];
+                                                    tableHeaders: string[];
                                                   };
                                                 };
                                               }
                                             ).result?.chartData
-                                              ?.xAxisLabels ?? ["Name", "Value"]
+                                              ?.tableHeaders ?? [
+                                              "Name",
+                                              "Value",
+                                            ]
                                           ).map(
                                             (header: string, idx: number) => (
                                               <th
@@ -528,15 +532,16 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                           part.toolInvocation as unknown as {
                                             result: {
                                               chartData: {
-                                                xAxisLabels: string[];
-                                                seriesData: {
+                                                title: string;
+                                                tableData: {
                                                   name: string;
                                                   value: number;
                                                 }[];
+                                                tableHeaders: string[];
                                               };
                                             };
                                           }
-                                        ).result?.chartData?.seriesData?.map(
+                                        ).result?.chartData?.tableData?.map(
                                           (
                                             row: {
                                               name: string;

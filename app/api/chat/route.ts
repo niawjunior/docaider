@@ -149,13 +149,11 @@ export async function POST(req: Request) {
             .enum(["pie", "bar", "table"])
             .describe("The chart type to render"),
           title: z.string().optional().describe("The chart title"),
-          xAxisLabels: z.array(z.string()).optional().describe("X-axis labels"),
           seriesData: z
             .array(
               z.object({
                 name: z.string(),
                 value: z.number(),
-                color: z.string().optional(),
               })
             )
             .optional()
@@ -165,13 +163,12 @@ export async function POST(req: Request) {
             .string()
             .describe("Describe the dataset and labels for the chart."),
         }),
-        execute: async ({ type, title, xAxisLabels, seriesData, prompt }) => {
+        execute: async ({ type, title, seriesData, prompt }) => {
           try {
             const { object } = await generateObject({
               model: openai("gpt-4o-mini"),
               schema: z.object({
                 title: z.string().optional(),
-                xAxisLabels: z.array(z.string()).nullable().optional(),
                 seriesData: z
                   .array(
                     z.object({
@@ -181,18 +178,27 @@ export async function POST(req: Request) {
                     })
                   )
                   .optional(),
+                tableData: z
+                  .array(
+                    z.object({
+                      name: z.string(),
+                      value: z.number(),
+                    })
+                  )
+                  .optional(),
+                tableHeaders: z
+                  .array(z.string())
+                  .optional()
+                  .describe("Table headers"),
               }),
               prompt: `Generate ECharts-compatible option config for a ${type} chart based on this description:\n${prompt}\n\nTitle: ${
                 title ?? ""
-              }\nX-axis labels: ${
-                Array.isArray(xAxisLabels) ? JSON.stringify(xAxisLabels) : "[]"
               }\nSeries data: ${JSON.stringify(seriesData ?? [], null, 2)}`,
             });
 
             return {
               type,
               chartData: object,
-              tableData: seriesData ?? [],
             };
           } catch (error) {
             console.log("error", error);
