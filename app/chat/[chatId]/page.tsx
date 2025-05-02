@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useParams } from "next/navigation";
@@ -10,7 +9,7 @@ export default function ChatPage() {
   const { chatId } = useParams(); // dynamic route param
   const [isLoading, setIsLoading] = useState(true);
 
-  const [chats, setChats] = useState<any[]>([]);
+  const [chats, setChats] = useState<unknown[]>([]);
 
   useEffect(() => {
     setIsLoading(true);

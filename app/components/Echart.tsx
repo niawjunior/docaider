@@ -3,16 +3,15 @@ import React from "react";
 import ReactECharts from "echarts-for-react";
 
 interface EchartProps {
-  type: "bar" | "pie";
+  type: "bar" | "pie" | "table";
   option: any;
 }
 
 export default function Echart({ type, option }: EchartProps) {
-  console.log(option);
   const getDefaultOption = () => {
     if (type === "pie") {
       return {
-        backgroundColor: "#ffffff",
+        backgroundColor: "#52525c",
         tooltip: {
           trigger: "item",
 
@@ -24,7 +23,7 @@ export default function Echart({ type, option }: EchartProps) {
           orient: "vertical",
           left: "left",
           textStyle: {
-            color: "#333",
+            color: "#fff",
             fontFamily: "Prompt, sans-serif",
           },
         },
@@ -35,12 +34,12 @@ export default function Echart({ type, option }: EchartProps) {
             radius: "60%",
             label: {
               formatter: "{b}: {d}%",
-              color: "#333",
+              color: "#fff",
               fontFamily: "Prompt, sans-serif",
             },
             labelLine: {
               lineStyle: {
-                color: "#333",
+                color: "#fff",
               },
             },
             data: [],
@@ -51,7 +50,7 @@ export default function Echart({ type, option }: EchartProps) {
           left: "center",
           top: 10,
           textStyle: {
-            color: "#333",
+            color: "#fff",
             fontSize: 16,
             fontFamily: "Prompt, sans-serif",
           },
@@ -59,7 +58,7 @@ export default function Echart({ type, option }: EchartProps) {
       };
     } else if (type === "bar") {
       return {
-        backgroundColor: "#ffffff",
+        backgroundColor: "#52525c",
         tooltip: {
           trigger: "axis",
           axisPointer: {
@@ -72,13 +71,13 @@ export default function Echart({ type, option }: EchartProps) {
         xAxis: {
           type: "category",
           data: [],
-          axisLine: { lineStyle: { color: "#333" } },
-          axisLabel: { color: "#333", fontFamily: "Prompt, sans-serif" },
+          axisLine: { lineStyle: { color: "#fff" } },
+          axisLabel: { color: "#fff", fontFamily: "Prompt, sans-serif" },
         },
         yAxis: {
           type: "value",
-          axisLine: { lineStyle: { color: "#333" } },
-          axisLabel: { color: "#333", fontFamily: "Prompt, sans-serif" },
+          axisLine: { lineStyle: { color: "#fff" } },
+          axisLabel: { color: "#fff", fontFamily: "Prompt, sans-serif" },
         },
         series: [
           {
@@ -94,7 +93,7 @@ export default function Echart({ type, option }: EchartProps) {
           left: "center",
           top: 10,
           textStyle: {
-            color: "#333",
+            color: "#fff",
             fontSize: 16,
             fontFamily: "Prompt, sans-serif",
           },
@@ -134,15 +133,15 @@ export default function Echart({ type, option }: EchartProps) {
         };
       }
     ),
-    backgroundColor: "#ffffff",
+    backgroundColor: "#52525c",
   };
 
   console.log(mergedOption);
   return (
-    <div className="w-full max-w-2xl bg-white rounded-xl shadow p-4">
+    <div className="w-full max-w-2xl border-2 shadow">
       <ReactECharts
         option={mergedOption}
-        style={{ height: 300, width: "600px" }}
+        style={{ height: 300, minWidth: "600px" }}
       />
     </div>
   );

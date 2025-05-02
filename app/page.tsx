@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Layout from "./components/Layout";
@@ -6,7 +5,7 @@ import ChatForm from "./components/ChatForm";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [chats, setChats] = useState<any[]>([]);
+  const [chats, setChats] = useState<unknown[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

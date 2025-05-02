@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   appendResponseMessages,
   streamText,
   tool,
   experimental_generateSpeech as generateSpeech,
   experimental_generateImage as generateImage,
-  generateText,
   generateObject,
 } from "ai";
 
@@ -23,6 +21,21 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+export function errorHandler(error: unknown) {
+  if (error == null) {
+    return "unknown error";
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return JSON.stringify(error);
+}
 export async function POST(req: Request) {
   const { messages, chatId, imageBase64 } = await req.json();
   const result = streamText({
@@ -60,26 +73,6 @@ export async function POST(req: Request) {
         execute: async ({ type }: { type: string }) => {
           console.log("camera", type);
           return type;
-        },
-      }),
-      describeImage: tool({
-        description:
-          "When the user asks to describe an image from the url, describe the image. Always ask for image url.",
-        parameters: z.object({
-          imageUrl: z.string().describe("The image url"),
-        }),
-        execute: async ({ imageUrl }: { imageUrl: string }) => {
-          const result: any = await streamText({
-            model: openai("gpt-4o-mini"),
-            system: "You are a helpful assistant.",
-            messages: [
-              {
-                role: "user",
-                content: `Write a description of the image: ${imageUrl}`,
-              },
-            ],
-          });
-          return result.response.messages[0].content[0].text;
         },
       }),
       uploadImage: tool({
@@ -130,29 +123,6 @@ export async function POST(req: Request) {
           return { type, images };
         },
       }),
-      webSearch: tool({
-        description:
-          "Search the web to get information. Always ask for search query.",
-        parameters: z.object({
-          query: z.string().describe("The search query"),
-        }),
-        execute: async ({ query }: { query: string }) => {
-          const result = await generateText({
-            model: openai.responses("gpt-4o-mini"),
-            prompt: query,
-            tools: {
-              web_search_preview: openai.tools.webSearchPreview({
-                userLocation: {
-                  type: "approximate",
-                  city: "Bangkok",
-                  region: "Thailand",
-                },
-              }),
-            },
-          });
-          return { text: result.text, sources: result.sources };
-        },
-      }),
       generateHtml: tool({
         description:
           "When the user asks to generate html, create a html. Always ask for html prompt.",
@@ -196,31 +166,38 @@ export async function POST(req: Request) {
             .describe("Describe the dataset and labels for the chart."),
         }),
         execute: async ({ type, title, xAxisLabels, seriesData, prompt }) => {
-          const { object } = await generateObject({
-            model: openai("gpt-4o-mini"),
-            schema: z.object({
-              title: z.string().optional(),
-              xAxisLabels: z.array(z.string()).optional(),
-              seriesData: z
-                .array(
-                  z.object({
-                    name: z.string(),
-                    value: z.number(),
-                    color: z.string().optional(),
-                  })
-                )
-                .optional(),
-            }),
-            prompt: `Generate ECharts-compatible option config for a ${type} chart based on this description:\n${prompt}\n\nTitle: ${title}\nX-axis labels: ${JSON.stringify(
-              xAxisLabels
-            )}\nSeries data: ${JSON.stringify(seriesData, null, 2)}`,
-          });
+          try {
+            const { object } = await generateObject({
+              model: openai("gpt-4o-mini"),
+              schema: z.object({
+                title: z.string().optional(),
+                xAxisLabels: z.array(z.string()).nullable().optional(),
+                seriesData: z
+                  .array(
+                    z.object({
+                      name: z.string(),
+                      value: z.number(),
+                      color: z.string().optional(),
+                    })
+                  )
+                  .optional(),
+              }),
+              prompt: `Generate ECharts-compatible option config for a ${type} chart based on this description:\n${prompt}\n\nTitle: ${
+                title ?? ""
+              }\nX-axis labels: ${
+                Array.isArray(xAxisLabels) ? JSON.stringify(xAxisLabels) : "[]"
+              }\nSeries data: ${JSON.stringify(seriesData ?? [], null, 2)}`,
+            });
 
-          return {
-            type,
-            chartData: object,
-            tableData: seriesData ?? [],
-          };
+            return {
+              type,
+              chartData: object,
+              tableData: seriesData ?? [],
+            };
+          } catch (error) {
+            console.log("error", error);
+            return errorHandler(error);
+          }
         },
       }),
     },

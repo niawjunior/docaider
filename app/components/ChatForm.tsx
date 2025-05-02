@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useChat } from "@ai-sdk/react";
+import { Message, useChat } from "@ai-sdk/react";
 import { useEffect, useRef, useState } from "react";
 import { createChat } from "../tools/chat-store";
 import { useRouter } from "next/navigation";
@@ -21,7 +20,7 @@ interface ChatFormProps {
 }
 
 export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
-  const [currentMessages, setCurrentMessages] = useState<any[]>([]);
+  const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -71,6 +70,9 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
       }
 
       console.log("onFinish", messages);
+    },
+    onError: (error) => {
+      console.log("onError", error);
     },
   });
 
@@ -154,10 +156,8 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                       isUser ? "bg-blue-600 text-white" : " text-white"
                     }`}
                   >
-                    {message.parts.map((part: any, index) => {
+                    {message.parts.map((part, index) => {
                       if (part.type === "text") {
-                        const status = part;
-                        console.log(status);
                         return (
                           <p
                             key={index}
@@ -208,16 +208,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                               </div>
                             );
                           }
-
-                          if (
-                            part.toolInvocation.toolName === "describeImage"
-                          ) {
-                            return (
-                              <div key={index}>
-                                {part.toolInvocation.result}
-                              </div>
-                            );
-                          }
                           if (part.toolInvocation.toolName === "closeCamera") {
                             return (
                               <div key={index} className="space-y-2">
@@ -229,7 +219,19 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                           }
 
                           if (part.toolInvocation.toolName === "uploadImage") {
-                            const publicUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${part.toolInvocation.result?.data?.fullPath}`;
+                            const publicUrl = `${
+                              process.env.NEXT_PUBLIC_SUPABASE_URL
+                            }/storage/v1/object/public/${
+                              (
+                                part.toolInvocation as unknown as {
+                                  result: {
+                                    data: {
+                                      fullPath: string;
+                                    };
+                                  };
+                                }
+                              ).result?.data?.fullPath
+                            }`;
                             return (
                               <div key={index} className="space-y-2">
                                 <p className="text-sm font-semibold">
@@ -243,7 +245,19 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                   className="rounded-lg"
                                 />
                                 <p className="text-xs w-[300px] text-ellipsis overflow-hidden">
-                                  {`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${part.toolInvocation.result?.data?.fullPath}`}
+                                  {`${
+                                    process.env.NEXT_PUBLIC_SUPABASE_URL
+                                  }/storage/v1/object/public/${
+                                    (
+                                      part.toolInvocation as unknown as {
+                                        result: {
+                                          data: {
+                                            fullPath: string;
+                                          };
+                                        };
+                                      }
+                                    ).result?.data?.fullPath
+                                  }`}
                                 </p>
                               </div>
                             );
@@ -252,9 +266,17 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                           if (
                             part.toolInvocation.toolName === "generateSpeech"
                           ) {
-                            const uint8Obj =
-                              part.toolInvocation.result?.audio.audio
-                                .uint8ArrayData;
+                            const uint8Obj = (
+                              part.toolInvocation as unknown as {
+                                result: {
+                                  audio: {
+                                    audio: {
+                                      uint8ArrayData: Record<string, number>;
+                                    };
+                                  };
+                                };
+                              }
+                            ).result?.audio.audio.uint8ArrayData;
                             if (uint8Obj) {
                               // Convert object to Uint8Array
                               const byteArray = new Uint8Array(
@@ -277,7 +299,15 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                     🟠 Tool: {part.toolInvocation.toolName} ✅
                                   </p>
                                   <p className="text-xs">
-                                    {`"${part.toolInvocation.result.text}"`}
+                                    {`"${
+                                      (
+                                        part.toolInvocation as unknown as {
+                                          result: {
+                                            text: string;
+                                          };
+                                        }
+                                      ).result.text
+                                    }"`}
                                   </p>
                                   <audio controls src={audioUrl} />
                                 </div>
@@ -314,10 +344,27 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                 <p className="text-xs w-[300px] text-ellipsis overflow-hidden">
                                   {part.toolInvocation.args?.prompt}
                                 </p>
-                                {part.toolInvocation.result?.images?.[0]
-                                  ?.base64Data && (
+                                {(
+                                  part.toolInvocation as unknown as {
+                                    result: {
+                                      images: {
+                                        base64Data: string;
+                                      }[];
+                                    };
+                                  }
+                                ).result?.images?.[0]?.base64Data && (
                                   <Image
-                                    src={`data:image/png;base64,${part.toolInvocation.result?.images?.[0]?.base64Data}`}
+                                    src={`data:image/png;base64,${
+                                      (
+                                        part.toolInvocation as unknown as {
+                                          result: {
+                                            images: {
+                                              base64Data: string;
+                                            }[];
+                                          };
+                                        }
+                                      ).result?.images?.[0]?.base64Data
+                                    }`}
                                     alt="Generated Image"
                                     width={300}
                                     height={200}
@@ -325,8 +372,15 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                   />
                                 )}
                                 {status === "streaming" &&
-                                  !part.toolInvocation.result?.images?.[0]
-                                    ?.base64Data && (
+                                  !(
+                                    part.toolInvocation as unknown as {
+                                      result: {
+                                        images: {
+                                          base64Data: string;
+                                        }[];
+                                      };
+                                    }
+                                  ).result?.images?.[0]?.base64Data && (
                                     <div className="text-sm text-green-500">
                                       📸 Generating image...{" "}
                                       <div className="flex items-center justify-center py-4">
@@ -337,34 +391,19 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                               </div>
                             );
                           }
-                          if (part.toolInvocation.toolName === "webSearch") {
-                            return (
-                              <div key={index} className="space-y-2">
-                                <p className="text-sm font-semibold">
-                                  🟠 Tool: {part.toolInvocation.toolName} ✅
-                                </p>
-                                <p className="text-xs w-[300px] text-ellipsis overflow-hidden">
-                                  {part.toolInvocation.args?.query}
-                                </p>
-                                <div className="space-y-2">
-                                  {part.toolInvocation.result?.text && (
-                                    <p>{part.toolInvocation.result?.text}</p>
-                                  )}
-                                  {status === "streaming" && (
-                                    <div className="text-sm text-green-500">
-                                      📚 Searching web...{" "}
-                                      <div className="flex items-center justify-center py-4">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          }
                           if (part.toolInvocation.toolName === "generateHtml") {
-                            const rawHtml = part.toolInvocation.result?.code;
-                            const status = part.toolInvocation.status;
+                            const rawHtml = (
+                              part.toolInvocation as unknown as {
+                                result: {
+                                  code: string;
+                                };
+                              }
+                            ).result?.code;
+                            const status = (
+                              part.toolInvocation as unknown as {
+                                status: string;
+                              }
+                            ).status;
                             console.log(status);
                             return (
                               <div key={index} className="space-y-2">
@@ -400,42 +439,111 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                 <p className="text-sm font-semibold">
                                   🟠 Tool: visualizeData ✅
                                 </p>
-                                {part.toolInvocation.result?.type &&
-                                  part.toolInvocation.result?.type !==
-                                    "table" && (
+                                {(
+                                  part.toolInvocation as unknown as {
+                                    result: {
+                                      type: string;
+                                      chartData: unknown;
+                                    };
+                                  }
+                                ).result?.type &&
+                                  (
+                                    part.toolInvocation as unknown as {
+                                      result: {
+                                        type: string;
+                                        chartData: unknown;
+                                      };
+                                    }
+                                  ).result?.type !== "table" && (
                                     <Echart
-                                      type={part.toolInvocation.result?.type}
+                                      type={
+                                        (
+                                          part.toolInvocation as unknown as {
+                                            result: {
+                                              type: "bar" | "pie" | "table";
+                                              chartData: unknown;
+                                            };
+                                          }
+                                        ).result?.type
+                                      }
                                       option={
-                                        part.toolInvocation.result?.chartData
+                                        (
+                                          part.toolInvocation as unknown as {
+                                            result: {
+                                              chartData: unknown;
+                                            };
+                                          }
+                                        ).result?.chartData
                                       }
                                     />
                                   )}
 
-                                {part.toolInvocation.result?.type ===
-                                  "table" && (
-                                  <div className="overflow-x-auto w-[400px] rounded-lg shadow border bg-white text-black text-sm">
+                                {(
+                                  part.toolInvocation as unknown as {
+                                    result: {
+                                      type: string;
+                                      chartData: {
+                                        xAxisLabels: string[];
+                                        seriesData: {
+                                          name: string;
+                                          value: number;
+                                        }[];
+                                      };
+                                    };
+                                  }
+                                ).result?.type === "table" && (
+                                  <div className="overflow-x-auto w-[600px]  shadow border bg-zinc-600 text-white text-sm">
                                     <table className="min-w-full text-left table-auto">
-                                      <thead className="bg-gray-100">
+                                      <thead className="bg-zinc-700">
                                         <tr>
                                           {(
-                                            part.toolInvocation.result
-                                              ?.chartData?.xAxisLabels ?? [
-                                              "Name",
-                                              "Value",
-                                            ]
-                                          ).map((header: any, idx: any) => (
-                                            <th
-                                              key={idx}
-                                              className="px-4 py-2 font-semibold text-gray-600 whitespace-nowrap"
-                                            >
-                                              {header}
-                                            </th>
-                                          ))}
+                                            (
+                                              part.toolInvocation as unknown as {
+                                                result: {
+                                                  chartData: {
+                                                    xAxisLabels: string[];
+                                                    seriesData: {
+                                                      name: string;
+                                                      value: number;
+                                                    }[];
+                                                  };
+                                                };
+                                              }
+                                            ).result?.chartData
+                                              ?.xAxisLabels ?? ["Name", "Value"]
+                                          ).map(
+                                            (header: string, idx: number) => (
+                                              <th
+                                                key={idx}
+                                                className="px-4 py-2 font-semibold text-zinc-200 whitespace-nowrap"
+                                              >
+                                                {header}
+                                              </th>
+                                            )
+                                          )}
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        {part.toolInvocation.result?.chartData?.seriesData?.map(
-                                          (row: any, i: any) => (
+                                        {(
+                                          part.toolInvocation as unknown as {
+                                            result: {
+                                              chartData: {
+                                                xAxisLabels: string[];
+                                                seriesData: {
+                                                  name: string;
+                                                  value: number;
+                                                }[];
+                                              };
+                                            };
+                                          }
+                                        ).result?.chartData?.seriesData?.map(
+                                          (
+                                            row: {
+                                              name: string;
+                                              value: number;
+                                            },
+                                            i: number
+                                          ) => (
                                             <tr key={i} className="border-t">
                                               <td className="px-4 py-2">
                                                 {row.name}
@@ -473,19 +581,26 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
             onSubmit={handleSubmit}
             className="sticky bottom-0 w-full px-4 py-2 flex items-center gap-3"
           >
-            <input
+            <textarea
               value={input}
               onChange={handleInputChange}
               placeholder={
                 status !== "ready" ? "Thinking..." : "Ask anything..."
               }
               disabled={status !== "ready"}
-              className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
+              rows={1}
+              className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={status !== "ready"}
-              className="bg-orange-600 hover:bg-orange-700 w-12 h-12 text-white px-4 py-4 rounded-full disabled:opacity-50"
+              className="bg-orange-600 hover:bg-orange-700 w-12 h-12 text-white rounded-full disabled:opacity-50"
             >
               ⬆
             </button>
