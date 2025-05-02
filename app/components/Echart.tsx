@@ -1,148 +1,92 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
-import ReactECharts from "echarts-for-react";
+import React from 'react';
+import * as echarts from 'echarts/core';
+import {
+  GridComponent,
+  GridComponentOption,
+  TitleComponent,
+  TitleComponentOption,
+  ToolboxComponent,
+  ToolboxComponentOption,
+  TooltipComponent,
+  TooltipComponentOption,
+  LegendComponent,
+  LegendComponentOption,
+} from 'echarts/components';
+import {
+  BarChart,
+  BarSeriesOption,
+  LineChart,
+  LineSeriesOption,
+  PieChart,
+  PieSeriesOption,
+} from 'echarts/charts';
+import { CanvasRenderer } from 'echarts/renderers';
+import { useEffect, useRef } from 'react';
+
+type ECOption = echarts.ComposeOption<
+  | GridComponentOption
+  | TitleComponentOption
+  | ToolboxComponentOption
+  | TooltipComponentOption
+  | LegendComponentOption
+  | BarSeriesOption
+  | LineSeriesOption
+  | PieSeriesOption
+>;
+
+echarts.use([
+  GridComponent,
+  TitleComponent,
+  ToolboxComponent,
+  TooltipComponent,
+  LegendComponent,
+  BarChart,
+  LineChart,
+  PieChart,
+  CanvasRenderer,
+]);
 
 interface EchartProps {
-  type: "bar" | "pie" | "table";
-  option: any;
+  option: ECOption;
+  width?: string | number;
+  height?: string | number;
+  className?: string;
 }
 
-export default function Echart({ type, option }: EchartProps) {
-  const getDefaultOption = () => {
-    if (type === "pie") {
-      return {
-        backgroundColor: "#52525c",
-        tooltip: {
-          trigger: "item",
+export default function Echart({ option, width = '100%', height = '400px', className }: EchartProps) {
+  const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstance = useRef<echarts.ECharts | null>(null);
 
-          textStyle: {
-            fontFamily: "Prompt, sans-serif",
-          },
-        },
-        legend: {
-          orient: "vertical",
-          left: "left",
-          textStyle: {
-            color: "#fff",
-            fontFamily: "Prompt, sans-serif",
-          },
-        },
-        series: [
-          {
-            name: "",
-            type: "pie",
-            radius: "60%",
-            label: {
-              formatter: "{b}: {d}%",
-              color: "#fff",
-              fontFamily: "Prompt, sans-serif",
-            },
-            labelLine: {
-              lineStyle: {
-                color: "#fff",
-              },
-            },
-            data: [],
-          },
-        ],
-        title: {
-          text: "",
-          left: "center",
-          top: 10,
-          textStyle: {
-            color: "#fff",
-            fontSize: 16,
-            fontFamily: "Prompt, sans-serif",
-          },
-        },
-      };
-    } else if (type === "bar") {
-      return {
-        backgroundColor: "#52525c",
-        tooltip: {
-          trigger: "axis",
-          axisPointer: {
-            type: "shadow",
-          },
-          textStyle: {
-            fontFamily: "Prompt, sans-serif",
-          },
-        },
-        xAxis: {
-          type: "category",
-          data: [],
-          axisLine: { lineStyle: { color: "#fff" } },
-          axisLabel: { color: "#fff", fontFamily: "Prompt, sans-serif" },
-        },
-        yAxis: {
-          type: "value",
-          axisLine: { lineStyle: { color: "#fff" } },
-          axisLabel: { color: "#fff", fontFamily: "Prompt, sans-serif" },
-        },
-        series: [
-          {
-            data: [],
-            type: "bar",
-            itemStyle: {
-              color: "#5cb85c",
-            },
-          },
-        ],
-        title: {
-          text: "",
-          left: "center",
-          top: 10,
-          textStyle: {
-            color: "#fff",
-            fontSize: 16,
-            fontFamily: "Prompt, sans-serif",
-          },
-        },
-      };
+  useEffect(() => {
+    if (!chartRef.current) return;
+
+    if (!chartInstance.current) {
+      chartInstance.current = echarts.init(chartRef.current);
     }
-    return {};
-  };
 
-  const defaultOption = getDefaultOption() as any;
-  if (type === "bar" && option?.xAxisLabels) {
-    defaultOption.xAxis.data = option.xAxisLabels;
-  }
-  const mergedOption = {
-    ...defaultOption,
-    ...option,
-    title: {
-      ...defaultOption.title,
-      ...(option?.title && typeof option.title === "object"
-        ? option.title
-        : { text: option.title }),
-    },
-    series: (option.series || defaultOption.series)?.map(
-      (s: any, i: number) => {
-        const seriesData = option.seriesData ?? s.data ?? [];
+    if (chartInstance.current) {
+      chartInstance.current.setOption(option as ECOption);
+      chartInstance.current.resize();
+    }
 
-        // 🔁 Add color to each item if provided
-        const enrichedData = seriesData.map((item: any) => ({
-          ...item,
-          itemStyle: item.color ? { color: item.color } : undefined,
-        }));
-
-        return {
-          ...defaultOption.series?.[i],
-          ...s,
-          data: enrichedData,
-        };
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.dispose();
       }
-    ),
-    backgroundColor: "#52525c",
-  };
+    };
+  }, [option]);
 
-  console.log(mergedOption);
+  useEffect(() => {
+    if (chartInstance.current) {
+      chartInstance.current.resize();
+    }
+  }, [width, height]);
+
   return (
-    <div className="w-full max-w-2xl border-2 shadow">
-      <ReactECharts
-        option={mergedOption}
-        style={{ height: 300, minWidth: "600px" }}
-      />
-    </div>
+    <div
+      ref={chartRef}
+      style={{ width, height }}
+      className={className}
+    />
   );
 }
