@@ -1,6 +1,15 @@
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+#text to visualize
+
+<img width="1440" alt="image" src="https://github.com/user-attachments/assets/426125ed-9c99-48a9-9590-6caefd83a3d6" />
+<img width="1437" alt="image" src="https://github.com/user-attachments/assets/f024b70b-f807-4f1a-ad4a-8ab8888a22de" />
+<img width="1438" alt="image" src="https://github.com/user-attachments/assets/e14fb0a8-fa2e-4edc-ae72-8f4bbbe4c66a" />
+<img width="1439" alt="image" src="https://github.com/user-attachments/assets/e0d0d781-7ac5-44cc-9374-fe9e719e7b1e" />
+
+
+#video demo
 https://github.com/user-attachments/assets/607b8468-1d96-49a3-98e7-76872469af2a
 
 
