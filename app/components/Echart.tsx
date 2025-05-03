@@ -36,6 +36,9 @@ export default function Echart({ type, option }: EchartProps) {
           width: "50%",
           textStyle: {
             color: textColor,
+            fontSize: 10,
+            width: 200,
+            overflow: "break",
             fontFamily: "Prompt, sans-serif",
           },
         },
@@ -44,14 +47,15 @@ export default function Echart({ type, option }: EchartProps) {
             name: "",
             type: "pie",
             radius: "60%",
-            center: ["60%", "50%"],
+            center: ["60%", "55%"],
             label: {
               formatter: "{b}: {d}%",
               color: textColor,
               fontFamily: "Prompt, sans-serif",
               overflow: "break", // ← allow wrapping instead of truncating
-              width: 200, // ← adjust width to allow wrapping
+              width: 160, // ← adjust width to allow wrapping
               lineHeight: 16,
+              fontSize: 10,
             },
             labelLine: {
               lineStyle: {
