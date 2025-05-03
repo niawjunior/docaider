@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ReactECharts from "echarts-for-react";
+import { ResizableBox } from "react-resizable";
+import "react-resizable/css/styles.css";
 
 interface EchartProps {
   type: "bar" | "pie" | "table";
@@ -9,6 +11,14 @@ interface EchartProps {
 
 export default function Echart({ type, option }: EchartProps) {
   const textColor = option?.textColor ?? "#fff";
+  const [boxWidth, setBoxWidth] = useState(0);
+
+  useEffect(() => {
+    // Convert 90vw to px
+    const vwWidth = Math.floor(window.innerWidth * 0.9) - 260;
+    setBoxWidth(vwWidth);
+  }, []);
+
   const getDefaultOption = () => {
     if (type === "pie") {
       return {
@@ -78,6 +88,9 @@ export default function Echart({ type, option }: EchartProps) {
       };
     } else if (type === "bar") {
       return {
+        grid: {
+          bottom: "100px",
+        },
         toolbox: {
           show: true,
           feature: {
@@ -105,6 +118,11 @@ export default function Echart({ type, option }: EchartProps) {
             fontFamily: "Prompt, sans-serif",
             interval: 0,
             rotate: 30,
+            overflow: "break", // ← allow wrapping instead of truncating
+            width: 100, // ← adjust width to allow wrapping
+            lineHeight: 12,
+            margin: 16,
+            fontSize: 10,
           },
         },
         yAxis: {
@@ -170,13 +188,22 @@ export default function Echart({ type, option }: EchartProps) {
   console.log(mergedOption);
   return (
     <div>
-      {option && (
+      {option && boxWidth > 0 && (
         <div className="w-[calc(100vw-460px)] shadow ">
-          <ReactECharts
-            showLoading={!option}
-            option={mergedOption}
-            style={{ minHeight: "400px", width: "100%" }}
-          />
+          <ResizableBox
+            width={boxWidth}
+            height={400}
+            minConstraints={[300, 300]}
+            maxConstraints={[1000, 800]}
+          >
+            <ReactECharts
+              showLoading={!option}
+              option={mergedOption}
+              notMerge
+              lazyUpdate
+              style={{ width: "100%", height: "100%" }}
+            />
+          </ResizableBox>
         </div>
       )}
     </div>

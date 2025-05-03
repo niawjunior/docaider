@@ -102,7 +102,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
         <div>
           <div
             className={clsx(
-              "overflow-y-auto space-y-2 px-6",
+              "overflow-y-auto space-y-2",
               messages.length > 0 && "h-[calc(100vh-250px)]"
             )}
           >
@@ -114,7 +114,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                   className={`flex ${isUser ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={` text-left px-4 py-2 rounded-2xl text-sm ${
+                    className={` text-left py-2 rounded-2xl text-sm ${
                       isUser ? "bg-blue-600 text-white" : " text-white"
                     }`}
                   >
@@ -123,7 +123,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                         return (
                           <p
                             key={index}
-                            className="leading-relaxed whitespace-pre-wrap"
+                            className=" px-4 leading-relaxed whitespace-pre-wrap"
                           >
                             {part.text}
                           </p>
@@ -134,7 +134,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                             part.toolInvocation.toolName === "generatePieChart"
                           ) {
                             return (
-                              <div key={index} className="space-y-2">
+                              <div key={index}>
                                 <Echart
                                   type="pie"
                                   option={
@@ -246,7 +246,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
           </div>
           <form
             onSubmit={handleSubmit}
-            className="sticky bottom-0 w-full px-4 py-2 flex items-center gap-3"
+            className="sticky bottom-0 w-full py-2 flex items-center gap-3"
           >
             <textarea
               value={input}
