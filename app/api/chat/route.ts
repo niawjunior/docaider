@@ -87,8 +87,18 @@ export async function POST(req: Request) {
             )
             .optional()
             .describe("Series data with optional color"),
+          backgroundColor: z
+            .string()
+            .optional()
+            .default("#52525c")
+            .describe("Background color of the chart"),
+          textColor: z
+            .string()
+            .optional()
+            .default("#fff")
+            .describe("Text color of the chart"),
         }),
-        execute: async ({ title, seriesData }) => {
+        execute: async ({ title, seriesData, backgroundColor, textColor }) => {
           try {
             const { object } = await generateObject({
               model: openai("gpt-4o-mini"),
@@ -107,10 +117,26 @@ export async function POST(req: Request) {
                     })
                   )
                   .optional(),
+                backgroundColor: z
+                  .string()
+                  .optional()
+                  .default("#52525c")
+                  .describe("Background color of the chart"),
+                textColor: z
+                  .string()
+                  .optional()
+                  .default("#fff")
+                  .describe("Text color of the chart"),
               }),
               prompt: `Generate ECharts-compatible option config for a pie chart based on schema and this description:\n\nTitle: ${
                 title ?? ""
-              }\nSeries data: ${JSON.stringify(seriesData ?? [], null, 2)}`,
+              }\nSeries data: ${JSON.stringify(
+                seriesData ?? [],
+                null,
+                2
+              )}\nBackground color: ${backgroundColor ?? ""}\nText color: ${
+                textColor ?? ""
+              }`,
             });
             return {
               chartData: object,
@@ -152,8 +178,18 @@ export async function POST(req: Request) {
             )
             .optional()
             .describe("Series data with optional color"),
+          backgroundColor: z
+            .string()
+            .optional()
+            .default("#52525c")
+            .describe("Background color of the chart"),
+          textColor: z
+            .string()
+            .optional()
+            .default("#fff")
+            .describe("Text color of the chart"),
         }),
-        execute: async ({ title, seriesData }) => {
+        execute: async ({ title, seriesData, backgroundColor, textColor }) => {
           try {
             const { object } = await generateObject({
               model: openai("gpt-4o-mini"),
@@ -172,10 +208,26 @@ export async function POST(req: Request) {
                     })
                   )
                   .optional(),
+                backgroundColor: z
+                  .string()
+                  .optional()
+                  .default("#52525c")
+                  .describe("Background color of the chart"),
+                textColor: z
+                  .string()
+                  .optional()
+                  .default("#fff")
+                  .describe("Text color of the chart"),
               }),
               prompt: `Generate ECharts-compatible option config for a bar chart based on schema and this description:\n\nTitle: ${
                 title ?? ""
-              }\nSeries data: ${JSON.stringify(seriesData ?? [], null, 2)}`,
+              }\nSeries data: ${JSON.stringify(
+                seriesData ?? [],
+                null,
+                2
+              )}\nBackground color: ${backgroundColor ?? ""}\nText color: ${
+                textColor ?? ""
+              }`,
             });
             return {
               chartData: object,

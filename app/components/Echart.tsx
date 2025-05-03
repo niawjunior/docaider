@@ -8,6 +8,7 @@ interface EchartProps {
 }
 
 export default function Echart({ type, option }: EchartProps) {
+  const textColor = option?.textColor ?? "#fff";
   const getDefaultOption = () => {
     if (type === "pie") {
       return {
@@ -30,8 +31,11 @@ export default function Echart({ type, option }: EchartProps) {
         legend: {
           orient: "vertical",
           left: "left",
+          bottom: 0,
+          padding: [20, 10, 10, 10],
+          width: "50%",
           textStyle: {
-            color: "#fff",
+            color: textColor,
             fontFamily: "Prompt, sans-serif",
           },
         },
@@ -40,14 +44,15 @@ export default function Echart({ type, option }: EchartProps) {
             name: "",
             type: "pie",
             radius: "60%",
+            center: ["70%", "50%"],
             label: {
               formatter: "{b}: {d}%",
-              color: "#fff",
+              color: textColor,
               fontFamily: "Prompt, sans-serif",
             },
             labelLine: {
               lineStyle: {
-                color: "#fff",
+                color: textColor,
               },
             },
             data: [],
@@ -58,7 +63,7 @@ export default function Echart({ type, option }: EchartProps) {
           left: "center",
           top: 10,
           textStyle: {
-            color: "#fff",
+            color: textColor,
             fontSize: 16,
             fontFamily: "Prompt, sans-serif",
           },
@@ -87,9 +92,9 @@ export default function Echart({ type, option }: EchartProps) {
         xAxis: {
           type: "category",
           data: option?.seriesData?.map((item: any) => item.name) ?? [],
-          axisLine: { lineStyle: { color: "#fff" } },
+          axisLine: { lineStyle: { color: textColor } },
           axisLabel: {
-            color: "#fff",
+            color: textColor,
             fontFamily: "Prompt, sans-serif",
             interval: 0,
             rotate: 30,
@@ -97,8 +102,8 @@ export default function Echart({ type, option }: EchartProps) {
         },
         yAxis: {
           type: "value",
-          axisLine: { lineStyle: { color: "#fff" } },
-          axisLabel: { color: "#fff", fontFamily: "Prompt, sans-serif" },
+          axisLine: { lineStyle: { color: textColor } },
+          axisLabel: { color: textColor, fontFamily: "Prompt, sans-serif" },
         },
         series: [
           {
@@ -114,7 +119,7 @@ export default function Echart({ type, option }: EchartProps) {
           left: "center",
           top: 10,
           textStyle: {
-            color: "#fff",
+            color: textColor,
             fontSize: 16,
             fontFamily: "Prompt, sans-serif",
           },
@@ -125,6 +130,7 @@ export default function Echart({ type, option }: EchartProps) {
   };
 
   const defaultOption = getDefaultOption() as any;
+
   const mergedOption = {
     ...defaultOption,
     ...option,
@@ -151,18 +157,18 @@ export default function Echart({ type, option }: EchartProps) {
         };
       }
     ),
-    backgroundColor: "#52525c",
+    backgroundColor: option?.backgroundColor ?? defaultOption.backgroundColor,
   };
 
   console.log(mergedOption);
   return (
     <div>
       {option && (
-        <div className="w-full max-w-2xl border-2 shadow">
+        <div className="min-w-[900px] border-2 shadow ">
           <ReactECharts
             showLoading={!option}
             option={mergedOption}
-            style={{ height: 300, minWidth: "600px" }}
+            style={{ minHeight: "400px", width: "100%" }}
           />
         </div>
       )}
