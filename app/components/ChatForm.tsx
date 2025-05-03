@@ -6,7 +6,6 @@ import { createChat } from "../tools/chat-store";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { IoMdSend } from "react-icons/io";
-import ReactMarkdown from "react-markdown";
 
 import { createClient } from "@supabase/supabase-js";
 import Echart from "./Echart";
@@ -126,7 +125,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                             key={index}
                             className="leading-relaxed whitespace-pre-wrap"
                           >
-                            <ReactMarkdown>{part.text}</ReactMarkdown>
+                            {part.text}
                           </p>
                         );
                       } else {
