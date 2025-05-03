@@ -9,10 +9,12 @@ const ChatLayout = ({
   children,
   chats,
   isLoading = false,
+  isShowTitle = true,
 }: {
   children: React.ReactNode;
   chats?: unknown[];
   isLoading?: boolean;
+  isShowTitle?: boolean;
 }) => {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -81,8 +83,9 @@ const ChatLayout = ({
         {/* Main */}
         <main className="flex-1 w-full flex flex-col items-center justify-center p-10 overflow-x-auto ">
           <div className="text-center w-full h-full flex flex-col items-center justify-center">
-            <h1 className="text-2xl font-semibold mb-2">🌟 Hello</h1>
-            <p className="text-zinc-400 mb-6">How can I help you today?</p>
+            {isShowTitle && (
+              <p className="text-zinc-400 mb-6">How can I help you today?</p>
+            )}
 
             <div className="bg-zinc-800 rounded-xl p-4 w-full min-w-[300px]">
               {children}
