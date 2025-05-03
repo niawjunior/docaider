@@ -24,7 +24,12 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  useEffect(() => {
+    // Focus on load
+    textareaRef.current?.focus();
+  }, []);
   const {
     messages,
     input,
@@ -56,6 +61,10 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
         onChatUpdate?.();
       }
 
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+
       console.log("onFinish", messages);
     },
     onError: (error) => {
@@ -84,7 +93,12 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
           }
         })
         .catch((error) => console.error("Error loading chat history:", error))
-        .finally(() => setIsLoading(false));
+        .finally(() => {
+          setIsLoading(false);
+          setTimeout(() => {
+            textareaRef.current?.focus();
+          }, 100);
+        });
     } else {
       createChat().then((id) => {
         router.push(`/chat/${id}`);
@@ -93,6 +107,32 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
     }
   }, [chatId, setMessages, router]);
 
+  useEffect(() => {
+    const handleGlobalKeydown = (e: KeyboardEvent) => {
+      const active = document.activeElement;
+
+      // If already typing in an input/textarea or using a shortcut, do nothing
+      if (
+        active instanceof HTMLInputElement ||
+        active instanceof HTMLTextAreaElement ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.altKey
+      ) {
+        return;
+      }
+
+      // Ignore if non-character keys (e.g., Shift, Tab, etc.)
+      if (e.key.length === 1) {
+        textareaRef.current?.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeydown);
+    return () => {
+      window.removeEventListener("keydown", handleGlobalKeydown);
+    };
+  }, []);
   return (
     <div className="flex flex-col">
       {isLoading ? (
@@ -169,7 +209,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                             part.toolInvocation.toolName === "generateBarChart"
                           ) {
                             return (
-                              <div key={index} className="space-y-2">
+                              <div key={index}>
                                 <BarChart
                                   option={
                                     (
@@ -268,10 +308,11 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
           </div>
           <form
             onSubmit={handleSubmit}
-            className="sticky bottom-0 w-full py-2 flex items-center gap-3"
+            className="sticky bottom-0 w-full py-2 px-2 flex items-center gap-3"
           >
             <textarea
               value={input}
+              ref={textareaRef}
               onChange={handleInputChange}
               placeholder={
                 status !== "ready" ? "Thinking..." : "Ask anything..."

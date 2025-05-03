@@ -118,7 +118,7 @@ const BarChart = ({ option }: BarChartProps) => {
   };
 
   return (
-    <div className="w-[calc(100vw-460px)] shadow ">
+    <div>
       {option && boxWidth > 0 && (
         <ResizableBox
           width={boxWidth}
