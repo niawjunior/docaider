@@ -134,7 +134,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
     };
   }, []);
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col bg-zinc-800 p-2 rounded-xl">
       {isLoading ? (
         <div className="flex items-center justify-center py-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>

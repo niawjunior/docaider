@@ -2,8 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { createChat } from "../tools/chat-store";
-import { useState } from "react";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { GoHomeFill } from "react-icons/go";
+import {
+  TbLayoutSidebarLeftCollapseFilled,
+  TbLayoutSidebarLeftExpandFilled,
+} from "react-icons/tb";
+
 import clsx from "clsx";
 
 const ChatLayout = ({
@@ -20,8 +25,12 @@ const ChatLayout = ({
   isShowTitle?: boolean;
 }) => {
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth >= 768; // Open by default on md+ screens
+    }
+    return true; // Fallback for SSR
+  });
   const createNewChat = async () => {
     const id = await createChat(); // create a new chat
     router.push(`/chat/${id}`);
@@ -36,18 +45,48 @@ const ChatLayout = ({
     return text || "Untitled";
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSidebarOpen(window.innerWidth >= 768);
+    };
+
+    handleResize(); // Trigger on mount
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <>
       <div className="flex h-screen bg-black text-white">
-        <button
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="fixed top-4 left-4 z-2 p-1 w-12 cursor-pointer  rounded-lg text-orange-500"
-        >
-          {isSidebarOpen ? <FaArrowLeft /> : <FaArrowRight />}
-        </button>
+        <div className="fixed top-4 flex z-[99] gap-4 w-72 px-4">
+          <button
+            onClick={() => router.push("/")}
+            className="text-[20px] rounded-lg cursor-pointer"
+          >
+            <GoHomeFill />
+          </button>
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="text-[20px] rounded-lg cursor-pointer"
+          >
+            {isSidebarOpen ? (
+              <TbLayoutSidebarLeftCollapseFilled />
+            ) : (
+              <TbLayoutSidebarLeftExpandFilled />
+            )}
+          </button>
+        </div>
         {/* Sidebar */}
         {isSidebarOpen && (
-          <aside className="w-72 border-r border-zinc-800 p-4 flex flex-col gap-4 bg-zinc-900">
+          <aside
+            className={clsx(
+              "bg-zinc-900 p-4 flex flex-col gap-4 z-50 transition-all duration-300",
+              isSidebarOpen
+                ? "fixed top-0 left-0 h-full w-72 border-r border-zinc-800"
+                : "hidden md:block w-72 border-r border-zinc-800",
+              "md:static md:h-auto md:flex"
+            )}
+          >
             <button
               onClick={createNewChat}
               className="bg-orange-600 hover:bg-orange-700 text-white rounded-lg py-2 mt-[50px] px-4 text-left font-medium"
@@ -89,13 +128,13 @@ const ChatLayout = ({
         )}
 
         {/* Main */}
-        <main className="flex-1 w-full flex flex-col items-center justify-center p-10 overflow-x-auto scroll-hidden ">
+        <main className="flex-1 w-full flex flex-col items-center justify-center p-10 overflow-x-auto">
           <div className="text-center w-full h-full flex flex-col items-center justify-center">
             {isShowTitle && (
-              <p className="text-zinc-400 mb-6">How can I help you today?</p>
+              <p className="text-zinc-300 mb-6">How can I help you today?</p>
             )}
 
-            <div className="bg-zinc-800 rounded-xl p-4 w-full min-w-[300px]">
+            <div className="rounded-xl p-4 w-full min-w-[300px]">
               {children}
             </div>
           </div>
