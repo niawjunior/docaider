@@ -8,7 +8,8 @@ import clsx from "clsx";
 import { IoMdSend } from "react-icons/io";
 
 import { createClient } from "@supabase/supabase-js";
-import Echart from "./Echart";
+import BarChart from "./BarChart";
+import PieChart from "./PieChart";
 
 export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -99,14 +100,15 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
         </div>
       ) : (
-        <div>
+        <div className="overflow-hidden">
           <div
             className={clsx(
-              "overflow-y-auto space-y-2",
+              "overflow-y-auto space-y-2 ",
               messages.length > 0 && "h-[calc(100vh-250px)]"
             )}
           >
             {messages.map((message) => {
+              console.log("message", message);
               const isUser = message.role === "user";
               return (
                 <div
@@ -114,8 +116,12 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                   className={`flex ${isUser ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={` text-left py-2 rounded-2xl text-sm ${
+                    className={` text-left py-2 rounded-2xl text-sm mr-6 ${
                       isUser ? "bg-blue-600 text-white" : " text-white"
+                    } ${!isUser ? "max-w-[60%]" : "ml-6"} ${
+                      !isUser &&
+                      !message.toolInvocations?.length &&
+                      "bg-zinc-600"
                     }`}
                   >
                     {message.parts.map((part, index) => {
@@ -135,8 +141,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                           ) {
                             return (
                               <div key={index}>
-                                <Echart
-                                  type="pie"
+                                <PieChart
                                   option={
                                     (
                                       part.toolInvocation as unknown as {
@@ -144,7 +149,16 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                           chartData: unknown;
                                         };
                                       }
-                                    ).result?.chartData
+                                    ).result?.chartData as {
+                                      title: string;
+                                      seriesData: {
+                                        name: string;
+                                        value: number;
+                                        color: string;
+                                      }[];
+                                      backgroundColor: string;
+                                      textColor: string;
+                                    }
                                   }
                                 />
                               </div>
@@ -156,8 +170,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                           ) {
                             return (
                               <div key={index} className="space-y-2">
-                                <Echart
-                                  type="bar"
+                                <BarChart
                                   option={
                                     (
                                       part.toolInvocation as unknown as {
@@ -165,7 +178,16 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                           chartData: unknown;
                                         };
                                       }
-                                    ).result?.chartData
+                                    ).result?.chartData as {
+                                      title: string;
+                                      seriesData: {
+                                        name: string;
+                                        value: number;
+                                        color: string;
+                                      }[];
+                                      backgroundColor: string;
+                                      textColor: string;
+                                    }
                                   }
                                 />
                               </div>
