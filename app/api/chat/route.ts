@@ -21,21 +21,21 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export function errorHandler(error: unknown) {
-  if (error == null) {
-    return "unknown error";
-  }
+// export function errorHandler(error: unknown) {
+//   if (error == null) {
+//     return "unknown error";
+//   }
 
-  if (typeof error === "string") {
-    return error;
-  }
+//   if (typeof error === "string") {
+//     return error;
+//   }
 
-  if (error instanceof Error) {
-    return error.message;
-  }
+//   if (error instanceof Error) {
+//     return error.message;
+//   }
 
-  return JSON.stringify(error);
-}
+//   return JSON.stringify(error);
+// }
 export async function POST(req: Request) {
   const { messages, chatId, imageBase64 } = await req.json();
   const result = streamText({
@@ -202,7 +202,7 @@ export async function POST(req: Request) {
             };
           } catch (error) {
             console.log("error", error);
-            return errorHandler(error);
+            return error;
           }
         },
       }),
