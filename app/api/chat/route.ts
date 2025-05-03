@@ -1,20 +1,8 @@
-import {
-  appendResponseMessages,
-  streamText,
-  tool,
-  experimental_generateSpeech as generateSpeech,
-  experimental_generateImage as generateImage,
-  generateObject,
-} from "ai";
+import { appendResponseMessages, streamText, tool, generateObject } from "ai";
 
-// import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { openai } from "@ai-sdk/openai";
-
-// const openRouter = createOpenRouter({
-//   apiKey: process.env.NEXT_PUBLIC_OPENROUTER_API_TOKEN,
-// });
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -37,113 +25,56 @@ const supabase = createClient(
 //   return JSON.stringify(error);
 // }
 export async function POST(req: Request) {
-  const { messages, chatId, imageBase64 } = await req.json();
+  const { messages, chatId } = await req.json();
   const result = streamText({
     model: openai("gpt-4o-mini"),
-    system: "You are a helpful assistant.",
+    system: `
+    You are Askivue — a smart, friendly AI assistant that transforms natural language into visual insights. 
+    Your role is to help users describe their data, generate charts, explain patterns, and offer suggestions — all in a clear, conversational, and empowering tone.
+    
+    🧠 Behavior Guidelines:
+    - Always assume the user wants to visualize or understand data.
+    - When unclear, ask concise follow-up questions to clarify their intent.
+    - If the data looks suitable for a pie, bar, or table chart, suggest the most relevant type.
+    - If the user asks for changes (color, type, title), respond flexibly with updated chart options.
+    - Avoid jargon. Prioritize clarity and simplicity.
+    - Be proactive — offer insights, summaries, or suggestions based on the data.
+    - When appropriate, describe what the chart shows in human-friendly language.
+    - ❗ At this time, do not support line charts or other chart types outside pie, bar, and table. Politely explain the limitation and offer the closest supported option.
+    
+    🌐 Brand Tone:
+    - Friendly, professional, and concise.
+    - Like a data-savvy teammate — never robotic, never pushy.
+    - Encourage exploration with supportive phrasing (e.g., “Want to adjust this further?” or “Here’s what this tells us…”).
+    
+    🎯 Core Focus:
+    - Help users go from “text” to “visual” in seconds.
+    - Make the experience feel effortless and intelligent.
+    - Always return chart-ready responses when data is complete.
+    
+    You are not a general chatbot. You specialize in transforming user prompts into visual data insight.
+    `,
     messages,
 
     tools: {
-      openCamera: tool({
-        description:
-          "Open the camera. Always ask for confirmation before opening the camera.",
-        parameters: z.object({
-          type: z.string().describe("The type of camera"),
-        }),
-        execute: async ({ type }: { type: string }) => {
-          console.log("camera", type);
-          return type;
-        },
-      }),
-      askForConfirmationToOpenCamera: tool({
-        description: "Ask the user for confirmation.",
-        parameters: z.object({
-          message: z.string().describe("The message to ask for confirmation."),
-        }),
-        execute: async ({ message }: { message: string }) => {
-          console.log("confirmation", message);
-          return message;
-        },
-      }),
-      closeCamera: tool({
-        description: "Close the camera",
-        parameters: z.object({
-          type: z.string().describe("The type of camera"),
-        }),
-        execute: async ({ type }: { type: string }) => {
-          console.log("camera", type);
-          return type;
-        },
-      }),
-      uploadImage: tool({
-        description:
-          "When the user asks to upload an image, or save an image to supabase",
-        parameters: z.object({
-          type: z.string().describe("Upload type"),
-        }),
-        execute: async ({ type }: { type: string }) => {
-          const filename = `webcam-${Date.now()}.jpg`;
-          const buffer = Buffer.from(imageBase64, "base64");
-
-          const { data, error } = await supabase.storage
-            .from("damage-images") // your bucket name
-            .upload(filename, buffer, {
-              contentType: "image/jpeg",
-            });
-          return { type, data, error };
-        },
-      }),
-      generateSpeech: tool({
-        description: "Generate speech",
-        parameters: z.object({
-          text: z.string().describe("The text to generate speech"),
-          type: z.string().describe("Speech type"),
-        }),
-        execute: async ({ text, type }: { text: string; type: string }) => {
-          const audio = await generateSpeech({
-            model: openai.speech("tts-1"),
-            text,
-            voice: "alloy",
-          });
-          return { text, type, audio };
-        },
-      }),
-      generateImage: tool({
-        description: "Generate an image. Always ask for image prompt.",
-        parameters: z.object({
-          type: z.string().describe("Image type"),
-          prompt: z.string().describe("Image prompt"),
-        }),
-        execute: async ({ type, prompt }: { type: string; prompt: string }) => {
-          const { images } = await generateImage({
-            model: openai.image("dall-e-2"),
-            prompt,
-            n: 1,
-          });
-          return { type, images };
-        },
-      }),
-      generateHtml: tool({
-        description:
-          "When the user asks to generate html, create a html. Always ask for html prompt.",
-        parameters: z.object({
-          type: z.string().describe("Html type"),
-          prompt: z.string().describe("Html prompt"),
-        }),
-        execute: async ({ type, prompt }: { type: string; prompt: string }) => {
-          const { object } = await generateObject({
-            model: openai("gpt-4o-mini"),
-            schema: z.object({
-              code: z.string(),
-            }),
-            prompt,
-          });
-          return { type, code: object.code };
-        },
-      }),
       visualizeData: tool({
-        description:
-          "When the user asks to visualize data, generate a chart configuration for ECharts. Always ask for the data and chart type.",
+        description: `
+        Use this tool to generate visual chart configurations (ECharts-compatible) whenever the user asks to view data as a chart or table.
+      ✅ Required for:
+      - Pie charts
+      - Bar charts
+      - Data tables
+      - Any request involving "chart", "graph", "visualize", "ตาราง", "แผนภูมิ", or similar terms
+      - Any structured or numerical data the user provides
+
+      🧠 Behavior:
+      - Always ask for the chart type if not specified.
+      - If the user mentions table or ตาราง, use type "table".
+      - Never return raw markdown tables or plain lists — always respond visually through this tool.
+      - Support only: "pie", "bar", and "table" types.
+
+      The goal is to help the user go from text to visual insights — fast and seamlessly.
+        `,
         parameters: z.object({
           type: z
             .enum(["pie", "bar", "table"])
@@ -152,18 +83,42 @@ export async function POST(req: Request) {
           seriesData: z
             .array(
               z.object({
-                name: z.string(),
-                value: z.number(),
+                name: z.string().describe("Series name"),
+                value: z.number().describe("Series value"),
+                color: z
+                  .string()
+                  .describe(
+                    "Color for the chart series. If the user provides a color, use it. If not, use the previous color if available; otherwise, fall back to the default color."
+                  ),
               })
             )
             .optional()
             .describe("Series data with optional color"),
-
+          tableData: z
+            .array(
+              z.object({
+                name: z.string().describe("Table name"),
+                value: z.number().describe("Table value"),
+              })
+            )
+            .optional()
+            .describe("Table data"),
+          tableHeaders: z
+            .array(z.string())
+            .optional()
+            .describe("Table headers"),
           prompt: z
             .string()
             .describe("Describe the dataset and labels for the chart."),
         }),
-        execute: async ({ type, title, seriesData, prompt }) => {
+        execute: async ({
+          type,
+          title,
+          seriesData,
+          tableData,
+          tableHeaders,
+          prompt,
+        }) => {
           try {
             const { object } = await generateObject({
               model: openai("gpt-4o-mini"),
@@ -172,17 +127,21 @@ export async function POST(req: Request) {
                 seriesData: z
                   .array(
                     z.object({
-                      name: z.string(),
-                      value: z.number(),
-                      color: z.string().optional(),
+                      name: z.string().describe("Series name"),
+                      value: z.number().describe("Series value"),
+                      color: z
+                        .string()
+                        .describe(
+                          "Series color. Always ask for color and if the user doesn't ask for color, use the default color."
+                        ),
                     })
                   )
                   .optional(),
                 tableData: z
                   .array(
                     z.object({
-                      name: z.string(),
-                      value: z.number(),
+                      name: z.string().describe("Table name"),
+                      value: z.number().describe("Table value"),
                     })
                   )
                   .optional(),
@@ -193,7 +152,19 @@ export async function POST(req: Request) {
               }),
               prompt: `Generate ECharts-compatible option config for a ${type} chart based on this description:\n${prompt}\n\nTitle: ${
                 title ?? ""
-              }\nSeries data: ${JSON.stringify(seriesData ?? [], null, 2)}`,
+              }\nSeries data: ${JSON.stringify(
+                seriesData ?? [],
+                null,
+                2
+              )}\nTable data: ${JSON.stringify(
+                tableData ?? [],
+                null,
+                2
+              )}\nTable headers: ${JSON.stringify(
+                tableHeaders ?? [],
+                null,
+                2
+              )}`,
             });
 
             return {

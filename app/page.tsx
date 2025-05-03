@@ -34,9 +34,6 @@ export default function Home() {
         <span className="text-white text-xl font-bold">✨ Askivue</span>
         <div className="flex gap-4 text-sm text-gray-300">
           <a href="#" className="hover:text-white">
-            Docs
-          </a>
-          <a href="#" className="hover:text-white">
             Sign In
           </a>
         </div>
@@ -167,9 +164,7 @@ export default function Home() {
             <a href="#" className="hover:text-white transition">
               Terms
             </a>
-            <a href="#" className="hover:text-white transition">
-              Docs
-            </a>
+
             <a
               href="#"
               target="_blank"

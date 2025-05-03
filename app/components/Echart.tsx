@@ -11,6 +11,14 @@ export default function Echart({ type, option }: EchartProps) {
   const getDefaultOption = () => {
     if (type === "pie") {
       return {
+        toolbox: {
+          show: true,
+          feature: {
+            dataView: { show: true, readOnly: false },
+            restore: { show: true },
+            saveAsImage: { show: true },
+          },
+        },
         backgroundColor: "#52525c",
         tooltip: {
           trigger: "item",
