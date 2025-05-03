@@ -195,9 +195,8 @@ export async function POST(req: Request) {
       
       🧠 Behavior:
       - Support only: "table" types.
-      - Supports multiple dynamic columns and rows.
       - Always confirm the information provided by the user before generating the table.
-      - Support only: 2 columns and 2 rows.
+      - Support only: 2 columns.
       The goal is to help the user view structured insights in a clean, flexible format.`,
         parameters: z.object({
           title: z.string().optional().describe("The table title"),
