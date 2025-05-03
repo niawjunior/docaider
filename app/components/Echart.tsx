@@ -44,11 +44,14 @@ export default function Echart({ type, option }: EchartProps) {
             name: "",
             type: "pie",
             radius: "60%",
-            center: ["70%", "50%"],
+            center: ["60%", "50%"],
             label: {
               formatter: "{b}: {d}%",
               color: textColor,
               fontFamily: "Prompt, sans-serif",
+              overflow: "break", // ← allow wrapping instead of truncating
+              width: 200, // ← adjust width to allow wrapping
+              lineHeight: 16,
             },
             labelLine: {
               lineStyle: {
@@ -164,7 +167,7 @@ export default function Echart({ type, option }: EchartProps) {
   return (
     <div>
       {option && (
-        <div className="min-w-[900px] border-2 shadow ">
+        <div className="w-[calc(100vw-460px)] shadow ">
           <ReactECharts
             showLoading={!option}
             option={mergedOption}
