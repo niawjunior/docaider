@@ -143,7 +143,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
         <div className="overflow-hidden">
           <div
             className={clsx(
-              "overflow-y-auto space-y-2 ",
+              "overflow-y-auto scroll-hidden space-y-2 ",
               messages.length > 0 && "h-[calc(100vh-250px)]"
             )}
           >
@@ -255,7 +255,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                             return (
                               <div
                                 key={index}
-                                className="overflow-x-auto w-[600px] shadow border bg-zinc-600 text-white text-sm rounded"
+                                className="overflow-x-auto scroll-hidden w-[600px] shadow border bg-zinc-600 text-white text-sm rounded"
                               >
                                 <table className="min-w-full text-left table-auto">
                                   <thead className="bg-zinc-700">

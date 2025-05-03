@@ -56,7 +56,7 @@ const ChatLayout = ({
             </button>
 
             <div className="text-sm text-zinc-400 font-semibold">Recents</div>
-            <ul className="flex-1 overflow-y-auto">
+            <ul className="flex-1 overflow-y-auto scroll-hidden">
               {isLoading ? (
                 <div className="flex items-center justify-center py-4">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
@@ -89,7 +89,7 @@ const ChatLayout = ({
         )}
 
         {/* Main */}
-        <main className="flex-1 w-full flex flex-col items-center justify-center p-10 overflow-x-auto ">
+        <main className="flex-1 w-full flex flex-col items-center justify-center p-10 overflow-x-auto scroll-hidden ">
           <div className="text-center w-full h-full flex flex-col items-center justify-center">
             {isShowTitle && (
               <p className="text-zinc-400 mb-6">How can I help you today?</p>
