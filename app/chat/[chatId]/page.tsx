@@ -35,6 +35,7 @@ export default function ChatPage() {
 
   return (
     <Layout
+      chatId={chatId as string}
       chats={chats}
       isLoading={isLoading}
       isShowTitle={messages.length === 0}

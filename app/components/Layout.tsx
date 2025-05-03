@@ -4,16 +4,19 @@ import { useRouter } from "next/navigation";
 import { createChat } from "../tools/chat-store";
 import { useState } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import clsx from "clsx";
 
 const ChatLayout = ({
   children,
   chats,
   isLoading = false,
+  chatId,
   isShowTitle = true,
 }: {
   children: React.ReactNode;
   chats?: unknown[];
   isLoading?: boolean;
+  chatId?: string;
   isShowTitle?: boolean;
 }) => {
   const router = useRouter();
@@ -60,12 +63,17 @@ const ChatLayout = ({
                 </div>
               ) : (
                 chats?.map((chat) => (
-                  <li key={(chat as { id: string }).id}>
+                  <li key={(chat as { id: string }).id} className="py-1">
                     <button
                       onClick={() =>
                         router.push(`/chat/${(chat as { id: string }).id}`)
                       }
-                      className="w-full text-left text-sm py-2 px-2 rounded hover:bg-zinc-800 truncate"
+                      className={clsx(
+                        "w-full text-left text-sm py-2 px-2 rounded hover:bg-zinc-800 truncate",
+                        chatId === (chat as { id: string }).id
+                          ? "bg-zinc-700"
+                          : ""
+                      )}
                     >
                       {getMenuDisplayText(chat as { messages: unknown[] })}
                     </button>
