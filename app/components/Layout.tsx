@@ -130,7 +130,7 @@ const ChatLayout = ({
         )}
 
         {/* Main */}
-        <main className="flex-1 w-full flex flex-col items-center justify-center p-10 overflow-x-auto">
+        <main className="flex-1 w-full flex flex-col items-center justify-center p-4 overflow-x-auto">
           <div className="text-center w-full h-full flex flex-col items-center justify-center">
             {isShowTitle && (
               <p className="text-zinc-300 mb-6">How can I help you today?</p>

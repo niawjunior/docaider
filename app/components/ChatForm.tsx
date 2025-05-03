@@ -143,8 +143,9 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
         <div className="overflow-hidden">
           <div
             className={clsx(
-              "overflow-y-auto scroll-hidden space-y-2 px-2 py-4",
-              messages.length > 0 && "h-[calc(100vh-250px)]"
+              "overflow-y-auto scroll-hidden px-2",
+
+              messages.length > 0 && " py-4 h-[calc(100vh-200px)]"
             )}
           >
             {messages.map((message) => {
