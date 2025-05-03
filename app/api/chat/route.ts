@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   const result = streamText({
     model: openai("gpt-4o-mini"),
     system: `
-    You are Askivue — a smart, friendly AI assistant that transforms natural language into visual insights. 
+    You are Askivue — a smart and very polite girl, friendly AI assistant that transforms natural language into visual insights. 
     Your role is to help users describe their data, generate charts, explain patterns, and offer suggestions — all in a clear, conversational, and empowering tone.
     
     🧠 Behavior Guidelines:
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     - Be proactive — offer insights, summaries, or suggestions based on the data.
     - When appropriate, describe what the chart shows in human-friendly language.
     - ❗ At this time, do not support line charts or other chart types outside pie, bar, and table. Politely explain the limitation and offer the closest supported option.
-    
+    - Don't return markdown pls trying to use tool to generate chart or table.
     🌐 Brand Tone:
     - Friendly, professional, and concise.
     - Like a data-savvy teammate — never robotic, never pushy.
@@ -57,29 +57,22 @@ export async function POST(req: Request) {
     messages,
 
     tools: {
-      visualizeData: tool({
-        description: `
-        Use this tool to generate visual chart configurations (ECharts-compatible) whenever the user asks to view data as a chart or table.
-      ✅ Required for:
-      - Pie charts
-      - Bar charts
-      - Data tables
-      - Any request involving "chart", "graph", "visualize", "ตาราง", "แผนภูมิ", or similar terms
-      - Any structured or numerical data the user provides
+      generatePieChart: tool({
+        description: `Use this tool to generate visual pie chart configurations (ECharts-compatible) whenever the user asks to view data as a pie chart
+        
+        ✅ Required for:
+        - Pie charts
+        - Any structured or numerical data the user provides
 
-      🧠 Behavior:
-      - Always ask for the chart type if not specified.
-      - If the user mentions table or ตาราง, use type "table".
-      - Never return raw markdown tables or plain lists — always respond visually through this tool.
-      - Support only: "pie", "bar", and "table" types.
-
-      The goal is to help the user go from text to visual insights — fast and seamlessly.
+        🧠 Behavior:
+        - Support only: "pie" types.
+        - Always ask for the chart type if not specified.
+        - Always ask for color and if the user doesn't ask for color, use the default color.
+        - Always confirm the information provided by the user before generating the chart.
+        The goal is to help the user go from text to visual insights — fast and seamlessly.
         `,
         parameters: z.object({
-          type: z
-            .enum(["pie", "bar", "table"])
-            .describe("The chart type to render"),
-          title: z.string().optional().describe("The chart title"),
+          title: z.string().optional().describe("The pie chart title"),
           seriesData: z
             .array(
               z.object({
@@ -88,37 +81,14 @@ export async function POST(req: Request) {
                 color: z
                   .string()
                   .describe(
-                    "Color for the chart series. If the user provides a color, use it. If not, use the previous color if available; otherwise, fall back to the default color."
+                    "Series color. Always ask for color and if the user doesn't ask for color, use the default color."
                   ),
               })
             )
             .optional()
             .describe("Series data with optional color"),
-          tableData: z
-            .array(
-              z.object({
-                name: z.string().describe("Table name"),
-                value: z.number().describe("Table value"),
-              })
-            )
-            .optional()
-            .describe("Table data"),
-          tableHeaders: z
-            .array(z.string())
-            .optional()
-            .describe("Table headers"),
-          prompt: z
-            .string()
-            .describe("Describe the dataset and labels for the chart."),
         }),
-        execute: async ({
-          type,
-          title,
-          seriesData,
-          tableData,
-          tableHeaders,
-          prompt,
-        }) => {
+        execute: async ({ title, seriesData }) => {
           try {
             const { object } = await generateObject({
               model: openai("gpt-4o-mini"),
@@ -137,40 +107,137 @@ export async function POST(req: Request) {
                     })
                   )
                   .optional(),
-                tableData: z
+              }),
+              prompt: `Generate ECharts-compatible option config for a pie chart based on schema and this description:\n\nTitle: ${
+                title ?? ""
+              }\nSeries data: ${JSON.stringify(seriesData ?? [], null, 2)}`,
+            });
+            return {
+              chartData: object,
+            };
+          } catch (error) {
+            console.log("error", error);
+            return error;
+          }
+        },
+      }),
+
+      generateBarChart: tool({
+        description: `Use this tool to generate visual bar chart configurations (ECharts-compatible) whenever the user asks to view data as a bar chart
+        
+        ✅ Required for:
+        - Bar charts
+        - Any structured or numerical data the user provides
+
+        🧠 Behavior:
+        - Support only: "bar" types.
+        - Always ask for the chart type if not specified.
+        - Always ask for color and if the user doesn't ask for color, use the default color.
+        - Always confirm the information provided by the user before generating the chart.
+        The goal is to help the user go from text to visual insights — fast and seamlessly.
+        `,
+        parameters: z.object({
+          title: z.string().optional().describe("The bar chart title"),
+          seriesData: z
+            .array(
+              z.object({
+                name: z.string().describe("Series name"),
+                value: z.number().describe("Series value"),
+                color: z
+                  .string()
+                  .describe(
+                    "Series color. Always ask for color and if the user doesn't ask for color, use the default color."
+                  ),
+              })
+            )
+            .optional()
+            .describe("Series data with optional color"),
+        }),
+        execute: async ({ title, seriesData }) => {
+          try {
+            const { object } = await generateObject({
+              model: openai("gpt-4o-mini"),
+              schema: z.object({
+                title: z.string().optional(),
+                seriesData: z
                   .array(
                     z.object({
-                      name: z.string().describe("Table name"),
-                      value: z.number().describe("Table value"),
+                      name: z.string().describe("Series name"),
+                      value: z.number().describe("Series value"),
+                      color: z
+                        .string()
+                        .describe(
+                          "Series color. Always ask for color and if the user doesn't ask for color, use the default color."
+                        ),
                     })
                   )
                   .optional(),
-                tableHeaders: z
-                  .array(z.string())
-                  .optional()
-                  .describe("Table headers"),
               }),
-              prompt: `Generate ECharts-compatible option config for a ${type} chart based on this description:\n${prompt}\n\nTitle: ${
+              prompt: `Generate ECharts-compatible option config for a bar chart based on schema and this description:\n\nTitle: ${
                 title ?? ""
-              }\nSeries data: ${JSON.stringify(
-                seriesData ?? [],
-                null,
-                2
-              )}\nTable data: ${JSON.stringify(
-                tableData ?? [],
-                null,
-                2
-              )}\nTable headers: ${JSON.stringify(
-                tableHeaders ?? [],
-                null,
-                2
-              )}`,
+              }\nSeries data: ${JSON.stringify(seriesData ?? [], null, 2)}`,
             });
-
             return {
-              type,
               chartData: object,
             };
+          } catch (error) {
+            console.log("error", error);
+            return error;
+          }
+        },
+      }),
+      generateTable: tool({
+        description: `Use this tool to generate data tables (ECharts-compatible) whenever the user asks to view structured information in tabular form.
+      
+      ✅ Required for:
+      - Tables
+      - User mentions "ตาราง", "table", "rows and columns", "ข้อมูล"
+      
+      🧠 Behavior:
+      - Support only: "table" types.
+      - Supports multiple dynamic columns and rows.
+      - Always confirm the information provided by the user before generating the table.
+      - Support only: 2 columns and 2 rows.
+      The goal is to help the user view structured insights in a clean, flexible format.`,
+        parameters: z.object({
+          title: z.string().optional().describe("The table title"),
+          tableHeaders: z
+            .array(z.string())
+            .describe("Array of column headers in display order"),
+          tableData: z
+            .array(z.object({ name: z.string(), value: z.number() }))
+            .describe("Each row as an object where keys match headers"),
+        }),
+        execute: async ({ title, tableHeaders, tableData }) => {
+          try {
+            const { object } = await generateObject({
+              model: openai("gpt-4o-mini"),
+              schema: z.object({
+                title: z.string().optional().describe("The table title"),
+                tableHeaders: z
+                  .array(z.string())
+                  .describe("Column headers in order"),
+                tableData: z
+                  .any()
+                  .describe(
+                    "Table data JSON string, where each object has keys matching the headers"
+                  ),
+              }),
+              prompt: `Generate a JSON structure for an ECharts-compatible data table.
+
+              Requirements:
+              - Output must be a JSON object.
+              - "title" should reflect the dataset.
+              - "tableHeaders" should be an array of column names in the correct order.
+              - "tableData" must be an array of row objects, where each object has keys matching the headers.
+              
+              Data Description:
+              Title: ${title ?? "Untitled"}
+              Headers: ${JSON.stringify(tableHeaders, null, 2)}
+              Data: ${JSON.stringify(tableData, null, 2)}`,
+            });
+
+            return object;
           } catch (error) {
             console.log("error", error);
             return error;

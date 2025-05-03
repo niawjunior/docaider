@@ -6,6 +6,7 @@ import { createChat } from "../tools/chat-store";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { IoMdSend } from "react-icons/io";
+import ReactMarkdown from "react-markdown";
 
 import { createClient } from "@supabase/supabase-js";
 import Echart from "./Echart";
@@ -125,146 +126,112 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                             key={index}
                             className="leading-relaxed whitespace-pre-wrap"
                           >
-                            {part.text}
+                            <ReactMarkdown>{part.text}</ReactMarkdown>
                           </p>
                         );
                       } else {
                         if (part.type === "tool-invocation") {
                           if (
-                            part.toolInvocation.toolName === "visualizeData"
+                            part.toolInvocation.toolName === "generatePieChart"
                           ) {
                             return (
                               <div key={index} className="space-y-2">
-                                {(
-                                  part.toolInvocation as unknown as {
-                                    result: {
-                                      type: string;
-                                      chartData: unknown;
-                                    };
+                                <Echart
+                                  type="pie"
+                                  option={
+                                    (
+                                      part.toolInvocation as unknown as {
+                                        result: {
+                                          chartData: unknown;
+                                        };
+                                      }
+                                    ).result?.chartData
                                   }
-                                ).result?.type &&
-                                  (
-                                    part.toolInvocation as unknown as {
-                                      result: {
-                                        type: string;
-                                        chartData: unknown;
-                                      };
-                                    }
-                                  ).result?.type !== "table" && (
-                                    <Echart
-                                      type={
-                                        (
-                                          part.toolInvocation as unknown as {
-                                            result: {
-                                              type: "bar" | "pie" | "table";
-                                              chartData: unknown;
-                                            };
-                                          }
-                                        ).result?.type
-                                      }
-                                      option={
-                                        (
-                                          part.toolInvocation as unknown as {
-                                            result: {
-                                              chartData: unknown;
-                                            };
-                                          }
-                                        ).result?.chartData
-                                      }
-                                    />
-                                  )}
+                                />
+                              </div>
+                            );
+                          }
 
-                                {(
-                                  part.toolInvocation as unknown as {
-                                    result: {
-                                      type: string;
-                                      chartData: {
-                                        seriesData: {
-                                          name: string;
-                                          value: number;
-                                        }[];
-                                        title: string;
-                                      };
-                                    };
+                          if (
+                            part.toolInvocation.toolName === "generateBarChart"
+                          ) {
+                            return (
+                              <div key={index} className="space-y-2">
+                                <Echart
+                                  type="bar"
+                                  option={
+                                    (
+                                      part.toolInvocation as unknown as {
+                                        result: {
+                                          chartData: unknown;
+                                        };
+                                      }
+                                    ).result?.chartData
                                   }
-                                ).result?.type === "table" && (
-                                  <div className="overflow-x-auto w-[600px]  shadow border bg-zinc-600 text-white text-sm">
-                                    <table className="min-w-full text-left table-auto">
-                                      <thead className="bg-zinc-700">
-                                        <tr>
-                                          {(
-                                            (
-                                              part.toolInvocation as unknown as {
-                                                result: {
-                                                  chartData: {
-                                                    title: string;
-                                                    tableData: {
-                                                      name: string;
-                                                      value: number;
-                                                    }[];
-                                                    tableHeaders: string[];
-                                                  };
-                                                };
-                                              }
-                                            ).result?.chartData
-                                              ?.tableHeaders ?? [
-                                              "Name",
-                                              "Value",
-                                            ]
-                                          ).map(
-                                            (header: string, idx: number) => (
-                                              <th
-                                                key={idx}
-                                                className="px-4 py-2 font-semibold text-zinc-200 whitespace-nowrap"
-                                              >
-                                                {header}
-                                              </th>
-                                            )
-                                          )}
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        {(
-                                          part.toolInvocation as unknown as {
-                                            result: {
-                                              chartData: {
-                                                title: string;
-                                                tableData: {
-                                                  name: string;
-                                                  value: number;
-                                                }[];
-                                                tableHeaders: string[];
-                                              };
-                                            };
-                                          }
-                                        ).result?.chartData?.tableData?.map(
-                                          (
-                                            row: {
-                                              name: string;
-                                              value: number;
-                                            },
-                                            i: number
-                                          ) => (
-                                            <tr key={i} className="border-t">
-                                              <td className="px-4 py-2">
-                                                {row.name}
-                                              </td>
-                                              <td className="px-4 py-2">
-                                                {new Intl.NumberFormat(
-                                                  "en-US",
-                                                  {
-                                                    notation: "standard",
-                                                    compactDisplay: "short",
-                                                  }
-                                                ).format(row.value)}
-                                              </td>
-                                            </tr>
-                                          )
-                                        )}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                )}
+                                />
+                              </div>
+                            );
+                          }
+
+                          if (
+                            part.toolInvocation.toolName === "generateTable"
+                          ) {
+                            const tableResult = (
+                              part.toolInvocation as unknown as {
+                                result: {
+                                  tableHeaders: string[];
+                                  tableData: Record<string, string | number>[];
+                                };
+                              }
+                            ).result;
+
+                            const headers: string[] =
+                              tableResult?.tableHeaders ?? [];
+                            const rows: Record<string, string | number>[] =
+                              tableResult?.tableData ?? [];
+                            console.log(headers);
+                            console.log(rows);
+                            return (
+                              <div
+                                key={index}
+                                className="overflow-x-auto w-[600px] shadow border bg-zinc-600 text-white text-sm rounded"
+                              >
+                                <table className="min-w-full text-left table-auto">
+                                  <thead className="bg-zinc-700">
+                                    <tr>
+                                      {headers.map((header, idx) => (
+                                        <th
+                                          key={idx}
+                                          className="px-4 py-2 font-semibold text-zinc-200 whitespace-nowrap"
+                                        >
+                                          {header}
+                                        </th>
+                                      ))}
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {rows.map((row, i) => (
+                                      <tr
+                                        key={i}
+                                        className="border-t border-zinc-500"
+                                      >
+                                        {headers.map((header, j) => (
+                                          <td
+                                            key={j}
+                                            className="px-4 py-2 whitespace-nowrap"
+                                          >
+                                            {typeof row[header] === "number"
+                                              ? new Intl.NumberFormat("en-US", {
+                                                  notation: "standard",
+                                                  compactDisplay: "short",
+                                                }).format(row[header] as number)
+                                              : row[header]}
+                                          </td>
+                                        ))}
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
                               </div>
                             );
                           }

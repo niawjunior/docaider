@@ -3,6 +3,7 @@
 import Layout from "../components/Layout";
 import ChatForm from "../components/ChatForm";
 import { useEffect, useState } from "react";
+import GlobalLoader from "../components/GlobalLoader";
 
 export default function Dashboard() {
   const [chats, setChats] = useState<unknown[]>([]);
@@ -18,10 +19,13 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <Layout chats={chats} isLoading={isLoading}>
-      <div className="w-full px-4">
-        <ChatForm />
-      </div>
-    </Layout>
+    <>
+      {isLoading && <GlobalLoader />}
+      <Layout chats={chats} isLoading={isLoading}>
+        <div className="w-full px-4">
+          <ChatForm />
+        </div>
+      </Layout>
+    </>
   );
 }

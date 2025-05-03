@@ -35,7 +35,7 @@ const ChatLayout = ({
       {/* Sidebar */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="fixed top-4 left-4 z-50 p-2 w-12 bg-zinc-700 hover:bg-zinc-800 rounded-lg text-orange-500"
+        className="fixed top-4 left-4 z-50 p-1 w-12 cursor-pointer hover:bg-zinc-800 rounded-lg text-orange-500"
       >
         {isSidebarOpen ? "←" : "→"}
       </button>

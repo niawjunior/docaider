@@ -78,12 +78,12 @@ export default function Home() {
             className="flex flex-col md:flex-row gap-4 justify-center"
           >
             <motion.button
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/dashboard")}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg hover:shadow-orange-500/30"
             >
-              Coming soon
+              Get Started
             </motion.button>
           </motion.div>
 

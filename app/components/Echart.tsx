@@ -66,6 +66,14 @@ export default function Echart({ type, option }: EchartProps) {
       };
     } else if (type === "bar") {
       return {
+        toolbox: {
+          show: true,
+          feature: {
+            dataView: { show: true, readOnly: false },
+            restore: { show: true },
+            saveAsImage: { show: true },
+          },
+        },
         backgroundColor: "#52525c",
         tooltip: {
           trigger: "axis",
@@ -78,9 +86,14 @@ export default function Echart({ type, option }: EchartProps) {
         },
         xAxis: {
           type: "category",
-          data: option.seriesData?.map((item: any) => item.name) ?? [],
+          data: option?.seriesData?.map((item: any) => item.name) ?? [],
           axisLine: { lineStyle: { color: "#fff" } },
-          axisLabel: { color: "#fff", fontFamily: "Prompt, sans-serif" },
+          axisLabel: {
+            color: "#fff",
+            fontFamily: "Prompt, sans-serif",
+            interval: 0,
+            rotate: 30,
+          },
         },
         yAxis: {
           type: "value",
@@ -117,13 +130,13 @@ export default function Echart({ type, option }: EchartProps) {
     ...option,
     title: {
       ...defaultOption.title,
-      ...(option?.title && typeof option.title === "object"
-        ? option.title
-        : { text: option.title }),
+      ...(option?.title && typeof option?.title === "object"
+        ? option?.title
+        : { text: option?.title }),
     },
-    series: (option.series || defaultOption.series)?.map(
+    series: (option?.series || defaultOption.series)?.map(
       (s: any, i: number) => {
-        const seriesData = option.seriesData ?? s.data ?? [];
+        const seriesData = option?.seriesData ?? s.data ?? [];
 
         // 🔁 Add color to each item if provided
         const enrichedData = seriesData.map((item: any) => ({
@@ -143,11 +156,16 @@ export default function Echart({ type, option }: EchartProps) {
 
   console.log(mergedOption);
   return (
-    <div className="w-full max-w-2xl border-2 shadow">
-      <ReactECharts
-        option={mergedOption}
-        style={{ height: 300, minWidth: "600px" }}
-      />
+    <div>
+      {option && (
+        <div className="w-full max-w-2xl border-2 shadow">
+          <ReactECharts
+            showLoading={!option}
+            option={mergedOption}
+            style={{ height: 300, minWidth: "600px" }}
+          />
+        </div>
+      )}
     </div>
   );
 }
