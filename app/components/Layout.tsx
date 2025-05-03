@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { createChat } from "../tools/chat-store";
 import { useEffect, useState } from "react";
 import { GoHomeFill } from "react-icons/go";
+import { IoIosAddCircle } from "react-icons/io";
+
 import {
   TbLayoutSidebarLeftCollapseFilled,
   TbLayoutSidebarLeftExpandFilled,
@@ -89,9 +91,9 @@ const ChatLayout = ({
           >
             <button
               onClick={createNewChat}
-              className="bg-orange-600 hover:bg-orange-700 text-white rounded-lg py-2 mt-[50px] px-4 text-left font-medium"
+              className="bg-orange-600 flex items-center gap-2 hover:bg-orange-700 text-white rounded-lg py-2 mt-[50px] px-4 text-left font-medium"
             >
-              + New chat
+              <IoIosAddCircle /> New chat
             </button>
 
             <div className="text-sm text-zinc-400 font-semibold">Recents</div>
