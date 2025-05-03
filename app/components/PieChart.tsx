@@ -20,7 +20,9 @@ const PieChart = ({ option }: PieChartProps) => {
   const [boxWidth, setBoxWidth] = useState(0);
 
   useEffect(() => {
-    const vwWidth = Math.floor(window.innerWidth * 0.9) - 280;
+    const actualWidth = window.innerWidth;
+    const vwWidth =
+      Math.floor(actualWidth * 0.9) - (actualWidth > 768 ? 270 : 0);
     setBoxWidth(vwWidth);
   }, []);
 

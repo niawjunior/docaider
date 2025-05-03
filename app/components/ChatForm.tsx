@@ -157,9 +157,9 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                   className={`flex ${isUser ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={` text-left py-2 rounded-2xl text-sm mr-6 ${
+                    className={` text-left py-2 rounded-2xl text-sm ${
                       isUser ? "bg-blue-600 text-white" : " text-white"
-                    } ${!isUser ? "max-w-[60%]" : "ml-6"} ${
+                    } ${!isUser ? "max-w-[60%]" : ""} ${
                       !isUser &&
                       !message.toolInvocations?.length &&
                       "bg-zinc-600"

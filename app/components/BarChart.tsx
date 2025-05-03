@@ -20,13 +20,16 @@ const BarChart = ({ option }: BarChartProps) => {
   const [boxWidth, setBoxWidth] = useState(0);
   console.log(option);
   useEffect(() => {
-    const vwWidth = Math.floor(window.innerWidth * 0.9) - 280;
+    const actualWidth = window.innerWidth;
+    const vwWidth =
+      Math.floor(actualWidth * 0.9) - (actualWidth > 768 ? 270 : 0);
     setBoxWidth(vwWidth);
   }, []);
 
   const defaultOption = {
     grid: {
       bottom: "100px",
+      right: "40px",
     },
     toolbox: {
       show: true,
@@ -68,6 +71,7 @@ const BarChart = ({ option }: BarChartProps) => {
       axisLabel: {
         color: option?.textColor,
         fontFamily: "Prompt, sans-serif",
+        padding: [0, -5],
       },
     },
     series: [
