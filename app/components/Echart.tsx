@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import { ResizableBox } from "react-resizable";
 import "react-resizable/css/styles.css";
-
 interface EchartProps {
   type: "bar" | "pie" | "table";
   option: any;
@@ -15,7 +14,7 @@ export default function Echart({ type, option }: EchartProps) {
 
   useEffect(() => {
     // Convert 90vw to px
-    const vwWidth = Math.floor(window.innerWidth * 0.9) - 260;
+    const vwWidth = Math.floor(window.innerWidth * 0.9) - 280;
     setBoxWidth(vwWidth);
   }, []);
 
@@ -57,7 +56,7 @@ export default function Echart({ type, option }: EchartProps) {
             name: "",
             type: "pie",
             radius: "60%",
-            center: ["60%", "55%"],
+            center: ["50%", "50%"],
             label: {
               formatter: "{b}: {d}%",
               color: textColor,

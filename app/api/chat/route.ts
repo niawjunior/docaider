@@ -72,6 +72,7 @@ export async function POST(req: Request) {
         - Always ask for the chart type if not specified.
         - Always ask for color and if the user doesn't ask for color, use the default color.
         - Always confirm the information provided by the user before generating the chart.
+        - Always suggest the closest supported alternative if the chart type is unclear.
         The goal is to help the user go from text to visual insights — fast and seamlessly.
         `,
         parameters: z.object({
@@ -163,6 +164,7 @@ export async function POST(req: Request) {
         - Always ask for the chart type if not specified.
         - Always ask for color and if the user doesn't ask for color, use the default color.
         - Always confirm the information provided by the user before generating the chart.
+        - Always suggest the closest supported alternative if the chart type is unclear.
         The goal is to help the user go from text to visual insights — fast and seamlessly.
         `,
         parameters: z.object({
