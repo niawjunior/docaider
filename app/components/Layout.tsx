@@ -12,6 +12,8 @@ import {
 } from "react-icons/tb";
 
 import clsx from "clsx";
+import useSupabaseSession from "../hooks/useSupabaseSession";
+import { signOut } from "../login/action";
 
 const ChatLayout = ({
   children,
@@ -26,6 +28,8 @@ const ChatLayout = ({
   chatId?: string;
   isShowTitle?: boolean;
 }) => {
+  const { session } = useSupabaseSession();
+
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     if (typeof window !== "undefined") {
@@ -124,6 +128,24 @@ const ChatLayout = ({
             </ul>
 
             <div className="text-xs text-zinc-500 border-t border-zinc-700 pt-4 mt-4">
+              {session ? (
+                <div>
+                  <p>Logged in as {session.user.email}</p>
+                  <button
+                    onClick={() => signOut()}
+                    className="hover:text-white cursor-pointer"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => router.push("/login")}
+                  className="hover:text-white cursor-pointer"
+                >
+                  Sign In
+                </button>
+              )}
               <p className="text-zinc-400">Free plan</p>
             </div>
           </aside>

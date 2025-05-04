@@ -2,6 +2,9 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import useSupabaseSession from "./hooks/useSupabaseSession";
+import Link from "next/link";
+import { signOut } from "./login/action";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -28,14 +31,32 @@ const itemVariants = {
 export default function Home() {
   const router = useRouter();
 
+  const { session, loading } = useSupabaseSession();
+
+  if (loading) return null;
+
   return (
     <div className="w-full h-screen flex flex-col">
       <div className="absolute top-0 w-full px-6 py-4 flex justify-between items-center">
         <span className="text-white text-xl font-bold">✨ Askivue</span>
         <div className="flex gap-4 text-sm text-gray-300">
-          <a href="#" className="hover:text-white">
-            Sign In
-          </a>
+          {session ? (
+            <>
+              <Link href="/chat" className="hover:text-white cursor-pointer">
+                Dashboard
+              </Link>
+              <button
+                onClick={() => signOut()}
+                className="hover:text-white cursor-pointer"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <Link href="/login" className="hover:text-white">
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
       <video
