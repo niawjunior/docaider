@@ -40,7 +40,11 @@ export default function ChatPage() {
       isLoading={isLoading}
       isShowTitle={messages.length === 0}
     >
-      <ChatForm chatId={chatId as string} onChatUpdate={onChatUpdate} />
+      <ChatForm
+        isLoading={isLoading}
+        chatId={chatId as string}
+        onChatUpdate={onChatUpdate}
+      />
     </Layout>
   );
 }

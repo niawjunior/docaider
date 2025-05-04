@@ -130,15 +130,15 @@ const ChatLayout = ({
         )}
 
         {/* Main */}
-        <main className="flex-1 w-full flex flex-col items-center justify-center p-4 overflow-x-auto">
-          <div className="text-center w-full h-full flex flex-col items-center justify-center">
-            {isShowTitle && (
-              <p className="text-zinc-300 mb-6">How can I help you today?</p>
+        <main className="flex-1 w-full flex flex-col p-4 overflow-x-auto">
+          <div className="text-center w-full gap-8 md:p-4 p-0 h-full flex flex-col items-center justify-center">
+            {isShowTitle && !isLoading && (
+              <div>
+                <p className="text-2xl font-bold mb-2">Hello there!</p>
+                <p className="text-zinc-300 mb-6">How can I help you today?</p>
+              </div>
             )}
-
-            <div className="rounded-xl md:p-4 p-0 w-full min-w-[300px]">
-              {children}
-            </div>
+            <div className="rounded-xl  w-full min-w-[300px]">{children}</div>
           </div>
         </main>
       </div>
