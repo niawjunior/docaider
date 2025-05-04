@@ -11,7 +11,6 @@ import { IoArrowDownSharp } from "react-icons/io5";
 import { createClient } from "@supabase/supabase-js";
 import BarChart from "./BarChart";
 import PieChart from "./PieChart";
-import GlobalLoader from "./GlobalLoader";
 
 export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,7 +33,6 @@ export default function ChatForm({
   const [isAtBottom, setIsAtBottom] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
-  const [isChatLoading, setIsChatLoading] = useState(false);
   const suggestedPrompts = [
     {
       title: "Show me a bar chart",
@@ -125,7 +123,6 @@ export default function ChatForm({
 
   useEffect(() => {
     if (chatId) {
-      setIsChatLoading(true);
       fetch(`/api/chats/${chatId}`)
         .then((res) => res.json())
         .then((data) => {
@@ -145,7 +142,6 @@ export default function ChatForm({
           setTimeout(() => {
             textareaRef.current?.focus();
           }, 100);
-          setIsChatLoading(false);
         });
     } else {
       createChat().then((id) => {
