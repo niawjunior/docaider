@@ -149,12 +149,13 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
             )}
           >
             {messages.map((message) => {
-              console.log("message", message);
               const isUser = message.role === "user";
               return (
                 <div
                   key={message.id}
-                  className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                  className={`flex py-2 ${
+                    isUser ? "justify-end" : "justify-start"
+                  }`}
                 >
                   <div
                     className={` text-left py-2 rounded-2xl text-sm ${
@@ -177,6 +178,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                         );
                       } else {
                         if (part.type === "tool-invocation") {
+                          console.log("part", part.toolInvocation);
                           if (
                             part.toolInvocation.toolName === "generatePieChart"
                           ) {

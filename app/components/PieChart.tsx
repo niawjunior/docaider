@@ -19,6 +19,8 @@ interface PieChartProps {
 const PieChart = ({ option }: PieChartProps) => {
   const [boxWidth, setBoxWidth] = useState(0);
 
+  console.log("option", option);
+
   useEffect(() => {
     const actualWidth = window.innerWidth;
     const vwWidth =
@@ -35,7 +37,7 @@ const PieChart = ({ option }: PieChartProps) => {
         saveAsImage: { show: true },
       },
     },
-    backgroundColor: "#52525c",
+    backgroundColor: option?.backgroundColor ?? "#52525c",
     tooltip: {
       trigger: "item",
       textStyle: {

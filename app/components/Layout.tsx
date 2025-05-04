@@ -136,7 +136,7 @@ const ChatLayout = ({
               <p className="text-zinc-300 mb-6">How can I help you today?</p>
             )}
 
-            <div className="rounded-xl p-4 w-full min-w-[300px]">
+            <div className="rounded-xl md:p-4 p-0 w-full min-w-[300px]">
               {children}
             </div>
           </div>

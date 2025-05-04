@@ -18,7 +18,7 @@ interface BarChartProps {
 
 const BarChart = ({ option }: BarChartProps) => {
   const [boxWidth, setBoxWidth] = useState(0);
-  console.log(option);
+
   useEffect(() => {
     const actualWidth = window.innerWidth;
     const vwWidth =
