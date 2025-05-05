@@ -15,13 +15,11 @@ const ChatLayout = ({
   children,
   isLoading = false,
   chatId,
-  isShowTitle = true,
   registerRefreshSidebar,
 }: {
   children: React.ReactNode;
   isLoading?: boolean;
   chatId?: string;
-  isShowTitle?: boolean;
   registerRefreshSidebar?: (cb: () => void) => void;
 }) => {
   const router = useRouter();
@@ -72,14 +70,8 @@ const ChatLayout = ({
           />
         )}
         {/* Main */}
-        <main className="flex-1 w-full flex flex-col p-4 overflow-hidden">
+        <main className="flex-1 w-full flex flex-col p-4 ">
           <div className="text-center w-full gap-8 md:p-4 p-0 h-full flex flex-col items-center justify-center">
-            {isShowTitle && (
-              <div>
-                <p className="text-2xl font-bold mb-2">Hello there!</p>
-                <p className="text-zinc-300">How can I help you today?</p>
-              </div>
-            )}
             <div className="rounded-xl  w-full min-w-[300px]">{children}</div>
           </div>
         </main>

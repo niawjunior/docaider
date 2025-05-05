@@ -10,6 +10,7 @@ import { IoArrowDownSharp } from "react-icons/io5";
 import { createClient } from "@supabase/supabase-js";
 import BarChart from "./BarChart";
 import PieChart from "./PieChart";
+import GlobalLoader from "./GlobalLoader";
 
 export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,6 +28,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const [isAtBottom, setIsAtBottom] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
   const suggestedPrompts = [
     {
       title: "Show me a bar chart",
@@ -87,6 +89,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   });
 
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -117,7 +120,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
           if (Array.isArray(data)) {
             setCurrentMessages(data);
             setMessages(data);
-
+            setIsLoading(false);
             setTimeout(() => {
               bottomRef.current?.scrollIntoView({ behavior: "smooth" });
             }, 100);
@@ -125,6 +128,8 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
         })
         .catch((error) => console.error("Error loading chat history:", error))
         .finally(() => {
+          setIsLoading(false);
+          setIsReady(true);
           setTimeout(() => {
             textareaRef.current?.focus();
           }, 100);
@@ -176,21 +181,28 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   return (
     <>
       <div className="flex flex-col items-center gap-4 ">
-        {messages.length === 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
-            {suggestedPrompts.map((prompt, idx) => (
-              <button
-                key={idx}
-                onClick={() =>
-                  handlePromptClick(`${prompt.title} ${prompt.subtitle}`)
-                }
-                className="text-left p-4 rounded-xl border border-zinc-700 hover:bg-zinc-800 transition"
-              >
-                <p className="font-semibold text-white">{prompt.title}</p>
-                <p className="text-sm text-zinc-400">{prompt.subtitle}</p>
-              </button>
-            ))}
-          </div>
+        {!isReady && <GlobalLoader />}
+        {messages.length === 0 && !isLoading && (
+          <>
+            <div>
+              <p className="text-2xl font-bold mb-2">Hello there!</p>
+              <p className="text-zinc-300">How can I help you today?</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
+              {suggestedPrompts.map((prompt, idx) => (
+                <button
+                  key={idx}
+                  onClick={() =>
+                    handlePromptClick(`${prompt.title} ${prompt.subtitle}`)
+                  }
+                  className="text-left p-4 rounded-xl border border-zinc-700 hover:bg-zinc-800 transition"
+                >
+                  <p className="font-semibold text-white">{prompt.title}</p>
+                  <p className="text-sm text-zinc-400">{prompt.subtitle}</p>
+                </button>
+              ))}
+            </div>
+          </>
         )}
         <div className="w-full bg-zinc-800 p-2 rounded-xl">
           <div

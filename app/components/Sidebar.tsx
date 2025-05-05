@@ -12,12 +12,14 @@ interface SidebarProps {
   chatId?: string;
   isLoading?: boolean;
   registerRefresh?: (cb: () => void) => void;
+  onFinished?: () => void;
 }
 
 const Sidebar = ({
   chatId,
   isLoading = false,
   registerRefresh,
+  onFinished,
 }: SidebarProps) => {
   const { session } = useSupabaseSession();
   const [offset, setOffset] = useState(0);
@@ -70,8 +72,9 @@ const Sidebar = ({
 
       setOffset(fetchOffset + LIMIT);
       setLoadingMore(false);
+      onFinished?.();
     },
-    [offset, hasMore, loadingMore]
+    [offset, hasMore, loadingMore, onFinished]
   );
 
   useEffect(() => {
