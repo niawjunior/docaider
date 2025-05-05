@@ -113,7 +113,7 @@ const Sidebar = ({
   }, [hasMore, fetchChats]);
 
   return (
-    <aside className="bg-zinc-900 p-4 flex flex-col gap-4 h-full w-72 border-r border-zinc-800 z-50">
+    <aside className="bg-zinc-900 p-4 flex flex-col gap-4 h-full w-72 min-w-72 border-r border-zinc-800 z-50">
       <button
         onClick={createNewChat}
         className="bg-orange-600 flex items-center gap-2 hover:bg-orange-700 text-white rounded-lg py-2 mt-[50px] px-4 text-left font-medium"
