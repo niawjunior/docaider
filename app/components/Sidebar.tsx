@@ -157,17 +157,14 @@ const Sidebar = ({
         {session ? (
           <div>
             <p>Logged in as {session.user.email}</p>
-            <button
-              onClick={() => signOut()}
-              className="hover:text-white cursor-pointer"
-            >
+            <button onClick={() => signOut()} className="hover:text-white">
               Sign Out
             </button>
           </div>
         ) : (
           <button
             onClick={() => router.push("/login")}
-            className="hover:text-white cursor-pointer"
+            className="hover:text-white"
           >
             Sign In
           </button>

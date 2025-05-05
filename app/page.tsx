@@ -45,10 +45,7 @@ export default function Home() {
               <Link href="/chat" className="hover:text-white cursor-pointer">
                 Dashboard
               </Link>
-              <button
-                onClick={() => signOut()}
-                className="hover:text-white cursor-pointer"
-              >
+              <button onClick={() => signOut()} className="hover:text-white">
                 Sign Out
               </button>
             </>

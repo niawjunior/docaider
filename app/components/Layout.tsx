@@ -48,13 +48,13 @@ const ChatLayout = ({
         <div className="fixed top-4 flex z-[99] gap-4 w-72 px-4">
           <button
             onClick={() => router.push("/")}
-            className="text-[20px] rounded-lg cursor-pointer"
+            className="text-[20px] rounded-lg"
           >
             <GoHomeFill />
           </button>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="text-[20px] rounded-lg cursor-pointer"
+            className="text-[20px] rounded-lg"
           >
             {isSidebarOpen ? (
               <TbLayoutSidebarLeftCollapseFilled />

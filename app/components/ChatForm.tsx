@@ -370,7 +370,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                 onClick={() =>
                   bottomRef.current?.scrollIntoView({ behavior: "smooth" })
                 }
-                className="w-10 h-10 bottom-36 cursor-pointer fixed  flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
+                className="w-10 h-10 bottom-36 fixed  flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
                 aria-label="Scroll to bottom"
               >
                 <IoArrowDownSharp />
@@ -397,7 +397,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
               <button
                 type="submit"
                 disabled={status !== "ready"}
-                className="bg-orange-600 flex items-center justify-center cursor-pointer hover:bg-orange-700 w-12 h-12 text-md text-white rounded-full disabled:opacity-50"
+                className="bg-orange-600 flex items-center justify-center hover:bg-orange-700 w-12 h-12 text-md text-white rounded-full disabled:opacity-50"
               >
                 <IoMdSend />
               </button>
