@@ -2,7 +2,6 @@
 
 import { Message, useChat } from "@ai-sdk/react";
 import { useEffect, useRef, useState } from "react";
-import { createChat } from "../tools/chat-store";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { IoMdSend } from "react-icons/io";
@@ -70,7 +69,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
     async onToolCall({ toolCall }) {
       console.log("toolCall", toolCall);
       if (toolCall.toolName === "visualizeData") {
-        console.log("visualizeData", toolCall);
       }
     },
     onFinish: async () => {
@@ -99,7 +97,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
       const isBottom =
         el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
       setIsAtBottom(isBottom);
-      console.log(isBottom);
     };
 
     el.addEventListener("scroll", handleScroll);
@@ -132,10 +129,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
             textareaRef.current?.focus();
           }, 100);
         });
-    } else {
-      createChat().then((id) => {
-        router.push(`/chat/${id}`);
-      });
     }
   }, [chatId, setMessages, router]);
 
@@ -313,8 +306,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                               tableResult?.tableHeaders ?? [];
                             const rows: Record<string, string | number>[] =
                               tableResult?.tableData ?? [];
-                            console.log(headers);
-                            console.log(rows);
                             return (
                               <div
                                 key={index}

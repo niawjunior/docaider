@@ -13,8 +13,6 @@ export async function GET(
   try {
     const { chatId } = await params;
 
-    console.log("chatId", chatId);
-
     const { data, error } = await supabase
       .from("chats")
       .select("messages")
