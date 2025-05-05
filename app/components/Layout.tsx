@@ -44,7 +44,7 @@ const ChatLayout = ({
 
   return (
     <>
-      <div className="flex h-screen bg-black text-white">
+      <div className="flex h-dvh bg-black text-white">
         <div className="fixed top-4 flex z-[99] gap-4 w-72 px-4">
           <button
             onClick={() => router.push("/")}
@@ -72,12 +72,12 @@ const ChatLayout = ({
           />
         )}
         {/* Main */}
-        <main className="flex-1 w-full flex flex-col p-4 overflow-x-auto">
+        <main className="flex-1 w-full flex flex-col p-4 overflow-hidden">
           <div className="text-center w-full gap-8 md:p-4 p-0 h-full flex flex-col items-center justify-center">
             {isShowTitle && (
               <div>
                 <p className="text-2xl font-bold mb-2">Hello there!</p>
-                <p className="text-zinc-300 mb-6">How can I help you today?</p>
+                <p className="text-zinc-300">How can I help you today?</p>
               </div>
             )}
             <div className="rounded-xl  w-full min-w-[300px]">{children}</div>

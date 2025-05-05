@@ -177,7 +177,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
     <>
       <div className="flex flex-col items-center gap-4 ">
         {messages.length === 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 w-full max-w-2xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
             {suggestedPrompts.map((prompt, idx) => (
               <button
                 key={idx}
@@ -192,13 +192,13 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
             ))}
           </div>
         )}
-        <div className="overflow-hidden  w-full bg-zinc-800 p-2 rounded-xl">
+        <div className="w-full bg-zinc-800 p-2 rounded-xl">
           <div
             ref={containerRef}
             className={clsx(
-              "overflow-y-auto scroll-hidden px-2",
+              "overflow-auto scroll-hidden px-2",
 
-              messages.length > 0 && " py-4 h-[calc(100vh-200px)]"
+              messages.length > 0 && " py-4 h-[calc(100dvh-200px)]"
             )}
           >
             {messages.map((message) => {
