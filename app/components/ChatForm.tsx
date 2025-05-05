@@ -19,14 +19,9 @@ export const supabase = createClient(
 interface ChatFormProps {
   chatId?: string;
   onChatUpdate?: () => void;
-  isLoading?: boolean;
 }
 
-export default function ChatForm({
-  chatId,
-  onChatUpdate,
-  isLoading,
-}: ChatFormProps) {
+export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -79,14 +74,8 @@ export default function ChatForm({
       }
     },
     onFinish: async () => {
-      if (!chatId) {
-        console.log(messages);
-        // const id = await createChat(); // create a new chat
-        // router.push(`/chat/${id}`);
-      } else {
-        setCurrentMessages(messages);
-        onChatUpdate?.();
-      }
+      setCurrentMessages(messages);
+      onChatUpdate?.();
 
       setTimeout(() => {
         textareaRef.current?.focus();
@@ -194,7 +183,7 @@ export default function ChatForm({
   return (
     <>
       <div className="flex flex-col items-center gap-4 ">
-        {messages.length === 0 && !isLoading && (
+        {messages.length === 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 w-full max-w-2xl">
             {suggestedPrompts.map((prompt, idx) => (
               <button
@@ -424,8 +413,6 @@ export default function ChatForm({
             </div>
           </form>
         </div>
-
-        {/* Chat input */}
       </div>
     </>
   );
