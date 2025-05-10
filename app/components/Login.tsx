@@ -8,18 +8,7 @@ const LoginComponent = () => {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callback_url") || "/chat";
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-zinc-950 text-white overflow-hidden px-4">
-      {/* Background */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover opacity-10 blur-sm"
-      >
-        <source src="/askivue-demo.mp4" type="video/mp4" />
-      </video>
-
+    <div className=" min-h-screen flex items-center justify-center bg-zinc-950 text-white overflow-hidden px-4">
       {/* Login Box */}
       <div className="relative z-10 bg-zinc-800/80 backdrop-blur-lg shadow-xl rounded-2xl p-10 w-full max-w-md border border-zinc-700">
         <div className="text-center mb-6">
