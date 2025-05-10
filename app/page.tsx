@@ -45,7 +45,14 @@ export default function Home() {
               <Link href="/chat" className="hover:text-white cursor-pointer">
                 Dashboard
               </Link>
-              <button onClick={() => signOut()} className="hover:text-white">
+              <button
+                onClick={() =>
+                  signOut().then(() => {
+                    window.location.reload();
+                  })
+                }
+                className="hover:text-white"
+              >
                 Sign Out
               </button>
             </>

@@ -19,8 +19,6 @@ interface PieChartProps {
 const PieChart = ({ option }: PieChartProps) => {
   const [boxWidth, setBoxWidth] = useState(0);
 
-  console.log("option", option);
-
   useEffect(() => {
     const actualWidth = window.innerWidth;
     const vwWidth =

@@ -2,8 +2,11 @@
 
 import { signInWithGoogle } from "./action";
 import { FcGoogle } from "react-icons/fc";
+import { useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callback_url") || "/chat";
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-zinc-950 text-white overflow-hidden px-4">
       {/* Background */}
@@ -28,7 +31,7 @@ export default function LoginPage() {
 
         <form>
           <button
-            formAction={signInWithGoogle}
+            formAction={() => signInWithGoogle(callbackUrl)}
             className="w-full flex items-center justify-center gap-3 bg-white text-black py-3 px-4 rounded-lg shadow hover:bg-gray-100 transition font-medium"
           >
             <FcGoogle className="text-xl" />

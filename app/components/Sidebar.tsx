@@ -6,7 +6,6 @@ import { IoIosAddCircle } from "react-icons/io";
 import clsx from "clsx";
 import { createChat } from "../tools/chat-store";
 import useSupabaseSession from "../hooks/useSupabaseSession";
-import { signOut } from "../login/action";
 
 interface SidebarProps {
   chatId?: string;
@@ -146,9 +145,6 @@ const Sidebar = ({
         {session ? (
           <div>
             <p>Logged in as {session.user.email}</p>
-            <button onClick={() => signOut()} className="hover:text-white">
-              Sign Out
-            </button>
           </div>
         ) : (
           <button
@@ -158,7 +154,6 @@ const Sidebar = ({
             Sign In
           </button>
         )}
-        <p className="text-zinc-400">Free plan</p>
       </div>
     </aside>
   );
