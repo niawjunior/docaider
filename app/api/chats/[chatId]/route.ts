@@ -1,22 +1,25 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "../../../utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ chatId: string }> }
 ) {
-  try {
-    const { chatId } = await params;
+  const supabase = await createClient();
+  const { chatId } = await params;
 
+  const { data: user } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
     const { data, error } = await supabase
       .from("chats")
       .select("messages")
       .eq("id", chatId)
+      .eq("user_id", user!.user!.id)
       .single();
 
     if (error?.code === "PGRST116") {

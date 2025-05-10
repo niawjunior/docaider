@@ -1,13 +1,10 @@
 import { appendResponseMessages, streamText, tool, generateObject } from "ai";
 
-import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { openai } from "@ai-sdk/openai";
+import { NextRequest } from "next/server";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { createClient } from "../../utils/supabase/server";
 
 // export function errorHandler(error: unknown) {
 //   if (error == null) {
@@ -24,8 +21,22 @@ const supabase = createClient(
 
 //   return JSON.stringify(error);
 // }
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const supabase = await createClient();
   const { messages, chatId } = await req.json();
+
+  // Get the user from the request
+
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+
+  if (!user) {
+    console.error("User not found");
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
   const result = streamText({
     model: openai("gpt-4o-mini"),
     maxSteps: 1,
@@ -251,11 +262,28 @@ export async function POST(req: Request) {
         messages,
         responseMessages: response.messages,
       });
+
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError) {
+        console.error("Error fetching user:", authError);
+        return;
+      }
+
+      if (!user) {
+        console.error("User not found");
+        return;
+      }
+
       await supabase
         .from("chats")
         .upsert({
           id: chatId,
           messages: finalMessages,
+          user_id: user.id,
         })
         .eq("id", chatId);
     },

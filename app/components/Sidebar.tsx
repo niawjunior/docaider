@@ -49,8 +49,6 @@ const Sidebar = ({
     async (customOffset?: number) => {
       const fetchOffset = customOffset ?? offset;
 
-      if (loadingMore || !hasMore) return;
-
       setLoadingMore(true);
       const res = await fetch(
         `/api/chats?limit=${LIMIT}&offset=${fetchOffset}`
@@ -59,22 +57,12 @@ const Sidebar = ({
 
       if (data.length < LIMIT) setHasMore(false);
 
-      setChats((prev) => {
-        if (fetchOffset === 0) return data; // 👈 replace when offset is 0
-        const combined = [...prev, ...data];
-        const unique = Array.from(
-          new Map(
-            combined.map((item) => [(item as { id: string }).id, item])
-          ).values()
-        );
-        return unique;
-      });
-
+      setChats(data);
       setOffset(fetchOffset + LIMIT);
       setLoadingMore(false);
       onFinished?.();
     },
-    [offset, hasMore, loadingMore, onFinished]
+    [offset, LIMIT, onFinished]
   );
 
   useEffect(() => {
@@ -84,8 +72,6 @@ const Sidebar = ({
   useEffect(() => {
     if (registerRefresh) {
       registerRefresh(() => {
-        console.log("Triggered sidebar refresh");
-
         setOffset(0);
         setHasMore(true);
         setLoadingMore(false);
