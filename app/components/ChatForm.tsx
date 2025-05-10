@@ -225,7 +225,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                   <div
                     className={` text-left py-2 rounded-2xl text-sm ${
                       isUser ? "bg-blue-600 text-white" : " text-white"
-                    } ${!isUser ? "max-w-[60%]" : ""} ${
+                    } ${
                       !isUser &&
                       !message.toolInvocations?.length &&
                       "bg-zinc-600"
@@ -298,6 +298,155 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                     }
                                   }
                                 />
+                              </div>
+                            );
+                          }
+
+                          if (
+                            part.toolInvocation.toolName === "getCryptoBalance"
+                          ) {
+                            const balances =
+                              (
+                                part.toolInvocation as unknown as {
+                                  result: {
+                                    balances: unknown;
+                                  };
+                                }
+                              ).result?.balances || [];
+                            return (
+                              <div
+                                key={index}
+                                className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full mx-auto mt-6"
+                              >
+                                <h2 className="text-lg font-semibold text-white mb-4">
+                                  🪙 Crypto Wallet Balances
+                                </h2>
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                  {Object.entries(balances)
+                                    .filter(([, v]: any) => v.available > 0)
+                                    .map(([symbol, v]: any) => (
+                                      <div
+                                        key={symbol}
+                                        className="bg-zinc-800 rounded-lg p-4 flex flex-col items-start shadow hover:shadow-orange-500/20 transition"
+                                      >
+                                        <div className="text-white font-medium text-sm">
+                                          {symbol}
+                                        </div>
+                                        <div className="text-orange-400 text-lg font-bold">
+                                          {v.available}
+                                        </div>
+                                      </div>
+                                    ))}
+
+                                  {Object.values(balances).filter(
+                                    (v: any) => v.available > 0
+                                  ).length === 0 && (
+                                    <p className="text-sm text-zinc-400 col-span-full">
+                                      No balances available.
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          if (
+                            part.toolInvocation.toolName === "getCryptoPrice"
+                          ) {
+                            const result = (part.toolInvocation as any)?.result;
+
+                            return (
+                              <div
+                                key={index}
+                                className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full  mx-auto mt-6"
+                              >
+                                {result ? (
+                                  <>
+                                    <h2 className="text-lg font-semibold text-white mb-4">
+                                      📊 {result?.name || "Crypto"} Price
+                                      Overview
+                                    </h2>
+                                    <div className="grid grid-cols-2 gap-4 text-sm text-zinc-300">
+                                      <div>
+                                        <span className="text-zinc-400">
+                                          Date
+                                        </span>
+                                        <div className="text-blue-400 text-xl font-bold">
+                                          {new Date(
+                                            result.date
+                                          ).toLocaleString()}
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <span className="text-zinc-400">
+                                          Current Price
+                                        </span>
+                                        <div className="text-orange-400 text-xl font-bold">
+                                          ฿{" "}
+                                          {result.price?.toLocaleString() ??
+                                            "-"}
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <span className="text-zinc-400">
+                                          24h Change
+                                        </span>
+                                        <div
+                                          className={`font-semibold ${
+                                            result.percentChange24hr >= 0
+                                              ? "text-green-400"
+                                              : "text-red-400"
+                                          }`}
+                                        >
+                                          {result.percentChange24hr?.toFixed(
+                                            2
+                                          ) ?? "0.00"}
+                                          %
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <span className="text-zinc-400">
+                                          Previous Close
+                                        </span>
+                                        <div>
+                                          ฿{" "}
+                                          {result.prevClose?.toLocaleString() ??
+                                            "-"}
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <span className="text-zinc-400">
+                                          Previous Open
+                                        </span>
+                                        <div>
+                                          ฿{" "}
+                                          {result.prevOpen?.toLocaleString() ??
+                                            "-"}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {result.insights && (
+                                      <div className="mt-6 text-sm text-zinc-300">
+                                        <h3 className="font-semibold text-white mb-2">
+                                          💡 Insight
+                                        </h3>
+                                        <p className="leading-relaxed">
+                                          {result.insights}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-white text-sm">
+                                      Fetching price data...
+                                    </p>
+                                    <div className="flex items-center justify-center py-4">
+                                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             );
                           }
