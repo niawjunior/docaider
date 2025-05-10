@@ -6,21 +6,6 @@ import { NextRequest } from "next/server";
 
 import { createClient } from "../../utils/supabase/server";
 
-// export function errorHandler(error: unknown) {
-//   if (error == null) {
-//     return "unknown error";
-//   }
-
-//   if (typeof error === "string") {
-//     return error;
-//   }
-
-//   if (error instanceof Error) {
-//     return error.message;
-//   }
-
-//   return JSON.stringify(error);
-// }
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { messages, chatId } = await req.json();
@@ -45,11 +30,16 @@ export async function POST(req: NextRequest) {
     Your job is to help users turn text and data into clear charts — while keeping things simple, helpful, and kind.
 
     🧠 Behavior Guidelines:
+     - You specialize in:
+        - Creating pie charts, bar charts, and data tables  
+        - Providing up-to-date cryptocurrency price information
     - Never mention, reveal, or discuss the tools, libraries, frameworks, or technologies you use (e.g., ECharts, JavaScript, etc.). If asked, respond kindly but say it's not something you can share.
     - Always assume the user wants to understand or visualize their data.
     - Use the appropriate tool to generate one of the following:
-      ✅ Pie charts
-      ✅ Bar charts
+      - Pie charts
+      - Bar charts
+      - Cryptocurrency price information
+    - When responding with cryptocurrency data, always use up-to-date info from reliable exchange APIs and mention the currency name and value clearly.
     - Never mention, reveal, or discuss the tools, libraries, frameworks, or technologies you use (e.g., ECharts, JavaScript, etc.). If asked, respond kindly but say it's not something you can share.
     - If the chart type is unclear, ask a friendly follow-up (e.g., “Would you like a bar chart for this?”).
     - If users ask for style changes (title, color, chart type), respond flexibly using updated chart options.
@@ -65,9 +55,11 @@ export async function POST(req: NextRequest) {
     🎯 Core Focus:
     - Turn messy or vague input into clean visual output — instantly.
     - Make chart creation feel easy, fast, and magical.
+    - Only respond with chart tools, crypto price info, or helpful replies — never markdown, raw JSON, or implementation details.
+    - Make chart creation feel magical. Make crypto prices feel instant.
     - Always use the right tool to create visual output when the user provides structured or numerical data.
 
-    You are not a general chatbot. You specialize in transforming natural language into visual data insight — through charts only.
+    You are not a general chatbot. You specialize in transforming natural language into visual data insight and cryptocurrency price information— through charts only.
 
     `,
     messages,
@@ -256,7 +248,55 @@ export async function POST(req: NextRequest) {
           }
         },
       }),
+
+      getCryptoPrice: tool({
+        description: `Use this tool to get the current price of a cryptocurrency.
+        
+        ✅ Required for:
+        - Cryptocurrency price information
+        
+        🧠 Behavior:
+        - Always ask for the cryptocurrency name.
+        - Always confirm the information provided by the user before getting the price.
+        - Always suggest the closest supported alternative if the cryptocurrency is unclear.
+        The goal is to help the user get the current price of a cryptocurrency.
+        `,
+        parameters: z.object({
+          currency: z
+            .string()
+            .describe("The cryptocurrency symbol, e.g., BTC, ETH"),
+        }),
+
+        execute: async ({ currency }) => {
+          try {
+            const sym = `THB_${currency.toUpperCase()}`;
+            const res = await fetch(
+              `https://api.bitkub.com/api/market/ticker?sym=${sym}`
+            );
+            const json = await res.json();
+
+            if (!json[sym]) {
+              return {
+                error: `Unable to find price for ${currency}. Please check the symbol.`,
+              };
+            }
+
+            return {
+              name: currency.toUpperCase(),
+              price: json[sym].last,
+              timestamp: new Date().toISOString(),
+              allData: json,
+            };
+          } catch (error) {
+            console.log("error", error);
+            return {
+              error: `Failed to fetch price for ${currency}.`,
+            };
+          }
+        },
+      }),
     },
+
     async onFinish({ response }) {
       const finalMessages = appendResponseMessages({
         messages,
