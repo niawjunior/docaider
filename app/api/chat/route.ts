@@ -39,14 +39,17 @@ export async function POST(req: NextRequest) {
     🧠 Behavior Guidelines:
      - You specialize in:
         - Creating pie charts, bar charts, and data tables  
-        - Providing up-to-date cryptocurrency price information and balance base on Bitkub API
+        - Providing up-to-date cryptocurrency data using the Bitkub API, including:
+          • Live crypto prices
+          • Market listing summary
+
     - Never mention, reveal, or discuss the tools, libraries, frameworks, or technologies you use (e.g., ECharts, JavaScript, etc.). If asked, respond kindly but say it's not something you can share.
     - Always assume the user wants to understand or visualize their data.
     - Use the appropriate tool to generate one of the following:
       - Pie charts
       - Bar charts
       - Cryptocurrency price information
-      - Cryptocurrency balance information
+      - Market listing summary
     - When responding with cryptocurrency data, always use up-to-date info from reliable exchange APIs and mention the currency name and value clearly.
     - Never mention, reveal, or discuss the tools, libraries, frameworks, or technologies you use (e.g., ECharts, JavaScript, etc.). If asked, respond kindly but say it's not something you can share.
     - If the chart type is unclear, ask a friendly follow-up (e.g., “Would you like a bar chart for this?”).
@@ -63,11 +66,11 @@ export async function POST(req: NextRequest) {
     🎯 Core Focus:
     - Turn messy or vague input into clean visual output — instantly.
     - Make chart creation feel easy, fast, and magical.
-    - Only respond with chart tools, crypto price info, or crypto balance info, or helpful replies — never markdown, raw JSON, or implementation details.
-    - Make chart creation feel magical. Make crypto prices and balance feel instant.
+    - Only respond with chart tools, crypto price info, or market listing summary or helpful replies — never markdown, raw JSON, or implementation details.
+    - Make chart creation feel magical. Make crypto prices feel instant.
     - Always use the right tool to create visual output when the user provides structured or numerical data.
 
-    You are not a general chatbot. You specialize in transforming natural language into visual data insight and cryptocurrency price and balance information— through charts only.
+    You are not a general chatbot. You specialize in transforming natural language into visual data insight and crypto intelligence.
 
     `,
     messages,
@@ -420,6 +423,51 @@ export async function POST(req: NextRequest) {
             console.error("getCryptoBalance error:", error);
             return {
               error: "Failed to fetch balances",
+            };
+          }
+        },
+      }),
+
+      getCryptoMarketSummary: tool({
+        description: `Use this tool to get an overview of the cryptocurrency market on Bitkub.
+      
+        ✅ Required for:
+        - Answering questions like "How many cryptocurrencies are on Bitkub?"
+        - Giving a summary of market listings (symbols, counts)
+      
+        🧠 Behavior:
+        - Count and list unique base crypto symbols (e.g. BTC, ETH)
+        - Provide a simple summary and total count
+        - Do not repeat trading pairs (e.g. THB_BTC and USDT_BTC are both BTC)
+        `,
+        parameters: z.object({}), // No params needed
+
+        execute: async () => {
+          try {
+            const url = `https://api.bitkub.com/api/market/ticker`;
+            const res = await fetch(url);
+            const json = await res.json();
+
+            // Parse and map each THB_xxx pair to extract base coin and volume
+            const coinVolumes: { symbol: string; volume: number }[] =
+              Object.entries(json)
+                .filter(([key]) => key.startsWith("THB_")) // Only THB-based trading pairs
+                .map(([key, value]) => ({
+                  symbol: key.replace("THB_", ""), // Remove THB_ prefix
+                  volume: (value as any).quoteVolume ?? 0, // Use quoteVolume as trading volume
+                }));
+
+            // Sort by volume descending
+            const sortedCoins = coinVolumes.sort((a, b) => b.volume - a.volume);
+
+            return {
+              total: sortedCoins.length,
+              coins: sortedCoins,
+            };
+          } catch (err) {
+            console.error("getCryptoMarketSummary error:", err);
+            return {
+              error: "Unable to fetch market summary from Bitkub.",
             };
           }
         },

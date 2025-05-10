@@ -11,6 +11,7 @@ import { createClient } from "@supabase/supabase-js";
 import BarChart from "./BarChart";
 import PieChart from "./PieChart";
 import GlobalLoader from "./GlobalLoader";
+import Image from "next/image";
 
 export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -302,53 +303,53 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                             );
                           }
 
-                          if (
-                            part.toolInvocation.toolName === "getCryptoBalance"
-                          ) {
-                            const balances =
-                              (
-                                part.toolInvocation as unknown as {
-                                  result: {
-                                    balances: unknown;
-                                  };
-                                }
-                              ).result?.balances || [];
-                            return (
-                              <div
-                                key={index}
-                                className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full mx-auto mt-6"
-                              >
-                                <h2 className="text-lg font-semibold text-white mb-4">
-                                  🪙 Crypto Wallet Balances
-                                </h2>
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                  {Object.entries(balances)
-                                    .filter(([, v]: any) => v.available > 0)
-                                    .map(([symbol, v]: any) => (
-                                      <div
-                                        key={symbol}
-                                        className="bg-zinc-800 rounded-lg p-4 flex flex-col items-start shadow hover:shadow-orange-500/20 transition"
-                                      >
-                                        <div className="text-white font-medium text-sm">
-                                          {symbol}
-                                        </div>
-                                        <div className="text-orange-400 text-lg font-bold">
-                                          {v.available}
-                                        </div>
-                                      </div>
-                                    ))}
+                          // if (
+                          //   part.toolInvocation.toolName === "getCryptoBalance"
+                          // ) {
+                          //   const balances =
+                          //     (
+                          //       part.toolInvocation as unknown as {
+                          //         result: {
+                          //           balances: unknown;
+                          //         };
+                          //       }
+                          //     ).result?.balances || [];
+                          //   return (
+                          //     <div
+                          //       key={index}
+                          //       className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full mx-auto mt-6"
+                          //     >
+                          //       <h2 className="text-lg font-semibold text-white mb-4">
+                          //         🪙 Crypto Wallet Balances
+                          //       </h2>
+                          //       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                          //         {Object.entries(balances)
+                          //           .filter(([, v]: any) => v.available > 0)
+                          //           .map(([symbol, v]: any) => (
+                          //             <div
+                          //               key={symbol}
+                          //               className="bg-zinc-800 rounded-lg p-4 flex flex-col items-start shadow hover:shadow-orange-500/20 transition"
+                          //             >
+                          //               <div className="text-white font-medium text-sm">
+                          //                 {symbol}
+                          //               </div>
+                          //               <div className="text-orange-400 text-lg font-bold">
+                          //                 {v.available}
+                          //               </div>
+                          //             </div>
+                          //           ))}
 
-                                  {Object.values(balances).filter(
-                                    (v: any) => v.available > 0
-                                  ).length === 0 && (
-                                    <p className="text-sm text-zinc-400 col-span-full">
-                                      No balances available.
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          }
+                          //         {Object.values(balances).filter(
+                          //           (v: any) => v.available > 0
+                          //         ).length === 0 && (
+                          //           <p className="text-sm text-zinc-400 col-span-full">
+                          //             No balances available.
+                          //           </p>
+                          //         )}
+                          //       </div>
+                          //     </div>
+                          //   );
+                          // }
 
                           if (
                             part.toolInvocation.toolName === "getCryptoPrice"
@@ -441,6 +442,69 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                   <div className="flex items-center gap-2">
                                     <p className="text-white text-sm">
                                       Fetching price data...
+                                    </p>
+                                    <div className="flex items-center justify-center py-4">
+                                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          }
+
+                          if (
+                            part.toolInvocation.toolName ===
+                            "getCryptoMarketSummary"
+                          ) {
+                            const result = (part.toolInvocation as any)?.result;
+
+                            return (
+                              <div
+                                key={index}
+                                className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full  mx-auto mt-6"
+                              >
+                                {result ? (
+                                  <div>
+                                    <h2 className="text-lg font-semibold text-white mb-4">
+                                      📊 Bitkub Crypto Summary
+                                    </h2>
+                                    <p className="text-orange-400 mb-2 text-sm">
+                                      Bitkub currently lists{" "}
+                                      <strong>{result.total}</strong> unique
+                                      cryptocurrencies.
+                                    </p>
+                                    <div className="text-sm text-zinc-400 flex flex-wrap gap-2">
+                                      {result.coins.map(
+                                        (
+                                          c: { symbol: string; volume: number },
+                                          i: number
+                                        ) => (
+                                          <div
+                                            key={i}
+                                            className="flex items-center gap-2"
+                                          >
+                                            <Image
+                                              src={`/icons/${c.symbol.toUpperCase()}.png`}
+                                              alt={c.symbol}
+                                              width={20}
+                                              height={20}
+                                              loading="lazy"
+                                            />
+                                            <span
+                                              key={i}
+                                              className="bg-zinc-800 border border-zinc-700 px-2 py-1 rounded text-xs"
+                                            >
+                                              {c.symbol}
+                                            </span>
+                                          </div>
+                                        )
+                                      )}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-white text-sm">
+                                      Fetching market summary...
                                     </p>
                                     <div className="flex items-center justify-center py-4">
                                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
