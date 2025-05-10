@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     maxSteps: 1,
     system: `
     You are Askivue — a smart, very polite, and friendly AI assistant who transforms natural language into beautiful visual insights. 
-    Your job is to help users turn text and data into clear charts and tables — while keeping things simple, helpful, and kind.
+    Your job is to help users turn text and data into clear charts — while keeping things simple, helpful, and kind.
 
     🧠 Behavior Guidelines:
     - Never mention, reveal, or discuss the tools, libraries, frameworks, or technologies you use (e.g., ECharts, JavaScript, etc.). If asked, respond kindly but say it's not something you can share.
@@ -39,9 +39,8 @@ export async function POST(req: Request) {
     - Use the appropriate tool to generate one of the following:
       ✅ Pie charts
       ✅ Bar charts
-      ✅ Data tables
     - Never mention, reveal, or discuss the tools, libraries, frameworks, or technologies you use (e.g., ECharts, JavaScript, etc.). If asked, respond kindly but say it's not something you can share.
-    - If the chart type is unclear, ask a friendly follow-up (e.g., “Would you like a bar chart or table for this?”).
+    - If the chart type is unclear, ask a friendly follow-up (e.g., “Would you like a bar chart for this?”).
     - If users ask for style changes (title, color, chart type), respond flexibly using updated chart options.
     - Do not use or mention unsupported chart types (like line charts). If asked, gently explain the current limitation and suggest the closest supported alternative.
     - When appropriate, offer short insights or observations in plain language based on the data.
@@ -57,7 +56,7 @@ export async function POST(req: Request) {
     - Make chart creation feel easy, fast, and magical.
     - Always use the right tool to create visual output when the user provides structured or numerical data.
 
-    You are not a general chatbot. You specialize in transforming natural language into visual data insight — through charts and tables only.
+    You are not a general chatbot. You specialize in transforming natural language into visual data insight — through charts only.
 
     `,
     messages,
@@ -240,63 +239,6 @@ export async function POST(req: Request) {
             return {
               chartData: object,
             };
-          } catch (error) {
-            console.log("error", error);
-            return error;
-          }
-        },
-      }),
-      generateTable: tool({
-        description: `Use this tool to generate data tables (ECharts-compatible) whenever the user asks to view structured information in tabular form.
-      
-      ✅ Required for:
-      - Tables
-      - User mentions "ตาราง", "table", "rows and columns", "ข้อมูล"
-      
-      🧠 Behavior:
-      - Support only: "table" types.
-      - Always confirm the information provided by the user before generating the table.
-      - Support only: 2 columns.
-      The goal is to help the user view structured insights in a clean, flexible format.`,
-        parameters: z.object({
-          title: z.string().optional().describe("The table title"),
-          tableHeaders: z
-            .array(z.string())
-            .describe("Array of column headers in display order"),
-          tableData: z
-            .array(z.object({ name: z.string(), value: z.number() }))
-            .describe("Each row as an object where keys match headers"),
-        }),
-        execute: async ({ title, tableHeaders, tableData }) => {
-          try {
-            const { object } = await generateObject({
-              model: openai("gpt-4o-mini"),
-              schema: z.object({
-                title: z.string().optional().describe("The table title"),
-                tableHeaders: z
-                  .array(z.string())
-                  .describe("Column headers in order"),
-                tableData: z
-                  .any()
-                  .describe(
-                    "Table data JSON string, where each object has keys matching the headers"
-                  ),
-              }),
-              prompt: `Generate a JSON structure for an ECharts-compatible data table.
-
-              Requirements:
-              - Output must be a JSON object.
-              - "title" should reflect the dataset.
-              - "tableHeaders" should be an array of column names in the correct order.
-              - "tableData" must be an array of row objects, where each object has keys matching the headers.
-              
-              Data Description:
-              Title: ${title ?? "Untitled"}
-              Headers: ${JSON.stringify(tableHeaders, null, 2)}
-              Data: ${JSON.stringify(tableData, null, 2)}`,
-            });
-
-            return object;
           } catch (error) {
             console.log("error", error);
             return error;

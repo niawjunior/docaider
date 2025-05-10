@@ -301,67 +301,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                               </div>
                             );
                           }
-
-                          if (
-                            part.toolInvocation.toolName === "generateTable"
-                          ) {
-                            const tableResult = (
-                              part.toolInvocation as unknown as {
-                                result: {
-                                  tableHeaders: string[];
-                                  tableData: Record<string, string | number>[];
-                                };
-                              }
-                            ).result;
-
-                            const headers: string[] =
-                              tableResult?.tableHeaders ?? [];
-                            const rows: Record<string, string | number>[] =
-                              tableResult?.tableData ?? [];
-                            return (
-                              <div
-                                key={index}
-                                className="overflow-x-auto scroll-hidden w-[600px] shadow border bg-zinc-600 text-white text-sm rounded"
-                              >
-                                <table className="min-w-full text-left table-auto">
-                                  <thead className="bg-zinc-700">
-                                    <tr>
-                                      {headers.map((header, idx) => (
-                                        <th
-                                          key={idx}
-                                          className="px-4 py-2 font-semibold text-zinc-200 whitespace-nowrap"
-                                        >
-                                          {header}
-                                        </th>
-                                      ))}
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {rows.map((row, i) => (
-                                      <tr
-                                        key={i}
-                                        className="border-t border-zinc-500"
-                                      >
-                                        {headers.map((header, j) => (
-                                          <td
-                                            key={j}
-                                            className="px-4 py-2 whitespace-nowrap"
-                                          >
-                                            {typeof row[header] === "number"
-                                              ? new Intl.NumberFormat("en-US", {
-                                                  notation: "standard",
-                                                  compactDisplay: "short",
-                                                }).format(row[header] as number)
-                                              : row[header]}
-                                          </td>
-                                        ))}
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            );
-                          }
                         }
                       }
                     })}

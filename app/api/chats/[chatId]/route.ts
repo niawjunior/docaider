@@ -19,8 +19,9 @@ export async function GET(
       .eq("id", chatId)
       .single();
 
-    console.log("error", error);
-
+    if (error?.code === "PGRST116") {
+      return NextResponse.json([]);
+    }
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
