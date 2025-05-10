@@ -2,11 +2,11 @@
 
 import { signInWithGoogle } from "../login/action";
 import { FcGoogle } from "react-icons/fc";
+import { useSearchParams } from "next/navigation";
 
-interface LoginComponentProps {
-  callbackUrl?: string;
-}
-const LoginComponent = ({ callbackUrl }: LoginComponentProps) => {
+const LoginComponent = () => {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callback_url") || "/chat";
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-zinc-950 text-white overflow-hidden px-4">
       {/* Background */}
