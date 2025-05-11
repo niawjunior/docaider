@@ -4,7 +4,7 @@ import Layout from "../components/Layout";
 import ChatForm from "../components/ChatForm";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createChat } from "../tools/chat";
+import { createChat } from "../utils/aisdk/chat";
 import { useParams } from "next/navigation";
 import GlobalLoader from "../components/GlobalLoader";
 

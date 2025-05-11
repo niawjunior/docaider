@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { IoIosAddCircle } from "react-icons/io";
 import clsx from "clsx";
-import { createChat } from "../tools/chat";
+import { createChat } from "../utils/aisdk/chat";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 
 interface SidebarProps {

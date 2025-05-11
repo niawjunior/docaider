@@ -10,7 +10,8 @@ import { IoArrowDownSharp } from "react-icons/io5";
 import BarChart from "./BarChart";
 import PieChart from "./PieChart";
 import GlobalLoader from "./GlobalLoader";
-import Image from "next/image";
+import CryptoSummary from "./CryptoSummary";
+import CryptoPriceOverview from "./CryptoPriceOverview";
 
 interface ChatFormProps {
   chatId?: string;
@@ -239,32 +240,14 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                         );
                       } else {
                         if (part.type === "tool-invocation") {
-                          console.log("part", part.toolInvocation);
                           if (
                             part.toolInvocation.toolName === "generatePieChart"
                           ) {
+                            const result = (part.toolInvocation as any)?.result;
+
                             return (
                               <div key={index}>
-                                <PieChart
-                                  option={
-                                    (
-                                      part.toolInvocation as unknown as {
-                                        result: {
-                                          chartData: unknown;
-                                        };
-                                      }
-                                    ).result?.chartData as {
-                                      title: string;
-                                      seriesData: {
-                                        name: string;
-                                        value: number;
-                                        color: string;
-                                      }[];
-                                      backgroundColor: string;
-                                      textColor: string;
-                                    }
-                                  }
-                                />
+                                <PieChart option={result?.chartData} />
                               </div>
                             );
                           }
@@ -272,230 +255,23 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                           if (
                             part.toolInvocation.toolName === "generateBarChart"
                           ) {
+                            const result = (part.toolInvocation as any)?.result;
                             return (
                               <div key={index}>
-                                <BarChart
-                                  option={
-                                    (
-                                      part.toolInvocation as unknown as {
-                                        result: {
-                                          chartData: unknown;
-                                        };
-                                      }
-                                    ).result?.chartData as {
-                                      title: string;
-                                      seriesData: {
-                                        name: string;
-                                        value: number;
-                                        color: string;
-                                      }[];
-                                      backgroundColor: string;
-                                      textColor: string;
-                                    }
-                                  }
-                                />
+                                <BarChart option={result?.chartData} />
                               </div>
                             );
                           }
-
-                          // if (
-                          //   part.toolInvocation.toolName === "getCryptoBalance"
-                          // ) {
-                          //   const balances =
-                          //     (
-                          //       part.toolInvocation as unknown as {
-                          //         result: {
-                          //           balances: unknown;
-                          //         };
-                          //       }
-                          //     ).result?.balances || [];
-                          //   return (
-                          //     <div
-                          //       key={index}
-                          //       className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full mx-auto mt-6"
-                          //     >
-                          //       <h2 className="text-lg font-semibold text-white mb-4">
-                          //         🪙 Crypto Wallet Balances
-                          //       </h2>
-                          //       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                          //         {Object.entries(balances)
-                          //           .filter(([, v]: any) => v.available > 0)
-                          //           .map(([symbol, v]: any) => (
-                          //             <div
-                          //               key={symbol}
-                          //               className="bg-zinc-800 rounded-lg p-4 flex flex-col items-start shadow hover:shadow-orange-500/20 transition"
-                          //             >
-                          //               <div className="text-white font-medium text-sm">
-                          //                 {symbol}
-                          //               </div>
-                          //               <div className="text-orange-400 text-lg font-bold">
-                          //                 {v.available}
-                          //               </div>
-                          //             </div>
-                          //           ))}
-
-                          //         {Object.values(balances).filter(
-                          //           (v: any) => v.available > 0
-                          //         ).length === 0 && (
-                          //           <p className="text-sm text-zinc-400 col-span-full">
-                          //             No balances available.
-                          //           </p>
-                          //         )}
-                          //       </div>
-                          //     </div>
-                          //   );
-                          // }
 
                           if (
                             part.toolInvocation.toolName === "getCryptoPrice"
                           ) {
                             const result = (part.toolInvocation as any)?.result;
-                            console.log(result);
                             return (
-                              <div
+                              <CryptoPriceOverview
                                 key={index}
-                                className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full"
-                              >
-                                {result ? (
-                                  result.error ? (
-                                    <p className="text-sm text-zinc-400">
-                                      {result.error}
-                                    </p>
-                                  ) : (
-                                    <>
-                                      <div className="flex items-center justify-between gap-2">
-                                        <h2 className="text-lg flex items-center gap-2 font-semibold text-white mb-4">
-                                          <Image
-                                            src={`/icons/${result.name.toUpperCase()}.png`}
-                                            alt={result.name}
-                                            width={20}
-                                            height={20}
-                                            loading="lazy"
-                                          />{" "}
-                                          {result?.name || "Crypto"} Price
-                                          Overview
-                                        </h2>
-                                        <div className="flex items-center gap-2">
-                                          <h2 className="text-xs font-semibold border border-zinc-800 p-2 text-white rounded-full">
-                                            24 Volume :{" "}
-                                            {`${
-                                              result.baseVolume?.toLocaleString() ||
-                                              "-"
-                                            } (${result?.name})`}
-                                          </h2>
-                                          <h2 className="text-xs font-semibold border border-zinc-800 p-2 text-white rounded-full">
-                                            24 Volume :{" "}
-                                            {`${
-                                              result.quoteVolume?.toLocaleString() ||
-                                              "-"
-                                            } (${result.fiat || "THB"})`}
-                                          </h2>
-                                        </div>
-                                      </div>
-                                      <div className="h-[1px] bg-zinc-800 my-4"></div>
-                                      <div className="grid grid-cols-3 gap-4 text-sm text-zinc-300">
-                                        <div>
-                                          <span className="text-zinc-400">
-                                            Date
-                                          </span>
-                                          <div className="text-blue-400 text-xl font-bold">
-                                            {new Date(
-                                              result.date
-                                            ).toLocaleString()}
-                                          </div>
-                                        </div>
-                                        <div>
-                                          <span className="text-zinc-400">
-                                            Current Price
-                                          </span>
-                                          <div className="text-orange-400 text-xl font-bold">
-                                            ฿{" "}
-                                            {result.price?.toLocaleString() ??
-                                              "-"}
-                                          </div>
-                                        </div>
-                                        <div>
-                                          <span className="text-zinc-400">
-                                            24h Change
-                                          </span>
-                                          <div
-                                            className={`font-semibold text-xl ${
-                                              result.percentChange24hr >= 0
-                                                ? "text-green-400"
-                                                : "text-red-400"
-                                            }`}
-                                          >
-                                            {result.percentChange24hr?.toFixed(
-                                              2
-                                            ) ?? "0.00"}
-                                            %
-                                          </div>
-                                        </div>
-                                        <div>
-                                          <span className="text-zinc-400">
-                                            Previous Close
-                                          </span>
-                                          <div>
-                                            ฿{" "}
-                                            {result.prevClose?.toLocaleString() ??
-                                              "-"}
-                                          </div>
-                                        </div>
-                                        <div>
-                                          <span className="text-zinc-400">
-                                            Previous Open
-                                          </span>
-                                          <div>
-                                            ฿{" "}
-                                            {result.prevOpen?.toLocaleString() ??
-                                              "-"}
-                                          </div>
-                                        </div>
-                                        <div className="flex gap-2  rounded">
-                                          <div>
-                                            <span className="text-zinc-400">
-                                              High 24hr
-                                            </span>
-                                            <div>
-                                              {result.high?.toLocaleString() ??
-                                                "-"}
-                                            </div>
-                                          </div>
-                                          <div>
-                                            <span className="text-zinc-400">
-                                              Low 24hr
-                                            </span>
-                                            <div>
-                                              {result.low?.toLocaleString() ??
-                                                "-"}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-
-                                      {result.insights && (
-                                        <div className="mt-6 text-sm text-zinc-300">
-                                          <h3 className="font-semibold text-white mb-2">
-                                            💡 Insight
-                                          </h3>
-                                          <p className="leading-relaxed">
-                                            {result.insights}
-                                          </p>
-                                        </div>
-                                      )}
-                                    </>
-                                  )
-                                ) : (
-                                  <div className="flex items-center gap-2">
-                                    <p className="text-white text-sm">
-                                      Fetching price data...
-                                    </p>
-                                    <div className="flex items-center justify-center py-4">
-                                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
+                                result={result}
+                              />
                             );
                           }
 
@@ -505,68 +281,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                           ) {
                             const result = (part.toolInvocation as any)?.result;
 
-                            return (
-                              <div
-                                key={index}
-                                className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full  mx-auto mt-6"
-                              >
-                                {result ? (
-                                  <div>
-                                    <h2 className="text-lg flex items-center gap-2 font-semibold text-white mb-4">
-                                      <Image
-                                        src="/icons/bitkub.svg"
-                                        alt="Bitkub"
-                                        width={70}
-                                        height={70}
-                                        loading="lazy"
-                                      />{" "}
-                                      Bitkub Crypto Summary
-                                    </h2>
-                                    <p className="text-orange-400 mb-2 text-sm">
-                                      Bitkub currently lists{" "}
-                                      <strong>{result.total}</strong> unique
-                                      cryptocurrencies.
-                                    </p>
-                                    <div className="text-sm text-zinc-400 flex flex-wrap gap-2">
-                                      {result.coins.map(
-                                        (
-                                          c: { symbol: string; volume: number },
-                                          i: number
-                                        ) => (
-                                          <div
-                                            key={i}
-                                            className="flex items-center gap-2"
-                                          >
-                                            <Image
-                                              src={`/icons/${c.symbol.toUpperCase()}.png`}
-                                              alt={c.symbol}
-                                              width={20}
-                                              height={20}
-                                              loading="lazy"
-                                            />
-                                            <span
-                                              key={i}
-                                              className="bg-zinc-800 border border-zinc-700 px-2 py-1 rounded text-xs"
-                                            >
-                                              {c.symbol}
-                                            </span>
-                                          </div>
-                                        )
-                                      )}
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div className="flex items-center gap-2">
-                                    <p className="text-white text-sm">
-                                      Fetching market summary...
-                                    </p>
-                                    <div className="flex items-center justify-center py-4">
-                                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            );
+                            return <CryptoSummary key={index} data={result} />;
                           }
                         }
                       }
