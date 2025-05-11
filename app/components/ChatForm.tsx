@@ -7,16 +7,11 @@ import clsx from "clsx";
 import { IoMdSend } from "react-icons/io";
 import { IoArrowDownSharp } from "react-icons/io5";
 
-import { createClient } from "@supabase/supabase-js";
 import BarChart from "./BarChart";
 import PieChart from "./PieChart";
 import GlobalLoader from "./GlobalLoader";
 import Image from "next/image";
 
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 interface ChatFormProps {
   chatId?: string;
   onChatUpdate?: () => void;
