@@ -272,6 +272,7 @@ export async function POST(req: NextRequest) {
         - Always return insights about the price.
         - Always suggest the next steps for the user.
         - Always return insights and next steps.
+        - Fiat currency currently supported only THB.
         `,
         parameters: z.object({
           currency: z
@@ -280,14 +281,16 @@ export async function POST(req: NextRequest) {
           fiat: z
             .string()
             .default("THB")
-            .describe("The fiat currency, e.g., THB, USD"),
+            .describe("The fiat currency currently supported only THB"),
         }),
         execute: async ({ currency, fiat }) => {
           try {
             const sym = `${fiat.toUpperCase()}_${currency.toUpperCase()}`;
             const url = `https://api.bitkub.com/api/market/ticker?sym=${sym}`;
+            console.log("url", url);
             const res = await fetch(url);
             const json = await res.json();
+            console.log("json", json);
 
             if (!json[sym]) {
               return {
@@ -299,6 +302,11 @@ export async function POST(req: NextRequest) {
             const { object } = await generateObject({
               model: openai("gpt-4o-mini"),
               schema: z.object({
+                fiat: z
+                  .string()
+                  .optional()
+                  .default("THB")
+                  .describe("The fiat currency, e.g., THB, USD"),
                 name: z
                   .string()
                   .optional()
@@ -356,6 +364,7 @@ export async function POST(req: NextRequest) {
               Percent change 24hr: ${item.percentChange}\n
               Previous close: ${item.prevClose}\n
               Previous open: ${item.prevOpen}\n
+              Fiat: ${fiat}\n
                   `,
             });
 
@@ -373,6 +382,7 @@ export async function POST(req: NextRequest) {
               prevOpen: item.prevOpen,
               insights: object.insights,
               nextSteps: object.nextSteps,
+              fiat: fiat,
               date: new Date().toISOString(),
             };
           } catch (error) {
