@@ -359,13 +359,19 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                             return (
                               <div
                                 key={index}
-                                className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full  mx-auto mt-6"
+                                className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full"
                               >
                                 {result ? (
                                   <>
-                                    <h2 className="text-lg font-semibold text-white mb-4">
-                                      📊 {result?.name || "Crypto"} Price
-                                      Overview
+                                    <h2 className="text-lg flex items-center gap-2 font-semibold text-white mb-4">
+                                      <Image
+                                        src={`/icons/${result.name.toUpperCase()}.png`}
+                                        alt={result.name}
+                                        width={20}
+                                        height={20}
+                                        loading="lazy"
+                                      />{" "}
+                                      {result?.name || "Crypto"} Price Overview
                                     </h2>
                                     <div className="grid grid-cols-2 gap-4 text-sm text-zinc-300">
                                       <div>
@@ -465,8 +471,15 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                               >
                                 {result ? (
                                   <div>
-                                    <h2 className="text-lg font-semibold text-white mb-4">
-                                      📊 Bitkub Crypto Summary
+                                    <h2 className="text-lg flex items-center gap-2 font-semibold text-white mb-4">
+                                      <Image
+                                        src="/icons/bitkub.svg"
+                                        alt="Bitkub"
+                                        width={70}
+                                        height={70}
+                                        loading="lazy"
+                                      />{" "}
+                                      Bitkub Crypto Summary
                                     </h2>
                                     <p className="text-orange-400 mb-2 text-sm">
                                       Bitkub currently lists{" "}
