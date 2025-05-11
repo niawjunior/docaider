@@ -287,7 +287,6 @@ export async function POST(req: NextRequest) {
             const sym = `${fiat.toUpperCase()}_${currency.toUpperCase()}`;
             const url = `https://api.bitkub.com/api/market/ticker?sym=${sym}`;
             const res = await fetch(url);
-            console.log("res", res);
             const json = await res.json();
 
             if (!json[sym]) {
@@ -297,7 +296,6 @@ export async function POST(req: NextRequest) {
             }
 
             const item = json[sym];
-
             const { object } = await generateObject({
               model: openai("gpt-4o-mini"),
               schema: z.object({
@@ -307,14 +305,22 @@ export async function POST(req: NextRequest) {
                   .default("")
                   .describe("The cryptocurrency name"),
                 price: z.number().optional().describe("The current price"),
-                high24hr: z
+                high: z
                   .number()
                   .optional()
                   .describe("The highest price in the last 24 hours"),
-                low24hr: z
+                low: z
                   .number()
                   .optional()
                   .describe("The lowest price in the last 24 hours"),
+                baseVolume: z
+                  .number()
+                  .optional()
+                  .describe("The base volume in the last 24 hours"),
+                quoteVolume: z
+                  .number()
+                  .optional()
+                  .describe("The quote volume in the last 24 hours"),
                 percentChange24hr: z
                   .number()
                   .optional()
@@ -343,19 +349,25 @@ export async function POST(req: NextRequest) {
               prompt: `Give a short insight and next step for a user looking at this cryptocurrency data.\n\n
               Name: ${currency.toUpperCase()}\n
               Price: ${item.last}\n
-              High 24hr: ${item.high}\n
-              Low 24hr: ${item.low}\n
+              High: ${item.high24hr}\n
+              Low: ${item.low24hr}\n
+              Base volume: ${item.baseVolume}\n
+              Quote volume: ${item.quoteVolume}\n
               Percent change 24hr: ${item.percentChange}\n
               Previous close: ${item.prevClose}\n
               Previous open: ${item.prevOpen}\n
                   `,
             });
 
+            console.log("high24hr", item.high24hr);
+            console.log("low24hr", item.low24hr);
             return {
               name: currency.toUpperCase(),
               price: item.last,
-              high24hr: item.high,
-              low24hr: item.low,
+              high: item.high24hr,
+              low: item.low24hr,
+              baseVolume: item.baseVolume,
+              quoteVolume: item.quoteVolume,
               percentChange24hr: item.percentChange,
               prevClose: item.prevClose,
               prevOpen: item.prevOpen,

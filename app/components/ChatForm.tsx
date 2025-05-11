@@ -355,7 +355,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                             part.toolInvocation.toolName === "getCryptoPrice"
                           ) {
                             const result = (part.toolInvocation as any)?.result;
-
+                            console.log(result);
                             return (
                               <div
                                 key={index}
@@ -363,17 +363,32 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                               >
                                 {result ? (
                                   <>
-                                    <h2 className="text-lg flex items-center gap-2 font-semibold text-white mb-4">
-                                      <Image
-                                        src={`/icons/${result.name.toUpperCase()}.png`}
-                                        alt={result.name}
-                                        width={20}
-                                        height={20}
-                                        loading="lazy"
-                                      />{" "}
-                                      {result?.name || "Crypto"} Price Overview
-                                    </h2>
-                                    <div className="grid grid-cols-2 gap-4 text-sm text-zinc-300">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <h2 className="text-lg flex items-center gap-2 font-semibold text-white mb-4">
+                                        <Image
+                                          src={`/icons/${result.name.toUpperCase()}.png`}
+                                          alt={result.name}
+                                          width={20}
+                                          height={20}
+                                          loading="lazy"
+                                        />{" "}
+                                        {result?.name || "Crypto"} Price
+                                        Overview
+                                      </h2>
+                                      <div>
+                                        <h2>
+                                          24 Volume :{" "}
+                                          {`${result.baseVolume || "-"} (${
+                                            result?.name
+                                          })`}
+                                        </h2>
+                                        <h2>
+                                          24 Volume :{" "}
+                                          {`${result.quoteVolume || "-"} (THB)`}
+                                        </h2>
+                                      </div>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-4 text-sm text-zinc-300">
                                       <div>
                                         <span className="text-zinc-400">
                                           Date
@@ -399,7 +414,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                           24h Change
                                         </span>
                                         <div
-                                          className={`font-semibold ${
+                                          className={`font-semibold text-xl ${
                                             result.percentChange24hr >= 0
                                               ? "text-green-400"
                                               : "text-red-400"
@@ -429,6 +444,26 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                           ฿{" "}
                                           {result.prevOpen?.toLocaleString() ??
                                             "-"}
+                                        </div>
+                                      </div>
+                                      <div className="flex gap-2  rounded">
+                                        <div>
+                                          <span className="text-zinc-400">
+                                            High
+                                          </span>
+                                          <div>
+                                            {result.high?.toLocaleString() ??
+                                              "-"}
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <span className="text-zinc-400">
+                                            Low 24hr
+                                          </span>
+                                          <div>
+                                            {result.low?.toLocaleString() ??
+                                              "-"}
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
