@@ -384,7 +384,10 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                         </h2>
                                         <h2>
                                           24 Volume :{" "}
-                                          {`${result.quoteVolume || "-"} (THB)`}
+                                          {`${
+                                            result.quoteVolume?.toLocaleString() ||
+                                            "-"
+                                          } (THB)`}
                                         </h2>
                                       </div>
                                     </div>
