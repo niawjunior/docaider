@@ -452,7 +452,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                       <div className="flex gap-2  rounded">
                                         <div>
                                           <span className="text-zinc-400">
-                                            High
+                                            High 24hr
                                           </span>
                                           <div>
                                             {result.high?.toLocaleString() ??
