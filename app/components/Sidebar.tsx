@@ -56,7 +56,11 @@ const Sidebar = ({
 
       if (data.length < LIMIT) setHasMore(false);
 
-      setChats(data);
+      setChats((prev) => {
+        const existingIds = new Set(prev.map((c: any) => c.id));
+        const newChats = data.filter((c: any) => !existingIds.has(c.id));
+        return [...prev, ...newChats];
+      });
       setOffset(fetchOffset + LIMIT);
       setLoadingMore(false);
       onFinished?.();
