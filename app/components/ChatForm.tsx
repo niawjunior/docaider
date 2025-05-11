@@ -380,14 +380,15 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                           {result?.name || "Crypto"} Price
                                           Overview
                                         </h2>
-                                        <div>
-                                          <h2>
+                                        <div className="flex items-center gap-2">
+                                          <h2 className="text-xs font-semibold border border-zinc-800 p-2 text-white rounded-full">
                                             24 Volume :{" "}
-                                            {`${result.baseVolume || "-"} (${
-                                              result?.name
-                                            })`}
+                                            {`${
+                                              result.baseVolume?.toLocaleString() ||
+                                              "-"
+                                            } (${result?.name})`}
                                           </h2>
-                                          <h2>
+                                          <h2 className="text-xs font-semibold border border-zinc-800 p-2 text-white rounded-full">
                                             24 Volume :{" "}
                                             {`${
                                               result.quoteVolume?.toLocaleString() ||
@@ -396,6 +397,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                                           </h2>
                                         </div>
                                       </div>
+                                      <div className="h-[1px] bg-zinc-800 my-4"></div>
                                       <div className="grid grid-cols-3 gap-4 text-sm text-zinc-300">
                                         <div>
                                           <span className="text-zinc-400">

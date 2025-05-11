@@ -11,10 +11,8 @@ export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { messages, chatId } = await req.json();
 
-  const API_KEY =
-    "f035dba4295389aaf34b3421a9a6db4c7be7b46810553d9297633b1a620f419f";
-  const API_SECRET =
-    "25d708ae61f3417fa2c62f7d858516274f1da8ee3a86423cb74bc2cb536f36b0VVLtmoC9ZXrxtj9em4LokCpI2En3";
+  const API_KEY = process.env.BITKUB_API_KEY!;
+  const API_SECRET = process.env.BITKUB_API_SECRET!;
 
   // Get the user from the request
 
