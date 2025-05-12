@@ -398,14 +398,20 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                className="ml-2"
+                className="ml-2 relative"
                 size="icon"
                 onClick={() => setIsPdfModalOpen(true)}
               >
                 <FaFilePdf className="h-8 w-8" />
+                <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
+                  {documents?.length}
+                </div>
               </Button>
-              <Button variant="outline" className="ml-2" size="icon">
+              <Button variant="outline" className="ml-2 relative" size="icon">
                 <FaHammer className="h-8 w-8" />
+                <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
+                  6
+                </div>
               </Button>
             </div>
             <form
