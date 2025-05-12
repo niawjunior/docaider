@@ -7,101 +7,50 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { createClient } from "../utils/supabase/client";
 
 interface DocumentUploadProps {
   onUpload: (file: File, title: string) => Promise<void>;
   onClose: () => void;
+  documents?: { name: string; created_at: string; url: string }[];
 }
 
-const DocumentsList = () => {
-  const [documents, setDocuments] = useState<
-    { name: string; created_at: string; url: string }[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(true);
+interface DocumentsListProps {
+  documents?: { name: string; created_at: string; url: string }[];
+}
 
-  useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        const supabase = await createClient();
-        const { data: user } = await supabase.auth.getUser();
-
-        if (!user?.user?.id) return;
-
-        // Get all files in the user's directory
-        const { data: files, error } = await supabase.storage
-          .from("documents")
-          .list(`user_${user.user.id}`);
-
-        if (error) throw error;
-
-        // Get public URLs for each file
-        const documentsWithUrls = await Promise.all(
-          files.map(async (file) => {
-            const { data: publicUrl } = await supabase.storage
-              .from("documents")
-              .getPublicUrl(`user_${user.user.id}/${file.name}`);
-
-            return {
-              name: file.name,
-              created_at: file.created_at || new Date().toISOString(),
-              url: publicUrl.publicUrl,
-            };
-          })
-        );
-
-        setDocuments(documentsWithUrls);
-      } catch (error) {
-        console.error("Error fetching documents:", error);
-        toast("Error fetching documents", {
-          duration: 5000,
-          description: "Failed to fetch your documents. Please try again.",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchDocuments();
-  }, []);
-
+const DocumentsList = ({ documents }: DocumentsListProps) => {
   return (
     <div className="mt-4">
       <h3 className="text-sm font-medium mb-2">Your Documents</h3>
-      {isLoading ? (
-        <div className="flex items-center justify-center py-4">
-          <Loader2 className="h-4 w-4 animate-spin" />
-        </div>
-      ) : (
-        <div className="space-y-2 overflow-y-auto max-h-[200px]">
-          {documents.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No documents uploaded yet
-            </p>
-          ) : (
-            documents.map((doc) => (
-              <div
-                key={doc.name}
-                className="flex items-center justify-between p-2 bg-muted rounded-md"
-              >
-                <div>
-                  <p className="text-sm font-medium">{doc.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(doc.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-                <a
-                  href={doc.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline"
-                >
-                  View
-                </a>
+      <div className="space-y-2 overflow-y-auto max-h-[200px]">
+        {documents?.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No documents uploaded yet
+          </p>
+        ) : (
+          documents?.map((doc) => (
+            <div
+              key={doc.name}
+              className="flex items-center justify-between p-2 bg-muted rounded-md"
+            >
+              <div>
+                <p className="text-sm font-medium">{doc.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {new Date(doc.created_at).toLocaleDateString()}
+                </p>
               </div>
-            ))
-          )}
-        </div>
-      )}
+              <a
+                href={doc.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-primary hover:underline"
+              >
+                View
+              </a>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 };
@@ -109,6 +58,7 @@ const DocumentsList = () => {
 export default function DocumentUpload({
   onUpload,
   onClose,
+  documents,
 }: DocumentUploadProps) {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -219,7 +169,7 @@ export default function DocumentUpload({
             {isUploading ? "Uploading..." : "Upload Document"}
           </Button>
         </form>
-        <DocumentsList />
+        <DocumentsList documents={documents} />
       </CardContent>
     </Card>
   );

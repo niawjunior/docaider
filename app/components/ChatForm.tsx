@@ -20,6 +20,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { createClient } from "../utils/supabase/client";
+import { toast } from "sonner";
 
 interface ChatFormProps {
   chatId?: string;
@@ -29,7 +31,9 @@ interface ChatFormProps {
 export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
-
+  const [documents, setDocuments] = useState<
+    { name: string; created_at: string; url: string }[]
+  >([]);
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -205,6 +209,55 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
     textareaRef.current?.focus();
     setPromptToSubmit(text);
   };
+
+  const fetchDocuments = async () => {
+    try {
+      const supabase = await createClient();
+      const { data: user } = await supabase.auth.getUser();
+
+      if (!user?.user?.id) return;
+
+      // Get all files in the user's directory
+      const { data: files, error } = await supabase.storage
+        .from("documents")
+        .list(`user_${user.user.id}`);
+
+      if (error) throw error;
+
+      // Get public URLs for each file
+      const documentsWithUrls = await Promise.all(
+        files.map(async (file) => {
+          const { data: publicUrl } = await supabase.storage
+            .from("documents")
+            .getPublicUrl(`user_${user.user.id}/${file.name}`);
+
+          return {
+            name: file.name,
+            created_at: file.created_at || new Date().toISOString(),
+            url: file.metadata.size > 0 ? publicUrl.publicUrl : "",
+          };
+        })
+      );
+
+      const filteredDocuments = documentsWithUrls.filter(
+        (doc) => doc.url !== ""
+      );
+
+      setDocuments(filteredDocuments);
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      toast("Error fetching documents", {
+        duration: 5000,
+        description: "Failed to fetch your documents. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
+
   return (
     <>
       <div className="flex flex-col items-center gap-4 ">
@@ -398,7 +451,11 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                 </DialogHeader>
                 <DocumentUpload
                   onUpload={handleDocumentUpload}
-                  onClose={() => setIsPdfModalOpen(false)}
+                  onClose={() => {
+                    setIsPdfModalOpen(false);
+                    fetchDocuments();
+                  }}
+                  documents={documents}
                 />
               </DialogContent>
             </Dialog>
