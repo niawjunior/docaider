@@ -4,14 +4,22 @@ import { Message, useChat } from "@ai-sdk/react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
-import { IoMdSend } from "react-icons/io";
 import { IoArrowDownSharp } from "react-icons/io5";
+import DocumentUpload from "./DocumentUpload";
+import { FaFilePdf, FaHammer } from "react-icons/fa";
 
 import BarChart from "./BarChart";
 import PieChart from "./PieChart";
 import GlobalLoader from "./GlobalLoader";
 import CryptoSummary from "./CryptoSummary";
 import CryptoPriceOverview from "./CryptoPriceOverview";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface ChatFormProps {
   chatId?: string;
@@ -20,12 +28,30 @@ interface ChatFormProps {
 
 export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+
+  const handleDocumentUpload = async (file: File, title: string) => {
+    console.log("uploading document", file);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("title", title);
+
+    const response = await fetch("/api/pdf", {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await response.json();
+    console.log("result", result);
+  };
+
   const suggestedPrompts = [
     {
       title: "Show me a bar chart",
@@ -68,6 +94,9 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
     async onToolCall({ toolCall }) {
       console.log("toolCall", toolCall);
       if (toolCall.toolName === "visualizeData") {
+      }
+
+      if (toolCall.toolName === "askQuestion") {
       }
     },
     onFinish: async () => {
@@ -116,6 +145,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
           // so we'll need to trigger a new message with the existing history
           if (Array.isArray(data)) {
             setCurrentMessages(data);
+            console.log("data", data);
             setMessages(data);
             setIsLoading(false);
             setTimeout(() => {
@@ -283,6 +313,23 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
 
                             return <CryptoSummary key={index} data={result} />;
                           }
+
+                          if (part.toolInvocation.toolName === "askQuestion") {
+                            const result = (part.toolInvocation as any)?.result;
+
+                            return result ? (
+                              <p key={index}>{result}</p>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <p className="text-white text-sm">
+                                  Searching through documents...
+                                </p>
+                                <div className="flex items-center justify-center py-4">
+                                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                </div>
+                              </div>
+                            );
+                          }
                         }
                       }
                     })}
@@ -294,48 +341,68 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
             <div ref={bottomRef} />
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="sticky bottom-0 flex-col w-full py-2 px-2 flex items-center gap-3"
-          >
-            {!isAtBottom && (
-              <button
-                onClick={() =>
-                  bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-                }
-                className="w-10 h-10 bottom-36 fixed  flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
-                aria-label="Scroll to bottom"
+          <div className="flex flex-col">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="ml-2"
+                size="icon"
+                onClick={() => setIsPdfModalOpen(true)}
               >
-                <IoArrowDownSharp />
-              </button>
-            )}
-            <div className="flex items-center gap-3 w-full">
-              <textarea
-                value={input}
-                ref={textareaRef}
-                onChange={handleInputChange}
-                placeholder={
-                  status !== "ready" ? "Thinking..." : "Ask anything..."
-                }
-                disabled={status !== "ready"}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSubmit(e);
-                  }
-                }}
-                rows={1}
-                className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
-              />
-              <button
-                type="submit"
-                disabled={status !== "ready"}
-                className="bg-orange-600 flex items-center justify-center hover:bg-orange-700 w-12 h-12 text-md text-white rounded-full disabled:opacity-50"
-              >
-                <IoMdSend />
-              </button>
+                <FaFilePdf className="h-8 w-8" />
+              </Button>
+              <Button variant="outline" className="ml-2" size="icon">
+                <FaHammer className="h-8 w-8" />
+              </Button>
             </div>
-          </form>
+            <form
+              onSubmit={handleSubmit}
+              className="sticky bottom-0 flex-col w-full py-2 px-2 flex items-center gap-3"
+            >
+              {!isAtBottom && (
+                <button
+                  onClick={() =>
+                    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+                  }
+                  className="w-10 h-10 bottom-36 fixed  flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
+                  aria-label="Scroll to bottom"
+                >
+                  <IoArrowDownSharp />
+                </button>
+              )}
+              <div className="flex items-center gap-3 w-full">
+                <textarea
+                  value={input}
+                  ref={textareaRef}
+                  onChange={handleInputChange}
+                  placeholder={
+                    status !== "ready" ? "Thinking..." : "Ask anything..."
+                  }
+                  disabled={status !== "ready"}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit(e);
+                    }
+                  }}
+                  rows={1}
+                  className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+                />
+              </div>
+            </form>
+
+            <Dialog open={isPdfModalOpen} onOpenChange={setIsPdfModalOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Manage Knowledge Base </DialogTitle>
+                </DialogHeader>
+                <DocumentUpload
+                  onUpload={handleDocumentUpload}
+                  onClose={() => setIsPdfModalOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
     </>

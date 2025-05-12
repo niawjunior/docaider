@@ -3,6 +3,8 @@ import { z } from "zod";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import crypto from "crypto";
+import { createClient } from "../utils/supabase/server";
+import { findRelevantContent } from "../utils/embedding";
 
 const API_KEY = process.env.BITKUB_API_KEY!;
 const API_SECRET = process.env.BITKUB_API_SECRET!;
@@ -419,6 +421,62 @@ export const getCryptoMarketSummaryTool = tool({
       return {
         error: "Unable to fetch market summary from Bitkub.",
       };
+    }
+  },
+});
+
+export const askQuestionTool = tool({
+  description: `You are a helpful assistant. Check your knowledge base before answering any questions.Assume the user has uploaded documents.
+    Only respond to questions using information from tool calls.
+    if no relevant information is found in the tool calls, respond, "Sorry, I don't know..".`,
+  parameters: z.object({
+    question: z.string().describe("Question to ask about the documents"),
+  }),
+  execute: async ({ question }) => {
+    try {
+      const supabase = await createClient();
+      const { data: user } = await supabase.auth.getUser();
+
+      if (!user?.user?.id) {
+        throw new Error("User not authenticated");
+      }
+
+      // Get relevant chunks using our utility function
+      const relevantChunks = await findRelevantContent(user.user.id, question);
+
+      if (!relevantChunks || relevantChunks.length === 0) {
+        return "No relevant documents found for this question.";
+      }
+
+      // Combine relevant chunks into a single context
+      const context = relevantChunks.map((chunk) => chunk.chunk).join("\n\n");
+
+      // Create a prompt with the context
+      const prompt = `Answer the following question based on the provided context:
+      Question: ${question}
+
+      Context:
+      ${context}
+
+      Answer:`;
+
+      const { object } = await generateObject({
+        model: openai("gpt-4o-mini"),
+        schema: z.object({
+          answer: z.string().describe("Answer to the question"),
+        }),
+        prompt,
+        system: `You are a helpful assistant that can answer questions based on uploaded documents.
+        Use the uploadDocument tool to process new documents.
+        Use the askQuestion tool to retrieve relevant information from existing documents.
+        Always provide accurate and contextually relevant answers.`,
+      });
+
+      console.log(object.answer);
+      return object.answer;
+    } catch (error: any) {
+      console.error("Error in askQuestionTool:", error);
+      throw new Error("Failed to process question: " + error.message);
     }
   },
 });

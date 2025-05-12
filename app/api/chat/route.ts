@@ -5,6 +5,7 @@ import { NextRequest } from "next/server";
 
 import { createClient } from "../../utils/supabase/server";
 import {
+  askQuestionTool,
   generateBarChartTool,
   generatePieChartTool,
   getCryptoBalanceTool,
@@ -21,16 +22,6 @@ export async function POST(req: NextRequest) {
   const { data } = await supabase.auth.getUser();
   const user = data.user;
 
-  // const { embeddings } = await embedMany({
-  //   model: openai.embedding("text-embedding-3-small"),
-  //   values: [
-  //     "sunny day at the beach",
-  //     "rainy afternoon in the city",
-  //     "snowy night in the mountains",
-  //   ],
-  // });
-  // console.log(embeddings);
-
   if (!user) {
     console.error("User not found");
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -39,16 +30,46 @@ export async function POST(req: NextRequest) {
     });
   }
   // const lastMessage = messages[messages.length - 1]?.content
+  // Get tools
+  const tools = {
+    generateBarChart: generateBarChartTool,
+    generatePieChart: generatePieChartTool,
+    getCryptoBalance: getCryptoBalanceTool,
+    getCryptoMarketSummary: getCryptoMarketSummaryTool,
+    getCryptoPrice: getCryptoPriceTool,
+    askQuestion: askQuestionTool,
+  };
+
   const result = streamText({
     model: openai("gpt-4o-mini"),
+    toolChoice: "required",
     maxSteps: 1,
+    tools,
     system: `
     You are Askivue — a smart, very polite, and friendly AI assistant who transforms natural language into beautiful visual insights. 
     Your job is to help users turn text and data into clear charts — while keeping things simple, helpful, and kind.
-
     🧠 Behavior Guidelines:
      - You specialize in:
         - Creating pie charts, bar charts, and data tables  
+        - Processing and answering questions about uploaded documents
+        - Processing and answering questions about uploaded documents. Assume the user has uploaded documents.
+
+    - You can use the following tools:
+      - generateBarChart: Create bar charts from data
+      - generatePieChart: Create pie charts from data
+      - getCryptoPrice: Get cryptocurrency prices
+      - getCryptoBalance: Get cryptocurrency balances
+      - getCryptoMarketSummary: Get cryptocurrency market summary
+      - askQuestion: Ask questions about uploaded documents
+
+    - Never mention, reveal, or discuss the tools, libraries, frameworks, or technologies you use (e.g., ECharts, JavaScript, etc.). If asked, respond kindly but say it's not something you can share.
+    - Always assume the user wants to understand or visualize their data.
+    - Use the appropriate tool to generate one of the following:
+      - Pie charts
+      - Bar charts
+      - Cryptocurrency price information
+      - Market listing summary
+      - Answers about uploaded documents
         - Providing up-to-date cryptocurrency data using the Bitkub API, including:
           • Live crypto prices
           • Market listing summary
@@ -85,15 +106,9 @@ export async function POST(req: NextRequest) {
     `,
     messages,
 
-    tools: {
-      generatePieChart: generatePieChartTool,
-      generateBarChart: generateBarChartTool,
-      getCryptoPrice: getCryptoPriceTool,
-      getCryptoBalance: getCryptoBalanceTool,
-      getCryptoMarketSummary: getCryptoMarketSummaryTool,
-    },
-
     async onFinish({ response }) {
+      console.log("onFinish", response);
+
       const finalMessages = appendResponseMessages({
         messages,
         responseMessages: response.messages,
