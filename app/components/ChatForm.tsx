@@ -32,7 +32,15 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [documents, setDocuments] = useState<
-    { name: string; created_at: string; url: string }[]
+    {
+      name: string;
+      created_at: string;
+      url: string;
+      id: string;
+      active: boolean;
+      document_id: string;
+      document_name: string;
+    }[]
   >([]);
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -42,7 +50,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const [isReady, setIsReady] = useState(false);
 
   const handleDocumentUpload = async (file: File, title: string) => {
-    console.log("uploading document", file);
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", title);
@@ -218,32 +225,31 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
       if (!user?.user?.id) return;
 
       // Get all files in the user's directory
-      const { data: files, error } = await supabase.storage
+      const { data: documents, error } = await supabase
         .from("documents")
-        .list(`user_${user.user.id}`);
-
+        .select("*")
+        .eq("user_id", user.user.id);
       if (error) throw error;
 
       // Get public URLs for each file
       const documentsWithUrls = await Promise.all(
-        files.map(async (file) => {
+        documents.map(async (doc) => {
           const { data: publicUrl } = await supabase.storage
             .from("documents")
-            .getPublicUrl(`user_${user.user.id}/${file.name}`);
-
+            .getPublicUrl(`user_${user.user.id}/${doc.document_name}`);
           return {
-            name: file.name,
-            created_at: file.created_at || new Date().toISOString(),
-            url: file.metadata.size > 0 ? publicUrl.publicUrl : "",
+            name: doc.document_name,
+            created_at: doc.created_at || new Date().toISOString(),
+            url: publicUrl.publicUrl,
+            id: doc.id,
+            active: doc.active,
+            document_id: doc.document_id,
+            document_name: doc.document_name,
           };
         })
       );
 
-      const filteredDocuments = documentsWithUrls.filter(
-        (doc) => doc.url !== ""
-      );
-
-      setDocuments(filteredDocuments);
+      setDocuments(documentsWithUrls);
     } catch (error) {
       console.error("Error fetching documents:", error);
       toast("Error fetching documents", {
@@ -258,6 +264,83 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
     fetchDocuments();
   }, []);
 
+  const handleDeleteDocument = async (doc: {
+    name: string;
+    url: string;
+    id: string;
+    document_id: string;
+    document_name: string;
+  }) => {
+    try {
+      const supabase = await createClient();
+      const { data: user } = await supabase.auth.getUser();
+
+      if (!user?.user?.id) return;
+      // // Delete the file from storage
+      const { error } = await supabase.storage
+        .from("documents")
+        .remove([`user_${user.user.id}/${doc.document_name}`]);
+
+      if (error) throw error;
+
+      // // // Delete the document from the database
+      const { error: dbError } = await supabase
+        .from("documents")
+        .delete()
+        .eq("id", doc.id);
+
+      if (dbError) throw dbError;
+
+      // // Remove the document from the state
+      // setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      toast("Error deleting document", {
+        duration: 5000,
+        description: "Failed to delete document. Please try again.",
+      });
+    }
+  };
+
+  const handleToggleDocumentActive = async (doc: {
+    id: string;
+    active: boolean;
+  }) => {
+    try {
+      const supabase = await createClient();
+      const { data: user } = await supabase.auth.getUser();
+
+      if (!user?.user?.id) return;
+
+      const { error } = await supabase
+        .from("documents")
+        .update({ active: !doc.active })
+        .eq("id", doc.id);
+
+      if (error) throw error;
+
+      // Update the local state
+      setDocuments((prev) =>
+        prev.map((d) => (d.id === doc.id ? { ...d, active: !doc.active } : d))
+      );
+
+      toast(
+        `Document ${doc.active ? "deactivated" : "activated"} successfully`,
+        {
+          duration: 3000,
+          description: doc.active
+            ? "The document has been deactivated and will not be used in searches."
+            : "The document has been activated and will be used in searches.",
+        }
+      );
+    } catch (error) {
+      console.error("Error toggling document status:", error);
+      toast("Error toggling document status", {
+        duration: 5000,
+        description: "Failed to toggle document status. Please try again.",
+      });
+    }
+  };
   return (
     <>
       <div className="flex flex-col items-center gap-4 ">
@@ -407,6 +490,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                   {documents?.length}
                 </div>
               </Button>
+
               <Button variant="outline" className="ml-2 relative" size="icon">
                 <FaHammer className="h-8 w-8" />
                 <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
@@ -457,6 +541,8 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                 </DialogHeader>
                 <DocumentUpload
                   onUpload={handleDocumentUpload}
+                  onDelete={handleDeleteDocument}
+                  onToggleActive={handleToggleDocumentActive}
                   onClose={() => {
                     setIsPdfModalOpen(false);
                     fetchDocuments();

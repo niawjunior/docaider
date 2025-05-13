@@ -7,58 +7,36 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import DocumentsList from "./DocumentList";
 
 interface DocumentUploadProps {
   onUpload: (file: File, title: string) => Promise<void>;
+  onDelete: (doc: {
+    name: string;
+    url: string;
+    id: string;
+    document_id: string;
+    document_name: string;
+  }) => Promise<void>;
   onClose: () => void;
-  documents?: { name: string; created_at: string; url: string }[];
+  documents?: {
+    name: string;
+    created_at: string;
+    url: string;
+    id: string;
+    active: boolean;
+    document_id: string;
+    document_name: string;
+  }[];
+  onToggleActive?: (doc: { id: string; active: boolean }) => Promise<void>;
 }
-
-interface DocumentsListProps {
-  documents?: { name: string; created_at: string; url: string }[];
-}
-
-const DocumentsList = ({ documents }: DocumentsListProps) => {
-  return (
-    <div className="mt-4">
-      <h3 className="text-sm font-medium mb-2">Your Documents</h3>
-      <div className="space-y-2 overflow-y-auto max-h-[200px]">
-        {documents?.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No documents uploaded yet
-          </p>
-        ) : (
-          documents?.map((doc) => (
-            <div
-              key={doc.name}
-              className="flex items-center justify-between p-2 bg-muted rounded-md"
-            >
-              <div>
-                <p className="text-sm font-medium">{doc.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(doc.created_at).toLocaleDateString()}
-                </p>
-              </div>
-              <a
-                href={doc.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-primary hover:underline"
-              >
-                View
-              </a>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-};
 
 export default function DocumentUpload({
   onUpload,
+  onDelete,
   onClose,
   documents,
+  onToggleActive,
 }: DocumentUploadProps) {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -86,6 +64,22 @@ export default function DocumentUpload({
       });
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleDelete = async (doc: {
+    name: string;
+    url: string;
+    id: string;
+    document_id: string;
+    document_name: string;
+  }) => {
+    if (!onDelete) return;
+
+    try {
+      await onDelete(doc);
+    } catch (error) {
+      console.error("Error deleting document:", error);
     }
   };
 
@@ -169,7 +163,11 @@ export default function DocumentUpload({
             {isUploading ? "Uploading..." : "Upload Document"}
           </Button>
         </form>
-        <DocumentsList documents={documents} />
+        <DocumentsList
+          documents={documents}
+          onDelete={handleDelete}
+          onToggleActive={onToggleActive}
+        />
       </CardContent>
     </Card>
   );

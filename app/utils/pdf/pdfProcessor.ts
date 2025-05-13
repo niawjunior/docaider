@@ -12,7 +12,9 @@ export interface DocumentChunk {
 export async function processPDF(
   file: File,
   title: string,
-  userId?: string
+  userId?: string,
+  documentId?: string,
+  fileName?: string
 ): Promise<DocumentChunk[]> {
   try {
     // Read the file as an ArrayBuffer
@@ -68,6 +70,9 @@ export async function processPDF(
         chunk: documentChunks[i].chunk,
         embedding: documentChunks[i].embedding,
         user_id: userId,
+        document_id: documentId,
+        document_name: fileName,
+        active: true,
       };
 
       // Convert to proper JSON format
@@ -108,11 +113,12 @@ export async function uploadPDF(
     const supabase = await createClient();
 
     const fileName = `${Date.now()}_${file.name}`;
+    const storagePath = `user_${userId}/${fileName}`;
 
     // Upload file to Supabase storage with user-specific path
-    const { error: storageError } = await supabase.storage
+    const { error: storageError, data: storageData } = await supabase.storage
       .from("documents")
-      .upload(`user_${userId}/${fileName}`, file, {
+      .upload(storagePath, file, {
         cacheControl: "3600",
         upsert: false,
       });
@@ -124,11 +130,11 @@ export async function uploadPDF(
     // Get the public URL
     const { data: publicUrl } = supabase.storage
       .from("documents")
-      .getPublicUrl(`user_${userId}/${fileName}`);
+      .getPublicUrl(storagePath);
 
     console.log(publicUrl);
 
-    await processPDF(file, title, userId);
+    await processPDF(file, title, userId, storageData.id, fileName);
     return "PDF uploaded and processed successfully";
   } catch (error) {
     throw error;
