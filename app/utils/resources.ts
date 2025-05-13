@@ -1,5 +1,5 @@
 import { createClient } from "../utils/supabase/server";
-import { findRelevantContent, generateEmbeddings } from "./embedding";
+import { generateEmbeddings } from "./embedding";
 
 export interface DocumentChunk {
   content: string;
@@ -39,23 +39,6 @@ export const storeDocument = async (
     }
   } catch (error) {
     console.error("Error storing document:", error);
-    throw error;
-  }
-};
-
-export const getDocumentChunks = async (
-  userId: string,
-  question: string
-): Promise<any[]> => {
-  try {
-    const chunks = await findRelevantContent(userId, question);
-    const relevantChunks = chunks.map((chunk) => ({
-      content: chunk.chunk,
-      embedding: chunk.embedding,
-    }));
-    return relevantChunks;
-  } catch (error) {
-    console.error("Error getting document chunks:", error);
     throw error;
   }
 };

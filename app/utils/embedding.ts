@@ -57,7 +57,6 @@ export const findRelevantContent = async (
 ): Promise<DatabaseChunk[]> => {
   const supabase = await createClient();
   const questionEmbedding = await generateEmbedding(question);
-
   const { data: relevantChunks, error } = await supabase.rpc(
     "match_documents",
     {
