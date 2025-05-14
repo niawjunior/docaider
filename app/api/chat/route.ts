@@ -61,10 +61,9 @@ export async function POST(req: NextRequest) {
     🧠 Behavior Guidelines:
      - You specialize in:
         - Creating pie charts, bar charts, and data tables  
-        - Processing and answering questions about uploaded documents
         ${
           isRagEnabled
-            ? "- Processing and answering questions about uploaded documents.Assume the user has uploaded documents.Please use the askQuestion tool to process and answer questions about uploaded documents. "
+            ? "- Processing and answering questions about uploaded documents. Assume the user has uploaded documents.Please use the askQuestion tool to process and answer questions about uploaded documents. "
             : ""
         }
 
@@ -76,7 +75,7 @@ export async function POST(req: NextRequest) {
       - getCryptoMarketSummary: Get cryptocurrency market summary
       ${
         isRagEnabled
-          ? "- askQuestion: Ask questions about uploaded documents.Assume the user has uploaded documents."
+          ? "- askQuestion: Ask questions about uploaded documents. Assume the user has uploaded documents."
           : ""
       }
 
