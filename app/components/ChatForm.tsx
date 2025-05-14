@@ -293,7 +293,10 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
       if (dbError) throw dbError;
 
       // // Remove the document from the state
-      // setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+      setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+      toast("Document deleted successfully", {
+        duration: 3000,
+      });
     } catch (error) {
       console.error("Error deleting document:", error);
       toast("Error deleting document", {

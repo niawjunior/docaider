@@ -40,9 +40,11 @@ export async function processPDF(
       separators: ["\n\n", "\n", "。", "。", "，", "，"], // Try to split at paragraphs, then lines, then Thai punctuation
     });
 
-    const chunks = await splitter.splitText(normalizedText);
+    const chunks = await splitter.createDocuments([normalizedText]);
     // Filter out any empty chunks
-    const filteredChunks = chunks.filter((chunk) => chunk.trim().length > 0);
+    const filteredChunks = chunks.filter(
+      (chunk) => chunk.pageContent.trim().length > 0
+    );
 
     // Generate embeddings for each chunk
     const supabase = await createClient();
@@ -51,7 +53,7 @@ export async function processPDF(
       filteredChunks.map(async (chunk) => {
         const { embedding } = await embed({
           model: openai.embedding("text-embedding-3-small"),
-          value: chunk,
+          value: chunk.pageContent,
         });
         return embedding;
       })
@@ -59,7 +61,7 @@ export async function processPDF(
 
     // Create chunks with embeddings
     const documentChunks: DocumentChunk[] = chunks.map((chunk, index) => ({
-      chunk,
+      chunk: chunk.pageContent,
       embedding: embeddingsArray[index],
     }));
 
