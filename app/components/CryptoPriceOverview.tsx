@@ -26,12 +26,12 @@ export default function CryptoPriceOverview({
   result,
 }: CryptoPriceOverviewProps) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full mx-auto mt-6">
+    <div className="w-full mx-auto mt-6">
       {result ? (
         result.error ? (
           <p className="text-sm text-zinc-400">{result.error}</p>
         ) : (
-          <>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-lg flex items-center gap-2 font-semibold text-white mb-4">
                 <Image
@@ -108,7 +108,7 @@ export default function CryptoPriceOverview({
                 <p className="leading-relaxed">{result.insights}</p>
               </div>
             )}
-          </>
+          </div>
         )
       ) : (
         <div className="flex items-center gap-2">

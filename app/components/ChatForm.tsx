@@ -31,6 +31,7 @@ interface ChatFormProps {
 export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [isToolModalOpen, setIsToolModalOpen] = useState(false);
   const [documents, setDocuments] = useState<
     {
       name: string;
@@ -491,7 +492,12 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                 </div>
               </Button>
 
-              <Button variant="outline" className="ml-2 relative" size="icon">
+              <Button
+                onClick={() => setIsToolModalOpen(true)}
+                variant="outline"
+                className="ml-2 relative"
+                size="icon"
+              >
                 <FaHammer className="h-8 w-8" />
                 <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
                   6
@@ -549,6 +555,21 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                   }}
                   documents={documents}
                 />
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={isToolModalOpen} onOpenChange={setIsToolModalOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Available Tools</DialogTitle>
+                </DialogHeader>
+                <div>
+                  <p>Generate Bar Chart</p>
+                  <p>Generate Pie Chart</p>
+                  <p>Get Crypto Price</p>
+                  <p>Get Crypto Market Summary</p>
+                  <p>Ask Question</p>
+                </div>
               </DialogContent>
             </Dialog>
           </div>

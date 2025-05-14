@@ -16,9 +16,9 @@ interface CryptoSummaryProps {
 
 export default function CryptoSummary({ data }: CryptoSummaryProps) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full mx-auto mt-6">
+    <div className="w-full mx-auto mt-6">
       {data ? (
-        <div>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
           <h2 className="text-lg flex items-center gap-2 font-semibold text-white mb-4">
             <Image
               src="/icons/bitkub.svg"
