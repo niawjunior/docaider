@@ -22,6 +22,10 @@ import {
 } from "@/components/ui/dialog";
 import { createClient } from "../utils/supabase/client";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import useUserConfig, { UserConfig } from "../hooks/useUserConfig";
+import useSupabaseSession from "../hooks/useSupabaseSession";
 
 interface ChatFormProps {
   chatId?: string;
@@ -49,19 +53,25 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const { session } = useSupabaseSession();
+  const { config, updateConfig } = useUserConfig(session?.user?.id || "");
 
+  useEffect(() => {
+    console.log("config", config);
+  }, [config, session?.user.id]);
   const handleDocumentUpload = async (file: File, title: string) => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("title", title);
 
-    const response = await fetch("/api/pdf", {
-      method: "POST",
-      body: formData,
-    });
-
-    const result = await response.json();
-    console.log("result", result);
+    try {
+      await fetch("/api/pdf", {
+        method: "POST",
+        body: formData,
+      });
+    } catch (error) {
+      console.error("Error uploading PDF:", error);
+    }
   };
 
   const suggestedPrompts = [
@@ -345,6 +355,14 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
       });
     }
   };
+
+  const handleUpdateConfig = async (updates: Partial<UserConfig>) => {
+    await updateConfig(updates);
+    toast("Config updated successfully", {
+      duration: 3000,
+    });
+  };
+
   return (
     <>
       <div className="flex flex-col items-center gap-4 ">
@@ -482,30 +500,41 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
           </div>
 
           <div className="flex flex-col">
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="ml-2 relative"
-                size="icon"
-                onClick={() => setIsPdfModalOpen(true)}
-              >
-                <FaFilePdf className="h-8 w-8" />
-                <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                  {documents?.length}
-                </div>
-              </Button>
+            <div className="flex justify-between items-center">
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="ml-2 relative"
+                  size="icon"
+                  onClick={() => setIsPdfModalOpen(true)}
+                >
+                  <FaFilePdf className="h-8 w-8" />
+                  <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
+                    {documents?.length}
+                  </div>
+                </Button>
 
-              <Button
-                onClick={() => setIsToolModalOpen(true)}
-                variant="outline"
-                className="ml-2 relative"
-                size="icon"
-              >
-                <FaHammer className="h-8 w-8" />
-                <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                  6
-                </div>
-              </Button>
+                <Button
+                  onClick={() => setIsToolModalOpen(true)}
+                  variant="outline"
+                  className="ml-2 relative"
+                  size="icon"
+                >
+                  <FaHammer className="h-8 w-8" />
+                  <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
+                    6
+                  </div>
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={config?.is_rag_enabled}
+                  onCheckedChange={(checked) =>
+                    handleUpdateConfig({ is_rag_enabled: checked })
+                  }
+                />
+                <Label>RAG</Label>
+              </div>
             </div>
             <form
               onSubmit={handleSubmit}

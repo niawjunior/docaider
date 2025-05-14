@@ -31,9 +31,7 @@ const itemVariants = {
 export default function Home() {
   const router = useRouter();
 
-  const { session, loading } = useSupabaseSession();
-
-  if (loading) return null;
+  const { session } = useSupabaseSession();
 
   return (
     <div className="w-full h-screen flex flex-col">

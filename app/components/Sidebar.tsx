@@ -146,18 +146,12 @@ const Sidebar = ({
       </ul>
 
       <div className="text-xs text-zinc-500 border-t border-zinc-700 pt-4 mt-4">
-        {session ? (
-          <div>
-            <p>Logged in as {session.user.email}</p>
-          </div>
-        ) : (
-          <button
-            onClick={() => router.push("/login")}
-            className="hover:text-white"
-          >
-            Sign In
-          </button>
-        )}
+        <div>
+          <p>Logged in as {session?.user.email}</p>
+          {session?.user.user_metadata?.full_name && (
+            <p>Name: {session?.user.user_metadata?.full_name}</p>
+          )}
+        </div>
       </div>
     </aside>
   );

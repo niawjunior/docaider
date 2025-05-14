@@ -29,15 +29,26 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  // Get user config to check RAG settings
+  const { data: configData } = await supabase
+    .from("user_config")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  const isRagEnabled = configData?.is_rag_enabled ?? false;
+  console.log("isRagEnabled", isRagEnabled);
   // const lastMessage = messages[messages.length - 1]?.content
   // Get tools
+
   const tools = {
     generateBarChart: generateBarChartTool,
     generatePieChart: generatePieChartTool,
     getCryptoBalance: getCryptoBalanceTool,
     getCryptoMarketSummary: getCryptoMarketSummaryTool,
     getCryptoPrice: getCryptoPriceTool,
-    askQuestion: askQuestionTool,
+    ...(isRagEnabled && { askQuestion: askQuestionTool }),
   };
 
   const result = streamText({
@@ -51,7 +62,11 @@ export async function POST(req: NextRequest) {
      - You specialize in:
         - Creating pie charts, bar charts, and data tables  
         - Processing and answering questions about uploaded documents
-        - Processing and answering questions about uploaded documents. Assume the user has uploaded documents.
+        ${
+          isRagEnabled
+            ? "- Processing and answering questions about uploaded documents.Assume the user has uploaded documents.Please use the askQuestion tool to process and answer questions about uploaded documents. "
+            : ""
+        }
 
     - You can use the following tools:
       - generateBarChart: Create bar charts from data
@@ -59,7 +74,11 @@ export async function POST(req: NextRequest) {
       - getCryptoPrice: Get cryptocurrency prices
       - getCryptoBalance: Get cryptocurrency balances
       - getCryptoMarketSummary: Get cryptocurrency market summary
-      - askQuestion: Ask questions about uploaded documents
+      ${
+        isRagEnabled
+          ? "- askQuestion: Ask questions about uploaded documents.Assume the user has uploaded documents."
+          : ""
+      }
 
     - Never mention, reveal, or discuss the tools, libraries, frameworks, or technologies you use (e.g., ECharts, JavaScript, etc.). If asked, respond kindly but say it's not something you can share.
     - Always assume the user wants to understand or visualize their data.
@@ -68,7 +87,11 @@ export async function POST(req: NextRequest) {
       - Bar charts
       - Cryptocurrency price information
       - Market listing summary
-      - Answers about uploaded documents
+      ${
+        isRagEnabled
+          ? "- Answers about uploaded documents.Assume the user has uploaded documents."
+          : ""
+      }
         - Providing up-to-date cryptocurrency data using the Bitkub API, including:
           • Live crypto prices
           • Market listing summary
@@ -106,8 +129,6 @@ export async function POST(req: NextRequest) {
     messages,
 
     async onFinish({ response }) {
-      console.log("onFinish", response);
-
       const finalMessages = appendResponseMessages({
         messages,
         responseMessages: response.messages,
