@@ -58,6 +58,39 @@ export const findRelevantContent = async (
   const supabase = await createClient();
   const questionEmbedding = await generateEmbedding(question);
 
+  //   -- First, create a function that only returns documents for a user
+  // CREATE OR REPLACE FUNCTION get_user_documents(
+  //   user_id text  -- Using text to match what we pass from TypeScript
+  // )
+  // RETURNS SETOF documents
+  // LANGUAGE sql SECURITY DEFINER
+  // AS $$
+  //   SELECT *
+  //   FROM documents
+  //   WHERE documents.user_id = user_id::uuid  -- Cast text to uuid
+  //   AND documents.active = true;
+  // $$;
+
+  // -- Then keep the match_documents function using the user_documents
+  // CREATE OR REPLACE FUNCTION match_documents (
+  //   query_embedding vector(512),
+  //   match_threshold float,
+  //   match_count int,
+  //   user_id text  -- Using text to match what we pass from TypeScript
+  // )
+  // RETURNS SETOF documents
+  // LANGUAGE sql SECURITY DEFINER
+  // AS $$
+  //   -- First get the user's documents using our new function
+  //   WITH user_docs AS (
+  //     SELECT * FROM get_user_documents(user_id)
+  //   )
+  //   SELECT *
+  //   FROM user_docs
+  //   WHERE user_docs.embedding <=> query_embedding < 1 - match_threshold
+  //   ORDER BY user_docs.embedding <=> query_embedding ASC
+  //   LIMIT least(match_count, 200);
+  // $$;
   const { data: relevantChunks, error } = await supabase.rpc(
     "match_documents",
     {
