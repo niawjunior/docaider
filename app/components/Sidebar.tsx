@@ -21,6 +21,8 @@ const Sidebar = ({
   onFinished,
 }: SidebarProps) => {
   const { session } = useSupabaseSession();
+
+  // const { userConfig } = useUserConfig(session?.user.id || "");
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const sidebarRef = useRef<HTMLUListElement>(null);

@@ -56,9 +56,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const { session } = useSupabaseSession();
   const { config, updateConfig } = useUserConfig(session?.user?.id || "");
 
-  useEffect(() => {
-    console.log("config", config);
-  }, [config, session?.user.id]);
   const handleDocumentUpload = async (file: File, title: string) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -232,7 +229,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
     try {
       const supabase = await createClient();
       const { data: user } = await supabase.auth.getUser();
-
       if (!user?.user?.id) return;
 
       // Get all files in the user's directory

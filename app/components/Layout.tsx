@@ -8,7 +8,6 @@ import {
   TbLayoutSidebarLeftCollapseFilled,
   TbLayoutSidebarLeftExpandFilled,
 } from "react-icons/tb";
-
 import Sidebar from "./Sidebar";
 
 const ChatLayout = ({

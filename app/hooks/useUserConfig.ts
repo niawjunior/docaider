@@ -28,7 +28,7 @@ export default function useUserConfig(userId: string) {
   const [config, setConfig] = useState<UserConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  console.log("userId", userId);
+
   const getConfig = useCallback(async () => {
     try {
       const { data, error } = await supabase
