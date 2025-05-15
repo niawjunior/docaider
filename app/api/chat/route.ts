@@ -37,9 +37,12 @@ export async function POST(req: NextRequest) {
     .eq("id", user.id)
     .single();
 
+  const { data: documentsData } = await supabase
+    .from("documents")
+    .select("document_id, document_name")
+    .eq("user_id", user.id);
+
   const isRagEnabled = configData?.is_rag_enabled ?? false;
-  console.log("isRagEnabled", isRagEnabled);
-  // const lastMessage = messages[messages.length - 1]?.content
   // Get tools
 
   const tools = {
@@ -64,6 +67,19 @@ export async function POST(req: NextRequest) {
     system: `
     You are Askivue — a smart, very polite, and friendly AI assistant who transforms natural language into beautiful visual insights. 
     Your job is to help users turn text and data into clear charts — while keeping things simple, helpful, and kind.
+    ${
+      isRagEnabled
+        ? documentsData?.length
+          ? "Always use the askQuestion tool to ask questions about uploaded documents. Assume the user has uploaded documents."
+          : "Assume the user haven't uploaded any documents and can't use the askQuestion tool to ask questions about uploaded documents. Have to inform the user to upload documents to use the askQuestion tool."
+        : documentsData?.length
+        ? `Have to tell the user that they already have documents uploaded ${documentsData
+            .map((doc) => doc.document_name)
+            .join(
+              ", "
+            )}. Assume the user haven't open RAG settings and can't use the askQuestion tool to ask questions about uploaded documents. Have to inform the user to open RAG settings to use the askQuestion tool.`
+        : "Assume the user haven't open RAG settings and can't use the askQuestion tool to ask questions about uploaded documents. Have to inform the user to open RAG settings to use the askQuestion tool."
+    }
     🧠 Behavior Guidelines:
      - You specialize in:
         - Creating pie charts, bar charts, and data tables  
