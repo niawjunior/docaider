@@ -6,7 +6,15 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { IoArrowDownSharp } from "react-icons/io5";
 import DocumentUpload from "./DocumentUpload";
-import { FaFilePdf, FaHammer } from "react-icons/fa";
+import {
+  FaBitcoin,
+  FaChartBar,
+  FaChartLine,
+  FaChartPie,
+  FaFilePdf,
+  FaHammer,
+  FaQuestion,
+} from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 
 import BarChart from "./BarChart";
@@ -27,6 +35,33 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import useUserConfig, { UserConfig } from "../hooks/useUserConfig";
 import useSupabaseSession from "../hooks/useSupabaseSession";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { Badge } from "@/components/ui/badge";
+
+const toolIcons = {
+  generateBarChart: <FaChartBar />,
+  generatePieChart: <FaChartPie />,
+  getCryptoPrice: <FaBitcoin />,
+  getCryptoMarketSummary: <FaChartLine />,
+  askQuestion: <FaQuestion />,
+};
+
+const tools = [
+  { name: "generateBarChart", description: "Generate a bar chart" },
+  { name: "generatePieChart", description: "Generate a pie chart" },
+  {
+    name: "getCryptoPrice",
+    description: "Get the current price of a cryptocurrency",
+  },
+  {
+    name: "getCryptoMarketSummary",
+    description: "Get a summary of the current market for a cryptocurrency",
+  },
+  {
+    name: "askQuestion",
+    description: "Ask a question about the uploaded documents",
+  },
+];
 
 interface ChatFormProps {
   chatId?: string;
@@ -73,6 +108,14 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   };
 
   const suggestedPrompts = [
+    {
+      title: "What is the current price of Bitcoin?",
+      subtitle: "as of today",
+    },
+    {
+      title: "Tell me about the document",
+      subtitle: "Who is the author?",
+    },
     {
       title: "Show me a bar chart",
       subtitle: "of monthly expenses by category",
@@ -126,8 +169,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
       setTimeout(() => {
         textareaRef.current?.focus();
       }, 100);
-
-      console.log("onFinish", messages);
     },
     onError: (error) => {
       console.log("onError", error);
@@ -644,13 +685,29 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                 <DialogHeader>
                   <DialogTitle>Available Tools</DialogTitle>
                 </DialogHeader>
-                <div>
-                  <p>Generate Bar Chart</p>
-                  <p>Generate Pie Chart</p>
-                  <p>Get Crypto Price</p>
-                  <p>Get Crypto Market Summary</p>
-                  <p>Ask Question</p>
-                </div>
+                <ScrollArea className="h-[300px] overflow-y-auto">
+                  {tools.map((tool) => (
+                    <div
+                      key={tool.name}
+                      className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-background/50 hover:bg-background/70 transition-colors"
+                    >
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        {toolIcons[tool.name as keyof typeof toolIcons]}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium leading-none truncate">
+                          {tool.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {tool.description}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="ml-auto">
+                        {tool.name}
+                      </Badge>
+                    </div>
+                  ))}
+                </ScrollArea>
               </DialogContent>
             </Dialog>
           </div>

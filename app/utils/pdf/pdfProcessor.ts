@@ -3,6 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import { embed } from "ai";
 import { createClient } from "../supabase/server";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { v4 as uuidv4 } from "uuid";
 
 export interface DocumentChunk {
   chunk: string;
@@ -18,7 +19,6 @@ export async function processPDF(
 ): Promise<DocumentChunk[]> {
   try {
     // Read the file as an ArrayBuffer
-    console.log(file);
     const fileBuffer = await file.arrayBuffer();
 
     // Parse PDF
@@ -113,8 +113,10 @@ export async function uploadPDF(
 ): Promise<string> {
   try {
     const supabase = await createClient();
+    // Encode the filename to handle special characters
+    const documentId = uuidv4();
+    const fileName = `${documentId}.pdf`;
 
-    const fileName = `${Date.now()}_${file.name}`;
     const storagePath = `user_${userId}/${fileName}`;
 
     // Upload file to Supabase storage with user-specific path

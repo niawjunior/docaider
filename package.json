@@ -16,6 +16,7 @@
     "@radix-ui/react-dialog": "^1.1.13",
     "@radix-ui/react-hover-card": "^1.1.13",
     "@radix-ui/react-label": "^2.1.6",
+    "@radix-ui/react-scroll-area": "^1.2.8",
     "@radix-ui/react-slot": "^1.2.2",
     "@radix-ui/react-switch": "^1.2.4",
     "@supabase/ssr": "^0.6.1",
@@ -40,6 +41,7 @@
     "react-resizable": "^3.0.5",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.3.0",
+    "uuid": "^11.1.0",
     "zod": "^3.24.3",
     "zod-to-json-schema": "^3.24.5"
   },

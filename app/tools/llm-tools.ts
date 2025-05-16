@@ -218,10 +218,8 @@ export const getCryptoPriceTool = tool({
     try {
       const sym = `${fiat.toUpperCase()}_${currency.toUpperCase()}`;
       const url = `https://api.bitkub.com/api/market/ticker?sym=${sym}`;
-      console.log("url", url);
       const res = await fetch(url);
       const json = await res.json();
-      console.log("json", json);
 
       if (!json[sym]) {
         return {
@@ -466,7 +464,7 @@ export const askQuestionTool = tool({
           answer: z
             .string()
             .describe(
-              "Answer to the question. Use markdown formatting with clear headings and bullet points."
+              "Answer to the question. Use markdown formatting with clear headings and bullet points. For date/time questions, provide accurate dates and maintain chronological order."
             ),
         }),
         prompt,
@@ -478,6 +476,18 @@ export const askQuestionTool = tool({
       - Use backticks (\`) for code snippets
       - Use **bold** for important terms
       - Use *italic* for emphasis
+
+      # Date/Time Handling
+      - When answering date-related questions:
+        • Today is ${new Date().toISOString()}
+        • Always provide accurate dates from the document
+        • Maintain chronological order
+        • Compare dates relative to current date
+        • Format dates consistently (YYYY-MM-DD or full date format)
+        • For "next" or "upcoming" questions:
+          - Sort dates chronologically
+          - Return the first date that's in the future
+          - Include days until the event
 
       # Response Structure
       ## Summary
@@ -516,6 +526,13 @@ export const askQuestionTool = tool({
       • Option B
       • Considerations for each
 
+
+      # Date/Time Examples
+      ## Upcoming Events
+      • Next holiday: January 1, 2025 (New Year's Day)
+        - 15 days from today
+      • Next public holiday: January 27, 2025 (Makha Bucha Day)
+        - 41 days from today
       `,
       });
 
