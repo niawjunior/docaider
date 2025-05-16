@@ -30,9 +30,25 @@ export async function processPDF(
       .normalize("NFC") // Normalize Unicode characters
       .replace(/\u0000/g, "") // Remove null characters
       .replace(/\r\n/g, "\n") // Normalize newlines
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, "") // Remove control characters
+      .replace(
+        /[\u00AD\u034F\u1806\u180B-\u180E\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g,
+        ""
+      ) // Remove zero-width characters
+      .replace(/[\u0080-\u009F]/g, "") // Remove C1 control characters
       .replace(/\s+/g, " ") // Clean up whitespace
       .trim();
 
+    // Add proper Thai character handling
+    const thaiNormalizedText = normalizedText
+      .replace(/[\u0E00-\u0E7F]/g, (match) => {
+        // Handle Thai characters with proper normalization
+        return match.normalize("NFC");
+      })
+      .replace(/[\u0E00-\u0E7F]+/g, (match) => {
+        // Handle Thai word boundaries
+        return match.replace(/([\u0E00-\u0E7F])/g, "$1 ");
+      });
     // Split text into chunks with better context
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000, // Maximum characters per chunk
@@ -40,12 +56,13 @@ export async function processPDF(
       separators: ["\n\n", "\n", "。", "。", "，", "，"], // Try to split at paragraphs, then lines, then Thai punctuation
     });
 
-    const chunks = await splitter.createDocuments([normalizedText]);
+    const chunks = await splitter.createDocuments([thaiNormalizedText]);
     // Filter out any empty chunks
     const filteredChunks = chunks.filter(
       (chunk) => chunk.pageContent.trim().length > 0
     );
 
+    console.log("filteredChunks", filteredChunks);
     // Generate embeddings for each chunk
     const supabase = await createClient();
 

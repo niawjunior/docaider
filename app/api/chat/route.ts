@@ -122,6 +122,14 @@ export async function POST(req: NextRequest) {
         ? "- RAG is enabled, but no documents are uploaded. Ask the user to upload documents first."
         : "- RAG is disabled and no documents are uploaded. Ask the user to upload documents and enable RAG to use document Q&A."
     }
+
+    Thai Text Handling:
+    - When processing Thai text:
+      • Normalize Unicode characters using NFC
+      • Handle Thai word boundaries properly
+      • Maintain Thai character combinations
+      • Preserve Thai punctuation marks
+      • Use appropriate Thai-specific character handling
     
     📊 **Chart Behavior**
     - Always assume the user wants to *visualize* or *understand* data.

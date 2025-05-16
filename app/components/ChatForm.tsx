@@ -55,7 +55,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const [isToolModalOpen, setIsToolModalOpen] = useState(false);
   const [documents, setDocuments] = useState<
     {
-      name: string;
+      title: string;
       created_at: string;
       url: string;
       id: string;
@@ -296,7 +296,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
             .from("documents")
             .getPublicUrl(`user_${user.user.id}/${doc.document_name}`);
           return {
-            name: doc.document_name,
+            title: doc.title,
             created_at: doc.created_at || new Date().toISOString(),
             url: publicUrl.publicUrl,
             id: doc.id,
@@ -323,7 +323,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   }, []);
 
   const handleDeleteDocument = async (doc: {
-    name: string;
+    title: string;
     url: string;
     id: string;
     document_id: string;
@@ -646,7 +646,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                 >
                   <FaHammer className="h-8 w-8" />
                   <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                    6
+                    {tools.length}
                   </div>
                 </Button>
               </div>

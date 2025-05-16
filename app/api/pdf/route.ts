@@ -9,6 +9,8 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("file");
     const title = formData.get("title") as string;
+    console.log("file", file);
+    console.log("title", title);
     if (!file || !(file instanceof Blob) || !title) {
       return new Response(
         JSON.stringify({ error: "File and title are required" }),

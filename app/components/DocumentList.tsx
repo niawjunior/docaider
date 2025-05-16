@@ -6,20 +6,20 @@ import { FaFilePdf } from "react-icons/fa";
 
 interface DocumentsListProps {
   documents?: {
-    name: string;
     created_at: string;
     url: string;
     id: string;
     active: boolean;
     document_id: string;
     document_name: string;
+    title: string;
   }[];
   onDelete?: (doc: {
-    name: string;
     url: string;
     id: string;
     document_id: string;
     document_name: string;
+    title: string;
   }) => Promise<void>;
   onToggleActive?: (doc: { id: string; active: boolean }) => Promise<void>;
 }
@@ -32,7 +32,7 @@ const DocumentsList = ({
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async (doc: {
-    name: string;
+    title: string;
     url: string;
     id: string;
     document_id: string;
@@ -74,11 +74,11 @@ const DocumentsList = ({
         ) : (
           documents?.map((doc) => (
             <div
-              key={doc.name}
+              key={doc.document_name}
               className="flex items-center justify-between p-2 bg-muted rounded-md"
             >
               <div>
-                <p className="text-sm font-medium">{doc.name}</p>
+                <p className="text-sm font-medium">{doc.title}</p>
                 <p className="text-xs text-muted-foreground">
                   {new Date(doc.created_at).toLocaleDateString()}
                 </p>

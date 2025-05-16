@@ -12,7 +12,7 @@ import DocumentsList from "./DocumentList";
 interface DocumentUploadProps {
   onUpload: (file: File, title: string) => Promise<void>;
   onDelete: (doc: {
-    name: string;
+    title: string;
     url: string;
     id: string;
     document_id: string;
@@ -20,7 +20,7 @@ interface DocumentUploadProps {
   }) => Promise<void>;
   onClose: () => void;
   documents?: {
-    name: string;
+    title: string;
     created_at: string;
     url: string;
     id: string;
@@ -68,7 +68,7 @@ export default function DocumentUpload({
   };
 
   const handleDelete = async (doc: {
-    name: string;
+    title: string;
     url: string;
     id: string;
     document_id: string;
