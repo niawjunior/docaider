@@ -32,11 +32,9 @@ import {
 import { createClient } from "../utils/supabase/client";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import useUserConfig, { UserConfig } from "../hooks/useUserConfig";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { Badge } from "@/components/ui/badge";
 
 const toolIcons = {
   generateBarChart: <FaChartBar />,
@@ -45,23 +43,6 @@ const toolIcons = {
   getCryptoMarketSummary: <FaChartLine />,
   askQuestion: <FaQuestion />,
 };
-
-const tools = [
-  { name: "generateBarChart", description: "Generate a bar chart" },
-  { name: "generatePieChart", description: "Generate a pie chart" },
-  {
-    name: "getCryptoPrice",
-    description: "Get the current price of a cryptocurrency",
-  },
-  {
-    name: "getCryptoMarketSummary",
-    description: "Get a summary of the current market for a cryptocurrency",
-  },
-  {
-    name: "askQuestion",
-    description: "Ask a question about the uploaded documents",
-  },
-];
 
 interface ChatFormProps {
   chatId?: string;
@@ -91,6 +72,34 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const [isReady, setIsReady] = useState(false);
   const { session } = useSupabaseSession();
   const { config, updateConfig } = useUserConfig(session?.user?.id || "");
+
+  const tools = [
+    {
+      name: "generateBarChart",
+      description: "Generate a bar chart",
+      enabled: config?.generate_bar_chart_enabled ?? true,
+    },
+    {
+      name: "generatePieChart",
+      description: "Generate a pie chart",
+      enabled: config?.generate_pie_chart_enabled ?? true,
+    },
+    {
+      name: "getCryptoPrice",
+      description: "Get the current price of a cryptocurrency",
+      enabled: config?.get_crypto_price_enabled ?? true,
+    },
+    {
+      name: "getCryptoMarketSummary",
+      description: "Get a summary of the current market for a cryptocurrency",
+      enabled: config?.get_crypto_market_summary_enabled ?? true,
+    },
+    {
+      name: "askQuestion",
+      description: "Ask a question about the uploaded documents",
+      enabled: config?.ask_question_enabled ?? true,
+    },
+  ];
 
   const handleDocumentUpload = async (file: File, title: string) => {
     const formData = new FormData();
@@ -394,9 +403,34 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
     }
   };
 
-  const handleUpdateConfig = async (updates: Partial<UserConfig>) => {
-    await updateConfig(updates);
-    toast("Config updated successfully", {
+  const handleUpdateConfig = async (
+    updates: Partial<Record<string, boolean>>
+  ) => {
+    const mappedUpdates: Partial<UserConfig> = {};
+
+    Object.entries(updates).forEach(([key, value]) => {
+      switch (key) {
+        case "generateBarChart":
+          mappedUpdates.generate_bar_chart_enabled = value;
+          break;
+        case "generatePieChart":
+          mappedUpdates.generate_pie_chart_enabled = value;
+          break;
+        case "getCryptoPrice":
+          mappedUpdates.get_crypto_price_enabled = value;
+          break;
+        case "getCryptoMarketSummary":
+          mappedUpdates.get_crypto_market_summary_enabled = value;
+          break;
+        case "askQuestion":
+          mappedUpdates.ask_question_enabled = value;
+          break;
+      }
+    });
+
+    console.log("mappedUpdates", mappedUpdates);
+    await updateConfig(mappedUpdates);
+    toast.success("Config updated successfully", {
       duration: 3000,
     });
   };
@@ -616,15 +650,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                   </div>
                 </Button>
               </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={config?.is_rag_enabled}
-                  onCheckedChange={(checked) =>
-                    handleUpdateConfig({ is_rag_enabled: checked })
-                  }
-                />
-                <Label>RAG</Label>
-              </div>
             </div>
             <form
               onSubmit={handleSubmit}
@@ -702,9 +727,15 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                           {tool.description}
                         </p>
                       </div>
-                      <Badge variant="outline" className="ml-auto">
-                        {tool.name}
-                      </Badge>
+
+                      <Switch
+                        id={tool.name}
+                        key={tool.name}
+                        checked={tool.enabled}
+                        onCheckedChange={(checked) =>
+                          handleUpdateConfig({ [tool.name]: checked })
+                        }
+                      />
                     </div>
                   ))}
                 </ScrollArea>
