@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 
   const result = streamText({
     model: openai("gpt-4o-mini"),
-    toolChoice: isRagEnabled ? "required" : "auto",
+    toolChoice: "auto",
     maxSteps: 1,
     tools,
     system: `
