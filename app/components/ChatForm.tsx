@@ -34,7 +34,14 @@ import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import useUserConfig, { UserConfig } from "../hooks/useUserConfig";
 import useSupabaseSession from "../hooks/useSupabaseSession";
+import { useCredit } from "../context/CreditContext";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const toolIcons = {
   generateBarChart: <FaChartBar />,
@@ -72,32 +79,38 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const [isReady, setIsReady] = useState(false);
   const { session } = useSupabaseSession();
   const { config, updateConfig } = useUserConfig(session?.user?.id || "");
+  const { credit, updateCredit } = useCredit();
 
   const tools = [
     {
       name: "generateBarChart",
       description: "Generate a bar chart",
       enabled: config?.generate_bar_chart_enabled ?? true,
+      creditCost: 1,
     },
     {
       name: "generatePieChart",
       description: "Generate a pie chart",
       enabled: config?.generate_pie_chart_enabled ?? true,
+      creditCost: 1,
     },
     {
       name: "getCryptoPrice",
       description: "Get the current price of a cryptocurrency",
       enabled: config?.get_crypto_price_enabled ?? true,
+      creditCost: 1,
     },
     {
       name: "getCryptoMarketSummary",
       description: "Get a summary of the current market for a cryptocurrency",
       enabled: config?.get_crypto_market_summary_enabled ?? true,
+      creditCost: 1,
     },
     {
       name: "askQuestion",
       description: "Ask a question about the uploaded documents",
       enabled: config?.ask_question_enabled ?? true,
+      creditCost: 2,
     },
   ];
 
@@ -165,10 +178,41 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
     },
     async onToolCall({ toolCall }) {
       console.log("toolCall", toolCall);
-      if (toolCall.toolName === "visualizeData") {
+
+      // Find the tool configuration
+      const tool = tools.find((t) => t.name === toolCall.toolName);
+      if (!tool || !tool.creditCost) {
+        console.error(
+          "Tool not found or missing credit cost:",
+          toolCall.toolName
+        );
+        return;
       }
 
-      if (toolCall.toolName === "askQuestion") {
+      // Check if user has credits data and enough credits
+      if (
+        !credit ||
+        credit.balance === undefined ||
+        credit.balance < tool.creditCost
+      ) {
+        toast.error(
+          `Not enough credits. You need ${tool.creditCost} credits for this action.`
+        );
+        return;
+      }
+
+      // Deduct credits
+      try {
+        await updateCredit(credit.balance - tool.creditCost);
+        toast.success(
+          `Used ${tool.creditCost} credits. Remaining: ${
+            credit.balance - tool.creditCost
+          }`
+        );
+      } catch (error) {
+        console.error("Error updating credits:", error);
+        toast.error("Failed to update credits. Please try again.");
+        return;
       }
     },
     onFinish: async () => {
@@ -626,29 +670,52 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
           <div className="flex flex-col">
             <div className="flex justify-between items-center">
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="ml-2 relative"
-                  size="icon"
-                  onClick={() => setIsPdfModalOpen(true)}
-                >
-                  <FaFilePdf className="h-8 w-8" />
-                  <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                    {documents?.length}
-                  </div>
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        variant="outline"
+                        className="ml-2 relative"
+                        size="icon"
+                        disabled={credit?.balance === 0}
+                        onClick={() => setIsPdfModalOpen(true)}
+                      >
+                        <FaFilePdf className="h-8 w-8" />
+                        <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
+                          {documents?.length}
+                        </div>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {credit?.balance === 0 ? (
+                        <p>Not enough credits</p>
+                      ) : (
+                        <p>Manage documents</p>
+                      )}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
 
-                <Button
-                  onClick={() => setIsToolModalOpen(true)}
-                  variant="outline"
-                  className="ml-2 relative"
-                  size="icon"
-                >
-                  <FaHammer className="h-8 w-8" />
-                  <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                    {tools.length}
-                  </div>
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        variant="outline"
+                        className="ml-2 relative"
+                        size="icon"
+                        onClick={() => setIsToolModalOpen(true)}
+                      >
+                        <FaHammer className="h-8 w-8" />
+                        <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
+                          {tools.length}
+                        </div>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Manage tools</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </div>
             <form
@@ -725,6 +792,9 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                         </h3>
                         <p className="text-sm text-muted-foreground">
                           {tool.description}
+                        </p>
+                        <p className="text-sm text-orange-400">
+                          {tool.creditCost} credit
                         </p>
                       </div>
 

@@ -6,6 +6,7 @@ import { IoIosAddCircle } from "react-icons/io";
 import clsx from "clsx";
 import { createChat } from "../utils/aisdk/chat";
 import useSupabaseSession from "../hooks/useSupabaseSession";
+import { useCredit } from "../context/CreditContext";
 
 interface SidebarProps {
   chatId?: string;
@@ -21,7 +22,7 @@ const Sidebar = ({
   onFinished,
 }: SidebarProps) => {
   const { session } = useSupabaseSession();
-
+  const { credit, loading: creditLoading } = useCredit();
   // const { userConfig } = useUserConfig(session?.user.id || "");
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -147,12 +148,17 @@ const Sidebar = ({
         )}
       </ul>
 
-      <div className="text-xs text-zinc-500 border-t border-zinc-700 pt-4 mt-4">
-        <div>
-          <p>Logged in as {session?.user.email}</p>
-          {session?.user.user_metadata?.full_name && (
-            <p>Name: {session?.user.user_metadata?.full_name}</p>
+      <div className="text-xs  border-t border-zinc-700 pt-4 mt-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Credits:</span>
+          {creditLoading ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
+          ) : (
+            <span className="text-sm">{credit?.balance.toFixed(2) || 0}</span>
           )}
+        </div>
+        <div className="text-zinc-500">
+          <p>Logged in as {session?.user.email}</p>
         </div>
       </div>
     </aside>

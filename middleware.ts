@@ -51,6 +51,16 @@ export async function middleware(request: NextRequest) {
       if (configError) {
         console.error("Error creating user config:", configError);
       }
+
+      // Initialize user credits
+      const { error: creditsError } = await supabase.from("credits").insert({
+        user_id: user.id,
+        balance: 50,
+      });
+
+      if (creditsError) {
+        console.error("Error creating user credits:", creditsError);
+      }
     }
   }
 

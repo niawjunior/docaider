@@ -42,33 +42,48 @@ export async function POST(req: NextRequest) {
     .eq("user_id", user.id);
 
   const isRagEnabled = configData?.ask_question_enabled ?? false;
-  // Get tools
+  // Get user credit
+  const { data: creditData } = await supabase
+    .from("credits")
+    .select("balance")
+    .eq("user_id", user.id)
+    .single();
 
-  const tools = {
-    ...(configData?.generate_bar_chart_enabled && {
-      generateBarChart: generateBarChartTool,
-    }),
-    ...(configData?.generate_pie_chart_enabled && {
-      generatePieChart: generatePieChartTool,
-    }),
-    ...(configData?.get_crypto_price_enabled && {
-      getCryptoPrice: getCryptoPriceTool,
-    }),
-    ...(configData?.get_crypto_market_summary_enabled && {
-      getCryptoMarketSummary: getCryptoMarketSummaryTool,
-    }),
-    ...(isRagEnabled && { askQuestion: askQuestionTool }),
-  };
+  // Get tools
+  const tools =
+    creditData?.balance === 0
+      ? {}
+      : {
+          ...(configData?.generate_bar_chart_enabled && {
+            generateBarChart: generateBarChartTool,
+          }),
+          ...(configData?.generate_pie_chart_enabled && {
+            generatePieChart: generatePieChartTool,
+          }),
+          ...(configData?.get_crypto_price_enabled && {
+            getCryptoPrice: getCryptoPriceTool,
+          }),
+          ...(configData?.get_crypto_market_summary_enabled && {
+            getCryptoMarketSummary: getCryptoMarketSummaryTool,
+          }),
+          ...(isRagEnabled && { askQuestion: askQuestionTool }),
+        };
 
   const result = streamText({
     model: openai("gpt-4o-mini"),
-    toolChoice: "auto",
+    toolChoice: creditData?.balance === 0 ? "none" : "auto",
     maxSteps: 1,
     tools,
     system: `
     You are **Askivue** — a smart, polite, and friendly AI assistant that transforms natural language into clear, visual insights.
     
     🔧 **Current Tool Availability**
+    - Credit: ${creditData?.balance}
+    - ${
+      creditData?.balance === 0
+        ? "Your credit balance is 0 so you can't use any tools. Please inform the user to add credits to use tools."
+        : "You can use tools."
+    }
     - RAG: ${isRagEnabled ? "✅ Enabled" : "❌ Disabled"}
     - Uploaded Documents: ${documentsData?.length || 0}
     - Bar Chart: ${
