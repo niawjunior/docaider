@@ -7,6 +7,7 @@ import clsx from "clsx";
 import { IoArrowDownSharp } from "react-icons/io5";
 import DocumentUpload from "./DocumentUpload";
 import { FaFilePdf, FaHammer } from "react-icons/fa";
+import ReactMarkdown from "react-markdown";
 
 import BarChart from "./BarChart";
 import PieChart from "./PieChart";
@@ -358,7 +359,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
       duration: 3000,
     });
   };
-
   return (
     <>
       <div className="flex flex-col items-center gap-4 ">
@@ -472,7 +472,60 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                             const result = (part.toolInvocation as any)?.result;
 
                             return result ? (
-                              <p key={index}>{result}</p>
+                              <div>
+                                <ReactMarkdown
+                                  components={{
+                                    h1: ({ children }) => (
+                                      <h1 className="text-xl font-bold mb-4 text-white">
+                                        {children}
+                                      </h1>
+                                    ),
+                                    h2: ({ children }) => (
+                                      <h2 className="text-lg font-semibold mb-3 text-white">
+                                        {children}
+                                      </h2>
+                                    ),
+                                    h3: ({ children }) => (
+                                      <h3 className="text-base font-medium mb-2 text-white">
+                                        {children}
+                                      </h3>
+                                    ),
+                                    p: ({ children }) => (
+                                      <p className="mb-4 text-white">
+                                        {children}
+                                      </p>
+                                    ),
+                                    ul: ({ children }) => (
+                                      <ul className="list-disc pl-6 mb-4 text-white">
+                                        {children}
+                                      </ul>
+                                    ),
+                                    ol: ({ children }) => (
+                                      <ol className="list-decimal pl-6 mb-4 text-white">
+                                        {children}
+                                      </ol>
+                                    ),
+                                    li: ({ children }) => (
+                                      <li className="mb-2 text-white">
+                                        {children}
+                                      </li>
+                                    ),
+
+                                    strong: ({ children }) => (
+                                      <strong className="font-bold text-white">
+                                        {children}
+                                      </strong>
+                                    ),
+                                    em: ({ children }) => (
+                                      <em className="italic text-white">
+                                        {children}
+                                      </em>
+                                    ),
+                                  }}
+                                >
+                                  {result}
+                                </ReactMarkdown>
+                              </div>
                             ) : (
                               <div className="flex items-center gap-2">
                                 <p className="text-white text-sm">

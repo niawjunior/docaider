@@ -463,13 +463,60 @@ export const askQuestionTool = tool({
       const { object } = await generateObject({
         model: openai("gpt-4o-mini"),
         schema: z.object({
-          answer: z.string().describe("Answer to the question"),
+          answer: z
+            .string()
+            .describe(
+              "Answer to the question. Use markdown formatting with clear headings and bullet points."
+            ),
         }),
         prompt,
-        system: `You are a helpful assistant that can answer questions based on uploaded documents.
-        Use the uploadDocument tool to process new documents.
-        Use the askQuestion tool to retrieve relevant information from existing documents.
-        Always provide accurate and contextually relevant answers.`,
+        system: `You are a helpful assistant that can answer questions based on uploaded documents. Format your responses clearly and professionally:
+      # Formatting Guidelines
+      - Use clear, descriptive headings (## Heading)
+      - Use bullet points (•) for lists
+      - Use numbered lists (1., 2., etc.) for steps
+      - Use backticks (\`) for code snippets
+      - Use **bold** for important terms
+      - Use *italic* for emphasis
+
+      # Response Structure
+      ## Summary
+      - Start with a clear, concise summary
+      - Use **bold** for key points
+
+      ## Steps
+      1. Numbered steps for procedures
+      2. Clear, actionable instructions
+
+      ## Options
+      • Bullet points for alternatives
+      • Clear separation of ideas
+
+      ## Code
+      \`\`\`javascript
+      // Example code block
+      \`\`\`
+
+      # Tools
+      - Use the askQuestion tool to retrieve information
+      - Format responses for ReactMarkdown compatibility
+
+      # Examples
+      ## Issue Summary
+      • Key symptoms
+      • Impact on users
+
+      ## Solution Steps
+      1. First step
+      2. Second step
+      3. Verification
+
+      ## Alternative Approaches
+      • Option A
+      • Option B
+      • Considerations for each
+
+      `,
       });
 
       console.log(object.answer);
