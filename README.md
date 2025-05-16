@@ -1,50 +1,152 @@
+# AskVue
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Describe your data in plain language. We’ll turn it into stunning, interactive charts – automatically.
 
-#text to visualize
+## Features
 
-<img width="1440" alt="image" src="https://github.com/user-attachments/assets/426125ed-9c99-48a9-9590-6caefd83a3d6" />
-<img width="1437" alt="image" src="https://github.com/user-attachments/assets/f024b70b-f807-4f1a-ad4a-8ab8888a22de" />
-<img width="1438" alt="image" src="https://github.com/user-attachments/assets/e14fb0a8-fa2e-4edc-ae72-8f4bbbe4c66a" />
-<img width="1439" alt="image" src="https://github.com/user-attachments/assets/e0d0d781-7ac5-44cc-9374-fe9e719e7b1e" />
+- 🤖 **AI Integration**: Powered by OpenAI SDK and LangChain for intelligent text processing and analysis
+- 📊 **Advanced Data Visualization**: Uses ECharts for sophisticated data visualization capabilities
+- 📄 **PDF Processing**: Supports PDF parsing and analysis using pdf-parse
+- 🎨 **Modern UI**: Built with Tailwind CSS and Radix UI components for a polished user experience
+- 🔄 **Real-time Updates**: Uses Intersection Observer for smooth, performant UI interactions
+- 🔐 **Secure Authentication**: Integrated with Supabase for secure user management
+- 🚀 **Performance Optimized**: Built with Turbopack for faster development
 
+## Available Tools
 
-#video demo
-https://github.com/user-attachments/assets/607b8468-1d96-49a3-98e7-76872469af2a
+### 1. Pie Chart Generator
 
+- Generate interactive pie charts from structured data
+- Customizable colors and styling
+- ECharts-compatible visualization
+- Automatic data validation and error handling
 
+### 2. Data Processing Tools
+
+- Bitkub API integration for cryptocurrency data
+- Secure API key management
+- Data embedding and relevance scoring
+- Customizable chart configurations
+
+### 3. AI-Powered Features
+
+- GPT-4 integration for advanced data analysis
+- Smart chart type suggestions
+- Automatic data validation
+- Interactive chart generation
+
+### 4. Security Tools
+
+- Environment-based API key management
+- Secure authentication with Supabase
+- Data encryption and protection
+- Role-based access control
+
+## Tech Stack
+
+- **Framework**: Next.js 15.3 with TypeScript
+- **UI Components**: Radix UI, Tailwind CSS
+- **AI/ML**: OpenAI SDK, LangChain
+- **Data Visualization**: ECharts
+- **State Management**: Zod for type-safe validation
+- **Authentication**: Supabase
+- **PDF Processing**: pdf-parse
+- **Animation**: Framer Motion
+- **Icons**: React Icons, Lucide React
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18 or higher
+- npm or yarn package manager
+- A Supabase account (for authentication)
+- OpenAI API key (for AI features)
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone [https://github.com/niawjunior/askivue]
+cd askivue
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Copy the environment file:
+
+```bash
+cp .env.example .env
+```
+
+4. Update your `.env` file with required API keys and configuration:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
+OPENAI_API_KEY=your_openai_key
+```
+
+5. Start the development server:
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+6. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+askivue/
+├── app/              # Next.js app directory
+├── components/       # Reusable React components
+├── hooks/           # Custom React hooks
+├── lib/             # Utility functions and configurations
+├── public/          # Static assets
+└── middleware.ts    # Next.js middleware configuration
+```
 
-## Learn More
+## Development
 
-To learn more about Next.js, take a look at the following resources:
+This project uses Turbopack for faster development. You can start the development server with:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The page will auto-update as you edit files.
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This project is optimized for deployment on Vercel. To deploy:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Push your changes to GitHub
+2. Import the repository to Vercel
+3. Configure your environment variables in Vercel dashboard
+4. Deploy with one click
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details
+
+## Support
+
+For support, please open an issue in the GitHub repository or contact the development team directly.
