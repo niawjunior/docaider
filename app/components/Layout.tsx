@@ -13,6 +13,12 @@ import {
 import Sidebar from "./Sidebar";
 import { CreditProvider } from "../context/CreditContext";
 import { createChat } from "../utils/aisdk/chat";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const ChatLayout = ({
   children,
@@ -57,39 +63,75 @@ const ChatLayout = ({
           <div className="fixed top-4 flex z-[99] gap-4 px-4 justify-between w-[290px]">
             <div className="flex justify-between w-full ">
               <div className="flex gap-4">
-                <button
-                  onClick={() => router.push("/")}
-                  className="text-[20px] rounded-lg"
-                >
-                  <GoHomeFill />
-                </button>
-                <button
-                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                  className="text-[20px] rounded-lg"
-                >
-                  {isSidebarOpen ? (
-                    <TbLayoutSidebarLeftCollapseFilled />
-                  ) : (
-                    <TbLayoutSidebarLeftExpandFilled />
-                  )}
-                </button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <button
+                        onClick={() => router.push("/")}
+                        className="text-[20px] rounded-lg"
+                      >
+                        <GoHomeFill />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Go to home</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <button
+                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                        className="text-[20px] rounded-lg"
+                      >
+                        {isSidebarOpen ? (
+                          <TbLayoutSidebarLeftCollapseFilled />
+                        ) : (
+                          <TbLayoutSidebarLeftExpandFilled />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Toggle sidebar</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 {!isSidebarOpen && (
-                  <button
-                    onClick={createNewChat}
-                    className="text-[20px] rounded-lg"
-                  >
-                    <IoMdOpen />
-                  </button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <button
+                          onClick={createNewChat}
+                          className="text-[20px] rounded-lg"
+                        >
+                          <IoMdOpen />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Create new chat</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
               {isSidebarOpen && (
                 <div className="flex justify-end w-full">
-                  <button
-                    onClick={createNewChat}
-                    className="text-[20px] rounded-lg"
-                  >
-                    <IoMdOpen />
-                  </button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <button
+                          onClick={createNewChat}
+                          className="text-[20px] rounded-lg"
+                        >
+                          <IoMdOpen />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Create new chat</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               )}
             </div>

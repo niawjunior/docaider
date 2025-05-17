@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import DocumentsList from "./DocumentList";
 import { formatBytes } from "../utils/formatBytes";
+import { useCredit } from "../context/CreditContext";
 
 interface DocumentUploadProps {
   onUpload: (file: File, title: string) => Promise<void>;
@@ -44,6 +45,7 @@ export default function DocumentUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [fileSizeError, setFileSizeError] = useState<string | null>(null);
   const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
+  const { credit, updateCredit } = useCredit();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +60,8 @@ export default function DocumentUpload({
         duration: 5000,
         description: "Your document has been uploaded successfully",
       });
+      updateCredit((credit?.balance || 0) - 1);
+
       onClose();
     } catch (error) {
       console.error("Error uploading document:", error);
@@ -152,11 +156,18 @@ export default function DocumentUpload({
           </div>
           <Button
             type="submit"
-            disabled={!file || !title || isUploading}
+            disabled={
+              !file ||
+              !title ||
+              isUploading ||
+              !credit?.balance ||
+              credit?.balance < 1
+            }
             className="w-full"
           >
             {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isUploading ? "Uploading..." : "Upload Document"}
+            <span className="text-xs text-gray-500">1 credit</span>
           </Button>
         </form>
         <DocumentsList

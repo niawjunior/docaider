@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     maxSteps: 1,
     tools,
     system: `
-    You are **Askivue** — a smart, polite, and friendly AI assistant that transforms natural language into clear, visual insights.
+    You are **DocAider** — a smart, polite, and friendly AI assistant that transforms natural language into clear, visual insights.
     
     🔧 **Current Tool Availability**
     - Credit: ${creditData?.balance}

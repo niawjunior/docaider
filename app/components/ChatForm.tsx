@@ -42,6 +42,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 const toolIcons = {
   generateBarChart: <FaChartBar />,
@@ -485,7 +486,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
         {messages.length === 0 && !isLoading && (
           <>
             <div>
-              <p className="text-2xl font-bold mb-2">Hello there!</p>
+              <p className="text-2xl font-bold">Hello there!</p>
               <p className="text-zinc-300">How can I help you today?</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
@@ -495,7 +496,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                   onClick={() =>
                     handlePromptClick(`${prompt.title} ${prompt.subtitle}`)
                   }
-                  className="text-left p-4 rounded-xl border border-zinc-700 hover:bg-zinc-800 transition"
+                  className="text-left px-4 py-2 rounded-xl border border-zinc-700 hover:bg-zinc-800 transition"
                 >
                   <p className="font-semibold text-white">{prompt.title}</p>
                   <p className="text-sm text-zinc-400">{prompt.subtitle}</p>
@@ -677,7 +678,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                         variant="outline"
                         className="ml-2 relative"
                         size="icon"
-                        disabled={credit?.balance === 0}
                         onClick={() => setIsPdfModalOpen(true)}
                       >
                         <FaFilePdf className="h-8 w-8" />
@@ -687,11 +687,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {credit?.balance === 0 ? (
-                        <p>Not enough credits</p>
-                      ) : (
-                        <p>Manage documents</p>
-                      )}
+                      <p>Manage documents</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -790,11 +786,14 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                         <h3 className="font-medium leading-none truncate">
                           {tool.name}
                         </h3>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground mt-2">
                           {tool.description}
                         </p>
                         <p className="text-sm text-orange-400">
-                          {tool.creditCost} credit
+                          <Badge variant="secondary" className="text-green-500">
+                            {tool.creditCost}{" "}
+                            {tool.creditCost > 1 ? "credits" : "credit"}
+                          </Badge>
                         </p>
                       </div>
 

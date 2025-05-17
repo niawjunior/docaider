@@ -12,7 +12,7 @@ const LoginComponent = () => {
       {/* Login Box */}
       <div className="relative z-10 bg-zinc-800/80 backdrop-blur-lg shadow-xl rounded-2xl p-10 w-full max-w-md border border-zinc-700">
         <div className="text-center mb-6">
-          <span className="text-orange-500 font-bold text-3xl">Askivue</span>
+          <span className="text-orange-500 font-bold text-3xl">DocAider</span>
           <h1 className="text-2xl font-semibold mt-2">
             Sign in to your account
           </h1>
