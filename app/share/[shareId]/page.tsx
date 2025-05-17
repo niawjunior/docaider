@@ -100,7 +100,7 @@ const SharePage = () => {
                     className={clsx(
                       "overflow-auto scroll-hidden px-2",
 
-                      messages.length > 0 && " py-4 h-[calc(100dvh-200px)]"
+                      messages.length > 0 && " py-4 h-[calc(100dvh-225px)]"
                     )}
                   >
                     {messages.map((message) => {
