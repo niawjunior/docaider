@@ -5,10 +5,8 @@ import CryptoSummary from "@/app/components/CryptoSummary";
 import GlobalLoader from "@/app/components/GlobalLoader";
 import PieChart from "@/app/components/PieChart";
 import { Button } from "@/components/ui/button";
-import { Message, useChat } from "@ai-sdk/react";
 import clsx from "clsx";
 import dayjs from "dayjs";
-// import { useChat } from "@ai-sdk/react";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -21,24 +19,10 @@ const SharePage = () => {
   const { shareId } = useParams();
   const [isAtBottom, setIsAtBottom] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
-  const [chatId, setChatId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<any[]>([]);
   const [shareData, setShareData] = useState<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { messages, setMessages, input, status } = useChat({
-    api: "/api/chat",
-    id: chatId!,
-    initialMessages: currentMessages,
-    sendExtraMessageFields: true,
-    body: {
-      chatId: chatId!,
-    },
-
-    onError: (error) => {
-      console.log("onError", error);
-    },
-  });
 
   useEffect(() => {
     const fetchShareData = async () => {
@@ -46,13 +30,11 @@ const SharePage = () => {
       const response = await fetch(`/api/share/${shareId}`);
       const data = await response.json();
       setShareData(data);
-      setCurrentMessages(data.messages);
       setMessages(data.messages);
-      setChatId(data.chat_id);
       setIsLoading(false);
     };
     fetchShareData();
-  }, [setMessages, shareId]);
+  }, [shareId]);
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -121,7 +103,7 @@ const SharePage = () => {
                               "bg-zinc-600"
                             }`}
                           >
-                            {message.parts.map((part, index) => {
+                            {message.parts.map((part: any, index: any) => {
                               if (part.type === "text") {
                                 return (
                                   <p
@@ -277,11 +259,12 @@ const SharePage = () => {
                     <form className="sticky bottom-0 flex-col w-full py-2 px-2 flex items-center gap-3">
                       {!isAtBottom && (
                         <button
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.preventDefault();
                             bottomRef.current?.scrollIntoView({
                               behavior: "smooth",
-                            })
-                          }
+                            });
+                          }}
                           className="w-10 h-10 bottom-36 fixed  flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
                           aria-label="Scroll to bottom"
                         >
@@ -290,13 +273,8 @@ const SharePage = () => {
                       )}
                       <div className="flex items-center gap-3 w-full">
                         <textarea
-                          value={input}
                           ref={textareaRef}
-                          placeholder={
-                            status !== "ready"
-                              ? "Thinking..."
-                              : "Ask anything..."
-                          }
+                          placeholder="Ask anything..."
                           disabled={true}
                           rows={1}
                           className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
