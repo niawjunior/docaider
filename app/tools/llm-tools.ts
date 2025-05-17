@@ -18,8 +18,7 @@ export const generatePieChartTool = tool({
 
   🧠 Behavior:
   - Support only: "pie" types.
-  - Always ask for the chart type if not specified.
-  - Always ask for color and if the user doesn't ask for color, use the default color use different color.
+  - If user asks for "default colors", generate a distinct color palette.
   - Always confirm the information provided by the user before generating the chart.
   - Always suggest the closest supported alternative if the chart type is unclear.
   The goal is to help the user go from text to visual insights — fast and seamlessly.
@@ -33,8 +32,9 @@ export const generatePieChartTool = tool({
           value: z.number().describe("Series value"),
           color: z
             .string()
+            .optional()
             .describe(
-              "Series color. Always ask for color and if the user doesn't ask for color, use the default color."
+              "Series color. Optional - if not provided, will use a distinct color from the default palette."
             ),
         })
       )
@@ -53,6 +53,29 @@ export const generatePieChartTool = tool({
   }),
   execute: async ({ title, seriesData, backgroundColor, textColor }) => {
     try {
+      // If no colors are provided in seriesData, generate a distinct color palette
+      if (seriesData?.length && !seriesData.some((item) => item.color)) {
+        // Generate distinct colors using a simple color palette
+        const defaultColors = [
+          "#FF6B6B", // Red
+          "#4ECDC4", // Teal
+          "#45B7D1", // Blue
+          "#96CEB4", // Green
+          "#FFEEAD", // Yellow
+          "#D4A5A5", // Pink
+          "#9B59B6", // Purple
+          "#3498DB", // Blue
+          "#E67E22", // Orange
+          "#2ECC71", // Green
+        ];
+
+        // Apply colors to series data
+        seriesData = seriesData.map((item, index) => ({
+          ...item,
+          color: defaultColors[index % defaultColors.length],
+        }));
+      }
+
       const { object } = await generateObject({
         model: openai("gpt-4o-mini"),
         schema: z.object({
@@ -64,8 +87,9 @@ export const generatePieChartTool = tool({
                 value: z.number().describe("Series value"),
                 color: z
                   .string()
+                  .optional()
                   .describe(
-                    "Series color. Always ask for color and if the user doesn't ask for color, use the default color."
+                    "Series color. Optional - if not provided, will use a distinct color from the default palette."
                   ),
               })
             )
@@ -297,8 +321,6 @@ export const getCryptoPriceTool = tool({
             `,
       });
 
-      console.log("high24hr", item.high24hr);
-      console.log("low24hr", item.low24hr);
       return {
         name: currency.toUpperCase(),
         price: item.last,
@@ -346,10 +368,6 @@ export const getCryptoBalanceTool = tool({
         .createHmac("sha256", API_SECRET)
         .update(sigPayload)
         .digest("hex");
-
-      console.log("X-BTK-TIMESTAMP:", timestamp);
-      console.log("X-BTK-APIKEY:", API_KEY);
-      console.log("X-BTK-SIGN:", signature);
 
       const res = await fetch(`https://api.bitkub.com${path}`, {
         method: "POST",
@@ -536,7 +554,6 @@ export const askQuestionTool = tool({
       `,
       });
 
-      console.log(object.answer);
       return object.answer;
     } catch (error: any) {
       console.error("Error in askQuestionTool:", error);

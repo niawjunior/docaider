@@ -62,7 +62,6 @@ export async function processPDF(
       (chunk) => chunk.pageContent.trim().length > 0
     );
 
-    console.log("filteredChunks", filteredChunks);
     // Generate embeddings for each chunk
     const supabase = await createClient();
 
@@ -99,7 +98,7 @@ export async function processPDF(
         ...data,
         chunk: data.chunk.replace(/\u0000/g, ""), // Remove null characters before storing
       };
-      const { data: result, error } = await supabase
+      const { error } = await supabase
         .from("documents")
         .upsert(chunkData)
         .select()
@@ -109,13 +108,8 @@ export async function processPDF(
         console.error("Error inserting into Supabase:", error);
         throw new Error(`Failed to insert chunk ${i + 1}: ${error.message}`);
       }
-
-      console.log(`Successfully inserted chunk ${i + 1} with ID:`, result?.id);
     }
 
-    console.log(
-      `Successfully processed and stored ${documentChunks.length} chunks`
-    );
     return documentChunks;
   } catch (error) {
     console.error("Error processing PDF:", error);
@@ -147,13 +141,6 @@ export async function uploadPDF(
     if (storageError) {
       throw new Error(`Storage upload error: ${storageError.message}`);
     }
-
-    // Get the public URL
-    const { data: publicUrl } = supabase.storage
-      .from("documents")
-      .getPublicUrl(storagePath);
-
-    console.log(publicUrl);
 
     await processPDF(file, title, userId, storageData.id, fileName);
     return "PDF uploaded and processed successfully";

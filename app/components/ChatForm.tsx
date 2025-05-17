@@ -178,8 +178,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
       chatId,
     },
     async onToolCall({ toolCall }) {
-      console.log("toolCall", toolCall);
-
       // Find the tool configuration
       const tool = tools.find((t) => t.name === toolCall.toolName);
       if (!tool || !tool.creditCost) {
@@ -260,7 +258,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
           // so we'll need to trigger a new message with the existing history
           if (Array.isArray(data)) {
             setCurrentMessages(data);
-            console.log("data", data);
             setMessages(data);
             setIsLoading(false);
             setTimeout(() => {
@@ -473,7 +470,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
       }
     });
 
-    console.log("mappedUpdates", mappedUpdates);
     await updateConfig(mappedUpdates);
     toast.success("Config updated successfully", {
       duration: 3000,
