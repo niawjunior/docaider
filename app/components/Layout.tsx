@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GoHomeFill } from "react-icons/go";
 import useSupabaseSession from "../hooks/useSupabaseSession";
+import { IoMdOpen } from "react-icons/io";
 
 import {
   TbLayoutSidebarLeftCollapseFilled,
@@ -47,24 +48,44 @@ const ChatLayout = ({
     <CreditProvider userId={session?.user.id || ""}>
       <>
         <div className="flex h-dvh bg-black text-white">
-          <div className="fixed top-4 flex z-[99] gap-4 w-72 px-4">
-            <div className="flex gap-4 w-full">
-              <button
-                onClick={() => router.push("/")}
-                className="text-[20px] rounded-lg"
-              >
-                <GoHomeFill />
-              </button>
-              <button
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="text-[20px] rounded-lg"
-              >
-                {isSidebarOpen ? (
-                  <TbLayoutSidebarLeftCollapseFilled />
-                ) : (
-                  <TbLayoutSidebarLeftExpandFilled />
+          <div className="fixed top-4 flex z-[99] gap-4 px-4 justify-between w-[290px]">
+            <div className="flex justify-between w-full ">
+              <div className="flex gap-4">
+                <button
+                  onClick={() => router.push("/")}
+                  className="text-[20px] rounded-lg"
+                >
+                  <GoHomeFill />
+                </button>
+                <button
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className="text-[20px] rounded-lg"
+                >
+                  {isSidebarOpen ? (
+                    <TbLayoutSidebarLeftCollapseFilled />
+                  ) : (
+                    <TbLayoutSidebarLeftExpandFilled />
+                  )}
+                </button>
+                {!isSidebarOpen && (
+                  <button
+                    onClick={() => router.push("/chat")}
+                    className="text-[20px] rounded-lg"
+                  >
+                    <IoMdOpen />
+                  </button>
                 )}
-              </button>
+              </div>
+              {isSidebarOpen && (
+                <div className="flex justify-end w-full">
+                  <button
+                    onClick={() => router.push("/chat")}
+                    className="text-[20px] rounded-lg"
+                  >
+                    <IoMdOpen />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           {/* Sidebar */}
