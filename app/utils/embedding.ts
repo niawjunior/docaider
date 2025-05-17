@@ -2,7 +2,7 @@ import { embed, embedMany } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { createClient } from "../utils/supabase/server";
 
-const embeddingModel = openai.embedding("text-embedding-3-large");
+const embeddingModel = openai.embedding("text-embedding-3-small");
 
 export const generateChunks = (input: string): string[] => {
   // Split Thai text using spaces and punctuation
