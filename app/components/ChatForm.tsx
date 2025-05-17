@@ -3,7 +3,6 @@
 import { Message, useChat } from "@ai-sdk/react";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { IoArrowDownSharp } from "react-icons/io5";
 import dayjs from "dayjs";
@@ -23,7 +22,6 @@ import ReactMarkdown from "react-markdown";
 
 import BarChart from "./BarChart";
 import PieChart from "./PieChart";
-import GlobalLoader from "./GlobalLoader";
 import CryptoSummary from "./CryptoSummary";
 import CryptoPriceOverview from "./CryptoPriceOverview";
 import { Button } from "@/components/ui/button";
@@ -62,10 +60,14 @@ const toolIcons = {
 interface ChatFormProps {
   chatId?: string;
   onChatUpdate?: () => void;
+  initialMessages?: Message[];
 }
 
-export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
-  const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
+export default function ChatForm({
+  chatId,
+  onChatUpdate,
+  initialMessages,
+}: ChatFormProps) {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCreateShareLoading, setIsCreateShareLoading] = useState(false);
@@ -82,12 +84,10 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
     }[]
   >([]);
   const [isToolModalOpen, setIsToolModalOpen] = useState(false);
-  const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
-  const [isReady, setIsReady] = useState(false);
   const { session } = useSupabaseSession();
   const { config, updateConfig } = useUserConfig(session?.user?.id || "");
   const { credit, updateCredit } = useCredit();
@@ -197,7 +197,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   } = useChat({
     api: "/api/chat",
     id: chatId,
-    initialMessages: currentMessages,
+    initialMessages: initialMessages,
     sendExtraMessageFields: true,
     body: {
       chatId,
@@ -240,7 +240,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
       }
     },
     onFinish: async () => {
-      setCurrentMessages(messages);
       onChatUpdate?.();
 
       setTimeout(() => {
@@ -253,7 +252,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   });
 
   const bottomRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -275,31 +273,15 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   }, [messages]);
 
   useEffect(() => {
-    if (chatId) {
-      fetch(`/api/chats/${chatId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          // The useChat hook doesn't provide a way to set initial messages directly,
-          // so we'll need to trigger a new message with the existing history
-          if (Array.isArray(data)) {
-            setCurrentMessages(data);
-            setMessages(data);
-            setIsLoading(false);
-            setTimeout(() => {
-              bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-            }, 100);
-          }
-        })
-        .catch((error) => console.error("Error loading chat history:", error))
-        .finally(() => {
-          setIsLoading(false);
-          setIsReady(true);
-          setTimeout(() => {
-            textareaRef.current?.focus();
-          }, 100);
-        });
+    if (initialMessages) {
+      setMessages(initialMessages);
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+
+        textareaRef.current?.focus();
+      }, 100);
     }
-  }, [chatId, setMessages, router]);
+  }, [initialMessages, setMessages]);
 
   useEffect(() => {
     const handleGlobalKeydown = (e: KeyboardEvent) => {
@@ -381,8 +363,6 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
         duration: 5000,
         description: "Failed to fetch your documents. Please try again.",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
   useEffect(() => {
@@ -535,8 +515,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   return (
     <>
       <div className="flex flex-col items-center gap-4 ">
-        {!isReady && <GlobalLoader />}
-        {messages.length === 0 && !isLoading && (
+        {messages.length === 0 && (
           <>
             <div className="md:mt-0 mt-[100px] ">
               <p className="text-2xl font-bold">Hello there!</p>

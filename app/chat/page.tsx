@@ -1,18 +1,12 @@
+"use client";
 import { redirect } from "next/navigation";
 import { createChat } from "../utils/aisdk/chat";
-import Layout from "../components/Layout";
-import GlobalLoader from "../components/GlobalLoader";
+import { useGlobalLoader } from "../components/GlobalLoaderProvider";
 
-export default async function Chat() {
-  const newChatId = await createChat();
-
-  if (!newChatId) {
-    return (
-      <Layout>
-        <GlobalLoader />
-      </Layout>
-    );
-  }
-
-  redirect(`/chat/${newChatId}`);
+export default function Chat() {
+  const { showLoader } = useGlobalLoader();
+  showLoader();
+  createChat().then((chatId) => {
+    redirect(`/chat/${chatId}`);
+  });
 }
