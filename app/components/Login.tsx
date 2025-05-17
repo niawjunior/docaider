@@ -3,6 +3,7 @@
 import { signInWithGoogle } from "../login/action";
 import { FcGoogle } from "react-icons/fc";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 const LoginComponent = () => {
   const searchParams = useSearchParams();
@@ -30,13 +31,13 @@ const LoginComponent = () => {
 
         <p className="text-sm text-zinc-400 mt-6 text-center">
           By signing in, you agree to our{" "}
-          <a href="#" className="text-orange-500 hover:underline">
+          <Link href="/terms" className="text-orange-500 hover:underline">
             Terms of Service
-          </a>{" "}
+          </Link>{" "}
           and{" "}
-          <a href="#" className="text-orange-500 hover:underline">
+          <Link href="/privacy" className="text-orange-500 hover:underline">
             Privacy Policy
-          </a>
+          </Link>
         </p>
       </div>
     </div>
