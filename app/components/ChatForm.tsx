@@ -17,6 +17,7 @@ import {
   FaHammer,
   FaQuestion,
   FaShare,
+  FaArrowUp,
 } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 
@@ -48,6 +49,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useShareUrl } from "../hooks/useShareUrl";
 import { Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 const toolIcons = {
   generateBarChart: <FaChartBar />,
@@ -802,8 +804,8 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                   <IoArrowDownSharp />
                 </button>
               )}
-              <div className="flex items-center gap-3 w-full">
-                <textarea
+              <div className="flex items-center gap-3 w-full relative">
+                <Textarea
                   value={input}
                   ref={textareaRef}
                   onChange={handleInputChange}
@@ -820,6 +822,14 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                   rows={1}
                   className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
                 />
+                <Button
+                  onClick={handleSubmit}
+                  variant="outline"
+                  disabled={status !== "ready" || !input.trim()}
+                  className="h-10 w-10 rounded-full border bg-white border-zinc-400 absolute right-2 bottom-2"
+                >
+                  <FaArrowUp />
+                </Button>
               </div>
             </form>
 
