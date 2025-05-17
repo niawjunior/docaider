@@ -48,7 +48,7 @@ export default function DocumentUpload({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !title) return;
+    if (!file || !title || !credit?.balance || credit?.balance < 1) return;
 
     setIsUploading(true);
     try {
