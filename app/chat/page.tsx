@@ -6,15 +6,13 @@ import GlobalLoader from "../components/GlobalLoader";
 export default async function Chat() {
   const newChatId = await createChat();
 
-  if (newChatId) {
-    redirect(`/chat/${newChatId}`);
-  }
-
-  return (
-    <>
+  if (!newChatId) {
+    return (
       <Layout>
         <GlobalLoader />
       </Layout>
-    </>
-  );
+    );
+  }
+
+  redirect(`/chat/${newChatId}`);
 }
