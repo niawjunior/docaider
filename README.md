@@ -1,4 +1,4 @@
-# AskVue
+# Docaider
 
 Describe your data in plain language. We’ll turn it into stunning, interactive charts – automatically.
 
