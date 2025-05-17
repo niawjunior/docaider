@@ -536,11 +536,11 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
         {!isReady && <GlobalLoader />}
         {messages.length === 0 && !isLoading && (
           <>
-            <div>
+            <div className="md:mt-0 mt-[100px] ">
               <p className="text-2xl font-bold">Hello there!</p>
               <p className="text-zinc-300">How can I help you today?</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl max-h-[calc(100dvh-350px)] overflow-y-auto scroll-hidden px-2">
               {suggestedPrompts.map((prompt, idx) => (
                 <button
                   key={idx}
@@ -557,7 +557,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
           </>
         )}
 
-        <div className="w-full bg-zinc-800 p-2 rounded-xl">
+        <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-[40px]">
           <div className="flex justify-end">
             {messages.length > 0 && (
               <TooltipProvider>
@@ -584,7 +584,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
             className={clsx(
               "overflow-auto scroll-hidden px-2",
 
-              messages.length > 0 && " py-4 h-[calc(100dvh-225px)]"
+              messages.length > 0 && " py-4 h-[calc(100dvh-250px)]"
             )}
           >
             {messages.map((message) => {

@@ -76,13 +76,13 @@ const SharePage = () => {
           <div className="text-center w-full gap-8 md:p-4 p-0 h-full flex flex-col items-center justify-center overflow-auto">
             <div className="rounded-xl  w-full min-w-[300px]">
               <div className="flex flex-col items-center gap-4 ">
-                <div className="w-full bg-zinc-800 p-2 rounded-xl">
+                <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-[40px]">
                   <div
                     ref={containerRef}
                     className={clsx(
                       "overflow-auto scroll-hidden px-2",
 
-                      messages.length > 0 && " py-4 h-[calc(100dvh-225px)]"
+                      messages.length > 0 && " py-4 h-[calc(100dvh-250px)]"
                     )}
                   >
                     {messages.map((message) => {

@@ -78,7 +78,7 @@ export default function Home() {
         >
           <motion.h1
             variants={itemVariants}
-            className="text-5xl md:text-6xl tracking-tight font-extrabold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
+            className="text-4xl md:mt-10 mt-6 md:text-6xl tracking-tight font-extrabold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
           >
             Transform Text and Documents into Insights
           </motion.h1>
