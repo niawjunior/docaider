@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import DocumentsList from "./DocumentList";
+import { formatBytes } from "../utils/formatBytes";
 
 interface DocumentUploadProps {
   onUpload: (file: File, title: string) => Promise<void>;
@@ -41,6 +42,8 @@ export default function DocumentUpload({
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [fileSizeError, setFileSizeError] = useState<string | null>(null);
+  const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,10 +98,35 @@ export default function DocumentUpload({
     }
   }, [file]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    if (selectedFile.size > MAX_FILE_SIZE) {
+      setFileSizeError(
+        `File size exceeds 3MB limit. Your file is ${formatBytes(
+          selectedFile.size
+        )}.`
+      );
+      setFile(null);
+      return;
+    }
+
+    setFileSizeError(null);
+    setFile(selectedFile);
+  };
   return (
     <Card className="mt-4">
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {fileSizeError && (
+            <div className="text-red-500 text-sm mb-2">{fileSizeError}</div>
+          )}
+          {file && (
+            <div className="text-sm text-gray-500 mb-2">
+              Selected file: {file.name} ({formatBytes(file.size)})
+            </div>
+          )}
           <div className="space-y-2">
             <Label>Document Title</Label>
             <Input
@@ -111,47 +139,15 @@ export default function DocumentUpload({
             />
           </div>
           <div className="space-y-2">
-            <Label>PDF File</Label>
+            <Label htmlFor="file">PDF File</Label>
             <div className="relative w-full">
-              <input
+              <Input
+                id="file"
                 type="file"
                 accept=".pdf"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    setFile(e.target.files[0]);
-                  }
-                }}
-                required
+                onChange={handleFileChange}
                 disabled={isUploading}
-                className="hidden"
-                ref={(input) => {
-                  if (input) {
-                    input.addEventListener("change", () => {
-                      if (input.files && input.files[0]) {
-                        setFile(input.files[0]);
-                      }
-                    });
-                  }
-                }}
               />
-              <Button
-                variant="outline"
-                className="w-full justify-start gap-2"
-                disabled={isUploading}
-                onClick={(e) => {
-                  const input = e.currentTarget
-                    .previousElementSibling as HTMLInputElement;
-                  if (input && !isUploading) {
-                    input.click();
-                  }
-                }}
-              >
-                {file ? (
-                  <span className="text-sm">{file.name}</span>
-                ) : (
-                  <span className="text-sm">Select PDF file</span>
-                )}
-              </Button>
             </div>
           </div>
           <Button
