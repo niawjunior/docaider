@@ -12,6 +12,7 @@ import {
 } from "react-icons/tb";
 import Sidebar from "./Sidebar";
 import { CreditProvider } from "../context/CreditContext";
+import { createChat } from "../utils/aisdk/chat";
 
 const ChatLayout = ({
   children,
@@ -44,6 +45,11 @@ const ChatLayout = ({
 
   const { session } = useSupabaseSession();
 
+  const createNewChat = async () => {
+    const id = await createChat();
+    router.push(`/chat/${id}`);
+  };
+
   return (
     <CreditProvider userId={session?.user.id || ""}>
       <>
@@ -69,7 +75,7 @@ const ChatLayout = ({
                 </button>
                 {!isSidebarOpen && (
                   <button
-                    onClick={() => router.push("/chat")}
+                    onClick={createNewChat}
                     className="text-[20px] rounded-lg"
                   >
                     <IoMdOpen />
@@ -79,7 +85,7 @@ const ChatLayout = ({
               {isSidebarOpen && (
                 <div className="flex justify-end w-full">
                   <button
-                    onClick={() => router.push("/chat")}
+                    onClick={createNewChat}
                     className="text-[20px] rounded-lg"
                   >
                     <IoMdOpen />

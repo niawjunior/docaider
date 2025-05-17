@@ -71,6 +71,7 @@ export async function POST(req: NextRequest) {
 
   const result = streamText({
     model: openai("gpt-4o-mini"),
+    maxTokens: 1000,
     toolChoice: creditData?.balance === 0 ? "none" : "auto",
     maxSteps: 1,
     tools,

@@ -2,9 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { IoIosAddCircle } from "react-icons/io";
 import clsx from "clsx";
-import { createChat } from "../utils/aisdk/chat";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import { useCredit } from "../context/CreditContext";
 
@@ -31,11 +29,6 @@ const Sidebar = ({
   const [loadingMore, setLoadingMore] = useState(false);
   const LIMIT = 20;
   const router = useRouter();
-
-  const createNewChat = async () => {
-    const id = await createChat();
-    router.push(`/chat/${id}`);
-  };
 
   const getMenuDisplayText = (chat: unknown) => {
     let text = "";
@@ -106,14 +99,9 @@ const Sidebar = ({
 
   return (
     <aside className="bg-zinc-900 p-4 flex flex-col gap-4 h-full w-72 min-w-72 border-r border-zinc-800 z-50">
-      <button
-        onClick={createNewChat}
-        className="bg-orange-600 flex items-center gap-2 hover:bg-orange-700 text-white rounded-lg py-2 mt-[50px] px-4 text-left font-medium"
-      >
-        <IoIosAddCircle /> New chat
-      </button>
-
-      <div className="text-sm text-zinc-400 font-semibold">Recents</div>
+      <div className="text-sm text-zinc-400 font-semibold mt-[50px]">
+        Recents
+      </div>
       <ul ref={sidebarRef} className="flex-1 overflow-y-auto scroll-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center py-4">
