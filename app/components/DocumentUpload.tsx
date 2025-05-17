@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import DocumentsList from "./DocumentList";
 import { formatBytes } from "../utils/formatBytes";
 import { useCredit } from "../context/CreditContext";
@@ -44,8 +43,8 @@ export default function DocumentUpload({
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [fileSizeError, setFileSizeError] = useState<string | null>(null);
-  const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
-  const { credit, updateCredit } = useCredit();
+  const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
+  const { credit } = useCredit();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,19 +55,10 @@ export default function DocumentUpload({
       await onUpload(file, title);
       setTitle("");
       setFile(null);
-      toast("Document uploaded successfully", {
-        duration: 5000,
-        description: "Your document has been uploaded successfully",
-      });
-      updateCredit((credit?.balance || 0) - 1);
 
       onClose();
     } catch (error) {
       console.error("Error uploading document:", error);
-      toast("Error uploading document", {
-        duration: 5000,
-        description: "Failed to upload document. Please try again.",
-      });
     } finally {
       setIsUploading(false);
     }
@@ -108,7 +98,7 @@ export default function DocumentUpload({
 
     if (selectedFile.size > MAX_FILE_SIZE) {
       setFileSizeError(
-        `File size exceeds 3MB limit. Your file is ${formatBytes(
+        `File size exceeds 1MB limit. Your file is ${formatBytes(
           selectedFile.size
         )}.`
       );

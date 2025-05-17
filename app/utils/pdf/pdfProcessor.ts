@@ -65,20 +65,35 @@ export async function processPDF(
     // Generate embeddings for each chunk
     const supabase = await createClient();
 
-    const embeddingsArray = await Promise.all(
+    const embeddings: number[][] = await Promise.all(
       filteredChunks.map(async (chunk) => {
-        const { embedding } = await embed({
-          model: openai.embedding("text-embedding-3-small"),
-          value: chunk.pageContent,
-        });
-        return embedding;
+        try {
+          const { embedding } = await embed({
+            model: openai.embedding("text-embedding-3-small"),
+            value: chunk.pageContent,
+          });
+          return embedding;
+        } catch (error) {
+          if (error instanceof Error) {
+            if (
+              error.message.includes("maximum context length") ||
+              error.message.includes("token")
+            ) {
+              throw new Error(
+                `Document chunk too long for embedding. Please try splitting the document into smaller sections. Maximum allowed tokens: 8192`
+              );
+            }
+            throw new Error(`Failed to generate embedding: ${error.message}`);
+          }
+          throw new Error("Failed to generate embedding");
+        }
       })
     );
 
     // Create chunks with embeddings
     const documentChunks: DocumentChunk[] = chunks.map((chunk, index) => ({
       chunk: chunk.pageContent,
-      embedding: embeddingsArray[index],
+      embedding: embeddings[index],
     }));
 
     // Store in Supabase

@@ -1,10 +1,12 @@
 "use client";
 
 import { Message, useChat } from "@ai-sdk/react";
+
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { IoArrowDownSharp } from "react-icons/io5";
+import dayjs from "dayjs";
 import DocumentUpload from "./DocumentUpload";
 import {
   FaBitcoin,
@@ -14,6 +16,7 @@ import {
   FaFilePdf,
   FaHammer,
   FaQuestion,
+  FaShare,
 } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 
@@ -43,6 +46,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import { useShareUrl } from "../hooks/useShareUrl";
+import { Loader2 } from "lucide-react";
 
 const toolIcons = {
   generateBarChart: <FaChartBar />,
@@ -60,7 +65,9 @@ interface ChatFormProps {
 export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
-  const [isToolModalOpen, setIsToolModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isCreateShareLoading, setIsCreateShareLoading] = useState(false);
+  const { shareData, error: shareError, refresh } = useShareUrl(chatId!);
   const [documents, setDocuments] = useState<
     {
       title: string;
@@ -72,6 +79,7 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
       document_name: string;
     }[]
   >([]);
+  const [isToolModalOpen, setIsToolModalOpen] = useState(false);
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -121,12 +129,27 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
     formData.append("title", title);
 
     try {
-      await fetch("/api/pdf", {
+      const response = await fetch("/api/pdf", {
         method: "POST",
         body: formData,
       });
-    } catch (error) {
-      console.error("Error uploading PDF:", error);
+      if (!response.ok) {
+        toast("Error uploading document", {
+          duration: 5000,
+          description: "Failed to upload document. Please try again.",
+        });
+      } else {
+        toast("Document uploaded successfully", {
+          duration: 5000,
+          description: "Document uploaded successfully.",
+        });
+        updateCredit((credit?.balance || 0) - 1);
+      }
+    } catch {
+      toast("Error uploading document", {
+        duration: 5000,
+        description: "Failed to upload document. Please try again.",
+      });
     }
   };
 
@@ -475,6 +498,38 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
       duration: 3000,
     });
   };
+
+  const handleShare = async () => {
+    try {
+      setIsCreateShareLoading(true);
+      const response = await fetch(`/api/share/${chatId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ chatId }),
+      });
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      toast.success("Share link created");
+      setIsShareModalOpen(true);
+      refresh();
+    } catch (error) {
+      console.error("Error sharing chat:", error);
+      toast.error("Failed to create share link");
+    } finally {
+      setIsCreateShareLoading(false);
+    }
+  };
+
+  const handleOpenShareModal = () => {
+    setIsShareModalOpen(true);
+  };
+
   return (
     <>
       <div className="flex flex-col items-center gap-4 ">
@@ -501,7 +556,29 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
             </div>
           </>
         )}
+
         <div className="w-full bg-zinc-800 p-2 rounded-xl">
+          <div className="flex justify-end">
+            {messages.length > 0 && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="ml-2"
+                      onClick={() => handleOpenShareModal()}
+                    >
+                      <FaShare className="text-lg" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Share your chat</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
           <div
             ref={containerRef}
             className={clsx(
@@ -804,6 +881,76 @@ export default function ChatForm({ chatId, onChatUpdate }: ChatFormProps) {
                     </div>
                   ))}
                 </ScrollArea>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Share public link to chat</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 flex flex-col items-center">
+                  {shareData?.shareUrl ? (
+                    <>
+                      <p className="text-sm self-start text-muted-foreground">
+                        {dayjs(shareData.createdAt).format(
+                          "DD/MM/YYYY HH:mm:ss"
+                        )}
+                      </p>
+                      <div className="flex items-center gap-2 justify-between w-full">
+                        <input
+                          type="text"
+                          value={shareData.shareUrl}
+                          readOnly
+                          className="flex-1 bg-zinc-800 text-white px-4 py-2 rounded-lg"
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            navigator.clipboard.writeText(shareData.shareUrl);
+                            toast.success("Link copied to clipboard");
+                          }}
+                        >
+                          Copy Link
+                        </Button>
+                      </div>
+                      <Button
+                        disabled={isCreateShareLoading}
+                        className="w-full"
+                        onClick={handleShare}
+                      >
+                        {isCreateShareLoading
+                          ? "Updating..."
+                          : "Update Share Link"}
+                        {isCreateShareLoading && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                      </Button>
+                      <p className="text-sm text-gray-400">
+                        Share this link with anyone to let them view your chat
+                        in read-only mode.
+                      </p>
+                    </>
+                  ) : (
+                    <Button
+                      disabled={isCreateShareLoading}
+                      className="w-full"
+                      onClick={handleShare}
+                    >
+                      {isCreateShareLoading
+                        ? "Generating..."
+                        : "Generate Share Link"}
+                      {isCreateShareLoading && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                    </Button>
+                  )}
+                  {shareError && (
+                    <p className="text-sm text-red-400 mt-2">
+                      {shareError.message}
+                    </p>
+                  )}
+                </div>
               </DialogContent>
             </Dialog>
           </div>
