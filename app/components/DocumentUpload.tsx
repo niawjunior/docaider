@@ -144,6 +144,7 @@ export default function DocumentUpload({
                 onChange={handleFileChange}
                 disabled={isUploading}
               />
+              <p className="text-xs text-gray-500">Maximum file size: 1MB</p>
             </div>
           </div>
           <Button
