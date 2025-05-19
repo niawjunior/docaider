@@ -36,7 +36,7 @@ import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import useUserConfig, { UserConfig } from "../hooks/useUserConfig";
 import useSupabaseSession from "../hooks/useSupabaseSession";
-import { useCredit } from "../context/CreditContext";
+import { useCredit } from "../hooks/useCredit";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import {
   Tooltip,
@@ -48,6 +48,7 @@ import { Badge } from "@/components/ui/badge";
 import { useShareUrl } from "../hooks/useShareUrl";
 import { Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { useQueryClient } from "@tanstack/react-query";
 
 const toolIcons = {
   generateBarChart: <FaChartBar />,
@@ -59,19 +60,16 @@ const toolIcons = {
 
 interface ChatFormProps {
   chatId?: string;
-  onChatUpdate?: () => void;
   initialMessages?: Message[];
 }
 
-export default function ChatForm({
-  chatId,
-  onChatUpdate,
-  initialMessages,
-}: ChatFormProps) {
+export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCreateShareLoading, setIsCreateShareLoading] = useState(false);
   const { shareData, error: shareError, refresh } = useShareUrl(chatId!);
+  const queryClient = useQueryClient();
+
   const [documents, setDocuments] = useState<
     {
       title: string;
@@ -90,7 +88,7 @@ export default function ChatForm({
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
   const { session } = useSupabaseSession();
   const { config, updateConfig } = useUserConfig(session?.user?.id || "");
-  const { credit, updateCredit } = useCredit();
+  const { credit, updateCredit } = useCredit(session?.user?.id || "");
 
   const tools = [
     {
@@ -240,7 +238,7 @@ export default function ChatForm({
       }
     },
     onFinish: async () => {
-      onChatUpdate?.();
+      await queryClient.invalidateQueries({ queryKey: ["chats"] });
 
       setTimeout(() => {
         textareaRef.current?.focus();

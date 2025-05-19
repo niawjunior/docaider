@@ -1,33 +1,24 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import useSupabaseSession from "../hooks/useSupabaseSession";
-import { useCredit } from "../context/CreditContext";
+import { useCredit } from "../hooks/useCredit";
+import { useChats } from "../hooks/useChats";
 
 interface SidebarProps {
   chatId?: string;
   isLoading?: boolean;
-  registerRefresh?: (cb: () => void) => void;
-  onFinished?: () => void;
 }
 
-const Sidebar = ({
-  chatId,
-  isLoading = false,
-  registerRefresh,
-  onFinished,
-}: SidebarProps) => {
+const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
   const { session } = useSupabaseSession();
-  const { credit, loading: creditLoading } = useCredit();
+  const { credit, isLoading: creditLoading } = useCredit(
+    session?.user.id || ""
+  );
   // const { userConfig } = useUserConfig(session?.user.id || "");
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
   const sidebarRef = useRef<HTMLUListElement>(null);
-  const [chats, setChats] = useState<unknown[]>([]);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const LIMIT = 20;
   const router = useRouter();
 
   const getMenuDisplayText = (chat: unknown) => {
@@ -40,45 +31,9 @@ const Sidebar = ({
     return text || "Untitled";
   };
 
-  const fetchChats = useCallback(
-    async (customOffset?: number) => {
-      const fetchOffset = customOffset ?? offset;
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useChats();
 
-      setLoadingMore(true);
-      const res = await fetch(
-        `/api/chats?limit=${LIMIT}&offset=${fetchOffset}`
-      );
-      const data = await res.json();
-
-      if (data.length < LIMIT) setHasMore(false);
-
-      setChats((prev) => {
-        const existingIds = new Set(prev.map((c: any) => c.id));
-        const newChats = data.filter((c: any) => !existingIds.has(c.id));
-        return [...prev, ...newChats];
-      });
-      setOffset(fetchOffset + LIMIT);
-      setLoadingMore(false);
-      onFinished?.();
-    },
-    [offset, LIMIT, onFinished]
-  );
-
-  useEffect(() => {
-    fetchChats();
-  }, []);
-
-  useEffect(() => {
-    if (registerRefresh) {
-      registerRefresh(() => {
-        setOffset(0);
-        setHasMore(true);
-        setLoadingMore(false);
-
-        fetchChats(0);
-      });
-    }
-  }, [registerRefresh, fetchChats]);
+  const chats = data?.pages.flatMap((page) => page.data) ?? [];
 
   useEffect(() => {
     const sidebar = sidebarRef.current;
@@ -89,13 +44,13 @@ const Sidebar = ({
         sidebar.scrollTop + sidebar.clientHeight >=
         sidebar.scrollHeight - 50
       ) {
-        if (hasMore) fetchChats();
+        if (hasNextPage && !isFetchingNextPage) fetchNextPage();
       }
     };
 
     sidebar.addEventListener("scroll", handleScroll);
     return () => sidebar.removeEventListener("scroll", handleScroll);
-  }, [hasMore, fetchChats]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <aside className="bg-zinc-900 p-4 flex flex-col gap-4 h-full w-72 min-w-72 border-r border-zinc-800 z-50">
@@ -103,7 +58,7 @@ const Sidebar = ({
         Recents
       </div>
       <ul ref={sidebarRef} className="flex-1 overflow-y-auto scroll-hidden">
-        {isLoading ? (
+        {isLoading || creditLoading ? (
           <div className="flex items-center justify-center py-4">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
           </div>
@@ -124,14 +79,9 @@ const Sidebar = ({
             </li>
           ))
         )}
-        {loadingMore && (
+        {isFetchingNextPage && (
           <div className="py-2 text-xs text-center text-zinc-500 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-          </div>
-        )}
-        {!hasMore && (
-          <div className="text-center text-xs text-zinc-400 py-4">
-            No more chats
           </div>
         )}
       </ul>

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Prompt } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "./components/theme-provider";
+import { ThemeProvider } from "./providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { GlobalLoaderProvider } from "./components/GlobalLoaderProvider";
+import { QueryProvider } from "./providers/QueryProvider";
 const prompt = Prompt({
   weight: ["400", "500", "600", "700", "800", "900"],
   subsets: ["thai"],
@@ -80,17 +80,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${prompt.className} antialiased bg-zinc-900`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <GlobalLoaderProvider>
+        <QueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
             {children}
             <Toaster />
-          </GlobalLoaderProvider>
-        </ThemeProvider>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );

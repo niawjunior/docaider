@@ -8,7 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import DocumentsList from "./DocumentList";
 import { formatBytes } from "../utils/formatBytes";
-import { useCredit } from "../context/CreditContext";
+import { useCredit } from "../hooks/useCredit";
+import useSupabaseSession from "../hooks/useSupabaseSession";
 
 interface DocumentUploadProps {
   onUpload: (file: File, title: string) => Promise<void>;
@@ -44,7 +45,8 @@ export default function DocumentUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [fileSizeError, setFileSizeError] = useState<string | null>(null);
   const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
-  const { credit } = useCredit();
+  const { session } = useSupabaseSession();
+  const { credit } = useCredit(session?.user?.id || "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
