@@ -9,12 +9,9 @@ export interface DocumentChunk {
   chunk: string;
   embedding: number[];
 }
-import wasm from "tiktoken/lite/tiktoken_bg.wasm?module";
-import model from "tiktoken/encoders/cl100k_base.json";
-import { init, Tiktoken } from "tiktoken/lite/init";
-export const config = { runtime: "edge" };
 
-await init((imports) => WebAssembly.instantiate(wasm, imports));
+import { Tiktoken } from "js-tiktoken/lite";
+import o200k_base from "js-tiktoken/ranks/o200k_base";
 
 async function splitUntilTokenLimit(
   text: string,
@@ -93,12 +90,7 @@ export async function processPDF(
     );
 
     // Initialize the lite tokenizer
-    await init((imports) => WebAssembly.instantiate(wasm, imports));
-    const encoder = new Tiktoken(
-      model.bpe_ranks,
-      model.special_tokens,
-      model.pat_str
-    );
+    const encoder = new Tiktoken(o200k_base);
 
     // Generate embeddings for each chunk
     const supabase = await createClient();
@@ -114,9 +106,6 @@ export async function processPDF(
       );
       validChunks.push(...splitChunks);
     }
-
-    // Free WASM memory
-    encoder.free();
 
     // Generate embeddings
     const embeddings: number[][] = await Promise.all(
