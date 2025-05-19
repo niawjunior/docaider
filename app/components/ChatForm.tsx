@@ -141,7 +141,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       } else {
         toast("Document uploaded successfully", {
           duration: 5000,
-          description: "Document uploaded successfully.",
+          description: "You have used 1 credit.",
         });
         updateCredit((credit?.balance || 0) - 1);
       }
