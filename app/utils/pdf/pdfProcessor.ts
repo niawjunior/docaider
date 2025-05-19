@@ -9,6 +9,35 @@ export interface DocumentChunk {
   chunk: string;
   embedding: number[];
 }
+import wasm from "tiktoken/lite/tiktoken_bg.wasm?module";
+import model from "tiktoken/encoders/cl100k_base.json";
+import { init, Tiktoken } from "tiktoken/lite/init";
+
+await init((imports) => WebAssembly.instantiate(wasm, imports));
+
+async function splitUntilTokenLimit(
+  text: string,
+  encoder: Tiktoken,
+  tokenLimit: number,
+  maxDepth = 3
+): Promise<string[]> {
+  const tokens = encoder.encode(text);
+  if (tokens.length <= tokenLimit) return [text];
+
+  if (maxDepth === 0) {
+    console.warn("Max split depth reached, skipping oversized chunk.");
+    return [];
+  }
+
+  const half = Math.floor(text.length / 2);
+  const left = text.slice(0, half);
+  const right = text.slice(half);
+
+  return [
+    ...(await splitUntilTokenLimit(left, encoder, tokenLimit, maxDepth - 1)),
+    ...(await splitUntilTokenLimit(right, encoder, tokenLimit, maxDepth - 1)),
+  ];
+}
 
 export async function processPDF(
   file: File,
@@ -51,8 +80,8 @@ export async function processPDF(
       });
     // Split text into chunks with better context
     const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 1000, // Maximum characters per chunk
-      chunkOverlap: 100, // Overlap between chunks to maintain context
+      chunkSize: 500, // Maximum characters per chunk
+      chunkOverlap: 50, // Overlap between chunks to maintain context
       separators: ["\n\n", "\n", "。", "。", "，", "，"], // Try to split at paragraphs, then lines, then Thai punctuation
     });
 
@@ -62,63 +91,63 @@ export async function processPDF(
       (chunk) => chunk.pageContent.trim().length > 0
     );
 
+    // Initialize the lite tokenizer
+    await init((imports) => WebAssembly.instantiate(wasm, imports));
+    const encoder = new Tiktoken(
+      model.bpe_ranks,
+      model.special_tokens,
+      model.pat_str
+    );
+
     // Generate embeddings for each chunk
     const supabase = await createClient();
 
+    // Filter chunks that fit within the 8192 token limit
+    const validChunks: string[] = [];
+
+    for (const chunk of filteredChunks) {
+      const splitChunks = await splitUntilTokenLimit(
+        chunk.pageContent,
+        encoder,
+        8192
+      );
+      validChunks.push(...splitChunks);
+    }
+
+    // Free WASM memory
+    encoder.free();
+
+    // Generate embeddings
     const embeddings: number[][] = await Promise.all(
-      filteredChunks.map(async (chunk) => {
-        try {
-          const { embedding } = await embed({
-            model: openai.embedding("text-embedding-3-small"),
-            value: chunk.pageContent,
-          });
-          return embedding;
-        } catch (error) {
-          if (error instanceof Error) {
-            if (
-              error.message.includes("maximum context length") ||
-              error.message.includes("token")
-            ) {
-              throw new Error(
-                `Document chunk too long for embedding. Please try splitting the document into smaller sections. Maximum allowed tokens: 8192`
-              );
-            }
-            throw new Error(`Failed to generate embedding: ${error.message}`);
-          }
-          throw new Error("Failed to generate embedding");
-        }
+      validChunks.map(async (chunkText) => {
+        const { embedding } = await embed({
+          model: openai.embedding("text-embedding-3-small"),
+          value: chunkText,
+        });
+        return embedding;
       })
     );
 
     // Create chunks with embeddings
-    const documentChunks: DocumentChunk[] = chunks.map((chunk, index) => ({
-      chunk: chunk.pageContent,
+    const documentChunks: DocumentChunk[] = validChunks.map((chunk, index) => ({
+      chunk,
       embedding: embeddings[index],
     }));
 
-    // Store in Supabase
     for (let i = 0; i < documentChunks.length; i++) {
-      const data = {
-        title,
-        chunk: documentChunks[i].chunk,
-        embedding: documentChunks[i].embedding,
-        user_id: userId,
-        document_id: documentId,
-        document_name: fileName,
-        active: true,
-      };
-
-      // Convert to proper JSON format
-      const chunkData = {
-        ...data,
-        chunk: data.chunk.replace(/\u0000/g, ""), // Remove null characters before storing
-      };
       const { error } = await supabase
         .from("documents")
-        .upsert(chunkData)
+        .upsert({
+          title,
+          chunk: documentChunks[i].chunk.replace(/\u0000/g, ""),
+          embedding: documentChunks[i].embedding,
+          user_id: userId,
+          document_id: documentId,
+          document_name: fileName,
+          active: true,
+        })
         .select()
         .single();
-
       if (error) {
         console.error("Error inserting into Supabase:", error);
         throw new Error(`Failed to insert chunk ${i + 1}: ${error.message}`);

@@ -334,14 +334,25 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
         .from("documents")
         .select("*")
         .eq("user_id", user.user.id);
+
       if (error) throw error;
+
+      // Step 2: Group by document_id
+      const grouped = new Map<string, typeof documents>();
+
+      documents.forEach((doc) => {
+        if (!grouped.has(doc.document_id)) {
+          grouped.set(doc.document_id, doc);
+        }
+      });
 
       // Get public URLs for each file
       const documentsWithUrls = await Promise.all(
-        documents.map(async (doc) => {
+        Array.from(grouped.values()).map(async (doc: any) => {
           const { data: publicUrl } = await supabase.storage
             .from("documents")
             .getPublicUrl(`user_${user.user.id}/${doc.document_name}`);
+
           return {
             title: doc.title,
             created_at: doc.created_at || new Date().toISOString(),
@@ -377,25 +388,28 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     try {
       const supabase = await createClient();
       const { data: user } = await supabase.auth.getUser();
-
       if (!user?.user?.id) return;
-      // // Delete the file from storage
-      const { error } = await supabase.storage
+
+      // 1. Delete the file from Supabase storage
+      const { error: storageError } = await supabase.storage
         .from("documents")
         .remove([`user_${user.user.id}/${doc.document_name}`]);
 
-      if (error) throw error;
+      if (storageError) throw storageError;
 
-      // // // Delete the document from the database
+      // 2. Delete all chunks with the same document_id
       const { error: dbError } = await supabase
         .from("documents")
         .delete()
-        .eq("id", doc.id);
+        .eq("document_id", doc.document_id);
 
       if (dbError) throw dbError;
 
-      // // Remove the document from the state
-      setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+      // 3. Remove the document from local state (filter by document_id)
+      setDocuments((prev) =>
+        prev.filter((d) => d.document_id !== doc.document_id)
+      );
+
       toast("Document deleted successfully", {
         duration: 3000,
       });
