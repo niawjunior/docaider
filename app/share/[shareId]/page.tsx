@@ -75,7 +75,7 @@ const SharePage = () => {
             </p>
           </div>
         </div>
-        <div className="text-center w-full gap-8 md:p-4 p-0 h-full flex flex-col items-center justify-center overflow-auto">
+        <div className="text-center w-full gap-8 md:p-4 p-0 h-full flex flex-col items-center">
           <div className="rounded-xl  w-full min-w-[300px]">
             <div className="flex flex-col items-center gap-4 ">
               <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-[40px]">

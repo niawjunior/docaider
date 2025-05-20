@@ -542,7 +542,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
 
   return (
     <>
-      <div className="flex flex-col items-center gap-4 ">
+      <div className="flex flex-col items-center gap-4 md:h-[calc(100dvh-70px)] justify-center h-[calc(100dvh-30px)] overflow-y-auto scroll-hidden ">
         {messages.length === 0 && (
           <>
             <div className="md:mt-0 mt-[100px] ">
@@ -751,7 +751,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
           </div>
 
           <div className="flex flex-col">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center pt-2">
               <div className="flex gap-2">
                 <TooltipProvider>
                   <Tooltip>
