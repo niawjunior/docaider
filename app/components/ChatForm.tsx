@@ -7,6 +7,9 @@ import clsx from "clsx";
 import { IoArrowDownSharp } from "react-icons/io5";
 import dayjs from "dayjs";
 import DocumentUpload from "./DocumentUpload";
+import "highlight.js/styles/github-dark.css"; // or choose another theme
+import rehypeHighlight from "rehype-highlight";
+
 import {
   FaBitcoin,
   FaChartBar,
@@ -676,6 +679,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                             return result ? (
                               <div>
                                 <ReactMarkdown
+                                  rehypePlugins={[rehypeHighlight]}
                                   components={{
                                     h1: ({ children }) => (
                                       <h1 className="text-xl font-bold mb-4 text-white">
@@ -723,6 +727,22 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                         {children}
                                       </em>
                                     ),
+                                    // ✅ Inline code
+                                    code: ({ className, children }) => {
+                                      const isBlock =
+                                        className?.includes("language-");
+                                      return isBlock ? (
+                                        <pre
+                                          className={`rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm ${className}`}
+                                        >
+                                          <code>{children}</code>
+                                        </pre>
+                                      ) : (
+                                        <code className="bg-zinc-800 text-orange-400 rounded px-1 py-0.5 text-sm font-mono">
+                                          {children}
+                                        </code>
+                                      );
+                                    },
                                   }}
                                 >
                                   {result}
