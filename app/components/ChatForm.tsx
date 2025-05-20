@@ -107,7 +107,25 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
   const { session } = useSupabaseSession();
   const { config, updateConfig } = useUserConfig(session?.user?.id || "");
-  const { credit, updateCredit } = useCredit(session?.user?.id || "");
+  const { credit } = useCredit(session?.user?.id || "");
+
+  const toolsConfig = {
+    generateBarChart: {
+      creditCost: 1,
+    },
+    generatePieChart: {
+      creditCost: 1,
+    },
+    getCryptoPrice: {
+      creditCost: 1,
+    },
+    getCryptoMarketSummary: {
+      creditCost: 1,
+    },
+    askQuestion: {
+      creditCost: 2,
+    },
+  };
 
   const tools = [
     {
@@ -162,7 +180,11 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
           duration: 5000,
           description: "You have used 1 credit.",
         });
-        updateCredit((credit?.balance || 0) - 1);
+
+        // refresh credit
+        await queryClient.invalidateQueries({
+          queryKey: ["credit", session?.user?.id],
+        });
       }
     } catch {
       toast("Error uploading document", {
@@ -241,18 +263,26 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       //   );
       //   return;
       // }
+    },
+    onFinish: async (response) => {
+      const totalCreditCost = response.toolInvocations?.reduce(
+        (total, toolName) => {
+          return (
+            total +
+            (toolsConfig[toolName.toolName as keyof typeof toolsConfig]
+              ?.creditCost || 0)
+          );
+        },
+        0
+      );
 
-      // refresh credit
+      await queryClient.invalidateQueries({ queryKey: ["chats"] });
       await queryClient.invalidateQueries({
         queryKey: ["credit", session?.user?.id],
       });
-
-      toast.success(
-        `Used ${tool.creditCost} credits. Remaining: ${credit?.balance || 0}`
-      );
-    },
-    onFinish: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["chats"] });
+      if (totalCreditCost && totalCreditCost > 0) {
+        toast.success(`Used ${totalCreditCost} credits.`);
+      }
 
       setTimeout(() => {
         textareaRef.current?.focus();

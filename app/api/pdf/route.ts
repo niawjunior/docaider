@@ -5,6 +5,17 @@ import { createClient } from "@/app/utils/supabase/server";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+
+  if (!user) {
+    console.error("User not found");
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const formData = await req.formData();
     const file = formData.get("file");
@@ -23,10 +34,24 @@ export async function POST(req: NextRequest) {
     const nodeFile = new File([arrayBuffer], `${title}.pdf`, {
       type: file.type,
     });
-    const { data } = await supabase.auth.getUser();
-    const userId = data.user?.id;
+    const userId = user?.id;
 
     const result = await uploadPDF(nodeFile, title, userId);
+
+    // Get user credit
+    const { data: creditData } = await supabase
+      .from("credits")
+      .select("balance")
+      .eq("user_id", user.id)
+      .single();
+
+    // update credit
+    await supabase
+      .from("credits")
+      .update({
+        balance: creditData?.balance - 1,
+      })
+      .eq("user_id", user.id);
 
     return new Response(JSON.stringify({ success: true, message: result }), {
       status: 200,

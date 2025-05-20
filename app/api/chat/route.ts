@@ -59,7 +59,6 @@ export async function POST(req: NextRequest) {
     .select("document_id, document_name")
     .eq("user_id", user.id);
 
-  const isRagEnabled = configData?.ask_question_enabled ?? false;
   // Get user credit
   const { data: creditData } = await supabase
     .from("credits")
@@ -84,7 +83,9 @@ export async function POST(req: NextRequest) {
           ...(configData?.get_crypto_market_summary_enabled && {
             getCryptoMarketSummary: getCryptoMarketSummaryTool,
           }),
-          ...(isRagEnabled && { askQuestion: askQuestionTool }),
+          ...(configData?.ask_question_enabled && {
+            askQuestion: askQuestionTool,
+          }),
         };
   console.log("creditData?.balance", creditData?.balance);
   const result = streamText({
@@ -95,6 +96,19 @@ export async function POST(req: NextRequest) {
     system: `
     You are **DocAider** — a smart, polite, and friendly AI assistant that transforms natural language into clear, visual insights.
     
+    ‼️ IMPORTANT:
+    If the user asks about a document and:
+    - askQuestion is available in your tools,
+    - RAG is enabled,
+    - Documents are uploaded,
+    You MUST call the *askQuestion* tool. Do NOT fall back to generic text like "please enable document tools.”
+
+    If you are not able to call the tool, respond with the reason:
+    - "Document tools are disabled"
+    - "No documents uploaded"
+    - "You don't have enough credit"
+
+    - Uploaded Documents: ${documentsData?.length || 0}
     🔧 **Current Tool Availability**
     - Credit: ${creditData?.balance}
     - ${
@@ -102,20 +116,44 @@ export async function POST(req: NextRequest) {
         ? "Your credit balance is 0 so you can't use any tools. Please inform the user to add credits to use tools."
         : "You can use tools."
     }
-    - RAG: ${isRagEnabled ? "✅ Enabled" : "❌ Disabled"}
-    - Uploaded Documents: ${documentsData?.length || 0}
+
+    ‼️ Do not fallback to "please enable document tools." Instead, use the *askQuestion* tool if it's available.
+
+ - Ask Question: ${
+   configData?.ask_question_enabled
+     ? documentsData?.length
+       ? creditData?.balance >= toolsConfig.askQuestion.creditCost
+         ? "✅ Enabled"
+         : "❌ Not enough credit"
+       : "❌ No documents uploaded"
+     : "❌ Disabled"
+ }
     - Bar Chart: ${
-      configData?.generate_bar_chart_enabled ? "✅ Enabled" : "❌ Disabled"
+      configData?.generate_bar_chart_enabled
+        ? creditData?.balance >= toolsConfig.generateBarChart.creditCost
+          ? "✅ Enabled"
+          : "❌ Disabled or not enough credits"
+        : "❌ Disabled"
     }
     - Pie Chart: ${
-      configData?.generate_pie_chart_enabled ? "✅ Enabled" : "❌ Disabled"
+      configData?.generate_pie_chart_enabled
+        ? creditData?.balance >= toolsConfig.generatePieChart.creditCost
+          ? "✅ Enabled"
+          : "❌ Disabled or not enough credits"
+        : "❌ Disabled"
     }
     - Crypto Price: ${
-      configData?.get_crypto_price_enabled ? "✅ Enabled" : "❌ Disabled"
+      configData?.get_crypto_price_enabled
+        ? creditData?.balance >= toolsConfig.getCryptoPrice.creditCost
+          ? "✅ Enabled"
+          : "❌ Disabled or not enough credits"
+        : "❌ Disabled"
     }
     - Crypto Market Summary: ${
       configData?.get_crypto_market_summary_enabled
-        ? "✅ Enabled"
+        ? creditData?.balance >= toolsConfig.getCryptoMarketSummary.creditCost
+          ? "✅ Enabled"
+          : "❌ Disabled or not enough credits"
         : "❌ Disabled"
     }
     
@@ -137,10 +175,10 @@ export async function POST(req: NextRequest) {
     - Avoid raw code, markdown, JSON, or technical details.
     - Never mention internal libraries or frameworks (e.g., JavaScript, ECharts).
     
-    📄 **RAG Handling**
+    📄 **Document Handling**
     ${
       documentsData?.length
-        ? isRagEnabled
+        ? configData?.ask_question_enabled
           ? `- Documents available: ${documentsData
               .map((doc) => doc.document_name)
               .join(
@@ -151,7 +189,7 @@ export async function POST(req: NextRequest) {
               .join(
                 ", "
               )}), but RAG is disabled. Inform the user to enable RAG to proceed.`
-        : isRagEnabled
+        : configData?.ask_question_enabled
         ? "- RAG is enabled, but no documents are uploaded. Ask the user to upload documents first."
         : "- RAG is disabled and no documents are uploaded. Ask the user to upload documents and enable RAG to use document Q&A."
     }
