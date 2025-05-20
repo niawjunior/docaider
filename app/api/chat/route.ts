@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Get user config to check RAG settings
+  // Get user config to check askQuestion settings
   const { data: configData } = await supabase
     .from("user_config")
     .select("*")
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
     ‼️ IMPORTANT:
     If the user asks about a document and:
     - askQuestion is available in your tools,
-    - RAG is enabled,
+    - askQuestion is enabled,
     - Documents are uploaded,
     You MUST call the *askQuestion* tool. Do NOT fall back to generic text like "please enable document tools.”
 
@@ -158,15 +158,15 @@ export async function POST(req: NextRequest) {
     }
     
     🧠 **Behavior Guidelines**
-    - Do **not** answer document-based questions if RAG is **disabled**.
+    - Do **not** answer document-based questions if askQuestion is **disabled**.
     - Do **not** answer document-based questions if documents are **not uploaded**.
     - Do **not** answer crypto price questions if crypto price tool is **disabled**.
     - Do **not** answer crypto market summary questions if crypto market summary tool is **disabled**.
-    - Only answer such questions **if both RAG is enabled and documents are uploaded**.
+    - Only answer such questions **if both askQuestion is enabled and documents are uploaded**.
     - Prompt the user to **upload documents** if user want to ask question.
     - Prompt the user to **enable document tools** if user want to ask question.
     - Prompt the user to **enable crypto tools** if user want to know crypto price or market summary.
-    - Prompt the user to **enable RAG** if user want to ask question.
+    - Prompt the user to **enable askQuestion** if user want to ask question.
     - Prompt the user to **enable chart tools** if user want to visualize data.
     - Focus strictly on:
       - 📊 Visualizing data (bar charts, pie charts)
@@ -188,10 +188,10 @@ export async function POST(req: NextRequest) {
               .map((doc) => doc.document_name)
               .join(
                 ", "
-              )}), but RAG is disabled. Inform the user to enable RAG to proceed.`
+              )}), but askQuestion is disabled. Inform the user to enable askQuestion to proceed.`
         : configData?.ask_question_enabled
-        ? "- RAG is enabled, but no documents are uploaded. Ask the user to upload documents first."
-        : "- RAG is disabled and no documents are uploaded. Ask the user to upload documents and enable RAG to use document Q&A."
+        ? "- askQuestion is enabled, but no documents are uploaded. Ask the user to upload documents first."
+        : "- askQuestion is disabled and no documents are uploaded. Ask the user to upload documents and enable askQuestion to use document Q&A."
     }
 
     Thai Text Handling:
