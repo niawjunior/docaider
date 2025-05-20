@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import useSupabaseSession from "./hooks/useSupabaseSession";
 import Link from "next/link";
 import { signOut } from "./login/action";
+import { Button } from "@/components/ui/button";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -40,24 +41,24 @@ export default function Home() {
         <div className="flex gap-4 text-sm text-gray-300">
           {session ? (
             <>
-              <Link href="/chat" className="hover:text-white cursor-pointer">
+              <Button variant="ghost" onClick={() => router.push("/chat")}>
                 Dashboard
-              </Link>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() =>
                   signOut().then(() => {
                     window.location.reload();
                   })
                 }
-                className="hover:text-white"
               >
                 Sign Out
-              </button>
+              </Button>
             </>
           ) : (
-            <Link href="/login" className="hover:text-white">
+            <Button variant="ghost" onClick={() => router.push("/login")}>
               Sign In
-            </Link>
+            </Button>
           )}
         </div>
       </div>

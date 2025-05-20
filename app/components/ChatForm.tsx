@@ -211,31 +211,26 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
         return;
       }
 
-      // Check if user has credits data and enough credits
-      if (
-        !credit ||
-        credit.balance === undefined ||
-        credit.balance < tool.creditCost
-      ) {
-        toast.error(
-          `Not enough credits. You need ${tool.creditCost} credits for this action.`
-        );
-        return;
-      }
+      // // Check if user has credits data and enough credits
+      // if (
+      //   !credit ||
+      //   credit.balance === undefined ||
+      //   credit.balance < tool.creditCost
+      // ) {
+      //   toast.error(
+      //     `Not enough credits. You need ${tool.creditCost} credits for this action.`
+      //   );
+      //   return;
+      // }
 
-      // Deduct credits
-      try {
-        await updateCredit(credit.balance - tool.creditCost);
-        toast.success(
-          `Used ${tool.creditCost} credits. Remaining: ${
-            credit.balance - tool.creditCost
-          }`
-        );
-      } catch (error) {
-        console.error("Error updating credits:", error);
-        toast.error("Failed to update credits. Please try again.");
-        return;
-      }
+      // refresh credit
+      await queryClient.invalidateQueries({
+        queryKey: ["credit", session?.user?.id],
+      });
+
+      toast.success(
+        `Used ${tool.creditCost} credits. Remaining: ${credit?.balance || 0}`
+      );
     },
     onFinish: async () => {
       await queryClient.invalidateQueries({ queryKey: ["chats"] });

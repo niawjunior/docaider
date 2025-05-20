@@ -16,6 +16,24 @@ export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { messages, chatId } = await req.json();
 
+  const toolsConfig = {
+    generateBarChart: {
+      creditCost: 1,
+    },
+    generatePieChart: {
+      creditCost: 1,
+    },
+    getCryptoPrice: {
+      creditCost: 1,
+    },
+    getCryptoMarketSummary: {
+      creditCost: 1,
+    },
+    askQuestion: {
+      creditCost: 2,
+    },
+  };
+
   // Get the user from the request
 
   const { data } = await supabase.auth.getUser();
@@ -68,11 +86,11 @@ export async function POST(req: NextRequest) {
           }),
           ...(isRagEnabled && { askQuestion: askQuestionTool }),
         };
-
+  console.log("creditData?.balance", creditData?.balance);
   const result = streamText({
     model: openai("gpt-4o-mini"),
     maxTokens: 1000,
-    toolChoice: creditData?.balance === 0 ? "none" : "auto",
+    toolChoice: "auto",
     maxSteps: 1,
     tools,
     system: `
@@ -174,6 +192,31 @@ export async function POST(req: NextRequest) {
     `,
 
     messages,
+    onStepFinish: async (response) => {
+      const tools = response.toolResults?.filter(
+        (item) => item.type === "tool-result"
+      );
+      const toolNames = tools?.map((item) => item.toolName);
+
+      const totalCreditCost = toolNames?.reduce((total, toolName) => {
+        return (
+          total +
+          (toolsConfig[toolName as keyof typeof toolsConfig]?.creditCost || 0)
+        );
+      }, 0);
+
+      if (totalCreditCost > 0) {
+        await supabase
+          .from("credits")
+          .update({
+            balance:
+              creditData?.balance - totalCreditCost < 0
+                ? 0
+                : creditData?.balance - totalCreditCost,
+          })
+          .eq("user_id", user.id);
+      }
+    },
 
     async onFinish({ response }) {
       const finalMessages = appendResponseMessages({
