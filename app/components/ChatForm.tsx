@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { Message, useChat } from "@ai-sdk/react";
@@ -20,6 +21,7 @@ import {
   FaQuestion,
   FaShare,
   FaArrowUp,
+  FaCopy,
 } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 
@@ -728,19 +730,56 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                       </em>
                                     ),
                                     // ✅ Inline code
-                                    code: ({ className, children }) => {
-                                      const isBlock =
-                                        className?.includes("language-");
-                                      return isBlock ? (
-                                        <pre
-                                          className={`rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm ${className}`}
-                                        >
-                                          <code>{children}</code>
-                                        </pre>
-                                      ) : (
-                                        <code className="bg-zinc-800 text-orange-400 rounded px-1 py-0.5 text-sm font-mono">
-                                          {children}
-                                        </code>
+                                    code({
+                                      node,
+                                      className,
+                                      children,
+                                      ...props
+                                    }) {
+                                      const [copied, setCopied] =
+                                        // eslint-disable-next-line react-hooks/rules-of-hooks
+                                        useState(false);
+                                      const language =
+                                        className?.replace("language-", "") ??
+                                        "";
+                                      const codeString =
+                                        String(children).trim();
+
+                                      const handleCopy = () => {
+                                        navigator.clipboard.writeText(
+                                          codeString
+                                        );
+                                        setCopied(true);
+                                        toast("Copied to clipboard", {
+                                          duration: 1500,
+                                        });
+                                        setTimeout(
+                                          () => setCopied(false),
+                                          1500
+                                        );
+                                      };
+
+                                      return (
+                                        <div className="relative group my-4">
+                                          <Button
+                                            variant="ghost"
+                                            onClick={handleCopy}
+                                            size="icon"
+                                            className="absolute top-2 right-2 text-xs px-2 py-1 rounded hover:bg-zinc-700"
+                                          >
+                                            <FaCopy />
+                                          </Button>
+                                          <pre
+                                            className={`rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm`}
+                                          >
+                                            <code
+                                              className={`language-${language}`}
+                                              {...props}
+                                            >
+                                              {children}
+                                            </code>
+                                          </pre>
+                                        </div>
                                       );
                                     },
                                   }}
