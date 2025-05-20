@@ -893,9 +893,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                       children,
                                       ...props
                                     }) {
-                                      const [copied, setCopied] =
-                                        // eslint-disable-next-line react-hooks/rules-of-hooks
-                                        useState(false);
                                       const language =
                                         className?.replace("language-", "") ??
                                         "";
@@ -908,14 +905,9 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                         navigator.clipboard.writeText(
                                           codeString
                                         );
-                                        setCopied(true);
                                         toast("Copied to clipboard", {
                                           duration: 1500,
                                         });
-                                        setTimeout(
-                                          () => setCopied(false),
-                                          1500
-                                        );
                                       };
 
                                       return (

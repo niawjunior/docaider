@@ -11,9 +11,23 @@ import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaCopy } from "react-icons/fa";
 import { IoArrowDownSharp } from "react-icons/io5";
 import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import { toast } from "sonner";
+import "highlight.js/styles/github-dark.css"; // or choose another theme
+
+function extractTextFromChildren(children: any): string {
+  if (typeof children === "string") return children;
+  if (Array.isArray(children)) {
+    return children.map(extractTextFromChildren).join("");
+  }
+  if (typeof children === "object" && children?.props?.children) {
+    return extractTextFromChildren(children.props.children);
+  }
+  return "";
+}
 
 const SharePage = () => {
   const router = useRouter();
@@ -183,6 +197,7 @@ const SharePage = () => {
                                   return result ? (
                                     <div key={index}>
                                       <ReactMarkdown
+                                        rehypePlugins={[rehypeHighlight]}
                                         components={{
                                           h1: ({ children }) => (
                                             <h1 className="text-xl font-bold mb-4 text-white">
@@ -230,6 +245,54 @@ const SharePage = () => {
                                               {children}
                                             </em>
                                           ),
+                                          // ✅ Inline code
+                                          code({
+                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                            node,
+                                            className,
+                                            children,
+                                            ...props
+                                          }) {
+                                            const language =
+                                              className?.replace(
+                                                "language-",
+                                                ""
+                                              ) ?? "";
+                                            const codeString =
+                                              extractTextFromChildren(children);
+
+                                            console.log(children);
+                                            const handleCopy = () => {
+                                              console.log(codeString);
+                                              navigator.clipboard.writeText(
+                                                codeString
+                                              );
+                                              toast("Copied to clipboard", {
+                                                duration: 1500,
+                                              });
+                                            };
+
+                                            return (
+                                              <div className="relative group my-4">
+                                                <Button
+                                                  variant="ghost"
+                                                  onClick={handleCopy}
+                                                  size="icon"
+                                                  className="absolute top-2 right-2 text-xs px-2 py-1 rounded hover:bg-zinc-700"
+                                                >
+                                                  <FaCopy />
+                                                </Button>
+                                                <pre className="rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm">
+                                                  <code
+                                                    className={`language-${language}`}
+                                                    {...props}
+                                                  >
+                                                    {children}
+                                                  </code>
+                                                </pre>
+                                              </div>
+                                            );
+                                          },
                                         }}
                                       >
                                         {result}
