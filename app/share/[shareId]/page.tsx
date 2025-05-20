@@ -20,7 +20,6 @@ const SharePage = () => {
   const { shareId } = useParams();
   const [isAtBottom, setIsAtBottom] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const fetchShareData = async () => {
     const response = await fetch(`/api/share/${shareId}`);
@@ -65,7 +64,11 @@ const SharePage = () => {
     <div className="flex h-dvh bg-black text-white">
       <main className="flex-1 w-full flex flex-col p-4 overflow-hidden ">
         <div className="flex items-center justify-between md:p-4 p-0">
-          <Button variant="ghost" onClick={handleBack}>
+          <Button
+            variant="ghost"
+            onClick={handleBack}
+            className="self-start p-0 flex"
+          >
             <FaArrowLeft />
           </Button>
           <div className="flex flex-col gap-1">
@@ -78,13 +81,14 @@ const SharePage = () => {
         <div className="text-center w-full gap-8 md:p-4 p-0 h-full flex flex-col items-center">
           <div className="rounded-xl  w-full min-w-[300px]">
             <div className="flex flex-col items-center gap-4 ">
-              <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-[40px]">
+              <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-2">
                 <div
                   ref={containerRef}
                   className={clsx(
                     "overflow-auto scroll-hidden px-2",
 
-                    data?.messages?.length > 0 && " py-4 h-[calc(100dvh-250px)]"
+                    data?.messages?.length > 0 &&
+                      " py-4 md:h-[calc(100dvh-140px)] h-[calc(100dvh-100px)]"
                   )}
                 >
                   {data?.messages?.map((message: any) => {
@@ -253,32 +257,21 @@ const SharePage = () => {
                   <div ref={bottomRef} />
                 </div>
 
-                <div className="flex flex-col">
-                  <form className="sticky bottom-0 flex-col w-full py-2 px-2 flex items-center gap-3">
-                    {!isAtBottom && (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          bottomRef.current?.scrollIntoView({
-                            behavior: "smooth",
-                          });
-                        }}
-                        className="w-10 h-10 bottom-36 fixed  flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
-                        aria-label="Scroll to bottom"
-                      >
-                        <IoArrowDownSharp />
-                      </button>
-                    )}
-                    <div className="flex items-center gap-3 w-full">
-                      <textarea
-                        ref={textareaRef}
-                        placeholder="Ask anything..."
-                        disabled={true}
-                        rows={1}
-                        className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
-                      />
-                    </div>
-                  </form>
+                <div className="flex flex-col items-center">
+                  {!isAtBottom && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        bottomRef.current?.scrollIntoView({
+                          behavior: "smooth",
+                        });
+                      }}
+                      className="w-10 h-10 bottom-10 fixed  flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
+                      aria-label="Scroll to bottom"
+                    >
+                      <IoArrowDownSharp />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

@@ -134,7 +134,9 @@ const ChatLayout = ({
         {/* Main */}
         <main className="flex-1 w-full flex flex-col p-4 overflow-hidden ">
           <div className="text-center w-full gap-8 md:p-4 p-0 h-full flex flex-col items-center">
-            <div className="rounded-xl  w-full min-w-[300px]">{children}</div>
+            <div className="rounded-xl  w-full min-w-[300px] md:mt-4 mt-0">
+              {children}
+            </div>
           </div>
         </main>
       </div>
