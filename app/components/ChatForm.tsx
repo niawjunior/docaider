@@ -68,6 +68,17 @@ interface ChatFormProps {
   initialMessages?: Message[];
 }
 
+function extractTextFromChildren(children: any): string {
+  if (typeof children === "string") return children;
+  if (Array.isArray(children)) {
+    return children.map(extractTextFromChildren).join("");
+  }
+  if (typeof children === "object" && children?.props?.children) {
+    return extractTextFromChildren(children.props.children);
+  }
+  return "";
+}
+
 export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -743,9 +754,11 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                         className?.replace("language-", "") ??
                                         "";
                                       const codeString =
-                                        String(children).trim();
+                                        extractTextFromChildren(children);
 
+                                      console.log(children);
                                       const handleCopy = () => {
+                                        console.log(codeString);
                                         navigator.clipboard.writeText(
                                           codeString
                                         );
@@ -769,9 +782,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                           >
                                             <FaCopy />
                                           </Button>
-                                          <pre
-                                            className={`rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm`}
-                                          >
+                                          <pre className="rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm">
                                             <code
                                               className={`language-${language}`}
                                               {...props}
