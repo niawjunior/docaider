@@ -89,7 +89,6 @@ export async function POST(req: NextRequest) {
   console.log("creditData?.balance", creditData?.balance);
   const result = streamText({
     model: openai("gpt-4o-mini"),
-    maxTokens: 1000,
     toolChoice: "auto",
     maxSteps: 1,
     tools,

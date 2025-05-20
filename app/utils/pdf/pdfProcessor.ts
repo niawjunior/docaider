@@ -11,13 +11,13 @@ export interface DocumentChunk {
 }
 
 import { Tiktoken } from "js-tiktoken/lite";
-import { getEncoding } from "js-tiktoken";
+import cl100k_base from "js-tiktoken/ranks/cl100k_base";
 
 async function splitUntilTokenLimit(
   text: string,
   encoder: Tiktoken,
   tokenLimit: number,
-  maxDepth = 3
+  maxDepth = 5
 ): Promise<string[]> {
   const tokens = encoder.encode(text);
   if (tokens.length <= tokenLimit) return [text];
@@ -90,7 +90,7 @@ export async function processPDF(
     );
 
     // Initialize the lite tokenizer
-    const encoder = getEncoding("gpt2");
+    const encoder = new Tiktoken(cl100k_base);
 
     // Generate embeddings for each chunk
     const supabase = await createClient();
