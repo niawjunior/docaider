@@ -96,7 +96,7 @@ export const findRelevantContent = async (
     {
       query_embedding: questionEmbedding,
       match_threshold: 0.1,
-      match_count: 100,
+      match_count: 200,
       user_id: userId,
     }
   );

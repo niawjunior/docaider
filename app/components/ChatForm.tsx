@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import DocumentUpload from "./DocumentUpload";
 import "highlight.js/styles/github-dark.css"; // or choose another theme
 import rehypeHighlight from "rehype-highlight";
-
+import { FaRegFaceSadCry } from "react-icons/fa6";
 import {
   FaBitcoin,
   FaChartBar,
@@ -54,6 +54,7 @@ import { useShareUrl } from "../hooks/useShareUrl";
 import { Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useQueryClient } from "@tanstack/react-query";
+import router from "next/router";
 
 const toolIcons = {
   generateBarChart: <FaChartBar />,
@@ -647,9 +648,40 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                           ) {
                             const result = (part.toolInvocation as any)?.result;
 
-                            return (
+                            if (
+                              !("result" in part.toolInvocation) &&
+                              message.id ===
+                                messages[messages.length - 1]?.id &&
+                              status === "streaming"
+                            ) {
+                              return (
+                                <div
+                                  key={message.id}
+                                  className="flex items-center gap-2"
+                                >
+                                  <p className="text-white text-sm">
+                                    Generating chart...
+                                  </p>
+                                  <div className="flex items-center justify-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return result ? (
                               <div key={index}>
                                 <PieChart option={result?.chartData} />
+                              </div>
+                            ) : (
+                              <div
+                                key={message.id}
+                                className="flex items-center gap-2"
+                              >
+                                <p className="text-white text-sm">
+                                  Something went wrong. Please try again.
+                                </p>
+
+                                <FaRegFaceSadCry />
                               </div>
                             );
                           }
@@ -658,9 +690,40 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                             part.toolInvocation.toolName === "generateBarChart"
                           ) {
                             const result = (part.toolInvocation as any)?.result;
-                            return (
+                            if (
+                              !("result" in part.toolInvocation) &&
+                              message.id ===
+                                messages[messages.length - 1]?.id &&
+                              status === "streaming"
+                            ) {
+                              return (
+                                <div
+                                  key={message.id}
+                                  className="flex items-center gap-2"
+                                >
+                                  <p className="text-white text-sm">
+                                    Generating chart...
+                                  </p>
+                                  <div className="flex items-center justify-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return result ? (
                               <div key={index}>
                                 <BarChart option={result?.chartData} />
+                              </div>
+                            ) : (
+                              <div
+                                key={message.id}
+                                className="flex items-center gap-2"
+                              >
+                                <p className="text-white text-sm">
+                                  Something went wrong. Please try again.
+                                </p>
+
+                                <FaRegFaceSadCry />
                               </div>
                             );
                           }
@@ -669,11 +732,42 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                             part.toolInvocation.toolName === "getCryptoPrice"
                           ) {
                             const result = (part.toolInvocation as any)?.result;
-                            return (
+                            if (
+                              !("result" in part.toolInvocation) &&
+                              message.id ===
+                                messages[messages.length - 1]?.id &&
+                              status === "streaming"
+                            ) {
+                              return (
+                                <div
+                                  key={message.id}
+                                  className="flex items-center gap-2"
+                                >
+                                  <p className="text-white text-sm">
+                                    Fetching crypto price...
+                                  </p>
+                                  <div className="flex items-center justify-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return result ? (
                               <CryptoPriceOverview
                                 key={index}
                                 result={result}
                               />
+                            ) : (
+                              <div
+                                key={message.id}
+                                className="flex items-center gap-2"
+                              >
+                                <p className="text-white text-sm">
+                                  Something went wrong. Please try again.
+                                </p>
+
+                                <FaRegFaceSadCry />
+                              </div>
                             );
                           }
 
@@ -683,14 +777,66 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                           ) {
                             const result = (part.toolInvocation as any)?.result;
 
-                            return <CryptoSummary key={index} data={result} />;
+                            if (
+                              !("result" in part.toolInvocation) &&
+                              message.id ===
+                                messages[messages.length - 1]?.id &&
+                              status === "streaming"
+                            ) {
+                              return (
+                                <div
+                                  key={message.id}
+                                  className="flex items-center gap-2"
+                                >
+                                  <p className="text-white text-sm">
+                                    Fetching crypto market summary ...
+                                  </p>
+                                  <div className="flex items-center justify-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return result ? (
+                              <CryptoSummary key={index} data={result} />
+                            ) : (
+                              <div
+                                key={message.id}
+                                className="flex items-center gap-2"
+                              >
+                                <p className="text-white text-sm">
+                                  Something went wrong. Please try again.
+                                </p>
+
+                                <FaRegFaceSadCry />
+                              </div>
+                            );
                           }
 
                           if (part.toolInvocation.toolName === "askQuestion") {
                             const result = (part.toolInvocation as any)?.result;
-
+                            if (
+                              !("result" in part.toolInvocation) &&
+                              message.id ===
+                                messages[messages.length - 1]?.id &&
+                              status === "streaming"
+                            ) {
+                              return (
+                                <div
+                                  key={message.id}
+                                  className="flex items-center gap-2"
+                                >
+                                  <p className="text-white text-sm">
+                                    Searching through the document...
+                                  </p>
+                                  <div className="flex items-center justify-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                  </div>
+                                </div>
+                              );
+                            }
                             return result ? (
-                              <div>
+                              <div key={index}>
                                 <ReactMarkdown
                                   rehypePlugins={[rehypeHighlight]}
                                   components={{
@@ -799,13 +945,15 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                 </ReactMarkdown>
                               </div>
                             ) : (
-                              <div className="flex items-center gap-2">
+                              <div
+                                key={message.id}
+                                className="flex items-center gap-2"
+                              >
                                 <p className="text-white text-sm">
-                                  Searching through documents...
+                                  Something went wrong. Please try again.
                                 </p>
-                                <div className="flex items-center justify-center py-4">
-                                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                </div>
+
+                                <FaRegFaceSadCry />
                               </div>
                             );
                           }
