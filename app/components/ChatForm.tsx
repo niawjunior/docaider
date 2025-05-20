@@ -70,6 +70,8 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   const { shareData, error: shareError, refresh } = useShareUrl(chatId!);
   const queryClient = useQueryClient();
 
+  const [isDesktop, setIsDesktop] = useState(false);
+
   const [documents, setDocuments] = useState<
     {
       title: string;
@@ -519,6 +521,25 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     setIsShareModalOpen(true);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      if (isDesktop) {
+        e.preventDefault();
+        handleSubmit();
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <>
       <div className="flex flex-col items-center gap-4 ">
@@ -799,12 +820,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                     status !== "ready" ? "Thinking..." : "Ask anything..."
                   }
                   disabled={status !== "ready"}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSubmit(e);
-                    }
-                  }}
+                  onKeyDown={handleKeyDown}
                   rows={1}
                   className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
                 />

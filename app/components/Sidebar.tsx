@@ -31,7 +31,13 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
     return text || "Untitled";
   };
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useChats();
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isChatsLoading,
+  } = useChats();
 
   const chats = data?.pages.flatMap((page) => page.data) ?? [];
 
@@ -58,7 +64,7 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
         Recents
       </div>
       <ul ref={sidebarRef} className="flex-1 overflow-y-auto scroll-hidden">
-        {isLoading || creditLoading ? (
+        {isLoading || creditLoading || isChatsLoading ? (
           <div className="flex items-center justify-center py-4">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
           </div>
