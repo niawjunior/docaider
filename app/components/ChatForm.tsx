@@ -1187,7 +1187,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                         className="relative bottom-[-5px]"
                         size="icon"
                         disabled={isDeleteImageLoading}
-                        onClick={() => removeImage(index)}
                       >
                         <Image
                           src={image.url}
@@ -1196,7 +1195,10 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                           height={10}
                           className="h-[35px] w-[35px] object-cover rounded-md"
                         />
-                        <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-red-500 rounded-full">
+                        <div
+                          onClick={() => removeImage(index)}
+                          className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-red-500 rounded-full"
+                        >
                           <TiDelete />
                         </div>
                         {image.isUploading && (
