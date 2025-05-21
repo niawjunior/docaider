@@ -2,6 +2,7 @@
 "use client";
 
 import { Message, useChat } from "@ai-sdk/react";
+import { TiDelete } from "react-icons/ti";
 
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
@@ -22,6 +23,7 @@ import {
   FaShare,
   FaArrowUp,
   FaCopy,
+  FaTrash,
 } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 
@@ -55,6 +57,8 @@ import { Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useQueryClient } from "@tanstack/react-query";
 import router from "next/router";
+import Image from "next/image";
+import { FcCancel } from "react-icons/fc";
 
 const toolIcons = {
   generateBarChart: <FaChartBar />,
@@ -80,13 +84,23 @@ function extractTextFromChildren(children: any): string {
   return "";
 }
 
+interface UploadedImage {
+  url: string;
+  file: File;
+  isUploading: boolean;
+  uploadProgress: number;
+  publicUrl?: string;
+}
+
 export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCreateShareLoading, setIsCreateShareLoading] = useState(false);
   const { shareData, error: shareError, refresh } = useShareUrl(chatId!);
   const queryClient = useQueryClient();
-
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const [isDeleteImageLoading, setIsDeleteImageLoading] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
 
   const [documents, setDocuments] = useState<
@@ -544,9 +558,166 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Add these new handlers
+  const handleDragOver = (e: React.DragEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    handleFiles(files);
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      handleFiles(files);
+    }
+  };
+
+  const handleFiles = (files: File[]) => {
+    const imageFiles = files.filter((file) => file.type.startsWith("image/"));
+
+    if (imageFiles.length === 0) {
+      toast("Please upload image files only");
+      return;
+    }
+
+    const newImages = imageFiles.map((file) => ({
+      url: URL.createObjectURL(file),
+      file,
+      isUploading: false,
+      uploadProgress: 0,
+    }));
+    setUploadedImages((prev) => [...prev, ...newImages]);
+
+    // Start uploading the new images
+    newImages.forEach((image, index) => {
+      const globalIndex = uploadedImages.length + index;
+      uploadImage(globalIndex, image.file);
+    });
+  };
+
+  const removeImage = async (index: number) => {
+    const imageToRemove = uploadedImages[index];
+
+    // If the image was successfully uploaded to Supabase, delete it
+    if (imageToRemove.publicUrl) {
+      setIsDeleteImageLoading(true);
+      try {
+        const supabase = await createClient();
+        // Extract the file path from the public URL
+        const filePath = imageToRemove.publicUrl.split("/").pop();
+        console.log(filePath);
+        if (filePath) {
+          // Delete the file from Supabase storage
+          const { error } = await supabase.storage
+            .from("chat-images")
+            .remove([filePath]);
+
+          if (error) {
+            console.error("Error deleting image:", error);
+            toast.error("Failed to delete image from storage");
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Error deleting image:", error);
+        toast.error("Failed to delete image");
+        return;
+      } finally {
+        setIsDeleteImageLoading(false);
+      }
+    }
+    // Remove the image from the UI
+    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
+
+    // Revoke the object URL to prevent memory leaks
+    if (imageToRemove.url.startsWith("blob:")) {
+      URL.revokeObjectURL(imageToRemove.url);
+    }
+  };
+
+  const uploadImageToSupabase = async (file: File): Promise<string> => {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Math.random()
+      .toString(36)
+      .substring(2, 15)}-${Date.now()}.${fileExt}`;
+    const supabase = await createClient();
+
+    const { data, error } = await supabase.storage
+      .from("chat-images") // Replace with your Supabase bucket name
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
+
+    // Get public URL
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("chat-images").getPublicUrl(fileName);
+
+    return publicUrl;
+  };
+
+  const uploadImage = async (index: number, file: File) => {
+    try {
+      // Update state to show loading
+      setUploadedImages((prev) =>
+        prev.map((img, i) =>
+          i === index ? { ...img, isUploading: true, uploadProgress: 0 } : img
+        )
+      );
+
+      const publicUrl = await uploadImageToSupabase(file);
+
+      // Update state with the public URL
+      setUploadedImages((prev) =>
+        prev.map((img, i) =>
+          i === index ? { ...img, isUploading: false, publicUrl } : img
+        )
+      );
+    } catch (error) {
+      console.error("Upload failed:", error);
+      setUploadedImages((prev) =>
+        prev.map((img, i) =>
+          i === index ? { ...img, isUploading: false } : img
+        )
+      );
+      toast.error("Failed to upload image");
+    }
+  };
+
   return (
     <>
-      <div className="flex flex-col items-center gap-4 md:h-[calc(100dvh-70px)] justify-center h-[calc(100dvh-30px)] overflow-y-auto scroll-hidden ">
+      <form
+        className={clsx(
+          "flex flex-col items-center gap-4 md:h-[calc(100dvh-70px)] justify-center h-[calc(100dvh-30px)] overflow-y-auto scroll-hidden"
+        )}
+        onSubmit={handleSubmit}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         {messages.length === 0 && (
           <>
             <div className="md:mt-0 mt-[100px] ">
@@ -570,7 +741,20 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
           </>
         )}
 
-        <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-[40px]">
+        <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-[40px] relative">
+          {/* Add drag overlay */}
+          {isDragging && (
+            <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded-lg pointer-events-none z-10">
+              <div className="text-center p-6 bg-zinc-800 rounded-lg">
+                <p className="text-xl font-medium mb-2">
+                  Drop your images here
+                </p>
+                <p className="text-sm text-zinc-400">
+                  Support for PNG, JPG, GIF up to 10MB
+                </p>
+              </div>
+            </div>
+          )}
           <div className="flex justify-end">
             {messages.length > 0 && (
               <TooltipProvider>
@@ -946,7 +1130,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
 
             <div ref={bottomRef} />
           </div>
-
           <div className="flex flex-col">
             <div className="flex justify-between items-center pt-2">
               <div className="flex gap-2">
@@ -993,16 +1176,46 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                 </TooltipProvider>
               </div>
             </div>
-            <form
-              onSubmit={handleSubmit}
-              className="sticky bottom-0 flex-col w-full py-2 px-2 flex items-center gap-3"
-            >
+            <div className="sticky bottom-0 flex-col w-full py-2 px-2 flex gap-3">
+              {/* Show uploaded images */}
+              {uploadedImages.length > 0 && (
+                <div className="flex flex-wrap gap-4 absolute bottom-[80px] left-[150px]">
+                  {uploadedImages.map((image, index) => (
+                    <div key={index} className="relative group">
+                      <Button
+                        variant="outline"
+                        className="relative bottom-[-5px]"
+                        size="icon"
+                        disabled={isDeleteImageLoading}
+                        onClick={() => removeImage(index)}
+                      >
+                        <Image
+                          src={image.url}
+                          alt={`Uploaded ${index + 1}`}
+                          width={10}
+                          height={10}
+                          className="h-[35px] w-[35px] object-cover rounded-md"
+                        />
+                        <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-red-500 rounded-full">
+                          <TiDelete />
+                        </div>
+                        {image.isUploading && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-md">
+                            <Loader2 className="animate-spin h-6 w-6" />
+                          </div>
+                        )}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {!isAtBottom && (
                 <button
                   onClick={() =>
                     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
                   }
-                  className="w-10 h-10 bottom-36 fixed  flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
+                  className="w-10 h-10 bottom-36 fixed self-center  flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
                   aria-label="Scroll to bottom"
                 >
                   <IoArrowDownSharp />
@@ -1018,7 +1231,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                   }
                   disabled={status !== "ready"}
                   onKeyDown={handleKeyDown}
-                  rows={1}
                   className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
                 />
                 <Button
@@ -1030,7 +1242,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                   <FaArrowUp />
                 </Button>
               </div>
-            </form>
+            </div>
 
             <Dialog open={isPdfModalOpen} onOpenChange={setIsPdfModalOpen}>
               <DialogContent>
@@ -1158,7 +1370,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
             </Dialog>
           </div>
         </div>
-      </div>
+      </form>
     </>
   );
 }
