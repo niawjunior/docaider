@@ -107,56 +107,32 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
   const { session } = useSupabaseSession();
   const { config, updateConfig } = useUserConfig(session?.user?.id || "");
-  const { credit } = useCredit(session?.user?.id || "");
-
-  const toolsConfig = {
-    generateBarChart: {
-      creditCost: 1,
-    },
-    generatePieChart: {
-      creditCost: 1,
-    },
-    getCryptoPrice: {
-      creditCost: 1,
-    },
-    getCryptoMarketSummary: {
-      creditCost: 1,
-    },
-    askQuestion: {
-      creditCost: 2,
-    },
-  };
 
   const tools = [
     {
       name: "generateBarChart",
       description: "Generate a bar chart",
       enabled: config?.generate_bar_chart_enabled ?? true,
-      creditCost: 1,
     },
     {
       name: "generatePieChart",
       description: "Generate a pie chart",
       enabled: config?.generate_pie_chart_enabled ?? true,
-      creditCost: 1,
     },
     {
       name: "getCryptoPrice",
       description: "Get the current price of a cryptocurrency",
       enabled: config?.get_crypto_price_enabled ?? true,
-      creditCost: 1,
     },
     {
       name: "getCryptoMarketSummary",
       description: "Get a summary of the current market for a cryptocurrency",
       enabled: config?.get_crypto_market_summary_enabled ?? true,
-      creditCost: 1,
     },
     {
       name: "askQuestion",
       description: "Ask a question about the uploaded documents",
       enabled: config?.ask_question_enabled ?? true,
-      creditCost: 2,
     },
   ];
 
@@ -242,16 +218,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       chatId,
     },
     async onToolCall({ toolCall }) {
-      // Find the tool configuration
-      const tool = tools.find((t) => t.name === toolCall.toolName);
-      if (!tool || !tool.creditCost) {
-        console.error(
-          "Tool not found or missing credit cost:",
-          toolCall.toolName
-        );
-        return;
-      }
-
       // // Check if user has credits data and enough credits
       // if (
       //   !credit ||
@@ -265,16 +231,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       // }
     },
     onFinish: async (response) => {
-      const totalCreditCost = response.toolInvocations?.reduce(
-        (total, toolName) => {
-          return (
-            total +
-            (toolsConfig[toolName.toolName as keyof typeof toolsConfig]
-              ?.creditCost || 0)
-          );
-        },
-        0
-      );
+      const totalCreditCost = response.toolInvocations?.length;
 
       await queryClient.invalidateQueries({ queryKey: ["chats"] });
       await queryClient.invalidateQueries({
@@ -1113,12 +1070,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                         </h3>
                         <p className="text-sm text-muted-foreground mt-2">
                           {tool.description}
-                        </p>
-                        <p className="text-sm text-orange-400">
-                          <Badge variant="secondary" className="text-green-500">
-                            {tool.creditCost}{" "}
-                            {tool.creditCost > 1 ? "credits" : "credit"}
-                          </Badge>
                         </p>
                       </div>
 

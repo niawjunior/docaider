@@ -16,24 +16,6 @@ export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { messages, chatId } = await req.json();
 
-  const toolsConfig = {
-    generateBarChart: {
-      creditCost: 1,
-    },
-    generatePieChart: {
-      creditCost: 1,
-    },
-    getCryptoPrice: {
-      creditCost: 1,
-    },
-    getCryptoMarketSummary: {
-      creditCost: 1,
-    },
-    askQuestion: {
-      creditCost: 2,
-    },
-  };
-
   // Get the user from the request
 
   const { data } = await supabase.auth.getUser();
@@ -54,11 +36,6 @@ export async function POST(req: NextRequest) {
     .eq("id", user.id)
     .single();
 
-  const { data: documentsData } = await supabase
-    .from("documents")
-    .select("document_id, document_name")
-    .eq("user_id", user.id);
-
   // Get user credit
   const { data: creditData } = await supabase
     .from("credits")
@@ -66,28 +43,20 @@ export async function POST(req: NextRequest) {
     .eq("user_id", user.id)
     .single();
 
+  const { data: documentsData } = await supabase
+    .from("documents")
+    .select("document_id, document_name, title")
+    .eq("user_id", user.id);
+
   // Get tools
-  const tools =
-    creditData?.balance === 0
-      ? {}
-      : {
-          ...(configData?.generate_bar_chart_enabled && {
-            generateBarChart: generateBarChartTool,
-          }),
-          ...(configData?.generate_pie_chart_enabled && {
-            generatePieChart: generatePieChartTool,
-          }),
-          ...(configData?.get_crypto_price_enabled && {
-            getCryptoPrice: getCryptoPriceTool,
-          }),
-          ...(configData?.get_crypto_market_summary_enabled && {
-            getCryptoMarketSummary: getCryptoMarketSummaryTool,
-          }),
-          ...(configData?.ask_question_enabled && {
-            askQuestion: askQuestionTool,
-          }),
-        };
-  console.log("creditData?.balance", creditData?.balance);
+  const tools = {
+    generateBarChart: generateBarChartTool,
+    generatePieChart: generatePieChartTool,
+    getCryptoPrice: getCryptoPriceTool,
+    getCryptoMarketSummary: getCryptoMarketSummaryTool,
+    askQuestion: askQuestionTool,
+  };
+
   const result = streamText({
     model: openai("gpt-4o-mini"),
     toolChoice: "auto",
@@ -122,40 +91,31 @@ export async function POST(req: NextRequest) {
  - Ask Question: ${
    configData?.ask_question_enabled
      ? documentsData?.length
-       ? creditData?.balance >= toolsConfig.askQuestion.creditCost
-         ? "✅ Enabled"
-         : "❌ Not enough credit"
-       : "❌ No documents uploaded"
-     : "❌ Disabled"
+       ? "✅ Enabled"
+       : "❌ No documents uploaded. Inform the user to upload documents to use askQuestion."
+     : "❌ Disabled. Inform the user to enable askQuestion to use askQuestion."
  }
     - Bar Chart: ${
       configData?.generate_bar_chart_enabled
-        ? creditData?.balance >= toolsConfig.generateBarChart.creditCost
-          ? "✅ Enabled"
-          : "❌ Disabled or not enough credits"
-        : "❌ Disabled"
+        ? "✅ Enabled"
+        : "❌ Disabled. Inform the user to enable generateBarChart to use generateBarChart."
     }
     - Pie Chart: ${
       configData?.generate_pie_chart_enabled
-        ? creditData?.balance >= toolsConfig.generatePieChart.creditCost
-          ? "✅ Enabled"
-          : "❌ Disabled or not enough credits"
-        : "❌ Disabled"
+        ? "✅ Enabled"
+        : "❌ Disabled. Inform the user to enable generatePieChart to use generatePieChart."
     }
     - Crypto Price: ${
       configData?.get_crypto_price_enabled
-        ? creditData?.balance >= toolsConfig.getCryptoPrice.creditCost
-          ? "✅ Enabled"
-          : "❌ Disabled or not enough credits"
-        : "❌ Disabled"
+        ? "✅ Enabled"
+        : "❌ Disabled. Inform the user to enable getCryptoPrice to use getCryptoPrice."
     }
     - Crypto Market Summary: ${
       configData?.get_crypto_market_summary_enabled
-        ? creditData?.balance >= toolsConfig.getCryptoMarketSummary.creditCost
-          ? "✅ Enabled"
-          : "❌ Disabled or not enough credits"
-        : "❌ Disabled"
+        ? "✅ Enabled"
+        : "❌ Disabled. Inform the user to enable getCryptoMarketSummary to use getCryptoMarketSummary."
     }
+    
     
     🧠 **Behavior Guidelines**
     - Do **not** answer document-based questions if askQuestion is **disabled**.
@@ -175,26 +135,8 @@ export async function POST(req: NextRequest) {
     - Avoid raw code, markdown, JSON, or technical details.
     - Never mention internal libraries or frameworks (e.g., JavaScript, ECharts).
     
-    📄 **Document Handling**
-    ${
-      documentsData?.length
-        ? configData?.ask_question_enabled
-          ? `- Documents available: ${documentsData
-              .map((doc) => doc.document_name)
-              .join(
-                ", "
-              )}. Use the *askQuestion* tool to answer related queries.`
-          : `- Documents are uploaded (${documentsData
-              .map((doc) => doc.document_name)
-              .join(
-                ", "
-              )}), but askQuestion is disabled. Inform the user to enable askQuestion to proceed.`
-        : configData?.ask_question_enabled
-        ? "- askQuestion is enabled, but no documents are uploaded. Ask the user to upload documents first."
-        : "- askQuestion is disabled and no documents are uploaded. Ask the user to upload documents and enable askQuestion to use document Q&A."
-    }
 
-    Thai Text Handling:
+    **Thai Text Handling**
     - When processing Thai text:
       • Normalize Unicode characters using NFC
       • Handle Thai word boundaries properly
@@ -202,6 +144,20 @@ export async function POST(req: NextRequest) {
       • Preserve Thai punctuation marks
       • Use appropriate Thai-specific character handling
     
+    📄 **Document Handling**
+    - Information about uploaded documents: ${JSON.stringify(documentsData)}
+    - ${
+      documentsData?.length
+        ? "Documents are uploaded"
+        : "No documents are uploaded"
+    }
+    ${
+      configData?.ask_question_enabled
+        ? "askQuestion is enabled"
+        : "askQuestion is disabled"
+    }
+
+
     📊 **Chart Behavior**
     - Always assume the user wants to *visualize* or *understand* data.
     - Ask clarifying questions if the chart type is unclear (e.g., "Would you like a pie chart or bar chart?").
@@ -235,13 +191,8 @@ export async function POST(req: NextRequest) {
       );
       const toolNames = tools?.map((item) => item.toolName);
 
-      const totalCreditCost = toolNames?.reduce((total, toolName) => {
-        return (
-          total +
-          (toolsConfig[toolName as keyof typeof toolsConfig]?.creditCost || 0)
-        );
-      }, 0);
-
+      const totalCreditCost = toolNames?.length || 0;
+      console.log("totalCreditCost", totalCreditCost);
       if (totalCreditCost > 0) {
         await supabase
           .from("credits")

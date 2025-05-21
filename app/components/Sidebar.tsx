@@ -58,6 +58,13 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
     return () => sidebar.removeEventListener("scroll", handleScroll);
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  const handleChatClick = (newChatId: string) => {
+    if (newChatId === chatId) return; // Don't navigate if already on the same chat
+
+    router.push(`/chat/${newChatId}`);
+    router.refresh();
+  };
+
   return (
     <aside className="bg-zinc-900 p-4 flex flex-col gap-4 h-full w-72 min-w-72 border-r border-zinc-800 z-50">
       <div className="text-sm text-zinc-400 font-semibold mt-[50px]">
@@ -72,9 +79,7 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
           chats?.map((chat) => (
             <li key={(chat as { id: string }).id} className="py-1">
               <button
-                onClick={() =>
-                  router.push(`/chat/${(chat as { id: string }).id}`)
-                }
+                onClick={() => handleChatClick((chat as { id: string }).id)}
                 className={clsx(
                   "w-full text-left text-sm py-2 px-2 rounded hover:bg-zinc-800 truncate",
                   chatId === (chat as { id: string }).id ? "bg-zinc-700" : ""
