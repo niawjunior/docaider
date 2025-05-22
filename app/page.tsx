@@ -6,6 +6,7 @@ import useSupabaseSession from "./hooks/useSupabaseSession";
 import Link from "next/link";
 import { signOut } from "./login/action";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -28,6 +29,8 @@ const itemVariants = {
     },
   },
 };
+
+const MotionButton = motion(Button);
 
 export default function Home() {
   const router = useRouter();
@@ -101,14 +104,15 @@ export default function Home() {
             variants={itemVariants}
             className="flex flex-col md:flex-row gap-4 justify-center"
           >
-            <motion.button
+            <MotionButton
               onClick={() => router.push("/chat")}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              size="lg"
               className="bg-gradient-to-r cursor-pointer from-orange-500 to-red-500 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg hover:shadow-orange-500/30"
             >
               Get Started
-            </motion.button>
+            </MotionButton>
           </motion.div>
 
           <section className="relative z-10 px-6 border-zinc-800">
@@ -144,33 +148,45 @@ export default function Home() {
             variants={itemVariants}
             className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8"
           >
-            <div className="bg-zinc-800/50 p-6 rounded-2xl backdrop-blur-sm">
-              <h3 className="text-2xl font-bold text-orange-500 mb-2">
-                Document Processing
-              </h3>
-              <p className="text-gray-400">
-                Upload PDFs and other documents to extract insights and process
-                content with AI.
-              </p>
-            </div>
-            <div className="bg-zinc-800/50 p-6 rounded-2xl backdrop-blur-sm">
-              <h3 className="text-2xl font-bold text-orange-500 mb-2">
-                AI-Powered Chat
-              </h3>
-              <p className="text-gray-400">
-                Get smart answers and insights through natural conversation with
-                our AI assistant.
-              </p>
-            </div>
-            <div className="bg-zinc-800/50 p-6 rounded-2xl backdrop-blur-sm">
-              <h3 className="text-2xl font-bold text-orange-500 mb-2">
-                Data Visualization
-              </h3>
-              <p className="text-gray-400">
-                Create beautiful, interactive charts from your data and document
-                content automatically.
-              </p>
-            </div>
+            <Card className="bg-zinc-800/50 backdrop-blur-sm border-zinc-700 text-left">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-orange-500 mb-2">
+                  Document Processing
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-400">
+                  Upload PDFs and other documents to extract insights and
+                  process content with AI.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-zinc-800/50 backdrop-blur-sm border-zinc-700 text-left">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-orange-500 mb-2">
+                  AI-Powered Chat
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-400">
+                  Get smart answers and insights through natural conversation
+                  with our AI assistant.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="bg-zinc-800/50 backdrop-blur-sm border-zinc-700 text-left">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-orange-500 mb-2">
+                  Data Visualization
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-400">
+                  Create beautiful, interactive charts from your data and
+                  document content automatically.
+                </p>
+              </CardContent>
+            </Card>
           </motion.div>
         </motion.div>
       </div>

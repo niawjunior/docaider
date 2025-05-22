@@ -86,7 +86,7 @@ export default function DocumentUpload({
     // Clear the file input when file is set to null
     if (!file) {
       const input = document.querySelector(
-        "input[type='file']"
+        "input[type='file']",
       ) as HTMLInputElement;
       if (input) {
         input.value = "";
@@ -101,8 +101,8 @@ export default function DocumentUpload({
     if (selectedFile.size > MAX_FILE_SIZE) {
       setFileSizeError(
         `File size exceeds 1MB limit. Your file is ${formatBytes(
-          selectedFile.size
-        )}.`
+          selectedFile.size,
+        )}.`,
       );
       setFile(null);
       return;

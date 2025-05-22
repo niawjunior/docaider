@@ -17,7 +17,7 @@ async function splitUntilTokenLimit(
   text: string,
   encoder: Tiktoken,
   tokenLimit: number,
-  maxDepth = 5
+  maxDepth = 5,
 ): Promise<string[]> {
   const tokens = encoder.encode(text);
   if (tokens.length <= tokenLimit) return [text];
@@ -42,7 +42,7 @@ export async function processPDF(
   title: string,
   userId?: string,
   documentId?: string,
-  fileName?: string
+  fileName?: string,
 ): Promise<DocumentChunk[]> {
   try {
     // Read the file as an ArrayBuffer
@@ -60,7 +60,7 @@ export async function processPDF(
       .replace(/[\u0000-\u001F\u007F-\u009F]/g, "") // Remove control characters
       .replace(
         /[\u00AD\u034F\u1806\u180B-\u180E\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g,
-        ""
+        "",
       ) // Remove zero-width characters
       .replace(/[\u0080-\u009F]/g, "") // Remove C1 control characters
       .replace(/\s+/g, " ") // Clean up whitespace
@@ -86,7 +86,7 @@ export async function processPDF(
     const chunks = await splitter.createDocuments([thaiNormalizedText]);
     // Filter out any empty chunks
     const filteredChunks = chunks.filter(
-      (chunk) => chunk.pageContent.trim().length > 0
+      (chunk) => chunk.pageContent.trim().length > 0,
     );
 
     // Initialize the lite tokenizer
@@ -102,7 +102,7 @@ export async function processPDF(
       const splitChunks = await splitUntilTokenLimit(
         chunk.pageContent,
         encoder,
-        8192
+        8192,
       );
       validChunks.push(...splitChunks);
     }
@@ -115,7 +115,7 @@ export async function processPDF(
           value: chunkText,
         });
         return embedding;
-      })
+      }),
     );
 
     // Create chunks with embeddings
@@ -154,7 +154,7 @@ export async function processPDF(
 export async function uploadPDF(
   file: File,
   title: string,
-  userId?: string
+  userId?: string,
 ): Promise<string> {
   try {
     const supabase = await createClient();

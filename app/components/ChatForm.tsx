@@ -3,13 +3,10 @@
 
 import { Message, useChat } from "@ai-sdk/react";
 import { TiDelete } from "react-icons/ti";
-
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import clsx from "clsx";
 import { IoArrowDownSharp } from "react-icons/io5";
-import dayjs from "dayjs";
-import DocumentUpload from "./DocumentUpload";
-import "highlight.js/styles/github-dark.css"; // or choose another theme
+import "highlight.js/styles/github-dark.css";
 import rehypeHighlight from "rehype-highlight";
 import { FaRegFaceSadCry } from "react-icons/fa6";
 import {
@@ -23,7 +20,6 @@ import {
   FaShare,
   FaArrowUp,
   FaCopy,
-  FaTrash,
 } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 
@@ -32,35 +28,38 @@ import PieChart from "./PieChart";
 import CryptoSummary from "./CryptoSummary";
 import CryptoPriceOverview from "./CryptoPriceOverview";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { createClient } from "../utils/supabase/client";
+
 import { toast } from "sonner";
-import { Switch } from "@/components/ui/switch";
+
 import useUserConfig, { UserConfig } from "../hooks/useUserConfig";
 import useSupabaseSession from "../hooks/useSupabaseSession";
-import { useCredit } from "../hooks/useCredit";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
 import { useShareUrl } from "../hooks/useShareUrl";
 import { Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useQueryClient } from "@tanstack/react-query";
-import router from "next/router";
 import Image from "next/image";
-import { FcCancel } from "react-icons/fc";
 
-const toolIcons = {
+// Import new components
+import SuggestedPrompts from "./SuggestedPrompts";
+import ToolsModal from "./ToolsModal";
+import ShareChatModal from "./ShareChatModal";
+import PdfManagementModal from "./PdfManagementModal";
+
+// Import TanStack Query Hooks
+import { useFetchDocuments } from "../hooks/useFetchDocuments";
+import { useDocumentMutations } from "../hooks/useDocumentMutations";
+import { useShareChatMutation } from "../hooks/useShareChatMutation";
+import { useImageHandling, UploadedImage } from "../hooks/useImageHandling";
+import { extractTextFromChildren } from "@/utils/textUtils";
+
+const toolIcons: Record<string, React.ReactNode> = {
   generateBarChart: <FaChartBar />,
   generatePieChart: <FaChartPie />,
   getCryptoPrice: <FaBitcoin />,
@@ -73,126 +72,110 @@ interface ChatFormProps {
   initialMessages?: Message[];
 }
 
-function extractTextFromChildren(children: any): string {
-  if (typeof children === "string") return children;
-  if (Array.isArray(children)) {
-    return children.map(extractTextFromChildren).join("");
-  }
-  if (typeof children === "object" && children?.props?.children) {
-    return extractTextFromChildren(children.props.children);
-  }
-  return "";
-}
-
-interface UploadedImage {
-  url: string;
-  file: File;
-  isUploading: boolean;
-  uploadProgress: number;
-  publicUrl?: string;
-}
+// Removed local extractTextFromChildren function
 
 export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isCreateShareLoading, setIsCreateShareLoading] = useState(false);
-  const { shareData, error: shareError, refresh } = useShareUrl(chatId!);
-  const queryClient = useQueryClient();
-  const [isDragging, setIsDragging] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
-  const [isDeleteImageLoading, setIsDeleteImageLoading] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  const [documents, setDocuments] = useState<
-    {
-      title: string;
-      created_at: string;
-      url: string;
-      id: string;
-      active: boolean;
-      document_id: string;
-      document_name: string;
-    }[]
-  >([]);
   const [isToolModalOpen, setIsToolModalOpen] = useState(false);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
-  const { session } = useSupabaseSession();
-  const { config, updateConfig } = useUserConfig(session?.user?.id || "");
+  const [isDesktop, setIsDesktop] = useState(false);
 
-  const tools = [
+  const { session } = useSupabaseSession();
+  const userId = session?.user?.id;
+  const queryClient = useQueryClient();
+
+  // --- TanStack Query Hooks ---
+  const { data: documents, isLoading: isLoadingDocuments } =
+    useFetchDocuments(userId);
+  const { uploadDocument, deleteDocument, toggleDocumentActive } =
+    useDocumentMutations(userId);
+  const { mutate: shareChat, isPending: isSharingChat } =
+    useShareChatMutation(chatId);
+  const {
+    uploadedImages,
+    isDragging,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleFileInput,
+    removeImage,
+    clearAllImages,
+    isUploading: isUploadingImages,
+  } = useImageHandling();
+
+  const {
+    config,
+    isLoading: isLoadingUserConfig,
+    updateConfig: mutateUserConfig,
+    isUpdating: isUpdatingUserConfig,
+  } = useUserConfig(userId);
+  const {
+    shareData,
+    error: shareHookError,
+    isLoading: isLoadingShareData,
+  } = useShareUrl(chatId || "");
+
+  const toolsArray = [
     {
+      id: "generateBarChart",
       name: "generateBarChart",
       description: "Generate a bar chart",
       enabled: config?.generate_bar_chart_enabled ?? true,
     },
     {
+      id: "generatePieChart",
       name: "generatePieChart",
       description: "Generate a pie chart",
       enabled: config?.generate_pie_chart_enabled ?? true,
     },
     {
+      id: "getCryptoPrice",
       name: "getCryptoPrice",
       description: "Get the current price of a cryptocurrency",
       enabled: config?.get_crypto_price_enabled ?? true,
     },
     {
+      id: "getCryptoMarketSummary",
       name: "getCryptoMarketSummary",
       description: "Get a summary of the current market for a cryptocurrency",
       enabled: config?.get_crypto_market_summary_enabled ?? true,
     },
     {
+      id: "askQuestion",
       name: "askQuestion",
       description: "Ask a question about the uploaded documents",
       enabled: config?.ask_question_enabled ?? true,
     },
   ];
 
-  const handleDocumentUpload = async (file: File, title: string) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-
-    try {
-      const response = await fetch("/api/pdf", {
-        method: "POST",
-        body: formData,
-      });
-      if (!response.ok) {
-        toast("Error uploading document", {
-          duration: 5000,
-          description: "Failed to upload document. Please try again.",
-        });
-      } else {
-        toast("Document uploaded successfully", {
-          duration: 5000,
-          description: "You have used 1 credit.",
-        });
-
-        // refresh credit
-        await queryClient.invalidateQueries({
-          queryKey: ["credit", session?.user?.id],
-        });
-      }
-    } catch {
-      toast("Error uploading document", {
-        duration: 5000,
-        description: "Failed to upload document. Please try again.",
-      });
-    }
+  const handleDocumentUpload = (file: File, title: string) => {
+    uploadDocument.mutate({ file, title });
   };
 
-  const suggestedPrompts = [
-    {
-      title: "What is the current price of Bitcoin?",
-      subtitle: "as of today",
-    },
-    {
-      title: "Tell me about the document",
-      subtitle: "Who is the author?",
-    },
+  const handleDeleteDocument = (doc: any) => {
+    deleteDocument.mutate({
+      document_id: doc.document_id,
+      document_name: doc.document_name,
+      title: doc.title,
+    });
+  };
+
+  const handleToggleDocumentActive = (doc: any) => {
+    toggleDocumentActive.mutate({
+      document_id: doc.document_id,
+      currentActiveState: doc.active,
+      title: doc.title,
+    });
+  };
+
+  const suggestedPromptsData = [
+    { title: "What is the current price of Bitcoin?", subtitle: "as of today" },
+    { title: "Tell me about the document", subtitle: "Who is the author?" },
     {
       title: "Show me a bar chart",
       subtitle: "of monthly expenses by category",
@@ -201,10 +184,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       title: "Create a pie chart",
       subtitle: "comparing revenue from different regions",
     },
-    {
-      title: "Compare income and expenses",
-      subtitle: "in a bar chart format",
-    },
+    { title: "Compare income and expenses", subtitle: "in a bar chart format" },
     {
       title: "Visualize my monthly spending",
       subtitle: "as a pie chart with colors by category",
@@ -212,85 +192,98 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   ];
 
   useEffect(() => {
-    // Focus on load
     textareaRef.current?.focus();
   }, []);
+
   const {
     messages,
     input,
-    handleSubmit,
+    handleSubmit: originalHandleSubmit,
     handleInputChange,
     status,
     setInput,
     setMessages,
+    append,
   } = useChat({
     api: "/api/chat",
     id: chatId,
     initialMessages: initialMessages,
     sendExtraMessageFields: true,
-    body: {
-      chatId,
-    },
-    async onToolCall({ toolCall }) {
-      // // Check if user has credits data and enough credits
-      // if (
-      //   !credit ||
-      //   credit.balance === undefined ||
-      //   credit.balance < tool.creditCost
-      // ) {
-      //   toast.error(
-      //     `Not enough credits. You need ${tool.creditCost} credits for this action.`
-      //   );
-      //   return;
-      // }
-    },
+    body: { chatId },
     onFinish: async (response) => {
       const totalCreditCost = response.toolInvocations?.length;
-
-      await queryClient.invalidateQueries({ queryKey: ["chats"] });
-      await queryClient.invalidateQueries({
-        queryKey: ["credit", session?.user?.id],
-      });
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: ["credit", userId] });
+      }
       if (totalCreditCost && totalCreditCost > 0) {
         toast.success(`Used ${totalCreditCost} credits.`);
       }
-
-      setTimeout(() => {
-        textareaRef.current?.focus();
-      }, 100);
+      setTimeout(() => textareaRef.current?.focus(), 100);
     },
     onError: (error) => {
-      console.log("onError", error);
+      console.error("Chat API Error:", error);
+      toast.error("An error occurred with the chat API: " + error.message);
     },
   });
+
+  const handleSubmitWithImages = async (
+    e?: React.FormEvent<HTMLFormElement>,
+  ) => {
+    if (e) e.preventDefault();
+    const messageContent = input.trim();
+    const imagePublicUrls = uploadedImages
+      .filter((img) => img.publicUrl)
+      .map((img) => img.publicUrl as string);
+
+    if (!messageContent && imagePublicUrls.length === 0) {
+      toast.info("Please type a message or upload an image.");
+      return;
+    }
+
+    const messageData: any = {};
+    if (imagePublicUrls.length > 0) {
+      messageData.imageUrls = imagePublicUrls;
+    }
+
+    if (imagePublicUrls.length > 0) {
+      append({
+        role: "user",
+        content: messageContent,
+        data: messageData,
+      });
+    } else {
+      originalHandleSubmit(e || (new Event("submit") as any));
+    }
+
+    setInput("");
+    clearAllImages();
+  };
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-
     const handleScroll = () => {
-      const threshold = 50; // pixels from bottom
-      const isBottom =
-        el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
-      setIsAtBottom(isBottom);
+      const threshold = 50;
+      setIsAtBottom(
+        el.scrollHeight - el.scrollTop - el.clientHeight < threshold,
+      );
     };
-
     el.addEventListener("scroll", handleScroll);
     return () => el.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (isAtBottom) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isAtBottom]);
 
   useEffect(() => {
     if (initialMessages) {
       setMessages(initialMessages);
       setTimeout(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-
+        bottomRef.current?.scrollIntoView({ behavior: "auto" });
         textareaRef.current?.focus();
       }, 100);
     }
@@ -299,450 +292,110 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   useEffect(() => {
     const handleGlobalKeydown = (e: KeyboardEvent) => {
       const active = document.activeElement;
-
-      // If already typing in an input/textarea or using a shortcut, do nothing
       if (
         active instanceof HTMLInputElement ||
         active instanceof HTMLTextAreaElement ||
         e.metaKey ||
         e.ctrlKey ||
         e.altKey
-      ) {
+      )
         return;
-      }
-
-      // Ignore if non-character keys (e.g., Shift, Tab, etc.)
-      if (e.key.length === 1) {
-        textareaRef.current?.focus();
-      }
+      if (e.key.length === 1) textareaRef.current?.focus();
     };
-
     window.addEventListener("keydown", handleGlobalKeydown);
-    return () => {
-      window.removeEventListener("keydown", handleGlobalKeydown);
-    };
+    return () => window.removeEventListener("keydown", handleGlobalKeydown);
   }, []);
 
   useEffect(() => {
     if (promptToSubmit !== null) {
       setInput(promptToSubmit);
       setTimeout(() => {
-        handleSubmit(new Event("submit"));
-        setPromptToSubmit(null); // reset
+        if (textareaRef.current?.form) {
+          const submitEvent = new Event("submit", {
+            bubbles: true,
+            cancelable: true,
+          });
+          textareaRef.current.form.dispatchEvent(submitEvent);
+        }
+        setPromptToSubmit(null);
       }, 100);
     }
-  }, [promptToSubmit, handleSubmit, setInput]);
+  }, [promptToSubmit, setInput]);
 
   const handlePromptClick = (text: string) => {
     textareaRef.current?.focus();
     setPromptToSubmit(text);
   };
 
-  const fetchDocuments = async () => {
-    try {
-      const supabase = await createClient();
-      const { data: user } = await supabase.auth.getUser();
-      if (!user?.user?.id) return;
-
-      // Get all files in the user's directory
-      const { data: documents, error } = await supabase
-        .from("documents")
-        .select("*")
-        .eq("user_id", user.user.id);
-
-      if (error) throw error;
-
-      // Step 2: Group by document_id
-      const grouped = new Map<string, typeof documents>();
-
-      documents.forEach((doc) => {
-        if (!grouped.has(doc.document_id)) {
-          grouped.set(doc.document_id, doc);
-        }
-      });
-
-      // Get public URLs for each file
-      const documentsWithUrls = await Promise.all(
-        Array.from(grouped.values()).map(async (doc: any) => {
-          const { data: publicUrl } = await supabase.storage
-            .from("documents")
-            .getPublicUrl(`user_${user.user.id}/${doc.document_name}`);
-
-          return {
-            title: doc.title,
-            created_at: doc.created_at || new Date().toISOString(),
-            url: publicUrl.publicUrl,
-            id: doc.id,
-            active: doc.active,
-            document_id: doc.document_id,
-            document_name: doc.document_name,
-          };
-        })
-      );
-
-      setDocuments(documentsWithUrls);
-    } catch (error) {
-      console.error("Error fetching documents:", error);
-      toast("Error fetching documents", {
-        duration: 5000,
-        description: "Failed to fetch your documents. Please try again.",
-      });
-    }
-  };
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
-
-  const handleDeleteDocument = async (doc: {
-    title: string;
-    url: string;
-    id: string;
-    document_id: string;
-    document_name: string;
-  }) => {
-    try {
-      const supabase = await createClient();
-      const { data: user } = await supabase.auth.getUser();
-      if (!user?.user?.id) return;
-
-      // 1. Delete the file from Supabase storage
-      const { error: storageError } = await supabase.storage
-        .from("documents")
-        .remove([`user_${user.user.id}/${doc.document_name}`]);
-
-      if (storageError) throw storageError;
-
-      // 2. Delete all chunks with the same document_id
-      const { error: dbError } = await supabase
-        .from("documents")
-        .delete()
-        .eq("document_id", doc.document_id);
-
-      if (dbError) throw dbError;
-
-      // 3. Remove the document from local state (filter by document_id)
-      setDocuments((prev) =>
-        prev.filter((d) => d.document_id !== doc.document_id)
-      );
-
-      toast("Document deleted successfully", {
-        duration: 3000,
-      });
-    } catch (error) {
-      console.error("Error deleting document:", error);
-      toast("Error deleting document", {
-        duration: 5000,
-        description: "Failed to delete document. Please try again.",
-      });
-    }
-  };
-
-  const handleToggleDocumentActive = async (doc: {
-    id: string;
-    active: boolean;
-  }) => {
-    try {
-      const supabase = await createClient();
-      const { data: user } = await supabase.auth.getUser();
-
-      if (!user?.user?.id) return;
-
-      const { error } = await supabase
-        .from("documents")
-        .update({ active: !doc.active })
-        .eq("id", doc.id);
-
-      if (error) throw error;
-
-      // Update the local state
-      setDocuments((prev) =>
-        prev.map((d) => (d.id === doc.id ? { ...d, active: !doc.active } : d))
-      );
-
-      toast(
-        `Document ${doc.active ? "deactivated" : "activated"} successfully`,
-        {
-          duration: 3000,
-          description: doc.active
-            ? "The document has been deactivated and will not be used in searches."
-            : "The document has been activated and will be used in searches.",
-        }
-      );
-    } catch (error) {
-      console.error("Error toggling document status:", error);
-      toast("Error toggling document status", {
-        duration: 5000,
-        description: "Failed to toggle document status. Please try again.",
-      });
-    }
-  };
-
-  const handleUpdateConfig = async (
-    updates: Partial<Record<string, boolean>>
+  const handleUpdateToolConfig = (
+    toolUpdates: Partial<Record<string, boolean>>,
   ) => {
-    const mappedUpdates: Partial<UserConfig> = {};
-
-    Object.entries(updates).forEach(([key, value]) => {
-      switch (key) {
-        case "generateBarChart":
-          mappedUpdates.generate_bar_chart_enabled = value;
-          break;
-        case "generatePieChart":
-          mappedUpdates.generate_pie_chart_enabled = value;
-          break;
-        case "getCryptoPrice":
-          mappedUpdates.get_crypto_price_enabled = value;
-          break;
-        case "getCryptoMarketSummary":
-          mappedUpdates.get_crypto_market_summary_enabled = value;
-          break;
-        case "askQuestion":
-          mappedUpdates.ask_question_enabled = value;
-          break;
+    const formattedUpdates: Partial<UserConfig> = {};
+    for (const [toolId, enabled] of Object.entries(toolUpdates)) {
+      const key = `${toolId}_enabled` as keyof UserConfig;
+      if (key in (config || {})) {
+        (formattedUpdates as any)[key] = enabled;
+      } else {
+        console.warn(`Invalid tool config key: ${key}`);
       }
-    });
-
-    await updateConfig(mappedUpdates);
-    toast.success("Config updated successfully", {
-      duration: 3000,
-    });
-  };
-
-  const handleShare = async () => {
-    try {
-      setIsCreateShareLoading(true);
-      const response = await fetch(`/api/share/${chatId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ chatId }),
-      });
-
-      const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      toast.success("Share link created");
-      setIsShareModalOpen(true);
-      refresh();
-    } catch (error) {
-      console.error("Error sharing chat:", error);
-      toast.error("Failed to create share link");
-    } finally {
-      setIsCreateShareLoading(false);
+    }
+    if (Object.keys(formattedUpdates).length > 0) {
+      mutateUserConfig(formattedUpdates);
+    } else {
+      toast.info("No valid configuration changes to apply.");
     }
   };
 
-  const handleOpenShareModal = () => {
-    setIsShareModalOpen(true);
+  const handleShareChat = () => {
+    if (chatId) {
+      shareChat();
+    } else {
+      toast.error("Cannot share: Chat ID is missing.");
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      if (isDesktop) {
-        e.preventDefault();
-        handleSubmit();
-      }
+    if (e.key === "Enter" && !e.shiftKey && isDesktop) {
+      e.preventDefault();
+      handleSubmitWithImages();
     }
   };
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 768);
-    };
-
+    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Add these new handlers
-  const handleDragOver = (e: React.DragEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!isDragging) {
-      setIsDragging(true);
-    }
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    const files = Array.from(e.dataTransfer.files);
-    handleFiles(files);
-  };
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      handleFiles(files);
-    }
-  };
-
-  const handleFiles = (files: File[]) => {
-    const imageFiles = files.filter((file) => file.type.startsWith("image/"));
-
-    if (imageFiles.length === 0) {
-      toast("Please upload image files only");
-      return;
-    }
-
-    const newImages = imageFiles.map((file) => ({
-      url: URL.createObjectURL(file),
-      file,
-      isUploading: false,
-      uploadProgress: 0,
-    }));
-    setUploadedImages((prev) => [...prev, ...newImages]);
-
-    // Start uploading the new images
-    newImages.forEach((image, index) => {
-      const globalIndex = uploadedImages.length + index;
-      uploadImage(globalIndex, image.file);
-    });
-  };
-
-  const removeImage = async (index: number) => {
-    const imageToRemove = uploadedImages[index];
-
-    // If the image was successfully uploaded to Supabase, delete it
-    if (imageToRemove.publicUrl) {
-      setIsDeleteImageLoading(true);
-      try {
-        const supabase = await createClient();
-        // Extract the file path from the public URL
-        const filePath = imageToRemove.publicUrl.split("/").pop();
-        console.log(filePath);
-        if (filePath) {
-          // Delete the file from Supabase storage
-          const { error } = await supabase.storage
-            .from("chat-images")
-            .remove([filePath]);
-
-          if (error) {
-            console.error("Error deleting image:", error);
-            toast.error("Failed to delete image from storage");
-            return;
-          }
-        }
-      } catch (error) {
-        console.error("Error deleting image:", error);
-        toast.error("Failed to delete image");
-        return;
-      } finally {
-        setIsDeleteImageLoading(false);
-      }
-    }
-    // Remove the image from the UI
-    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
-
-    // Revoke the object URL to prevent memory leaks
-    if (imageToRemove.url.startsWith("blob:")) {
-      URL.revokeObjectURL(imageToRemove.url);
-    }
-  };
-
-  const uploadImageToSupabase = async (file: File): Promise<string> => {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Math.random()
-      .toString(36)
-      .substring(2, 15)}-${Date.now()}.${fileExt}`;
-    const supabase = await createClient();
-
-    const { data, error } = await supabase.storage
-      .from("chat-images") // Replace with your Supabase bucket name
-      .upload(fileName, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-
-    if (error) {
-      console.error("Error uploading image:", error);
-      throw error;
-    }
-
-    // Get public URL
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("chat-images").getPublicUrl(fileName);
-
-    return publicUrl;
-  };
-
-  const uploadImage = async (index: number, file: File) => {
-    try {
-      // Update state to show loading
-      setUploadedImages((prev) =>
-        prev.map((img, i) =>
-          i === index ? { ...img, isUploading: true, uploadProgress: 0 } : img
-        )
-      );
-
-      const publicUrl = await uploadImageToSupabase(file);
-
-      // Update state with the public URL
-      setUploadedImages((prev) =>
-        prev.map((img, i) =>
-          i === index ? { ...img, isUploading: false, publicUrl } : img
-        )
-      );
-    } catch (error) {
-      console.error("Upload failed:", error);
-      setUploadedImages((prev) =>
-        prev.map((img, i) =>
-          i === index ? { ...img, isUploading: false } : img
-        )
-      );
-      toast.error("Failed to upload image");
-    }
-  };
-
   return (
-    <>
+    <TooltipProvider delayDuration={100}>
       <form
         className={clsx(
-          "flex flex-col items-center gap-4 md:h-[calc(100dvh-70px)] justify-center h-[calc(100dvh-30px)] overflow-y-auto scroll-hidden"
+          "flex flex-col items-center gap-4 md:h-[calc(100dvh-70px)] justify-center h-[calc(100dvh-30px)] overflow-y-auto scroll-hidden",
+          isDragging && "border-2 border-dashed border-primary bg-primary/10",
         )}
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmitWithImages}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {messages.length === 0 && (
+        {messages.length === 0 && !status.startsWith("experimental") && (
           <>
-            <div className="md:mt-0 mt-[100px] ">
+            <div className="md:mt-0 mt-[100px] text-center">
               <p className="text-2xl font-bold">Hello there!</p>
               <p className="text-zinc-300">How can I help you today?</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl max-h-[calc(100dvh-350px)] overflow-y-auto scroll-hidden px-2">
-              {suggestedPrompts.map((prompt, idx) => (
-                <button
-                  key={idx}
-                  onClick={() =>
-                    handlePromptClick(`${prompt.title} ${prompt.subtitle}`)
-                  }
-                  className="text-left px-4 py-2 rounded-xl border border-zinc-700 hover:bg-zinc-800 transition"
-                >
-                  <p className="font-semibold text-white">{prompt.title}</p>
-                  <p className="text-sm text-zinc-400">{prompt.subtitle}</p>
-                </button>
-              ))}
+            <div className="w-full max-w-2xl max-h-[calc(100dvh-350px)] overflow-y-auto scroll-hidden px-2">
+              <SuggestedPrompts
+                prompts={suggestedPromptsData}
+                onPromptClick={handlePromptClick}
+              />
             </div>
           </>
         )}
 
         <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-[40px] relative">
-          {/* Add drag overlay */}
           {isDragging && (
             <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded-lg pointer-events-none z-10">
               <div className="text-center p-6 bg-zinc-800 rounded-lg">
@@ -750,38 +403,33 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                   Drop your images here
                 </p>
                 <p className="text-sm text-zinc-400">
-                  Support for PNG, JPG, GIF up to 10MB
+                  Support for PNG, JPG, GIF (max 5 images)
                 </p>
               </div>
             </div>
           )}
           <div className="flex justify-end">
-            {messages.length > 0 && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="ml-2"
-                      onClick={() => handleOpenShareModal()}
-                    >
-                      <FaShare className="text-lg" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Share your chat</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+            {messages.length > 0 && chatId && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="ml-2"
+                    onClick={() => setIsShareModalOpen(true)}
+                  >
+                    <FaShare className="text-lg" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Share this Chat</TooltipContent>
+              </Tooltip>
             )}
           </div>
-          <div
+          <ScrollArea
             ref={containerRef}
             className={clsx(
               "overflow-auto scroll-hidden px-2",
-
-              messages.length > 0 && " py-4 h-[calc(100dvh-250px)]"
+              messages.length > 0 && " py-4 h-[calc(100dvh-250px)]",
             )}
           >
             {messages.map((message) => {
@@ -789,275 +437,107 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
               return (
                 <div
                   key={message.id}
-                  className={`flex py-2 ${
-                    isUser ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex py-2 ${isUser ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={` text-left py-2 rounded-2xl text-sm ${
-                      isUser ? "bg-blue-600 text-white" : " text-white"
-                    } ${
-                      !isUser &&
-                      !message.toolInvocations?.length &&
-                      "bg-zinc-600"
-                    }`}
+                    className={`text-left py-2 rounded-2xl text-sm ${isUser ? "bg-blue-600 text-white" : "text-white"} ${!isUser && !message.toolInvocations?.length && "bg-zinc-600"}`}
                   >
+                    {message.data &&
+                      (message.data as any).imageUrls &&
+                      ((message.data as any).imageUrls as string[]).length >
+                        0 && (
+                        <div className="grid grid-cols-2 gap-2 p-2">
+                          {((message.data as any).imageUrls as string[]).map(
+                            (url: string, idx: number) => (
+                              <Image
+                                key={idx}
+                                src={url}
+                                alt={`Uploaded image ${idx + 1}`}
+                                width={100}
+                                height={100}
+                                className="rounded-md object-cover"
+                              />
+                            ),
+                          )}
+                        </div>
+                      )}
                     {message.parts.map((part, index) => {
                       if (part.type === "text") {
                         return (
                           <p
                             key={index}
-                            className=" px-4 leading-relaxed whitespace-pre-wrap"
+                            className="px-4 leading-relaxed whitespace-pre-wrap"
                           >
                             {part.text}
                           </p>
                         );
-                      } else {
-                        if (part.type === "tool-invocation") {
-                          if (
-                            part.toolInvocation.toolName === "generatePieChart"
-                          ) {
-                            const result = (part.toolInvocation as any)?.result;
+                      } else if (part.type === "tool-invocation") {
+                        const toolName = part.toolInvocation.toolName;
+                        const result = (part.toolInvocation as any)?.result;
+                        const isStreamingTool =
+                          !("result" in part.toolInvocation) &&
+                          message.id === messages[messages.length - 1]?.id &&
+                          status === "streaming";
 
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Generating chart...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result ? (
+                        if (isStreamingTool) {
+                          return (
+                            <div
+                              key={`${message.id}-streaming-${index}`}
+                              className="flex items-center gap-2 px-4 py-2"
+                            >
+                              <p className="text-white text-sm">
+                                {toolName === "askQuestion"
+                                  ? "Searching..."
+                                  : `Generating ${toolName.replace("generate", "").toLowerCase()}...`}
+                              </p>
+                              <Loader2 className="animate-spin h-5 w-5 text-orange-500" />
+                            </div>
+                          );
+                        }
+                        if (!result) {
+                          return (
+                            <div
+                              key={`${message.id}-error-${index}`}
+                              className="flex items-center gap-2 px-4 py-2"
+                            >
+                              <p className="text-white text-sm">
+                                Error with {toolName}.
+                              </p>{" "}
+                              <FaRegFaceSadCry />
+                            </div>
+                          );
+                        }
+                        switch (toolName) {
+                          case "generatePieChart":
+                            return (
                               <div key={index}>
                                 <PieChart option={result?.chartData} />
                               </div>
-                            ) : (
-                              <div
-                                key={message.id}
-                                className="flex items-center gap-2"
-                              >
-                                <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
-                                </p>
-
-                                <FaRegFaceSadCry />
-                              </div>
                             );
-                          }
-
-                          if (
-                            part.toolInvocation.toolName === "generateBarChart"
-                          ) {
-                            const result = (part.toolInvocation as any)?.result;
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Generating chart...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result ? (
+                          case "generateBarChart":
+                            return (
                               <div key={index}>
                                 <BarChart option={result?.chartData} />
                               </div>
-                            ) : (
-                              <div
-                                key={message.id}
-                                className="flex items-center gap-2"
-                              >
-                                <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
-                                </p>
-
-                                <FaRegFaceSadCry />
-                              </div>
                             );
-                          }
-
-                          if (
-                            part.toolInvocation.toolName === "getCryptoPrice"
-                          ) {
-                            const result = (part.toolInvocation as any)?.result;
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Fetching crypto price...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result ? (
+                          case "getCryptoPrice":
+                            return (
                               <CryptoPriceOverview
                                 key={index}
                                 result={result}
                               />
-                            ) : (
-                              <div
-                                key={message.id}
-                                className="flex items-center gap-2"
-                              >
-                                <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
-                                </p>
-
-                                <FaRegFaceSadCry />
-                              </div>
                             );
-                          }
-
-                          if (
-                            part.toolInvocation.toolName ===
-                            "getCryptoMarketSummary"
-                          ) {
-                            const result = (part.toolInvocation as any)?.result;
-
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Fetching crypto market summary ...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result ? (
-                              <CryptoSummary key={index} data={result} />
-                            ) : (
+                          case "getCryptoMarketSummary":
+                            return <CryptoSummary key={index} data={result} />;
+                          case "askQuestion":
+                            return (
                               <div
-                                key={message.id}
-                                className="flex items-center gap-2"
+                                key={index}
+                                className="prose prose-sm prose-invert p-4 max-w-none"
                               >
-                                <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
-                                </p>
-
-                                <FaRegFaceSadCry />
-                              </div>
-                            );
-                          }
-
-                          if (part.toolInvocation.toolName === "askQuestion") {
-                            const result = (part.toolInvocation as any)?.result;
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Searching through the document...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result ? (
-                              <div key={index}>
                                 <ReactMarkdown
                                   rehypePlugins={[rehypeHighlight]}
                                   components={{
-                                    h1: ({ children }) => (
-                                      <h1 className="text-xl font-bold mb-4 text-white">
-                                        {children}
-                                      </h1>
-                                    ),
-                                    h2: ({ children }) => (
-                                      <h2 className="text-lg font-semibold mb-3 text-white">
-                                        {children}
-                                      </h2>
-                                    ),
-                                    h3: ({ children }) => (
-                                      <h3 className="text-base font-medium mb-2 text-white">
-                                        {children}
-                                      </h3>
-                                    ),
-                                    p: ({ children }) => (
-                                      <p className="mb-4 text-white">
-                                        {children}
-                                      </p>
-                                    ),
-                                    ul: ({ children }) => (
-                                      <ul className="list-disc pl-6 mb-4 text-white">
-                                        {children}
-                                      </ul>
-                                    ),
-                                    ol: ({ children }) => (
-                                      <ol className="list-decimal pl-6 mb-4 text-white">
-                                        {children}
-                                      </ol>
-                                    ),
-                                    li: ({ children }) => (
-                                      <li className="mb-2 text-white">
-                                        {children}
-                                      </li>
-                                    ),
-
-                                    strong: ({ children }) => (
-                                      <strong className="font-bold text-white">
-                                        {children}
-                                      </strong>
-                                    ),
-                                    em: ({ children }) => (
-                                      <em className="italic text-white">
-                                        {children}
-                                      </em>
-                                    ),
-                                    // ✅ Inline code
                                     code({
                                       node,
                                       className,
@@ -1069,29 +549,22 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                         "";
                                       const codeString =
                                         extractTextFromChildren(children);
-
-                                      console.log(children);
-                                      const handleCopy = () => {
-                                        console.log(codeString);
-                                        navigator.clipboard.writeText(
-                                          codeString
-                                        );
-                                        toast("Copied to clipboard", {
-                                          duration: 1500,
-                                        });
-                                      };
-
                                       return (
-                                        <div className="relative group my-4">
+                                        <div className="relative group my-2">
                                           <Button
                                             variant="ghost"
-                                            onClick={handleCopy}
+                                            onClick={() => {
+                                              navigator.clipboard.writeText(
+                                                codeString,
+                                              );
+                                              toast.success("Copied!");
+                                            }}
                                             size="icon"
-                                            className="absolute top-2 right-2 text-xs px-2 py-1 rounded hover:bg-zinc-700"
+                                            className="absolute top-1 right-1 h-6 w-6"
                                           >
-                                            <FaCopy />
+                                            <FaCopy className="h-3 w-3" />
                                           </Button>
-                                          <pre className="rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm">
+                                          <pre className="rounded-md p-3 overflow-x-auto bg-zinc-900 text-xs">
                                             <code
                                               className={`language-${language}`}
                                               {...props}
@@ -1107,272 +580,212 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                   {result}
                                 </ReactMarkdown>
                               </div>
-                            ) : (
-                              <div
-                                key={message.id}
-                                className="flex items-center gap-2"
-                              >
-                                <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
-                                </p>
-
-                                <FaRegFaceSadCry />
-                              </div>
                             );
-                          }
+                          default:
+                            return null;
                         }
                       }
+                      return null;
                     })}
                   </div>
                 </div>
               );
             })}
-
             <div ref={bottomRef} />
-          </div>
+          </ScrollArea>
           <div className="flex flex-col">
             <div className="flex justify-between items-center pt-2">
               <div className="flex gap-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Button
-                        variant="outline"
-                        className="ml-2 relative"
-                        size="icon"
-                        onClick={() => setIsPdfModalOpen(true)}
-                      >
-                        <FaFilePdf className="h-8 w-8" />
-                        <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                          {documents?.length}
-                        </div>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Manage documents</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Button
-                        variant="outline"
-                        className="ml-2 relative"
-                        size="icon"
-                        onClick={() => setIsToolModalOpen(true)}
-                      >
-                        <FaHammer className="h-8 w-8" />
-                        <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                          {tools.length}
-                        </div>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Manage tools</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="ml-2 relative"
+                      size="icon"
+                      onClick={() => setIsPdfModalOpen(true)}
+                    >
+                      <FaFilePdf className="h-5 w-5" />
+                      <div className="absolute text-[10px] top-[-8px] right-[-8px] w-4 h-4 flex items-center justify-center bg-orange-500 rounded-full text-white">
+                        {isLoadingDocuments ? (
+                          <Loader2 className="h-2 w-2 animate-spin" />
+                        ) : (
+                          documents?.length || 0
+                        )}
+                      </div>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Manage PDF Documents</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="ml-2 relative"
+                      size="icon"
+                      onClick={() => setIsToolModalOpen(true)}
+                    >
+                      <FaHammer className="h-5 w-5" />
+                      <div className="absolute text-[10px] top-[-8px] right-[-8px] w-4 h-4 flex items-center justify-center bg-orange-500 rounded-full text-white">
+                        {toolsArray.filter((t) => t.enabled).length}
+                      </div>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Manage Tools</TooltipContent>
+                </Tooltip>
               </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="relative"
+                    asChild
+                  >
+                    <span>
+                      <FaArrowUp />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        onChange={handleFileInput}
+                        disabled={
+                          uploadedImages.length >= 5 ||
+                          status !== "ready" ||
+                          isUploadingImages
+                        }
+                      />
+                    </span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Attach Images (max 5)</TooltipContent>
+              </Tooltip>
             </div>
             <div className="sticky bottom-0 flex-col w-full py-2 px-2 flex gap-3">
-              {/* Show uploaded images */}
               {uploadedImages.length > 0 && (
-                <div className="flex flex-wrap gap-4 absolute bottom-[80px] left-[150px]">
-                  {uploadedImages.map((image, index) => (
-                    <div key={index} className="relative group">
+                <div className="flex flex-wrap gap-2 p-2 border border-zinc-700 rounded-md bg-zinc-800/50 absolute bottom-[70px] left-2 right-2 max-w-[calc(100%-1rem)] overflow-x-auto">
+                  {uploadedImages.map((image) => (
+                    <div
+                      key={image.id}
+                      className="relative group flex-shrink-0"
+                    >
+                      <Image
+                        src={image.url}
+                        alt={`Uploaded ${image.file?.name || "image"}`}
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 object-cover rounded-md border border-zinc-600"
+                      />
                       <Button
-                        variant="outline"
-                        className="relative bottom-[-5px]"
+                        variant="destructive"
                         size="icon"
-                        disabled={isDeleteImageLoading}
+                        className="absolute top-[-8px] right-[-8px] h-5 w-5 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeImage(image)}
+                        disabled={image.isUploading}
                       >
-                        <Image
-                          src={image.url}
-                          alt={`Uploaded ${index + 1}`}
-                          width={10}
-                          height={10}
-                          className="h-[35px] w-[35px] object-cover rounded-md"
-                        />
-                        <div
-                          onClick={() => removeImage(index)}
-                          className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-red-500 rounded-full"
-                        >
-                          <TiDelete />
-                        </div>
-                        {image.isUploading && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-md">
-                            <Loader2 className="animate-spin h-6 w-6" />
-                          </div>
-                        )}
+                        <TiDelete className="h-4 w-4" />
                       </Button>
+                      {image.isUploading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-md">
+                          <Loader2 className="animate-spin h-5 w-5 text-white" />
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               )}
-
-              {!isAtBottom && (
-                <button
+              {!isAtBottom && messages.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="icon"
                   onClick={() =>
                     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
                   }
-                  className="w-10 h-10 bottom-36 fixed self-center  flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
+                  className="w-10 h-10 bottom-36 fixed self-center z-10 rounded-full shadow-lg"
                   aria-label="Scroll to bottom"
                 >
                   <IoArrowDownSharp />
-                </button>
+                </Button>
               )}
-              <div className="flex items-center gap-3 w-full relative">
+              <div className="flex items-end gap-2 w-full relative">
                 <Textarea
                   value={input}
                   ref={textareaRef}
                   onChange={handleInputChange}
                   placeholder={
-                    status !== "ready" ? "Thinking..." : "Ask anything..."
+                    status !== "ready"
+                      ? "Thinking..."
+                      : "Ask anything or drop images..."
                   }
-                  disabled={status !== "ready"}
+                  disabled={
+                    status !== "ready" ||
+                    isUploadingImages ||
+                    isLoadingUserConfig
+                  }
                   onKeyDown={handleKeyDown}
-                  className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+                  className="flex-1 bg-zinc-900 text-white px-4 py-3 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50 min-h-[40px] max-h-[150px] overflow-y-auto"
+                  rows={1}
                 />
                 <Button
-                  onClick={handleSubmit}
+                  type="submit"
                   variant="outline"
-                  disabled={status !== "ready" || !input.trim()}
-                  className="h-10 w-10 rounded-full border bg-white border-zinc-400 absolute right-2 bottom-2"
+                  size="icon"
+                  disabled={
+                    status !== "ready" ||
+                    (!input.trim() && uploadedImages.length === 0) ||
+                    isUploadingImages ||
+                    isUpdatingUserConfig
+                  }
+                  className="h-10 w-10 rounded-full border bg-white border-zinc-400"
                 >
-                  <FaArrowUp />
+                  {(status === "streaming" &&
+                    messages[messages.length - 1]?.role === "user") ||
+                  isUpdatingUserConfig ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <FaArrowUp />
+                  )}
                 </Button>
               </div>
             </div>
 
-            <Dialog open={isPdfModalOpen} onOpenChange={setIsPdfModalOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Manage Knowledge Base </DialogTitle>
-                </DialogHeader>
-                <DocumentUpload
-                  onUpload={handleDocumentUpload}
-                  onDelete={handleDeleteDocument}
-                  onToggleActive={handleToggleDocumentActive}
-                  onClose={() => {
-                    setIsPdfModalOpen(false);
-                    fetchDocuments();
-                  }}
-                  documents={documents}
-                />
-              </DialogContent>
-            </Dialog>
-
-            <Dialog open={isToolModalOpen} onOpenChange={setIsToolModalOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Available Tools</DialogTitle>
-                </DialogHeader>
-                <ScrollArea className="h-[300px] overflow-y-auto">
-                  {tools.map((tool) => (
-                    <div
-                      key={tool.name}
-                      className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-background/50 hover:bg-background/70 transition-colors"
-                    >
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        {toolIcons[tool.name as keyof typeof toolIcons]}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium leading-none truncate">
-                          {tool.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {tool.description}
-                        </p>
-                      </div>
-
-                      <Switch
-                        id={tool.name}
-                        key={tool.name}
-                        checked={tool.enabled}
-                        onCheckedChange={(checked) =>
-                          handleUpdateConfig({ [tool.name]: checked })
-                        }
-                      />
-                    </div>
-                  ))}
-                </ScrollArea>
-              </DialogContent>
-            </Dialog>
-
-            <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Share public link to chat</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 flex flex-col items-center">
-                  {shareData?.shareUrl ? (
-                    <>
-                      <p className="text-sm self-start text-muted-foreground">
-                        {dayjs(shareData.createdAt).format(
-                          "DD/MM/YYYY HH:mm:ss"
-                        )}
-                      </p>
-                      <div className="flex items-center gap-2 justify-between w-full">
-                        <input
-                          type="text"
-                          value={shareData.shareUrl}
-                          readOnly
-                          className="flex-1 bg-zinc-800 text-white px-4 py-2 rounded-lg"
-                        />
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            navigator.clipboard.writeText(shareData.shareUrl);
-                            toast.success("Link copied to clipboard");
-                          }}
-                        >
-                          Copy Link
-                        </Button>
-                      </div>
-                      <Button
-                        disabled={isCreateShareLoading}
-                        className="w-full"
-                        onClick={handleShare}
-                      >
-                        {isCreateShareLoading
-                          ? "Updating..."
-                          : "Update Share Link"}
-                        {isCreateShareLoading && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                      </Button>
-                      <p className="text-sm text-gray-400">
-                        Share this link with anyone to let them view your chat
-                        in read-only mode.
-                      </p>
-                    </>
-                  ) : (
-                    <Button
-                      disabled={isCreateShareLoading}
-                      className="w-full"
-                      onClick={handleShare}
-                    >
-                      {isCreateShareLoading
-                        ? "Generating..."
-                        : "Generate Share Link"}
-                      {isCreateShareLoading && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      )}
-                    </Button>
-                  )}
-                  {shareError && (
-                    <p className="text-sm text-red-400 mt-2">
-                      {shareError.message}
-                    </p>
-                  )}
-                </div>
-              </DialogContent>
-            </Dialog>
+            <PdfManagementModal
+              isOpen={isPdfModalOpen}
+              onOpenChange={setIsPdfModalOpen}
+              chatId={chatId}
+              documents={documents || []}
+              isLoading={isLoadingDocuments}
+              onUpload={handleDocumentUpload}
+              onDelete={handleDeleteDocument}
+              onToggleActive={handleToggleDocumentActive}
+              onClose={() => setIsPdfModalOpen(false)}
+              fetchDocuments={() =>
+                queryClient.invalidateQueries({
+                  queryKey: ["documents", userId],
+                })
+              }
+            />
+            <ToolsModal
+              isOpen={isToolModalOpen}
+              onOpenChange={setIsToolModalOpen}
+              tools={toolsArray}
+              toolIcons={toolIcons}
+              onUpdateConfig={handleUpdateToolConfig}
+            />
+            <ShareChatModal
+              isOpen={isShareModalOpen}
+              onOpenChange={setIsShareModalOpen}
+              shareData={shareData}
+              isLoading={isSharingChat || isLoadingShareData}
+              onShare={handleShareChat}
+              shareError={
+                shareHookError ? { message: shareHookError.message } : null
+              }
+              chatId={chatId}
+            />
           </div>
         </div>
       </form>
-    </>
+    </TooltipProvider>
   );
 }

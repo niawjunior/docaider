@@ -6,28 +6,36 @@ import clsx from "clsx";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import { useCredit } from "../hooks/useCredit";
 import { useChats } from "../hooks/useChats";
+import { Button } from "@/components/ui/button"; // Import ShadCN Button
+import { Loader2 } from "lucide-react"; // Import Loader2 for consistency
 
 interface SidebarProps {
   chatId?: string;
-  isLoading?: boolean;
+  isLoading?: boolean; // This isLoading prop seems to be a general loading state from parent
 }
 
-const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
+const Sidebar = ({
+  chatId,
+  isLoading: parentIsLoading = false,
+}: SidebarProps) => {
   const { session } = useSupabaseSession();
   const { credit, isLoading: creditLoading } = useCredit(
-    session?.user.id || ""
+    session?.user.id || "",
   );
-  // const { userConfig } = useUserConfig(session?.user.id || "");
   const sidebarRef = useRef<HTMLUListElement>(null);
   const router = useRouter();
 
   const getMenuDisplayText = (chat: unknown) => {
     let text = "";
-    (chat as { messages: unknown[] }).messages.forEach((message: unknown) => {
-      if ((message as { role: string }).role === "user") {
-        text = (message as { content: string }).content;
-      }
-    });
+    // Ensure messages exist and is an array before trying to iterate
+    const messages = (chat as { messages?: unknown[] })?.messages;
+    if (Array.isArray(messages)) {
+      messages.forEach((message: unknown) => {
+        if ((message as { role: string }).role === "user") {
+          text = (message as { content: string }).content;
+        }
+      });
+    }
     return text || "Untitled";
   };
 
@@ -59,11 +67,13 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleChatClick = (newChatId: string) => {
-    if (newChatId === chatId) return; // Don't navigate if already on the same chat
+    if (newChatId === chatId) return;
 
     router.push(`/chat/${newChatId}`);
     router.refresh();
   };
+
+  const isLoading = parentIsLoading || creditLoading || isChatsLoading;
 
   return (
     <aside className="bg-zinc-900 p-4 flex flex-col gap-4 h-full w-72 min-w-72 border-r border-zinc-800 z-50">
@@ -71,39 +81,46 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
         Recents
       </div>
       <ul ref={sidebarRef} className="flex-1 overflow-y-auto scroll-hidden">
-        {isLoading || creditLoading || isChatsLoading ? (
+        {isLoading ? (
           <div className="flex items-center justify-center py-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+            <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
           </div>
         ) : (
           chats?.map((chat) => (
             <li key={(chat as { id: string }).id} className="py-1">
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => handleChatClick((chat as { id: string }).id)}
                 className={clsx(
-                  "w-full text-left text-sm py-2 px-2 rounded hover:bg-zinc-800 truncate",
-                  chatId === (chat as { id: string }).id ? "bg-zinc-700" : ""
+                  "w-full text-left text-sm py-2 px-2 rounded truncate justify-start h-auto", // justify-start for text-left alignment
+                  chatId === (chat as { id: string }).id
+                    ? "bg-zinc-700 hover:bg-zinc-700/80"
+                    : "hover:bg-zinc-800",
                 )}
               >
                 {getMenuDisplayText(chat as { messages: unknown[] })}
-              </button>
+              </Button>
             </li>
           ))
         )}
         {isFetchingNextPage && (
-          <div className="py-2 text-xs text-center text-zinc-500 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          <div className="py-2 flex items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
           </div>
         )}
       </ul>
 
-      <div className="text-xs  border-t border-zinc-700 pt-4 mt-4">
+      <div className="text-xs border-t border-zinc-700 pt-4 mt-4">
         <div className="flex items-center gap-2">
           <span className="text-sm">Credits:</span>
           {creditLoading ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
+            <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
           ) : (
-            <span className="text-sm">{credit?.balance.toFixed(2) || 0}</span>
+            <span className="text-sm">
+              {credit?.balance !== undefined
+                ? credit.balance.toFixed(2)
+                : "0.00"}
+            </span>
           )}
         </div>
         <div className="text-zinc-500">

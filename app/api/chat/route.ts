@@ -11,6 +11,7 @@ import {
   getCryptoMarketSummaryTool,
   getCryptoPriceTool,
 } from "@/app/tools/llm-tools";
+import { createErrorResponse } from "@/utils/apiResponse";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -18,35 +19,69 @@ export async function POST(req: NextRequest) {
 
   // Get the user from the request
 
-  const { data } = await supabase.auth.getUser();
-  const user = data.user;
+  const { data: userData } = await supabase.auth.getUser(); // Renamed to userData
+  const user = userData.user;
 
   if (!user) {
     console.error("User not found");
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
+    // For non-streaming initial errors, we can use createErrorResponse.
+    return createErrorResponse("Unauthorized", 401, "UNAUTHORIZED");
   }
 
   // Get user config to check askQuestion settings
-  const { data: configData } = await supabase
+  const { data: configData, error: configError } = await supabase // Added error handling
     .from("user_config")
     .select("*")
-    .eq("id", user.id)
+    .eq("id", user.id) // Assuming 'id' in user_config is user.id
     .single();
 
+  if (configError && configError.code !== "PGRST116") {
+    // PGRST116: No rows found (ok, use defaults)
+    console.error("Error fetching user config:", configError);
+    return createErrorResponse(
+      "Failed to fetch user configuration.",
+      500,
+      "CONFIG_FETCH_ERROR",
+    );
+  }
+
   // Get user credit
-  const { data: creditData } = await supabase
+  const { data: creditData, error: creditFetchError } = await supabase // Added error handling
     .from("credits")
     .select("balance")
     .eq("user_id", user.id)
     .single();
 
-  const { data: documentsData } = await supabase
+  if (creditFetchError) {
+    console.error("Error fetching user credits:", creditFetchError);
+    return createErrorResponse(
+      "Failed to fetch user credits.",
+      500,
+      "CREDIT_FETCH_ERROR",
+    );
+  }
+
+  if (!creditData || creditData.balance <= 0) {
+    // This check is simplified. The system prompt already handles credit balance messages.
+    // However, if a tool call *requires* credits and this is a pre-check, it's relevant.
+    // For now, let the LLM handle informing about zero credit based on system prompt.
+    // If strict pre-emptive blocking is needed:
+    // return createErrorResponse("Insufficient credits to perform this action.", 402, "INSUFFICIENT_CREDITS");
+  }
+
+  const { data: documentsData, error: documentsError } = await supabase // Added error handling
     .from("documents")
     .select("document_id, document_name, title")
     .eq("user_id", user.id);
+
+  if (documentsError) {
+    console.error("Error fetching documents data:", documentsError);
+    return createErrorResponse(
+      "Failed to fetch user documents.",
+      500,
+      "DOCUMENTS_FETCH_ERROR",
+    );
+  }
 
   // Get tools
   const tools = {
@@ -57,12 +92,13 @@ export async function POST(req: NextRequest) {
     askQuestion: askQuestionTool,
   };
 
-  const result = streamText({
-    model: openai("gpt-4o-mini"),
-    toolChoice: "auto",
-    maxSteps: 1,
-    tools,
-    system: `
+  try {
+    const result = streamText({
+      model: openai("gpt-4o-mini"),
+      toolChoice: "auto",
+      maxSteps: 1,
+      tools,
+      system: `
     You are **DocAider** — a smart, polite, and friendly AI assistant that transforms natural language into clear, visual insights.
     
     ‼️ IMPORTANT:
@@ -79,9 +115,9 @@ export async function POST(req: NextRequest) {
 
     - Uploaded Documents: ${documentsData?.length || 0}
     🔧 **Current Tool Availability**
-    - Credit: ${creditData?.balance}
+    - Credit: ${creditData?.balance ?? 0} 
     - ${
-      creditData?.balance === 0
+      (creditData?.balance ?? 0) === 0
         ? "Your credit balance is 0 so you can't use any tools. Please inform the user to add credits to use tools."
         : "You can use tools."
     }
@@ -89,29 +125,29 @@ export async function POST(req: NextRequest) {
     ‼️ Do not fallback to "please enable document tools." Instead, use the *askQuestion* tool if it's available.
 
  - Ask Question: ${
-   configData?.ask_question_enabled
-     ? documentsData?.length
+   (configData?.ask_question_enabled ?? false) // Default to false if configData is null
+     ? (documentsData?.length ?? 0) > 0
        ? "✅ Enabled"
        : "❌ No documents uploaded. Inform the user to upload documents to use askQuestion."
      : "❌ Disabled. Inform the user to enable askQuestion to use askQuestion."
  }
     - Bar Chart: ${
-      configData?.generate_bar_chart_enabled
+      (configData?.generate_bar_chart_enabled ?? false)
         ? "✅ Enabled"
         : "❌ Disabled. Inform the user to enable generateBarChart to use generateBarChart."
     }
     - Pie Chart: ${
-      configData?.generate_pie_chart_enabled
+      (configData?.generate_pie_chart_enabled ?? false)
         ? "✅ Enabled"
         : "❌ Disabled. Inform the user to enable generatePieChart to use generatePieChart."
     }
     - Crypto Price: ${
-      configData?.get_crypto_price_enabled
+      (configData?.get_crypto_price_enabled ?? false)
         ? "✅ Enabled"
         : "❌ Disabled. Inform the user to enable getCryptoPrice to use getCryptoPrice."
     }
     - Crypto Market Summary: ${
-      configData?.get_crypto_market_summary_enabled
+      (configData?.get_crypto_market_summary_enabled ?? false)
         ? "✅ Enabled"
         : "❌ Disabled. Inform the user to enable getCryptoMarketSummary to use getCryptoMarketSummary."
     }
@@ -145,14 +181,14 @@ export async function POST(req: NextRequest) {
       • Use appropriate Thai-specific character handling
     
     📄 **Document Handling**
-    - Information about uploaded documents: ${JSON.stringify(documentsData)}
+    - Information about uploaded documents: ${JSON.stringify(documentsData || [])}
     - ${
-      documentsData?.length
+      (documentsData?.length ?? 0) > 0
         ? "Documents are uploaded"
         : "No documents are uploaded"
     }
     ${
-      configData?.ask_question_enabled
+      (configData?.ask_question_enabled ?? false)
         ? "askQuestion is enabled"
         : "askQuestion is disabled"
     }
@@ -184,59 +220,70 @@ export async function POST(req: NextRequest) {
     - Encourage continued interaction: "Want to explore more?" or "Need a pie chart for this too?"
     `,
 
-    messages,
-    onStepFinish: async (response) => {
-      const tools = response.toolResults?.filter(
-        (item) => item.type === "tool-result"
-      );
-      const toolNames = tools?.map((item) => item.toolName);
+      messages,
+      onStepFinish: async (response) => {
+        const toolsInvoked = response.toolResults?.filter(
+          (item) => item.type === "tool-result",
+        );
+        const toolNames = toolsInvoked?.map((item) => item.toolName);
 
-      const totalCreditCost = toolNames?.length || 0;
-      console.log("totalCreditCost", totalCreditCost);
-      if (totalCreditCost > 0) {
+        const totalCreditCost = toolNames?.length || 0;
+        // console.log("totalCreditCost onStepFinish:", totalCreditCost); // Removed debugging log
+        if (totalCreditCost > 0 && creditData) {
+          // Ensure creditData is available
+          await supabase
+            .from("credits")
+            .update({
+              balance:
+                creditData.balance - totalCreditCost < 0 // Use creditData.balance
+                  ? 0
+                  : creditData.balance - totalCreditCost,
+            })
+            .eq("user_id", user.id);
+        }
+      },
+
+      async onFinish({ response }) {
+        const finalMessages = appendResponseMessages({
+          messages,
+          responseMessages: response.messages,
+        });
+
+        // Re-fetch user within onFinish to ensure session is still valid before DB write
+        const { data: finishUserData, error: finishAuthError } =
+          await supabase.auth.getUser();
+
+        if (finishAuthError || !finishUserData.user) {
+          console.error(
+            "Error fetching user in onFinish or user not found:",
+            finishAuthError,
+          );
+          // Cannot use createErrorResponse here as headers might have been sent for streaming
+          // Log and skip DB write if user is not valid
+          return;
+        }
+
         await supabase
-          .from("credits")
-          .update({
-            balance:
-              creditData?.balance - totalCreditCost < 0
-                ? 0
-                : creditData?.balance - totalCreditCost,
+          .from("chats")
+          .upsert({
+            id: chatId, // chatId can be null for new chats, Supabase handles this by inserting if PK is null/default
+            messages: finalMessages,
+            user_id: finishUserData.user.id, // Use user from this scope
           })
-          .eq("user_id", user.id);
-      }
-    },
-
-    async onFinish({ response }) {
-      const finalMessages = appendResponseMessages({
-        messages,
-        responseMessages: response.messages,
-      });
-
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-
-      if (authError) {
-        console.error("Error fetching user:", authError);
-        return;
-      }
-
-      if (!user) {
-        console.error("User not found");
-        return;
-      }
-
-      await supabase
-        .from("chats")
-        .upsert({
-          id: chatId,
-          messages: finalMessages,
-          user_id: user.id,
-        })
-        .eq("id", chatId);
-    },
-  });
-
-  return result.toDataStreamResponse();
+          .eq("id", chatId); // This eq is only relevant for updates, upsert handles insert/update logic
+      },
+    });
+    return result.toDataStreamResponse();
+  } catch (error: any) {
+    console.error(
+      "Error in streamText setup or during initial processing:",
+      error,
+    );
+    // This error is before the stream is returned to the client.
+    return createErrorResponse(
+      error.message || "Failed to process chat request",
+      500,
+      "STREAM_PROCESSING_ERROR",
+    );
+  }
 }

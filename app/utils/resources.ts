@@ -9,7 +9,7 @@ export interface DocumentChunk {
 export const storeDocument = async (
   userId: string,
   title: string,
-  content: string
+  content: string,
 ): Promise<void> => {
   try {
     const supabase = await createClient();

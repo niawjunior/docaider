@@ -14,7 +14,7 @@ export const generateChunks = (input: string): string[] => {
 };
 
 export const generateEmbeddings = async (
-  value: string
+  value: string,
 ): Promise<Array<{ embedding: number[]; content: string }>> => {
   // Clean and normalize Thai text before generating embeddings
   const cleanedText = value
@@ -53,7 +53,7 @@ interface DatabaseChunk {
 
 export const findRelevantContent = async (
   userId: string,
-  question: string
+  question: string,
 ): Promise<DatabaseChunk[]> => {
   const supabase = await createClient();
   const questionEmbedding = await generateEmbedding(question);
@@ -98,7 +98,7 @@ export const findRelevantContent = async (
       match_threshold: 0.1,
       match_count: 200,
       user_id: userId,
-    }
+    },
   );
 
   if (error) throw error;

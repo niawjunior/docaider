@@ -4,6 +4,7 @@ import { signInWithGoogle } from "../login/action";
 import { FcGoogle } from "react-icons/fc";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Button } from "@/components/ui/button"; // Import ShadCN Button
 
 const LoginComponent = () => {
   const searchParams = useSearchParams();
@@ -20,13 +21,19 @@ const LoginComponent = () => {
         </div>
 
         <form>
-          <button
+          {/* Replace custom button with ShadCN Button */}
+          <Button
+            type="submit" // Important for form submission behavior
             formAction={() => signInWithGoogle(callbackUrl)}
-            className="w-full flex items-center justify-center gap-3 bg-white text-black py-3 px-4 rounded-lg shadow hover:bg-gray-100 transition font-medium"
+            variant="outline" // Or other variants like "default", "secondary"
+            className="w-full flex items-center justify-center gap-3 py-3 px-4 font-medium text-base"
+            // Adjusted padding and font-medium, text-base for similar look.
+            // bg-white text-black hover:bg-gray-100 are handled by variant="outline" or other variants.
+            // Shadow can be part of a variant or added via className if needed.
           >
             <FcGoogle className="text-xl" />
             Sign in with Google
-          </button>
+          </Button>
         </form>
 
         <p className="text-sm text-zinc-400 mt-6 text-center">

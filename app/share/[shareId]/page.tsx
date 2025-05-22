@@ -102,7 +102,7 @@ const SharePage = () => {
                     "overflow-auto scroll-hidden px-2",
 
                     data?.messages?.length > 0 &&
-                      " py-4 md:h-[calc(100dvh-140px)] h-[calc(100dvh-100px)]"
+                      " py-4 md:h-[calc(100dvh-140px)] h-[calc(100dvh-100px)]",
                   )}
                 >
                   {data?.messages?.map((message: any) => {
@@ -256,7 +256,7 @@ const SharePage = () => {
                                             const language =
                                               className?.replace(
                                                 "language-",
-                                                ""
+                                                "",
                                               ) ?? "";
                                             const codeString =
                                               extractTextFromChildren(children);
@@ -265,7 +265,7 @@ const SharePage = () => {
                                             const handleCopy = () => {
                                               console.log(codeString);
                                               navigator.clipboard.writeText(
-                                                codeString
+                                                codeString,
                                               );
                                               toast("Copied to clipboard", {
                                                 duration: 1500,

@@ -40,7 +40,7 @@ export function useShareUrl(chatId: string): {
     } catch (err) {
       console.log("error", err);
       setError(
-        err instanceof Error ? err : new Error("Failed to fetch share data")
+        err instanceof Error ? err : new Error("Failed to fetch share data"),
       );
       setShareData(null);
     } finally {

@@ -17,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button"; // Import ShadCN Button
 
 const ChatLayout = ({
   children,
@@ -58,13 +59,15 @@ const ChatLayout = ({
             <div className="flex gap-4">
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
-                    <button
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => router.push("/")}
-                      className="text-[20px] rounded-lg"
+                      className="text-[20px]" // Keep icon size if needed, or adjust Button size prop
                     >
                       <GoHomeFill />
-                    </button>
+                    </Button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Go to home</p>
@@ -73,17 +76,19 @@ const ChatLayout = ({
               </TooltipProvider>
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
-                    <button
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                      className="text-[20px] rounded-lg"
+                      className="text-[20px]"
                     >
                       {isSidebarOpen ? (
                         <TbLayoutSidebarLeftCollapseFilled />
                       ) : (
                         <TbLayoutSidebarLeftExpandFilled />
                       )}
-                    </button>
+                    </Button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Toggle sidebar</p>
@@ -93,13 +98,15 @@ const ChatLayout = ({
               {!isSidebarOpen && (
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger>
-                      <button
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={createNewChat}
-                        className="text-[20px] rounded-lg"
+                        className="text-[20px]"
                       >
                         <IoMdOpen />
-                      </button>
+                      </Button>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Create new chat</p>
@@ -112,13 +119,15 @@ const ChatLayout = ({
               <div className="flex justify-end w-full">
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger>
-                      <button
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={createNewChat}
-                        className="text-[20px] rounded-lg"
+                        className="text-[20px]"
                       >
                         <IoMdOpen />
-                      </button>
+                      </Button>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Create new chat</p>

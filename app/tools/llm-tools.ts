@@ -34,9 +34,9 @@ export const generatePieChartTool = tool({
             .string()
             .optional()
             .describe(
-              "Series color. Optional - if not provided, will use a distinct color from the default palette."
+              "Series color. Optional - if not provided, will use a distinct color from the default palette.",
             ),
-        })
+        }),
       )
       .optional()
       .describe("Series data with optional color"),
@@ -89,9 +89,9 @@ export const generatePieChartTool = tool({
                   .string()
                   .optional()
                   .describe(
-                    "Series color. Optional - if not provided, will use a distinct color from the default palette."
+                    "Series color. Optional - if not provided, will use a distinct color from the default palette.",
                   ),
-              })
+              }),
             )
             .optional(),
           backgroundColor: z
@@ -110,7 +110,7 @@ export const generatePieChartTool = tool({
         }\nSeries data: ${JSON.stringify(
           seriesData ?? [],
           null,
-          2
+          2,
         )}\nBackground color: ${backgroundColor ?? ""}\nText color: ${
           textColor ?? ""
         }`,
@@ -150,9 +150,9 @@ export const generateBarChartTool = tool({
           color: z
             .string()
             .describe(
-              "Series color. Always ask for color and if the user doesn't ask for color, use the default color."
+              "Series color. Always ask for color and if the user doesn't ask for color, use the default color.",
             ),
-        })
+        }),
       )
       .optional()
       .describe("Series data with optional color"),
@@ -181,9 +181,9 @@ export const generateBarChartTool = tool({
                 color: z
                   .string()
                   .describe(
-                    "Series color. Always ask for color and if the user doesn't ask for color, use the default color."
+                    "Series color. Always ask for color and if the user doesn't ask for color, use the default color.",
                   ),
-              })
+              }),
             )
             .optional(),
           backgroundColor: z
@@ -202,7 +202,7 @@ export const generateBarChartTool = tool({
         }\nSeries data: ${JSON.stringify(
           seriesData ?? [],
           null,
-          2
+          2,
         )}\nBackground color: ${backgroundColor ?? ""}\nText color: ${
           textColor ?? ""
         }`,
@@ -298,13 +298,13 @@ export const getCryptoPriceTool = tool({
             .string()
             .optional()
             .describe(
-              "Insights about the current price. Return insights in same as input language"
+              "Insights about the current price. Return insights in same as input language",
             ),
           nextSteps: z
             .string()
             .optional()
             .describe(
-              "Recommended next actions. Return next steps in same as input language"
+              "Recommended next actions. Return next steps in same as input language",
             ),
         }),
         prompt: `Give a short insight and next step for a user looking at this cryptocurrency data.\n\n
@@ -417,7 +417,7 @@ export const getCryptoMarketSummaryTool = tool({
 
       // Parse and map each THB_xxx pair to extract base coin and volume
       const coinVolumes: { symbol: string; volume: number }[] = Object.entries(
-        json
+        json,
       )
         .filter(([key]) => key.startsWith("THB_")) // Only THB-based trading pairs
         .map(([key, value]) => ({
@@ -482,7 +482,7 @@ export const askQuestionTool = tool({
           answer: z
             .string()
             .describe(
-              "Answer to the question. Use markdown formatting with clear headings and bullet points. For date/time questions, provide accurate dates and maintain chronological order."
+              "Answer to the question. Use markdown formatting with clear headings and bullet points. For date/time questions, provide accurate dates and maintain chronological order.",
             ),
         }),
         prompt,

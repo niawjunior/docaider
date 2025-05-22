@@ -57,7 +57,7 @@ export default function useUserCredit(userId: string) {
         console.error("Error updating credit:", err);
       }
     },
-    [userId, fetchCredit]
+    [userId, fetchCredit],
   );
 
   return {

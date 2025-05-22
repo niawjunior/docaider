@@ -24,7 +24,7 @@ export default function useSupabaseSession() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
-      }
+      },
     );
     return () => {
       listener.subscription.unsubscribe();
