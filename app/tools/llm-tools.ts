@@ -802,7 +802,6 @@ export const generateTTS = tool({
       Host: ${host.name} (${host.voice})
       Co-host: ${coHost.name} (${coHost.voice})
       Script: ${script}`;
-      console.log(prompt);
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
         contents: [{ parts: [{ text: prompt }] }],
@@ -831,7 +830,6 @@ export const generateTTS = tool({
 
       const data =
         response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-      console.log(response);
       if (!data) {
         return { error: "Failed to generate audio" };
       }

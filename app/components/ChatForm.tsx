@@ -633,7 +633,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
         const supabase = await createClient();
         // Extract the file path from the public URL
         const filePath = imageToRemove.publicUrl.split("/").pop();
-        console.log(filePath);
         if (filePath) {
           // Delete the file from Supabase storage
           const { error } = await supabase.storage
@@ -1134,7 +1133,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                           }
 
                           if (part.toolInvocation.toolName === "generateTTS") {
-                            console.log(part.toolInvocation);
                             const result = (part.toolInvocation as any)?.result;
                             if (
                               !("result" in part.toolInvocation) &&

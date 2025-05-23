@@ -251,7 +251,6 @@ export async function POST(req: NextRequest) {
       const toolNames = tools?.map((item) => item.toolName);
 
       const totalCreditCost = toolNames?.length || 0;
-      console.log("totalCreditCost", totalCreditCost);
       if (totalCreditCost > 0) {
         await supabase
           .from("credits")

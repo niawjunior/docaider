@@ -27,7 +27,6 @@ const TableComponent = ({ title, rows }: TableProps) => {
   const [selectedRow, setSelectedRow] = useState<string | null>(
     rows?.[0]?.document_id
   );
-  console.log(rows);
   return (
     <div className="flex md:flex-row flex-col gap-4">
       <ScrollArea className="w-full">

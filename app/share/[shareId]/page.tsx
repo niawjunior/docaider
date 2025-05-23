@@ -517,7 +517,6 @@ const SharePage = () => {
                                 if (
                                   part.toolInvocation.toolName === "generateTTS"
                                 ) {
-                                  console.log(part.toolInvocation);
                                   const result = (part.toolInvocation as any)
                                     ?.result;
                                   if (
