@@ -13,6 +13,7 @@ export interface UserConfig {
   generate_pie_chart_enabled: boolean;
   get_crypto_price_enabled: boolean;
   get_crypto_market_summary_enabled: boolean;
+  generate_tts_enabled: boolean;
   ask_question_enabled: boolean;
   language_preference: string;
   theme_preference: string;

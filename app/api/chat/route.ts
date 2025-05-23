@@ -10,6 +10,7 @@ import {
   generatePieChartTool,
   getCryptoMarketSummaryTool,
   getCryptoPriceTool,
+  generateTTS,
 } from "@/app/tools/llm-tools";
 
 export async function POST(req: NextRequest) {
@@ -55,6 +56,7 @@ export async function POST(req: NextRequest) {
     getCryptoPrice: getCryptoPriceTool,
     getCryptoMarketSummary: getCryptoMarketSummaryTool,
     askQuestion: askQuestionTool,
+    generateTTS: generateTTS,
   };
 
   const result = streamText({
@@ -88,13 +90,13 @@ export async function POST(req: NextRequest) {
 
     ‼️ Do not fallback to "please enable document tools." Instead, use the *askQuestion* tool if it's available.
 
- - Ask Question: ${
-   configData?.ask_question_enabled
-     ? documentsData?.length
-       ? "✅ Enabled"
-       : "❌ No documents uploaded. Inform the user to upload documents to use askQuestion."
-     : "❌ Disabled. Inform the user to enable askQuestion to use askQuestion."
- }
+    - Ask Question: ${
+      configData?.ask_question_enabled
+        ? documentsData?.length
+          ? "✅ Enabled"
+          : "❌ No documents uploaded. Inform the user to upload documents to use askQuestion."
+        : "❌ Disabled. Inform the user to enable askQuestion to use askQuestion."
+    }
     - Bar Chart: ${
       configData?.generate_bar_chart_enabled
         ? "✅ Enabled"
@@ -115,7 +117,11 @@ export async function POST(req: NextRequest) {
         ? "✅ Enabled"
         : "❌ Disabled. Inform the user to enable getCryptoMarketSummary to use getCryptoMarketSummary."
     }
-    
+    - Text to Speech: ${
+      configData?.generate_tts_enabled
+        ? "✅ Enabled"
+        : "❌ Disabled. Inform the user to enable generateTTS to use generateTTS."
+    }
     
     🧠 **Behavior Guidelines**
     - Do **not** answer document-based questions if askQuestion is **disabled**.
@@ -143,6 +149,46 @@ export async function POST(req: NextRequest) {
       • Maintain Thai character combinations
       • Preserve Thai punctuation marks
       • Use appropriate Thai-specific character handling
+    
+    **TTS Behavior**
+    - When user want to convert text to speech, use generateTTS tool.
+    - When user want to do conversation between two speakers with different voices, use generateTTS tool.
+    - When user want to generate voice message, use generateTTS tool.
+    - When user want to create a podcast, use generateTTS tool.
+    - Support only multi-speaker text-to-speech conversion
+    - Each speaker can have their own unique voice and personality
+    - Handle audio generation errors gracefully
+      Voice options (Name – Gender – Tone):
+      - Zephyr  – Female   – Bright  
+      - Puck    – Male – Upbeat  
+      - Charon  – Male   – Informative  
+      - Kore    – Female – Firm  
+      - Fenrir  – Male   – Excitable  
+      - Leda    – Female – Youthful  
+      - Orus    – Male   – Firm  
+      - Aoede   – Female – Breezy  
+      - Callirhoe – Female – Easy-going  
+      - Autonoe – Female – Bright  
+      - Enceladus – Male   – Breathy  
+      - Iapetus – Male   – Clear  
+      - Umbriel – Male – Easy-going  
+      - Algieba – Male   – Smooth  
+      - Despina – Female – Smooth  
+      - Erinome – Female – Clear  
+      - Algenib – Male   – Gravelly  
+      - Rasalgethi – Male – Informative  
+      - Laomedeia – Female – Upbeat  
+      - Achernar – Female   – Soft  
+      - Alnilam – Male   – Firm  
+      - Schedar – Male – Even  
+      - Gacrux  – Female   – Mature  
+      - Pulcherrima – Female – Forward  
+      - Achird  – Male   – Friendly  
+      - Zubenelgenubi – Male – Casual  
+      - Vindemiatrix – Female – Gentle  
+      - Sadachbia – Male – Lively  
+      - Sadaltager – Male   – Knowledgeable  
+      - Sulafar – Female   – Warm  
     
     📄 **Document Handling**
     - Information about uploaded documents: ${JSON.stringify(documentsData)}
@@ -235,6 +281,10 @@ export async function POST(req: NextRequest) {
           user_id: user.id,
         })
         .eq("id", chatId);
+    },
+
+    onError: async (error) => {
+      console.error("Error in streamText:", error);
     },
   });
 

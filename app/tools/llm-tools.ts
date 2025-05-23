@@ -5,9 +5,75 @@ import { openai } from "@ai-sdk/openai";
 import crypto from "crypto";
 import { createClient } from "../utils/supabase/server";
 import { findRelevantContent } from "../utils/embedding";
+import { GoogleGenAI } from "@google/genai";
+import wav from "wav";
+import { v4 as uuidv4 } from "uuid";
 
 const API_KEY = process.env.BITKUB_API_KEY!;
 const API_SECRET = process.env.BITKUB_API_SECRET!;
+
+async function saveToSupabase(
+  filename: string,
+  pcmData: Buffer
+): Promise<string> {
+  try {
+    const supabase = await createClient();
+    const fileExt = filename.split(".").pop();
+    const filePath = `${uuidv4()}.${fileExt}`;
+
+    const { error } = await supabase.storage
+      .from("podcasts")
+      .upload(filePath, pcmData, {
+        contentType: "audio/wav",
+        upsert: false,
+      });
+
+    if (error) {
+      console.error("Error uploading to Supabase:", error);
+      throw error;
+    }
+
+    // Get public URL
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("podcasts").getPublicUrl(filePath);
+
+    return publicUrl;
+  } catch (error) {
+    console.error("Error in saveToSupabase:", error);
+    throw error;
+  }
+}
+
+async function saveWaveFile(
+  filename: string,
+  pcmData: Buffer
+): Promise<string> {
+  try {
+    // 1. Create WAV file in memory
+    const wavBuffer = await new Promise<Buffer>((resolve, reject) => {
+      const writer = new wav.Writer({
+        channels: 1,
+        sampleRate: 24000,
+        bitDepth: 16,
+      });
+
+      const chunks: Buffer[] = [];
+      writer.on("data", (chunk) => chunks.push(chunk));
+      writer.on("end", () => resolve(Buffer.concat(chunks)));
+      writer.on("error", reject);
+
+      writer.write(pcmData);
+      writer.end();
+    });
+
+    // 2. Upload to Supabase and return the public URL
+    return await saveToSupabase(filename, wavBuffer);
+  } catch (error) {
+    console.error("Error in saveWaveFile:", error);
+    throw error;
+  }
+}
 
 export const generatePieChartTool = tool({
   description: `Use this tool to generate visual pie chart configurations (ECharts-compatible) whenever the user asks to view data as a pie chart
@@ -558,6 +624,226 @@ export const askQuestionTool = tool({
     } catch (error: any) {
       console.error("Error in askQuestionTool:", error);
       throw new Error("Failed to process question: " + error.message);
+    }
+  },
+});
+
+export const generateTTS = tool({
+  description: `Use this tool to convert text to speech using Gemini's TTS service.
+  
+  ✅ Required for:
+  - Converting any text content to speech
+  - Creating multi-speaker conversations
+  - Support only 2 speakers
+  - Creating a podcast
+
+  🧠 Behavior:
+  - Supports only multi-speaker configurations
+  - Each speaker can have their own unique voice
+  - Returns audio in WAV format
+  - Always ensure the text is appropriate for voice conversion
+  - Always ask for the speaker name and voice
+  - Always suggest the closest supported alternative if the voice is unclear
+  - Always confirm the information provided by the user before generating the audio
+  - Maximum length of audio is 2 minutes
+
+  Example usage:
+  - "Convert this summary to speech using a natural voice"
+  - "Create a conversation between two speakers with different voices"
+  - "Create a podcast"
+
+  Podcast Examples:
+  - "Create a podcast-style conversation between Joe (Voice: Kore) and Jane (Voice: Puck) discussing the latest tech trends"
+  - "Generate a podcast episode with two hosts: Alex (Voice: Alnilam) and Sarah (Voice: Aoede) interviewing a guest about AI ethics"
+  - "Create a podcast-style debate between two experts: Mike (Voice: Rasalgethi) and Lisa (Voice: Laomedeia) discussing climate change solutions"
+  - "Generate a podcast intro with host (Voice: Gacrux) and co-host (Voice: Achird) welcoming listeners to the show"
+
+  Voice options (Name – Gender – Tone):
+  - Zephyr  – Female   – Bright  
+  - Puck    – Male – Upbeat  
+  - Charon  – Male   – Informative  
+  - Kore    – Female – Firm  
+  - Fenrir  – Male   – Excitable  
+  - Leda    – Female – Youthful  
+  - Orus    – Male   – Firm  
+  - Aoede   – Female – Breezy  
+  - Callirhoe – Female – Easy-going  
+  - Autonoe – Female – Bright  
+  - Enceladus – Male   – Breathy  
+  - Iapetus – Male   – Clear  
+  - Umbriel – Male – Easy-going  
+  - Algieba – Male   – Smooth  
+  - Despina – Female – Smooth  
+  - Erinome – Female – Clear  
+  - Algenib – Male   – Gravelly  
+  - Rasalgethi – Male – Informative  
+  - Laomedeia – Female – Upbeat  
+  - Achernar – Female   – Soft  
+  - Alnilam – Male   – Firm  
+  - Schedar – Male – Even  
+  - Gacrux  – Female   – Mature  
+  - Pulcherrima – Female – Forward  
+  - Achird  – Male   – Friendly  
+  - Zubenelgenubi – Male – Casual  
+  - Vindemiatrix – Female – Gentle  
+  - Sadachbia – Male – Lively  
+  - Sadaltager – Male   – Knowledgeable  
+  - Sulafar – Female   – Warm  
+  `,
+  parameters: z.object({
+    topic: z
+      .string()
+      .describe("The main title or subject of the podcast episode")
+      .default("Episode Topic"),
+
+    style: z
+      .enum(["conversational", "interview"])
+      .describe("Podcast format style")
+      .default("interview"),
+
+    host: z.object({
+      name: z.string().describe("Host display name"),
+      gender: z
+        .enum(["male", "female"])
+        .describe("Host gender, for choosing Thai suffix (“kráp” vs. “khâ”)"),
+      voice: z
+        .enum([
+          "Zephyr",
+          "Puck",
+          "Charon",
+          "Kore",
+          "Fenrir",
+          "Leda",
+          "Orus",
+          "Aoede",
+          "Callirhoe",
+          "Autonoe",
+          "Enceladus",
+          "Iapetus",
+          "Umbriel",
+          "Algieba",
+          "Despina",
+          "Erinome",
+          "Algenib",
+          "Rasalgethi",
+          "Laomedeia",
+          "Achernar",
+          "Alnilam",
+          "Schedar",
+          "Gacrux",
+          "Pulcherrima",
+          "Achird",
+          "Zubenelgenubi",
+          "Vindemiatrix",
+          "Sadachbia",
+          "Sadaltager",
+          "Sulafar",
+        ])
+        .describe("Prebuilt voice for the host"),
+    }),
+
+    coHost: z.object({
+      name: z.string().describe("Co-host display name"),
+      gender: z
+        .enum(["male", "female"])
+        .describe(
+          "Co-host gender, for choosing Thai suffix (“kráp” vs. “khâ”)"
+        ),
+      voice: z
+        .enum([
+          "Zephyr",
+          "Puck",
+          "Charon",
+          "Kore",
+          "Fenrir",
+          "Leda",
+          "Orus",
+          "Aoede",
+          "Callirhoe",
+          "Autonoe",
+          "Enceladus",
+          "Iapetus",
+          "Umbriel",
+          "Algieba",
+          "Despina",
+          "Erinome",
+          "Algenib",
+          "Rasalgethi",
+          "Laomedeia",
+          "Achernar",
+          "Alnilam",
+          "Schedar",
+          "Gacrux",
+          "Pulcherrima",
+          "Achird",
+          "Zubenelgenubi",
+          "Vindemiatrix",
+          "Sadachbia",
+          "Sadaltager",
+          "Sulafar",
+        ])
+        .describe("Prebuilt voice for the co-host"),
+    }),
+
+    script: z
+      .string()
+      .describe(
+        `
+          Full conversation transcript, with each turn prefixed by speaker name.
+          ChatGPT will automatically append “kráp” or “khâ” based on gender.
+          If you need the softer “ká” particle, include it explicitly in the text.
+        `
+      )
+      .nonempty("A non-empty script is required"),
+  }),
+  execute: async ({ topic, style, host, coHost, script }) => {
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const prompt = `TTS the following conversation:
+      Topic: ${topic}
+      Style: ${style}
+      Host: ${host.name} (${host.voice})
+      Co-host: ${coHost.name} (${coHost.voice})
+      Script: ${script}`;
+      console.log(prompt);
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash-preview-tts",
+        contents: [{ parts: [{ text: prompt }] }],
+        config: {
+          responseModalities: ["AUDIO"],
+          speechConfig: {
+            multiSpeakerVoiceConfig: {
+              speakerVoiceConfigs: [
+                {
+                  speaker: host.name,
+                  voiceConfig: {
+                    prebuiltVoiceConfig: { voiceName: host.voice },
+                  },
+                },
+                {
+                  speaker: coHost.name,
+                  voiceConfig: {
+                    prebuiltVoiceConfig: { voiceName: coHost.voice },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      const data =
+        response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      console.log(response);
+      if (!data) {
+        return { error: "Failed to generate audio" };
+      }
+      const audioBuffer = Buffer.from(data, "base64");
+      const filename = `podcast-${uuidv4()}.wav`;
+      return await saveWaveFile(filename, audioBuffer);
+    } catch (error) {
+      console.error("Error in TTS:", error);
+      return { error: "Failed to process request" };
     }
   },
 });

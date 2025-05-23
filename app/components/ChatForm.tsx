@@ -24,6 +24,7 @@ import {
   FaArrowUp,
   FaCopy,
   FaTrash,
+  FaVolumeUp,
 } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 
@@ -66,6 +67,7 @@ const toolIcons = {
   getCryptoPrice: <FaBitcoin />,
   getCryptoMarketSummary: <FaChartLine />,
   askQuestion: <FaQuestion />,
+  generateTTS: <FaVolumeUp />,
 };
 
 interface ChatFormProps {
@@ -123,6 +125,11 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   const { config, updateConfig } = useUserConfig(session?.user?.id || "");
 
   const tools = [
+    {
+      name: "generateTTS",
+      description: "Generate a text to speech",
+      enabled: config?.generate_tts_enabled ?? true,
+    },
     {
       name: "generateBarChart",
       description: "Generate a bar chart",
@@ -498,6 +505,9 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
           break;
         case "askQuestion":
           mappedUpdates.ask_question_enabled = value;
+          break;
+        case "generateTTS":
+          mappedUpdates.generate_tts_enabled = value;
           break;
       }
     });
@@ -1070,9 +1080,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                       const codeString =
                                         extractTextFromChildren(children);
 
-                                      console.log(children);
                                       const handleCopy = () => {
-                                        console.log(codeString);
                                         navigator.clipboard.writeText(
                                           codeString
                                         );
@@ -1107,6 +1115,45 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                   {result}
                                 </ReactMarkdown>
                               </div>
+                            ) : (
+                              <div
+                                key={message.id}
+                                className="flex items-center gap-2"
+                              >
+                                <p className="text-white text-sm">
+                                  Something went wrong. Please try again.
+                                </p>
+
+                                <FaRegFaceSadCry />
+                              </div>
+                            );
+                          }
+
+                          if (part.toolInvocation.toolName === "generateTTS") {
+                            console.log(part.toolInvocation);
+                            const result = (part.toolInvocation as any)?.result;
+                            if (
+                              !("result" in part.toolInvocation) &&
+                              message.id ===
+                                messages[messages.length - 1]?.id &&
+                              status === "streaming"
+                            ) {
+                              return (
+                                <div
+                                  key={message.id}
+                                  className="flex items-center gap-2"
+                                >
+                                  <p className="text-white text-sm">
+                                    Creating audio ...
+                                  </p>
+                                  <div className="flex items-center justify-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return result ? (
+                              <audio key={message.id} src={result} controls />
                             ) : (
                               <div
                                 key={message.id}
