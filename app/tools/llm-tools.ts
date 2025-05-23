@@ -847,3 +847,36 @@ export const generateTTS = tool({
     }
   },
 });
+
+export const allDocumentTool = tool({
+  description: "Use this tool to return all documents file path",
+  parameters: z.object({
+    title: z.string().describe("Title of the document"),
+  }),
+  execute: async ({ title }) => {
+    const supabase = await createClient();
+    const { data: user } = await supabase.auth.getUser();
+
+    if (!user?.user?.id) {
+      throw new Error("User not authenticated");
+    }
+    const { data } = await supabase
+      .from("documents")
+      .select("document_id, document_name, title")
+      .eq("user_id", user.user.id);
+    if (!data) {
+      throw new Error("Failed to fetch documents");
+    }
+    return {
+      title,
+      rows: data.map((doc) => {
+        return {
+          document_id: doc.document_id,
+          document_name: doc.document_name,
+          title: doc.title,
+          url: `user_${user.user.id}/${doc.document_name}`,
+        };
+      }),
+    };
+  },
+});

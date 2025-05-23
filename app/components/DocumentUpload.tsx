@@ -44,7 +44,7 @@ export default function DocumentUpload({
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [fileSizeError, setFileSizeError] = useState<string | null>(null);
-  const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
+  const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
   const { session } = useSupabaseSession();
   const { credit } = useCredit(session?.user?.id || "");
 
@@ -144,7 +144,7 @@ export default function DocumentUpload({
                 onChange={handleFileChange}
                 disabled={isUploading}
               />
-              <p className="text-xs text-gray-500">Maximum file size: 1MB</p>
+              <p className="text-xs text-gray-500">Maximum file size: 3MB</p>
             </div>
           </div>
           <Button

@@ -11,6 +11,7 @@ import {
   getCryptoMarketSummaryTool,
   getCryptoPriceTool,
   generateTTS,
+  allDocumentTool,
 } from "@/app/tools/llm-tools";
 
 export async function POST(req: NextRequest) {
@@ -57,6 +58,7 @@ export async function POST(req: NextRequest) {
     getCryptoMarketSummary: getCryptoMarketSummaryTool,
     askQuestion: askQuestionTool,
     generateTTS: generateTTS,
+    allDocument: allDocumentTool,
   };
 
   const result = streamText({
@@ -121,6 +123,11 @@ export async function POST(req: NextRequest) {
       configData?.generate_tts_enabled
         ? "✅ Enabled"
         : "❌ Disabled. Inform the user to enable generateTTS to use generateTTS."
+    }
+    - All Document: ${
+      documentsData?.length
+        ? "✅ Enabled"
+        : "❌ No documents uploaded. Inform the user to upload documents to use allDocument."
     }
     
     🧠 **Behavior Guidelines**
@@ -191,8 +198,9 @@ export async function POST(req: NextRequest) {
       - Sulafar – Female   – Warm  
     
     📄 **Document Handling**
-    - Information about uploaded documents: ${JSON.stringify(documentsData)}
-    - ${
+    - If no documents are uploaded, return "No documents are uploaded"
+    
+    ${
       documentsData?.length
         ? "Documents are uploaded"
         : "No documents are uploaded"
@@ -217,6 +225,12 @@ export async function POST(req: NextRequest) {
     - Support:
       - Current price lookup
       - Market summary
+
+    **Document Behavior**
+    - If no documents are uploaded, return "No documents are uploaded"
+    - If documents are uploaded, return all documents file path
+    - Use allDocument tool to get all documents file path
+    - If user want to know all documents, use allDocument tool
     
     🎯 **Your Mission**
     - Turn messy or vague input into beautiful, instant insights.
