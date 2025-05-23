@@ -18,6 +18,7 @@ import rehypeHighlight from "rehype-highlight";
 import { toast } from "sonner";
 import "highlight.js/styles/github-dark.css"; // or choose another theme
 import { FaRegFaceSadCry } from "react-icons/fa6";
+import TableComponent from "@/app/components/Table";
 
 function extractTextFromChildren(children: any): string {
   if (typeof children === "string") return children;
@@ -121,8 +122,11 @@ const SharePage = () => {
                           } ${
                             !isUser &&
                             !message.toolInvocations?.length &&
-                            "bg-zinc-600"
-                          }`}
+                            "bg-zinc-600 "
+                          }
+                        
+                        ${!isUser && "w-full"}
+                        `}
                         >
                           {message.parts.map((part: any, index: any) => {
                             if (part.type === "text") {
@@ -343,6 +347,56 @@ const SharePage = () => {
                                       </div>
                                     );
                                   }
+
+                                  if (
+                                    part.toolInvocation.toolName ===
+                                    "allDocument"
+                                  ) {
+                                    const result = (part.toolInvocation as any)
+                                      ?.result;
+
+                                    if (
+                                      !("result" in part.toolInvocation) &&
+                                      message.id ===
+                                        data.messages[data.messages.length - 1]
+                                          ?.id &&
+                                      status === "streaming"
+                                    ) {
+                                      return (
+                                        <div
+                                          key={message.id}
+                                          className="flex items-center gap-2"
+                                        >
+                                          <p className="text-white text-sm">
+                                            Fetching documents ...
+                                          </p>
+                                          <div className="flex items-center justify-center py-4">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                          </div>
+                                        </div>
+                                      );
+                                    }
+                                    return result ? (
+                                      <TableComponent
+                                        key={message.id}
+                                        title={result.title}
+                                        rows={result.rows}
+                                      />
+                                    ) : (
+                                      <div
+                                        key={message.id}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <p className="text-white text-sm">
+                                          Something went wrong. Please try
+                                          again.
+                                        </p>
+
+                                        <FaRegFaceSadCry />
+                                      </div>
+                                    );
+                                  }
+
                                   return result ? (
                                     <div key={index}>
                                       <ReactMarkdown

@@ -814,7 +814,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                     }
                     
                     ${!isUser && "w-full"}
-
                     `}
                   >
                     {message.parts.map((part, index) => {
