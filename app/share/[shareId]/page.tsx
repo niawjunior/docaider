@@ -125,8 +125,12 @@ const SharePage = () => {
                             "bg-zinc-600 "
                           }
                         
-                        ${!isUser && "w-full"}
-                        `}
+                                ${
+                                  !isUser &&
+                                  message.toolInvocations?.length &&
+                                  "w-full"
+                                }
+                    `}
                         >
                           {message.parts.map((part: any, index: any) => {
                             if (part.type === "text") {

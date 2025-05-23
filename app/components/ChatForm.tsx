@@ -813,7 +813,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                       "bg-zinc-600 "
                     }
                     
-                    ${!isUser && "w-full"}
+                    ${!isUser && message.toolInvocations?.length && "w-full"}
                     `}
                   >
                     {message.parts.map((part, index) => {
