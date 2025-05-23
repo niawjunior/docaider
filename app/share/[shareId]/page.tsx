@@ -17,6 +17,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import { toast } from "sonner";
 import "highlight.js/styles/github-dark.css"; // or choose another theme
+import { FaRegFaceSadCry } from "react-icons/fa6";
 
 function extractTextFromChildren(children: any): string {
   if (typeof children === "string") return children;
@@ -105,7 +106,7 @@ const SharePage = () => {
                       " py-4 md:h-[calc(100dvh-140px)] h-[calc(100dvh-100px)]"
                   )}
                 >
-                  {data?.messages?.map((message: any) => {
+                  {data?.messages.map((message: any) => {
                     const isUser = message.role === "user";
                     return (
                       <div
@@ -142,9 +143,41 @@ const SharePage = () => {
                                   const result = (part.toolInvocation as any)
                                     ?.result;
 
-                                  return (
+                                  if (
+                                    !("result" in part.toolInvocation) &&
+                                    message.id ===
+                                      data.messages[data.messages.length - 1]
+                                        ?.id &&
+                                    status === "streaming"
+                                  ) {
+                                    return (
+                                      <div
+                                        key={message.id}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <p className="text-white text-sm">
+                                          Generating chart...
+                                        </p>
+                                        <div className="flex items-center justify-center py-4">
+                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                  return result ? (
                                     <div key={index}>
                                       <PieChart option={result?.chartData} />
+                                    </div>
+                                  ) : (
+                                    <div
+                                      key={message.id}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <p className="text-white text-sm">
+                                        Something went wrong. Please try again.
+                                      </p>
+
+                                      <FaRegFaceSadCry />
                                     </div>
                                   );
                                 }
@@ -155,9 +188,41 @@ const SharePage = () => {
                                 ) {
                                   const result = (part.toolInvocation as any)
                                     ?.result;
-                                  return (
+                                  if (
+                                    !("result" in part.toolInvocation) &&
+                                    message.id ===
+                                      data.messages[data.messages.length - 1]
+                                        ?.id &&
+                                    status === "streaming"
+                                  ) {
+                                    return (
+                                      <div
+                                        key={message.id}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <p className="text-white text-sm">
+                                          Generating chart...
+                                        </p>
+                                        <div className="flex items-center justify-center py-4">
+                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                  return result ? (
                                     <div key={index}>
                                       <BarChart option={result?.chartData} />
+                                    </div>
+                                  ) : (
+                                    <div
+                                      key={message.id}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <p className="text-white text-sm">
+                                        Something went wrong. Please try again.
+                                      </p>
+
+                                      <FaRegFaceSadCry />
                                     </div>
                                   );
                                 }
@@ -168,11 +233,43 @@ const SharePage = () => {
                                 ) {
                                   const result = (part.toolInvocation as any)
                                     ?.result;
-                                  return (
+                                  if (
+                                    !("result" in part.toolInvocation) &&
+                                    message.id ===
+                                      data.messages[data.messages.length - 1]
+                                        ?.id &&
+                                    status === "streaming"
+                                  ) {
+                                    return (
+                                      <div
+                                        key={message.id}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <p className="text-white text-sm">
+                                          Fetching crypto price...
+                                        </p>
+                                        <div className="flex items-center justify-center py-4">
+                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                  return result ? (
                                     <CryptoPriceOverview
                                       key={index}
                                       result={result}
                                     />
+                                  ) : (
+                                    <div
+                                      key={message.id}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <p className="text-white text-sm">
+                                        Something went wrong. Please try again.
+                                      </p>
+
+                                      <FaRegFaceSadCry />
+                                    </div>
                                   );
                                 }
 
@@ -183,8 +280,40 @@ const SharePage = () => {
                                   const result = (part.toolInvocation as any)
                                     ?.result;
 
-                                  return (
+                                  if (
+                                    !("result" in part.toolInvocation) &&
+                                    message.id ===
+                                      data.messages[data.messages.length - 1]
+                                        ?.id &&
+                                    status === "streaming"
+                                  ) {
+                                    return (
+                                      <div
+                                        key={message.id}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <p className="text-white text-sm">
+                                          Fetching crypto market summary ...
+                                        </p>
+                                        <div className="flex items-center justify-center py-4">
+                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                  return result ? (
                                     <CryptoSummary key={index} data={result} />
+                                  ) : (
+                                    <div
+                                      key={message.id}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <p className="text-white text-sm">
+                                        Something went wrong. Please try again.
+                                      </p>
+
+                                      <FaRegFaceSadCry />
+                                    </div>
                                   );
                                 }
 
@@ -193,7 +322,27 @@ const SharePage = () => {
                                 ) {
                                   const result = (part.toolInvocation as any)
                                     ?.result;
-
+                                  if (
+                                    !("result" in part.toolInvocation) &&
+                                    message.id ===
+                                      data.messages[data.messages.length - 1]
+                                        ?.id &&
+                                    status === "streaming"
+                                  ) {
+                                    return (
+                                      <div
+                                        key={message.id}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <p className="text-white text-sm">
+                                          Searching through the document...
+                                        </p>
+                                        <div className="flex items-center justify-center py-4">
+                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
                                   return result ? (
                                     <div key={index}>
                                       <ReactMarkdown
@@ -261,9 +410,7 @@ const SharePage = () => {
                                             const codeString =
                                               extractTextFromChildren(children);
 
-                                            console.log(children);
                                             const handleCopy = () => {
-                                              console.log(codeString);
                                               navigator.clipboard.writeText(
                                                 codeString
                                               );
@@ -299,13 +446,62 @@ const SharePage = () => {
                                       </ReactMarkdown>
                                     </div>
                                   ) : (
-                                    <div className="flex items-center gap-2">
+                                    <div
+                                      key={message.id}
+                                      className="flex items-center gap-2"
+                                    >
                                       <p className="text-white text-sm">
-                                        Searching through documents...
+                                        Something went wrong. Please try again.
                                       </p>
-                                      <div className="flex items-center justify-center py-4">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+
+                                      <FaRegFaceSadCry />
+                                    </div>
+                                  );
+                                }
+
+                                if (
+                                  part.toolInvocation.toolName === "generateTTS"
+                                ) {
+                                  console.log(part.toolInvocation);
+                                  const result = (part.toolInvocation as any)
+                                    ?.result;
+                                  if (
+                                    !("result" in part.toolInvocation) &&
+                                    message.id ===
+                                      data.messages[data.messages.length - 1]
+                                        ?.id &&
+                                    status === "streaming"
+                                  ) {
+                                    return (
+                                      <div
+                                        key={message.id}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <p className="text-white text-sm">
+                                          Creating audio ...
+                                        </p>
+                                        <div className="flex items-center justify-center py-4">
+                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                        </div>
                                       </div>
+                                    );
+                                  }
+                                  return result ? (
+                                    <audio
+                                      key={message.id}
+                                      src={result}
+                                      controls
+                                    />
+                                  ) : (
+                                    <div
+                                      key={message.id}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <p className="text-white text-sm">
+                                        Something went wrong. Please try again.
+                                      </p>
+
+                                      <FaRegFaceSadCry />
                                     </div>
                                   );
                                 }

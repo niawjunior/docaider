@@ -126,8 +126,13 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
 
   const tools = [
     {
+      name: "askQuestion",
+      description: "Ask a question about the uploaded documents",
+      enabled: config?.ask_question_enabled ?? true,
+    },
+    {
       name: "generateTTS",
-      description: "Generate a text to speech",
+      description: "Generate a text to speech, e.g. for podcasting",
       enabled: config?.generate_tts_enabled ?? true,
     },
     {
@@ -149,11 +154,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       name: "getCryptoMarketSummary",
       description: "Get a summary of the current market for a cryptocurrency",
       enabled: config?.get_crypto_market_summary_enabled ?? true,
-    },
-    {
-      name: "askQuestion",
-      description: "Ask a question about the uploaded documents",
-      enabled: config?.ask_question_enabled ?? true,
     },
   ];
 
