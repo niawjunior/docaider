@@ -29,7 +29,7 @@ const TableComponent = ({ title, rows }: TableProps) => {
   );
   console.log(rows);
   return (
-    <div className="flex gap-4 w-full min-w-full">
+    <div className="flex md:flex-row flex-col gap-4">
       <ScrollArea className="w-full">
         <Table>
           <TableCaption>{title}</TableCaption>
@@ -66,13 +66,13 @@ const TableComponent = ({ title, rows }: TableProps) => {
           </TableBody>
         </Table>
       </ScrollArea>
-      <div className="w-full">
+      <ScrollArea className="w-full">
         <Pdf
           url={`https://yahuypxwczxcfxrcpudu.supabase.co/storage/v1/object/public/documents/${
             rows?.find((row) => row.document_id === selectedRow)?.url
           }`}
         />
-      </div>
+      </ScrollArea>
     </div>
   );
 };
