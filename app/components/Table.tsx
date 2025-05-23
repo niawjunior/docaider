@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -29,49 +28,45 @@ const TableComponent = ({ title, rows }: TableProps) => {
   );
   return (
     <div className="flex md:flex-row flex-col gap-4">
-      <ScrollArea className="w-full">
-        <Table>
-          <TableCaption>{title}</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Document ID</TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead>Action</TableHead>
+      <Table className="overflow-auto">
+        <TableCaption>{title}</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Document ID</TableHead>
+            <TableHead>Title</TableHead>
+            <TableHead>Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows?.map((row, rowIndex) => (
+            <TableRow
+              key={rowIndex}
+              className={
+                selectedRow === row.document_id
+                  ? "bg-zinc-600"
+                  : "hover:bg-zinc-600"
+              }
+            >
+              <TableCell>{row.document_id}</TableCell>
+              <TableCell>{row.title}</TableCell>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSelectedRow(row.document_id)}
+                >
+                  <FaFilePdf className="h-4 w-4" />
+                </Button>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows?.map((row, rowIndex) => (
-              <TableRow
-                key={rowIndex}
-                className={
-                  selectedRow === row.document_id
-                    ? "bg-zinc-600"
-                    : "hover:bg-zinc-600"
-                }
-              >
-                <TableCell>{row.document_id}</TableCell>
-                <TableCell>{row.title}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setSelectedRow(row.document_id)}
-                  >
-                    <FaFilePdf className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </ScrollArea>
-      <ScrollArea className="w-full">
-        <Pdf
-          url={`https://yahuypxwczxcfxrcpudu.supabase.co/storage/v1/object/public/documents/${
-            rows?.find((row) => row.document_id === selectedRow)?.url
-          }`}
-        />
-      </ScrollArea>
+          ))}
+        </TableBody>
+      </Table>
+      <Pdf
+        url={`https://yahuypxwczxcfxrcpudu.supabase.co/storage/v1/object/public/documents/${
+          rows?.find((row) => row.document_id === selectedRow)?.url
+        }`}
+      />
     </div>
   );
 };
