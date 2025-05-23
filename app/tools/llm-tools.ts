@@ -688,7 +688,6 @@ export const generateTTS = tool({
   - Vindemiatrix – Female – Gentle  
   - Sadachbia – Male – Lively  
   - Sadaltager – Male   – Knowledgeable  
-  - Sulafar – Female   – Warm  
   `,
   parameters: z.object({
     topic: z
@@ -737,7 +736,6 @@ export const generateTTS = tool({
           "Vindemiatrix",
           "Sadachbia",
           "Sadaltager",
-          "Sulafar",
         ])
         .describe("Prebuilt voice for the host"),
     }),
@@ -780,7 +778,6 @@ export const generateTTS = tool({
           "Vindemiatrix",
           "Sadachbia",
           "Sadaltager",
-          "Sulafar",
         ])
         .describe("Prebuilt voice for the co-host"),
     }),

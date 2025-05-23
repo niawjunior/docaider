@@ -195,7 +195,6 @@ export async function POST(req: NextRequest) {
       - Vindemiatrix – Female – Gentle  
       - Sadachbia – Male – Lively  
       - Sadaltager – Male   – Knowledgeable  
-      - Sulafar – Female   – Warm  
     
     📄 **Document Handling**
     - If no documents are uploaded, return "No documents are uploaded"
