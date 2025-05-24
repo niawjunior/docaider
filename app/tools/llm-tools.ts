@@ -5,7 +5,7 @@ import { openai } from "@ai-sdk/openai";
 import crypto from "crypto";
 import { createClient } from "../utils/supabase/server";
 import { findRelevantContent } from "../utils/embedding";
-import { GoogleGenAI } from "@google/genai";
+import { GenerateContentConfig, GoogleGenAI } from "@google/genai";
 import wav from "wav";
 import { v4 as uuidv4 } from "uuid";
 
@@ -634,11 +634,11 @@ export const generateTTS = tool({
   ✅ Required for:
   - Converting any text content to speech
   - Creating multi-speaker conversations
-  - Support only 2 speakers
-  - Creating a podcast
+  - Support single and multi speakers
+  - Creating a podcast, interview, conversation, debate
 
   🧠 Behavior:
-  - Supports only multi-speaker configurations
+  - Supports single and multi-speaker configurations
   - Each speaker can have their own unique voice
   - Returns audio in WAV format
   - Always ensure the text is appropriate for voice conversion
@@ -650,13 +650,23 @@ export const generateTTS = tool({
   Example usage:
   - "Convert this summary to speech using a natural voice"
   - "Create a conversation between two speakers with different voices"
-  - "Create a podcast"
+  - "Create a podcast, interview, conversation, debate"
 
   Podcast Examples:
   - "Create a podcast-style conversation between Joe (Voice: Kore) and Jane (Voice: Puck) discussing the latest tech trends"
   - "Generate a podcast episode with two hosts: Alex (Voice: Alnilam) and Sarah (Voice: Aoede) interviewing a guest about AI ethics"
   - "Create a podcast-style debate between two experts: Mike (Voice: Rasalgethi) and Lisa (Voice: Laomedeia) discussing climate change solutions"
   - "Generate a podcast intro with host (Voice: Gacrux) and co-host (Voice: Achird) welcoming listeners to the show"
+
+  Interview Examples:
+  - "Interview a guest about AI ethics with two hosts: Alex (Voice: Alnilam) and Sarah (Voice: Aoede)"
+
+  Conversation Examples:
+  - "Create a conversation between two speakers with different voices"
+
+  Debate Examples:
+  - "Create a debate between two experts: Mike (Voice: Rasalgethi) and Lisa (Voice: Laomedeia) discussing climate change solutions"
+  
 
   Voice options (Name – Gender – Tone):
   - Zephyr  – Female   – Bright  
@@ -692,96 +702,59 @@ export const generateTTS = tool({
   parameters: z.object({
     topic: z
       .string()
-      .describe("The main title or subject of the podcast episode")
+      .describe(
+        "The main title or subject of the podcast, interview, conversation, debate"
+      )
       .default("Episode Topic"),
 
     style: z
-      .enum(["conversational", "interview"])
-      .describe("Podcast format style")
+      .enum(["conversational", "interview", "debate"])
+      .describe("Podcast format style, conversational, interview or debate")
       .default("interview"),
 
-    host: z.object({
-      name: z.string().describe("Host display name"),
-      gender: z
-        .enum(["male", "female"])
-        .describe("Host gender, for choosing Thai suffix (“kráp” vs. “khâ”)"),
-      voice: z
-        .enum([
-          "Zephyr",
-          "Puck",
-          "Charon",
-          "Kore",
-          "Fenrir",
-          "Leda",
-          "Orus",
-          "Aoede",
-          "Callirhoe",
-          "Autonoe",
-          "Enceladus",
-          "Iapetus",
-          "Umbriel",
-          "Algieba",
-          "Despina",
-          "Erinome",
-          "Algenib",
-          "Rasalgethi",
-          "Laomedeia",
-          "Achernar",
-          "Alnilam",
-          "Schedar",
-          "Gacrux",
-          "Pulcherrima",
-          "Achird",
-          "Zubenelgenubi",
-          "Vindemiatrix",
-          "Sadachbia",
-          "Sadaltager",
-        ])
-        .describe("Prebuilt voice for the host"),
-    }),
-
-    coHost: z.object({
-      name: z.string().describe("Co-host display name"),
-      gender: z
-        .enum(["male", "female"])
-        .describe(
-          "Co-host gender, for choosing Thai suffix (“kráp” vs. “khâ”)"
-        ),
-      voice: z
-        .enum([
-          "Zephyr",
-          "Puck",
-          "Charon",
-          "Kore",
-          "Fenrir",
-          "Leda",
-          "Orus",
-          "Aoede",
-          "Callirhoe",
-          "Autonoe",
-          "Enceladus",
-          "Iapetus",
-          "Umbriel",
-          "Algieba",
-          "Despina",
-          "Erinome",
-          "Algenib",
-          "Rasalgethi",
-          "Laomedeia",
-          "Achernar",
-          "Alnilam",
-          "Schedar",
-          "Gacrux",
-          "Pulcherrima",
-          "Achird",
-          "Zubenelgenubi",
-          "Vindemiatrix",
-          "Sadachbia",
-          "Sadaltager",
-        ])
-        .describe("Prebuilt voice for the co-host"),
-    }),
-
+    speakers: z.array(
+      z.object({
+        name: z.string().describe("Speaker display name"),
+        gender: z
+          .enum(["male", "female"])
+          .describe(
+            "Speaker gender, for choosing Thai suffix (“kráp” vs. “khâ”)"
+          ),
+        voice: z
+          .enum([
+            "Zephyr",
+            "Puck",
+            "Charon",
+            "Kore",
+            "Fenrir",
+            "Leda",
+            "Orus",
+            "Aoede",
+            "Callirhoe",
+            "Autonoe",
+            "Enceladus",
+            "Iapetus",
+            "Umbriel",
+            "Algieba",
+            "Despina",
+            "Erinome",
+            "Algenib",
+            "Rasalgethi",
+            "Laomedeia",
+            "Achernar",
+            "Alnilam",
+            "Schedar",
+            "Gacrux",
+            "Pulcherrima",
+            "Achird",
+            "Zubenelgenubi",
+            "Vindemiatrix",
+            "Sadachbia",
+            "Sadaltager",
+          ])
+          .describe("Prebuilt voice for the speaker"),
+      })
+    ),
     script: z
       .string()
       .describe(
@@ -793,39 +766,49 @@ export const generateTTS = tool({
       )
       .nonempty("A non-empty script is required"),
   }),
-  execute: async ({ topic, style, host, coHost, script }) => {
+  execute: async ({ topic, style, speakers, script }) => {
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       const prompt = `TTS the following conversation:
       Topic: ${topic}
       Style: ${style}
-      Host: ${host.name} (${host.voice})
-      Co-host: ${coHost.name} (${coHost.voice})
+      Speakers: ${speakers
+        .map((speaker) => `${speaker.name} (${speaker.voice})`)
+        .join(", ")}
       Script: ${script}`;
+
+      let config: GenerateContentConfig = {
+        responseModalities: ["AUDIO"],
+      };
+      if (speakers.length > 1) {
+        config = {
+          ...config,
+          speechConfig: {
+            multiSpeakerVoiceConfig: {
+              speakerVoiceConfigs: speakers.map((speaker) => ({
+                speaker: speaker.name,
+                voiceConfig: {
+                  prebuiltVoiceConfig: { voiceName: speaker.voice },
+                },
+              })),
+            },
+          },
+        };
+      } else {
+        config = {
+          ...config,
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: speakers[0].voice },
+            },
+          },
+        };
+      }
+
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
         contents: [{ parts: [{ text: prompt }] }],
-        config: {
-          responseModalities: ["AUDIO"],
-          speechConfig: {
-            multiSpeakerVoiceConfig: {
-              speakerVoiceConfigs: [
-                {
-                  speaker: host.name,
-                  voiceConfig: {
-                    prebuiltVoiceConfig: { voiceName: host.voice },
-                  },
-                },
-                {
-                  speaker: coHost.name,
-                  voiceConfig: {
-                    prebuiltVoiceConfig: { voiceName: coHost.voice },
-                  },
-                },
-              ],
-            },
-          },
-        },
+        config,
       });
 
       const data =

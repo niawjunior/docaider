@@ -194,6 +194,14 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
 
   const suggestedPrompts = [
     {
+      title: "Create a podcast script about the ghost story",
+      subtitle: "with one speaker",
+    },
+    {
+      title: "Create a podcast based on the document",
+      subtitle: "with two speakers",
+    },
+    {
       title: "What is the current price of Bitcoin?",
       subtitle: "as of today",
     },

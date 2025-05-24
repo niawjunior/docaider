@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 
   const result = streamText({
     model: openai("gpt-4o-mini"),
-    toolChoice: "auto",
+    toolChoice: creditData?.balance === 0 ? "none" : "auto",
     maxSteps: 1,
     tools,
     system: `
@@ -82,6 +82,7 @@ export async function POST(req: NextRequest) {
     - "You don't have enough credit"
 
     - Uploaded Documents: ${documentsData?.length || 0}
+
     🔧 **Current Tool Availability**
     - Credit: ${creditData?.balance}
     - ${
@@ -161,8 +162,8 @@ export async function POST(req: NextRequest) {
     - When user want to convert text to speech, use generateTTS tool.
     - When user want to do conversation between two speakers with different voices, use generateTTS tool.
     - When user want to generate voice message, use generateTTS tool.
-    - When user want to create a podcast, use generateTTS tool.
-    - Support only multi-speaker text-to-speech conversion
+    - When user want to create a podcast, interview, conversation, debate, use generateTTS tool.
+    - Support single and multi-speaker text-to-speech conversion
     - Each speaker can have their own unique voice and personality
     - Handle audio generation errors gracefully
       Voice options (Name – Gender – Tone):
