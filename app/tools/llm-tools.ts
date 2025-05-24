@@ -638,7 +638,7 @@ export const generateTTS = tool({
   - Creating a podcast, interview, conversation, debate
 
   🧠 Behavior:
-  - Supports single and multi-speaker configurations
+  - Supports single and multi-speaker (up to 2 speakers) configurations
   - Each speaker can have their own unique voice
   - Returns audio in WAV format
   - Always ensure the text is appropriate for voice conversion

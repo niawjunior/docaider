@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
     - When user want to do conversation between two speakers with different voices, use generateTTS tool.
     - When user want to generate voice message, use generateTTS tool.
     - When user want to create a podcast, interview, conversation, debate, use generateTTS tool.
-    - Support single and multi-speaker text-to-speech conversion
+    - Support single and multi-speaker (up to 2 speakers) text-to-speech conversion
     - Each speaker can have their own unique voice and personality
     - Handle audio generation errors gracefully
       Voice options (Name – Gender – Tone):
