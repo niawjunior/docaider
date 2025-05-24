@@ -630,7 +630,10 @@ export const askQuestionTool = tool({
 
 export const generateTTS = tool({
   description: `Use this tool to convert text to speech using Gemini's TTS service.
-  
+  - Important: 
+  - Confirm the information provided by the user before generating the audio
+  - Confirm the topic, style, speakers and script before generating the audio
+
   ✅ Required for:
   - Converting any text content to speech
   - Creating multi-speaker conversations
@@ -703,13 +706,15 @@ export const generateTTS = tool({
     topic: z
       .string()
       .describe(
-        "The main title or subject of the podcast, interview, conversation, debate"
+        "The main title or subject of the podcast, interview, conversation, debate or tv-show"
       )
       .default("Episode Topic"),
 
     style: z
-      .enum(["conversational", "interview", "debate"])
-      .describe("Podcast format style, conversational, interview or debate")
+      .enum(["conversational", "interview", "debate", "tv-show"])
+      .describe(
+        "Podcast format style, conversational, interview, debate or tv-show"
+      )
       .default("interview"),
 
     speakers: z.array(
