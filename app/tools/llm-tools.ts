@@ -760,16 +760,14 @@ export const generateTTS = tool({
           .describe("Prebuilt voice for the speaker"),
       })
     ),
-    script: z
-      .string()
-      .describe(
-        `
+    script: z.string().describe(
+      `
           Full conversation transcript, with each turn prefixed by speaker name.
           ChatGPT will automatically append “kráp” or “khâ” based on gender.
           If you need the softer “ká” particle, include it explicitly in the text.
+          Always confirm the information provided by the user before generating the audio.
         `
-      )
-      .nonempty("A non-empty script is required"),
+    ),
   }),
   execute: async ({ topic, style, speakers, script }) => {
     try {
