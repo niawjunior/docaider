@@ -1,5 +1,5 @@
 import { appendResponseMessages, streamText } from "ai";
-import { google } from "@ai-sdk/google";
+import { openai } from "@ai-sdk/openai";
 
 import { NextRequest } from "next/server";
 
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
   };
 
   const result = streamText({
-    model: google("gemini-2.0-flash-exp"),
+    model: openai("gpt-4o-mini"),
     toolChoice: creditData?.balance === 0 ? "none" : "auto",
     maxSteps: 1,
     tools,

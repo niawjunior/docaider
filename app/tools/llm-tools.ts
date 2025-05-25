@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { generateObject } from "ai";
-import { google } from "@ai-sdk/google";
+import { openai } from "@ai-sdk/openai";
 
 import crypto from "crypto";
 import { createClient } from "../utils/supabase/server";
@@ -144,7 +144,7 @@ export const generatePieChartTool = tool({
       }
 
       const { object } = await generateObject({
-        model: google("gemini-2.0-flash-exp"),
+        model: openai("gpt-4o-mini"),
         schema: z.object({
           title: z.string().optional(),
           seriesData: z
@@ -237,7 +237,7 @@ export const generateBarChartTool = tool({
   execute: async ({ title, seriesData, backgroundColor, textColor }) => {
     try {
       const { object } = await generateObject({
-        model: google("gemini-2.0-flash-exp"),
+        model: openai("gpt-4o-mini"),
         schema: z.object({
           title: z.string().optional(),
           seriesData: z
@@ -320,7 +320,7 @@ export const getCryptoPriceTool = tool({
 
       const item = json[sym];
       const { object } = await generateObject({
-        model: google("gemini-2.0-flash-exp"),
+        model: openai("gpt-4o-mini"),
         schema: z.object({
           fiat: z
             .string()
@@ -544,7 +544,7 @@ export const askQuestionTool = tool({
       Answer:`;
 
       const { object } = await generateObject({
-        model: google("gemini-2.0-flash-exp"),
+        model: openai("gpt-4o-mini"),
         schema: z.object({
           answer: z
             .string()
