@@ -1231,52 +1231,52 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
             <div ref={bottomRef} />
           </div>
           <div className="flex flex-col">
-            <div className="flex justify-between items-center pt-2">
-              <div className="flex gap-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Button
-                        variant="outline"
-                        className="ml-2 relative"
-                        size="icon"
-                        onClick={() => setIsPdfModalOpen(true)}
-                      >
-                        <FaFilePdf className="h-8 w-8" />
-                        <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                          {documents?.length}
-                        </div>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Manage documents</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Button
-                        variant="outline"
-                        className="ml-2 relative"
-                        size="icon"
-                        onClick={() => setIsToolModalOpen(true)}
-                      >
-                        <FaHammer className="h-8 w-8" />
-                        <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                          {tools.length}
-                        </div>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Manage tools</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
             <div className="sticky bottom-0 flex-col w-full py-2 px-2 flex gap-3">
+              <div className="flex justify-between items-center pt-2">
+                <div className="flex gap-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Button
+                          variant="outline"
+                          className="ml-2 relative"
+                          size="icon"
+                          onClick={() => setIsPdfModalOpen(true)}
+                        >
+                          <FaFilePdf className="h-8 w-8" />
+                          <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
+                            {documents?.length}
+                          </div>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Manage documents</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Button
+                          variant="outline"
+                          className="ml-2 relative"
+                          size="icon"
+                          onClick={() => setIsToolModalOpen(true)}
+                        >
+                          <FaHammer className="h-8 w-8" />
+                          <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
+                            {tools.length}
+                          </div>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Manage tools</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              </div>
               {/* Show uploaded images */}
               {uploadedImages.length > 0 && (
                 <div className="flex flex-wrap gap-4 absolute bottom-[80px] left-[150px]">
