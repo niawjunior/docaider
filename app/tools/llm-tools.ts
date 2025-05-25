@@ -1,7 +1,8 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { generateObject } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
+
 import crypto from "crypto";
 import { createClient } from "../utils/supabase/server";
 import { findRelevantContent } from "../utils/embedding";
@@ -143,7 +144,7 @@ export const generatePieChartTool = tool({
       }
 
       const { object } = await generateObject({
-        model: openai("gpt-4o-mini"),
+        model: google("gemini-2.0-flash-exp"),
         schema: z.object({
           title: z.string().optional(),
           seriesData: z
@@ -236,7 +237,7 @@ export const generateBarChartTool = tool({
   execute: async ({ title, seriesData, backgroundColor, textColor }) => {
     try {
       const { object } = await generateObject({
-        model: openai("gpt-4o-mini"),
+        model: google("gemini-2.0-flash-exp"),
         schema: z.object({
           title: z.string().optional(),
           seriesData: z
@@ -319,7 +320,7 @@ export const getCryptoPriceTool = tool({
 
       const item = json[sym];
       const { object } = await generateObject({
-        model: openai("gpt-4o-mini"),
+        model: google("gemini-2.0-flash-exp"),
         schema: z.object({
           fiat: z
             .string()
@@ -543,7 +544,7 @@ export const askQuestionTool = tool({
       Answer:`;
 
       const { object } = await generateObject({
-        model: openai("gpt-4o-mini"),
+        model: google("gemini-2.0-flash-exp"),
         schema: z.object({
           answer: z
             .string()
@@ -771,7 +772,9 @@ export const generateTTS = tool({
   }),
   execute: async ({ topic, style, speakers, script }) => {
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = new GoogleGenAI({
+        apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+      });
       const prompt = `TTS the following conversation:
       Topic: ${topic}
       Style: ${style}

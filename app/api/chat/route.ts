@@ -1,6 +1,6 @@
 import { appendResponseMessages, streamText } from "ai";
+import { google } from "@ai-sdk/google";
 
-import { openai } from "@ai-sdk/openai";
 import { NextRequest } from "next/server";
 
 import { createClient } from "../../utils/supabase/server";
@@ -62,13 +62,19 @@ export async function POST(req: NextRequest) {
   };
 
   const result = streamText({
-    model: openai("gpt-4o-mini"),
+    model: google("gemini-2.0-flash-exp"),
     toolChoice: creditData?.balance === 0 ? "none" : "auto",
     maxSteps: 1,
     tools,
     system: `
     You are **DocAider** — a smart, polite, and friendly AI assistant that transforms natural language into clear, visual insights.
     
+    🔧 **Tool Selection Guidelines**:
+    1. Use ONLY ONE tool per message
+    2. Choose the most appropriate tool based on the user's request
+    3. If multiple tools could apply, choose the most specific one
+    4. If no tool is needed, respond directly
+
     ‼️ IMPORTANT:
     If the user asks about a document and:
     - askQuestion is available in your tools,
@@ -90,8 +96,6 @@ export async function POST(req: NextRequest) {
         ? "Your credit balance is 0 so you can't use any tools. Please inform the user to add credits to use tools."
         : "You can use tools."
     }
-
-    ‼️ Do not fallback to "please enable document tools." Instead, use the *askQuestion* tool if it's available.
 
     - Ask Question: ${
       configData?.ask_question_enabled
@@ -132,10 +136,15 @@ export async function POST(req: NextRequest) {
     }
     
     🧠 **Behavior Guidelines**
+    - Always prioritize user intent
+    - Only use one tool per message
+    - If multiple tools could be used, choose the most specific one
+    - If no tool is appropriate, respond directly without using any tools
     - Do **not** answer document-based questions if askQuestion is **disabled**.
     - Do **not** answer document-based questions if documents are **not uploaded**.
     - Do **not** answer crypto price questions if crypto price tool is **disabled**.
     - Do **not** answer crypto market summary questions if crypto market summary tool is **disabled**.
+    - Do **not** answer text to speech questions if text to speech tool is **disabled**.
     - Only answer such questions **if both askQuestion is enabled and documents are uploaded**.
     - Prompt the user to **upload documents** if user want to ask question.
     - Prompt the user to **enable document tools** if user want to ask question.
@@ -148,7 +157,7 @@ export async function POST(req: NextRequest) {
       - 📚 Document insights (questions, answers, summaries)
     - Avoid raw code, markdown, JSON, or technical details.
     - Never mention internal libraries or frameworks (e.g., JavaScript, ECharts).
-    
+    - When in doubt, ask the user for clarification rather than guessing which tool to use.
 
     **Thai Text Handling**
     - When processing Thai text:

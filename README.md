@@ -46,7 +46,7 @@ Describe your data in plain language. We’ll turn it into stunning, interactive
 
 - **Framework**: Next.js 15.3 with TypeScript
 - **UI Components**: Radix UI, Tailwind CSS
-- **AI/ML**: OpenAI SDK, LangChain
+- **AI/ML**: OpenAI, Google AI SDK, LangChain
 - **Data Visualization**: ECharts
 - **State Management**: Zod for type-safe validation
 - **Authentication**: Supabase
@@ -62,6 +62,7 @@ Describe your data in plain language. We’ll turn it into stunning, interactive
 - npm or yarn package manager
 - A Supabase account (for authentication)
 - OpenAI API key (for AI features)
+- Google AI API key (for AI features)
 
 ### Installation
 
@@ -92,6 +93,7 @@ cp .env.example .env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
 OPENAI_API_KEY=your_openai_key
+GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_key
 ```
 
 5. Start the development server:

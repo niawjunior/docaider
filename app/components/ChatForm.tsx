@@ -96,6 +96,11 @@ interface UploadedImage {
 }
 
 export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+  const [selectedImage, setSelectedImage] = useState<{
+    url: string;
+    name: string;
+  } | null>(null);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCreateShareLoading, setIsCreateShareLoading] = useState(false);
@@ -104,6 +109,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [isDeleteImageLoading, setIsDeleteImageLoading] = useState(false);
+  const [isUploadImageLoading, setIsUploadImageLoading] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
 
   const [documents, setDocuments] = useState<
@@ -157,6 +163,14 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       enabled: config?.get_crypto_market_summary_enabled ?? true,
     },
   ];
+
+  // Add this function to handle image load
+  const handleImageLoad = (messageId: string, index: number) => {
+    setLoadedImages((prev) => ({
+      ...prev,
+      [`${messageId}-${index}`]: true,
+    }));
+  };
 
   const handleDocumentUpload = async (file: File, title: string) => {
     const formData = new FormData();
@@ -343,13 +357,18 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     if (promptToSubmit !== null) {
       setInput(promptToSubmit);
       setTimeout(() => {
-        handleSubmit(new Event("submit"));
-        setPromptToSubmit(null); // reset
+        if (!isUploadImageLoading) {
+          handleSubmit(new Event("submit"));
+          setPromptToSubmit(null); // reset
+          // clear images
+          setUploadedImages([]);
+        }
       }, 100);
     }
-  }, [promptToSubmit, handleSubmit, setInput]);
+  }, [promptToSubmit, handleSubmit, setInput, isUploadImageLoading]);
 
-  const handlePromptClick = (text: string) => {
+  const handlePromptClick = (e: React.MouseEvent, text: string) => {
+    e.preventDefault();
     textareaRef.current?.focus();
     setPromptToSubmit(text);
   };
@@ -562,7 +581,24 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     if (e.key === "Enter" && !e.shiftKey) {
       if (isDesktop) {
         e.preventDefault();
-        handleSubmit();
+        if (!isUploadImageLoading) {
+          console.log("input", input);
+          console.log("uploadedImages", uploadedImages);
+
+          if (uploadedImages.length > 0 && input) {
+            handleSubmit(e as unknown as React.FormEvent, {
+              experimental_attachments: uploadedImages.map((img) => ({
+                name: img.file.name,
+                contentType: img.file.type,
+                url: img.publicUrl!,
+              })),
+            });
+            // clear images
+            setUploadedImages([]);
+          } else {
+            handleSubmit(e as unknown as React.FormEvent);
+          }
+        }
       }
     }
   };
@@ -599,13 +635,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
 
     const files = Array.from(e.dataTransfer.files);
     handleFiles(files);
-  };
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      handleFiles(files);
-    }
   };
 
   const handleFiles = (files: File[]) => {
@@ -676,7 +705,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       .toString(36)
       .substring(2, 15)}-${Date.now()}.${fileExt}`;
     const supabase = await createClient();
-
+    setIsUploadImageLoading(true);
     const { data, error } = await supabase.storage
       .from("chat-images") // Replace with your Supabase bucket name
       .upload(fileName, file, {
@@ -689,6 +718,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       throw error;
     }
 
+    setIsUploadImageLoading(false);
     // Get public URL
     const {
       data: { publicUrl },
@@ -731,7 +761,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
         className={clsx(
           "flex flex-col items-center gap-4 md:h-[calc(100dvh-70px)] justify-center h-[calc(100dvh-30px)] overflow-y-auto scroll-hidden"
         )}
-        onSubmit={handleSubmit}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -746,9 +775,9 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
               {suggestedPrompts.map((prompt, idx) => (
                 <button
                   key={idx}
-                  onClick={() =>
-                    handlePromptClick(`${prompt.title} ${prompt.subtitle}`)
-                  }
+                  onClick={(e) => {
+                    handlePromptClick(e, `${prompt.title} ${prompt.subtitle}`);
+                  }}
                   className="text-left px-4 py-2 rounded-xl border border-zinc-700 hover:bg-zinc-800 transition"
                 >
                   <p className="font-semibold text-white">{prompt.title}</p>
@@ -812,23 +841,54 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                   }`}
                 >
                   <div
-                    className={` text-left py-2 rounded-2xl text-sm ${
-                      isUser ? "bg-blue-600 text-white" : " text-white"
-                    } ${
-                      !isUser &&
-                      !message.toolInvocations?.length &&
-                      "bg-zinc-600 "
-                    }
-                    
-                    ${!isUser && message.toolInvocations?.length && "w-full"}
-                    `}
+                    className={clsx(
+                      "text-sm",
+                      !isUser && "text-left",
+                      isUser && "text-right",
+                      message.toolInvocations?.length && "w-full"
+                    )}
                   >
+                    {message.experimental_attachments
+                      ?.filter((attachment) =>
+                        attachment.contentType?.startsWith("image/")
+                      )
+                      .map((attachment, index) => {
+                        const imageKey = `${message.id}-${index}`;
+                        const isLoaded = loadedImages[imageKey];
+
+                        return (
+                          <div key={imageKey} className="relative">
+                            <Image
+                              loading="lazy"
+                              width={200}
+                              height={200}
+                              className={`rounded-lg p-2 object-cover w-[200px] h-[200px] transition-opacity duration-300 ${
+                                isLoaded ? "opacity-100" : "opacity-0 absolute"
+                              }`}
+                              onClick={() =>
+                                setSelectedImage({
+                                  url: attachment.url,
+                                  name: attachment.name || "Image Preview",
+                                })
+                              }
+                              onLoad={() => handleImageLoad(message.id, index)}
+                              src={attachment.url}
+                              alt={attachment.name || "Uploaded image"}
+                            />
+                          </div>
+                        );
+                      })}
                     {message.parts.map((part, index) => {
                       if (part.type === "text") {
                         return (
                           <p
                             key={index}
-                            className="px-4 leading-relaxed whitespace-pre-wrap"
+                            className={clsx(
+                              "px-4 leading-relaxed whitespace-pre-wrap py-2 rounded-2xl text-sm text-white",
+                              isUser
+                                ? "bg-blue-600 text-white inline-block"
+                                : " text-white"
+                            )}
                           >
                             {part.text}
                           </p>
@@ -1336,7 +1396,13 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                   className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
                 />
                 <Button
-                  onClick={handleSubmit}
+                  onClick={() => {
+                    if (!isUploadImageLoading) {
+                      handleSubmit();
+                      // clear images
+                      setUploadedImages([]);
+                    }
+                  }}
                   variant="outline"
                   disabled={status !== "ready" || !input.trim()}
                   className="h-10 w-10 rounded-full border bg-white border-zinc-400 absolute right-2 bottom-2"
@@ -1466,6 +1532,29 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                     <p className="text-sm text-red-400 mt-2">
                       {shareError.message}
                     </p>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog
+              open={!!selectedImage}
+              onOpenChange={(open) => !open && setSelectedImage(null)}
+            >
+              <DialogContent className="max-w-[90vw] max-h-[90vh]">
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {selectedImage && (
+                    <Image
+                      placeholder="blur"
+                      loading="lazy"
+                      blurDataURL={selectedImage.url}
+                      src={selectedImage.url}
+                      alt={selectedImage.name || "Preview"}
+                      width={400}
+                      height={400}
+                      className="max-w-full max-h-[70vh] object-contain"
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   )}
                 </div>
               </DialogContent>
