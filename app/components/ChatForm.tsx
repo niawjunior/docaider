@@ -758,6 +758,9 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   return (
     <>
       <form
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
         className={clsx(
           "flex flex-col items-center gap-4 md:h-[calc(100dvh-70px)] justify-center h-[calc(100dvh-30px)] overflow-y-auto scroll-hidden"
         )}
