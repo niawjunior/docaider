@@ -720,9 +720,10 @@ export const generateTTS = tool({
 
     speakers: z.array(
       z.object({
-        name: z.string().describe("Speaker display name"),
+        name: z.string().optional().describe("Speaker display name"),
         gender: z
           .enum(["male", "female"])
+          .default("male")
           .describe(
             "Speaker gender, for choosing Thai suffix (“kráp” vs. “khâ”)"
           ),
@@ -758,13 +759,14 @@ export const generateTTS = tool({
             "Sadachbia",
             "Sadaltager",
           ])
+          .default("Puck")
           .describe("Prebuilt voice for the speaker"),
       })
     ),
     script: z.string().describe(
       `
           Full conversation transcript, with each turn prefixed by speaker name.
-          ChatGPT will automatically append “kráp” or “khâ” based on gender.
+          This tool will automatically append “kráp” or “khâ” based on gender.
           If you need the softer “ká” particle, include it explicitly in the text.
           Always confirm the information provided by the user before generating the audio.
         `

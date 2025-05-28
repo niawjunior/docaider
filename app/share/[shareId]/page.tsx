@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import "highlight.js/styles/github-dark.css"; // or choose another theme
 import { FaRegFaceSadCry } from "react-icons/fa6";
 import TableComponent from "@/app/components/Table";
+import Image from "next/image";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 function extractTextFromChildren(children: any): string {
   if (typeof children === "string") return children;
@@ -36,13 +38,25 @@ const SharePage = () => {
   const { shareId } = useParams();
   const [isAtBottom, setIsAtBottom] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
-
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+  const [selectedImage, setSelectedImage] = useState<{
+    url: string;
+    name: string;
+  } | null>(null);
   const fetchShareData = async () => {
     const response = await fetch(`/api/share/${shareId}`);
     if (!response.ok) {
       throw new Error("Failed to fetch share data");
     }
     return response.json();
+  };
+
+  // Add this function to handle image load
+  const handleImageLoad = (messageId: string, index: number) => {
+    setLoadedImages((prev) => ({
+      ...prev,
+      [`${messageId}-${index}`]: true,
+    }));
   };
 
   const { data, isLoading } = useQuery({
@@ -117,27 +131,57 @@ const SharePage = () => {
                         }`}
                       >
                         <div
-                          className={` text-left py-2 rounded-2xl text-sm ${
-                            isUser ? "bg-blue-600 text-white" : " text-white"
-                          } ${
-                            !isUser &&
-                            !message.toolInvocations?.length &&
-                            "bg-zinc-600 "
-                          }
-                        
-                                ${
-                                  !isUser &&
-                                  message.toolInvocations?.length &&
-                                  "w-full"
-                                }
-                    `}
+                          className={clsx(
+                            "text-sm text-left",
+                            message.toolInvocations?.length && "w-full"
+                          )}
                         >
+                          {message.experimental_attachments
+                            ?.filter((attachment: any) =>
+                              attachment.contentType?.startsWith("image/")
+                            )
+                            .map((attachment: any, index: any) => {
+                              const imageKey = `${message.id}-${index}`;
+                              const isLoaded = loadedImages[imageKey];
+
+                              return (
+                                <div key={imageKey} className="relative">
+                                  <Image
+                                    loading="lazy"
+                                    width={200}
+                                    height={200}
+                                    className={`rounded-lg p-2 object-cover w-[200px] h-[200px] transition-opacity duration-300 ${
+                                      isLoaded
+                                        ? "opacity-100"
+                                        : "opacity-0 absolute"
+                                    }`}
+                                    onClick={() =>
+                                      setSelectedImage({
+                                        url: attachment.url,
+                                        name:
+                                          attachment.name || "Image Preview",
+                                      })
+                                    }
+                                    onLoad={() =>
+                                      handleImageLoad(message.id, index)
+                                    }
+                                    src={attachment.url}
+                                    alt={attachment.name || "Uploaded image"}
+                                  />
+                                </div>
+                              );
+                            })}
                           {message.parts.map((part: any, index: any) => {
                             if (part.type === "text") {
                               return (
                                 <p
                                   key={index}
-                                  className=" px-4 leading-relaxed whitespace-pre-wrap"
+                                  className={clsx(
+                                    "px-4 leading-relaxed whitespace-pre-wrap py-2 rounded-2xl text-sm text-white",
+                                    isUser
+                                      ? "bg-blue-600 text-white inline-block"
+                                      : " text-white"
+                                  )}
                                 >
                                   {part.text}
                                 </p>
@@ -154,7 +198,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data.messages[data.messages.length - 1]
+                                      data?.messages[data?.messages.length - 1]
                                         ?.id &&
                                     status === "streaming"
                                   ) {
@@ -199,7 +243,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data.messages[data.messages.length - 1]
+                                      data?.messages[data?.messages.length - 1]
                                         ?.id &&
                                     status === "streaming"
                                   ) {
@@ -244,7 +288,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data.messages[data.messages.length - 1]
+                                      data?.messages[data?.messages.length - 1]
                                         ?.id &&
                                     status === "streaming"
                                   ) {
@@ -291,7 +335,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data.messages[data.messages.length - 1]
+                                      data?.messages[data?.messages.length - 1]
                                         ?.id &&
                                     status === "streaming"
                                   ) {
@@ -326,52 +370,6 @@ const SharePage = () => {
                                 }
 
                                 if (
-                                  part.toolInvocation.toolName === "allDocument"
-                                ) {
-                                  const result = (part.toolInvocation as any)
-                                    ?.result;
-                                  if (
-                                    !("result" in part.toolInvocation) &&
-                                    message.id ===
-                                      data.messages[data.messages.length - 1]
-                                        ?.id &&
-                                    status === "streaming"
-                                  ) {
-                                    return (
-                                      <div
-                                        key={message.id}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <p className="text-white text-sm">
-                                          Fetching documents ...
-                                        </p>
-                                        <div className="flex items-center justify-center py-4">
-                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                  return result ? (
-                                    <TableComponent
-                                      key={message.id}
-                                      title={result.title}
-                                      rows={result.rows}
-                                    />
-                                  ) : (
-                                    <div
-                                      key={message.id}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <p className="text-white text-sm">
-                                        Something went wrong. Please try again.
-                                      </p>
-
-                                      <FaRegFaceSadCry />
-                                    </div>
-                                  );
-                                }
-
-                                if (
                                   part.toolInvocation.toolName === "askQuestion"
                                 ) {
                                   const result = (part.toolInvocation as any)
@@ -379,7 +377,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data.messages[data.messages.length - 1]
+                                      data?.messages[data?.messages.length - 1]
                                         ?.id &&
                                     status === "streaming"
                                   ) {
@@ -397,7 +395,6 @@ const SharePage = () => {
                                       </div>
                                     );
                                   }
-
                                   return result ? (
                                     <div key={index}>
                                       <ReactMarkdown
@@ -451,8 +448,6 @@ const SharePage = () => {
                                           ),
                                           // ✅ Inline code
                                           code({
-                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                            node,
                                             className,
                                             children,
                                             ...props
@@ -522,7 +517,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data.messages[data.messages.length - 1]
+                                      data?.messages[data?.messages.length - 1]
                                         ?.id &&
                                     status === "streaming"
                                   ) {
@@ -545,6 +540,53 @@ const SharePage = () => {
                                       key={message.id}
                                       src={result}
                                       controls
+                                    />
+                                  ) : (
+                                    <div
+                                      key={message.id}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <p className="text-white text-sm">
+                                        Something went wrong. Please try again.
+                                      </p>
+
+                                      <FaRegFaceSadCry />
+                                    </div>
+                                  );
+                                }
+
+                                if (
+                                  part.toolInvocation.toolName === "allDocument"
+                                ) {
+                                  const result = (part.toolInvocation as any)
+                                    ?.result;
+
+                                  if (
+                                    !("result" in part.toolInvocation) &&
+                                    message.id ===
+                                      data?.messages[data?.messages.length - 1]
+                                        ?.id &&
+                                    status === "streaming"
+                                  ) {
+                                    return (
+                                      <div
+                                        key={message.id}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <p className="text-white text-sm">
+                                          Fetching documents ...
+                                        </p>
+                                        <div className="flex items-center justify-center py-4">
+                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                  return result ? (
+                                    <TableComponent
+                                      key={message.id}
+                                      title={result.title}
+                                      rows={result.rows}
                                     />
                                   ) : (
                                     <div
@@ -588,6 +630,29 @@ const SharePage = () => {
                 </div>
               </div>
             </div>
+
+            <Dialog
+              open={!!selectedImage}
+              onOpenChange={(open) => !open && setSelectedImage(null)}
+            >
+              <DialogContent className="max-w-[90vw] max-h-[90vh]">
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {selectedImage && (
+                    <Image
+                      placeholder="blur"
+                      loading="lazy"
+                      blurDataURL={selectedImage.url}
+                      src={selectedImage.url}
+                      alt={selectedImage.name || "Preview"}
+                      width={400}
+                      height={400}
+                      className="max-w-full max-h-[70vh] object-contain"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </main>

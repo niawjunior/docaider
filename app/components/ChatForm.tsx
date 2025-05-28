@@ -845,9 +845,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                 >
                   <div
                     className={clsx(
-                      "text-sm",
-                      !isUser && "text-left",
-                      isUser && "text-right",
+                      "text-sm text-left",
                       message.toolInvocations?.length && "w-full"
                     )}
                   >
