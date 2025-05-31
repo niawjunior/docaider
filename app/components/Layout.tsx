@@ -17,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 const ChatLayout = ({
   children,
@@ -59,12 +60,13 @@ const ChatLayout = ({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <button
+                    <Button
+                      size="icon"
                       onClick={() => router.push("/")}
                       className="text-[20px] rounded-lg"
                     >
                       <GoHomeFill />
-                    </button>
+                    </Button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Go to home</p>
@@ -74,7 +76,8 @@ const ChatLayout = ({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <button
+                    <Button
+                      size="icon"
                       onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                       className="text-[20px] rounded-lg"
                     >
@@ -83,7 +86,7 @@ const ChatLayout = ({
                       ) : (
                         <TbLayoutSidebarLeftExpandFilled />
                       )}
-                    </button>
+                    </Button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Toggle sidebar</p>
@@ -94,12 +97,13 @@ const ChatLayout = ({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <button
+                      <Button
+                        size="icon"
                         onClick={createNewChat}
                         className="text-[20px] rounded-lg"
                       >
                         <IoMdOpen />
-                      </button>
+                      </Button>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Create new chat</p>
@@ -113,12 +117,13 @@ const ChatLayout = ({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <button
+                      <Button
+                        size="icon"
                         onClick={createNewChat}
                         className="text-[20px] rounded-lg"
                       >
                         <IoMdOpen />
-                      </button>
+                      </Button>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Create new chat</p>
@@ -133,10 +138,8 @@ const ChatLayout = ({
         {isSidebarOpen && <Sidebar chatId={chatId} isLoading={isLoading} />}
         {/* Main */}
         <main className="flex-1 w-full flex flex-col p-4 overflow-hidden ">
-          <div className="text-center w-full gap-8 md:p-4 p-0 h-full flex flex-col items-center">
-            <div className="rounded-xl  w-full min-w-[300px] md:mt-4 mt-0">
-              {children}
-            </div>
+          <div className="text-center w-full gap-8  p-0 h-full flex flex-col items-center">
+            <div className="rounded-xl  w-full min-w-[300px]">{children}</div>
           </div>
         </main>
       </div>

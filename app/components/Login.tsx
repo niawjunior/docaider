@@ -4,6 +4,7 @@ import { signInWithGoogle } from "../login/action";
 import { FcGoogle } from "react-icons/fc";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 const LoginComponent = () => {
   const searchParams = useSearchParams();
@@ -20,13 +21,14 @@ const LoginComponent = () => {
         </div>
 
         <form>
-          <button
+          <Button
             formAction={() => signInWithGoogle(callbackUrl)}
-            className="w-full flex items-center justify-center gap-3 bg-white text-black py-3 px-4 rounded-lg shadow hover:bg-gray-100 transition font-medium"
+            variant="default"
+            className="w-full h-12"
           >
             <FcGoogle className="text-xl" />
             Sign in with Google
-          </button>
+          </Button>
         </form>
 
         <p className="text-sm text-zinc-400 mt-6 text-center">

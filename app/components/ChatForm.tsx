@@ -762,7 +762,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
           e.preventDefault();
         }}
         className={clsx(
-          "flex flex-col items-center gap-4 md:h-[calc(100dvh-70px)] justify-center h-[calc(100dvh-30px)] overflow-y-auto scroll-hidden"
+          "flex flex-col items-center gap-4 md:h-[calc(100dvh-60px)] md:mt-0 mt-[50px] justify-center h-[calc(100dvh-100px)] overflow-y-auto scroll-hidden"
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -774,24 +774,29 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
               <p className="text-2xl font-bold">Hello there!</p>
               <p className="text-zinc-300">How can I help you today?</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl max-h-[calc(100dvh-350px)] overflow-y-auto scroll-hidden px-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full max-h-[calc(100dvh-350px)] overflow-y-auto scroll-hidden px-2">
               {suggestedPrompts.map((prompt, idx) => (
-                <button
+                <Button
+                  variant="outline"
                   key={idx}
                   onClick={(e) => {
                     handlePromptClick(e, `${prompt.title} ${prompt.subtitle}`);
                   }}
-                  className="text-left px-4 py-2 rounded-xl border border-zinc-700 hover:bg-zinc-800 transition"
+                  className=" flex flex-col justify-center items-center gap-2 h-[70px]"
                 >
-                  <p className="font-semibold text-white">{prompt.title}</p>
-                  <p className="text-sm text-zinc-400">{prompt.subtitle}</p>
-                </button>
+                  <p className="text-sm font-semibold text-wrap">
+                    {prompt.title}
+                  </p>
+                  <p className="text-xs text-zinc-400 text-wrap">
+                    {prompt.subtitle}
+                  </p>
+                </Button>
               ))}
             </div>
           </>
         )}
 
-        <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-[40px] relative">
+        <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-[10px] relative">
           {/* Add drag overlay */}
           {isDragging && (
             <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded-lg pointer-events-none z-10">
@@ -831,7 +836,8 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
             className={clsx(
               "overflow-auto scroll-hidden px-2",
 
-              messages.length > 0 && " py-4 h-[calc(100dvh-250px)]"
+              messages.length > 0 &&
+                " py-4 md:h-[calc(100dvh-250px)] h-[calc(100dvh-300px)]"
             )}
           >
             {messages.map((message) => {
@@ -879,6 +885,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                           </div>
                         );
                       })}
+
                     {message.parts.map((part, index) => {
                       if (part.type === "text") {
                         return (
