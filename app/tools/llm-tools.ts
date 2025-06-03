@@ -3,15 +3,11 @@ import { z } from "zod";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 
-import crypto from "crypto";
 import { createClient } from "../utils/supabase/server";
 import { findRelevantContent } from "../utils/embedding";
 import { GenerateContentConfig, GoogleGenAI } from "@google/genai";
 import wav from "wav";
 import { v4 as uuidv4 } from "uuid";
-
-const API_KEY = process.env.BITKUB_API_KEY!;
-const API_SECRET = process.env.BITKUB_API_SECRET!;
 
 async function saveToSupabase(
   filename: string,
@@ -77,18 +73,17 @@ async function saveWaveFile(
 }
 
 export const generatePieChartTool = tool({
-  description: `Use this tool to generate visual pie chart configurations (ECharts-compatible) whenever the user asks to view data as a pie chart
-  
-  ✅ Required for:
-  - Pie charts
-  - Any structured or numerical data the user provides
+  description: `Use this tool to generate **ECharts-compatible pie chart configurations** from structured or numerical data, turning your text into visual insights.
+  ✅ **Required for**:
+  - Visualizing data as a pie chart.
+  - Any request involving displaying structured or numerical data in a pie chart format.
 
-  🧠 Behavior:
-  - Support only: "pie" types.
-  - If user asks for "default colors", generate a distinct color palette.
-  - Always confirm the information provided by the user before generating the chart.
-  - Always suggest the closest supported alternative if the chart type is unclear.
-  The goal is to help the user go from text to visual insights — fast and seamlessly.
+  🧠 **Behavior**:
+  - Supports only "pie" chart types.
+  - If the user asks for "default colors" or doesn't specify, a distinct color palette will be generated.
+  - **Always confirm the information provided by the user** before generating the chart.
+  - **Always suggest the closest supported alternative** if the chart type is unclear.
+  - **Do not** generate a pie chart if the tool is disabled; instead, inform the user to enable it.
   `,
   parameters: z.object({
     title: z.string().optional().describe("The pie chart title"),
@@ -193,20 +188,20 @@ export const generatePieChartTool = tool({
 });
 
 export const generateBarChartTool = tool({
-  description: `Use this tool to generate visual bar chart configurations (ECharts-compatible) whenever the user asks to view data as a bar chart
-        
-        ✅ Required for:
-        - Bar charts
-        - Any structured or numerical data the user provides
+  description: `Use this tool to generate **ECharts-compatible bar chart configurations** from structured or numerical data, transforming your text into visual insights.
 
-        🧠 Behavior:
-        - Support only: "bar" types.
-        - Always ask for the chart type if not specified.
-        - Always ask for color and if the user doesn't ask for color, use the default color.
-        - Always confirm the information provided by the user before generating the chart.
-        - Always suggest the closest supported alternative if the chart type is unclear.
-        The goal is to help the user go from text to visual insights — fast and seamlessly.
-        `,
+  ✅ **Required for**:
+  - Visualizing data as a bar chart.
+  - Any request involving displaying structured or numerical data in a bar chart format.
+
+  🧠 **Behavior**:
+  - Supports only "bar" chart types.
+  - **Always ask for the chart type** if not specified by the user.
+  - **Always ask for color preferences**; if no color is provided, use a default color.
+  - **Always confirm the information provided by the user** before generating the chart.
+  - **Always suggest the closest supported alternative** if the chart type is unclear.
+  - **Do not** generate a bar chart if the tool is disabled; instead, inform the user to enable it.
+  `,
   parameters: z.object({
     title: z.string().optional().describe("The bar chart title"),
     seriesData: z
@@ -285,18 +280,18 @@ export const generateBarChartTool = tool({
 });
 
 export const getCryptoPriceTool = tool({
-  description: `Use this tool to get the current price of a cryptocurrency based on Bitkub API.
-  
-  ✅ Required for:
-  - Cryptocurrency price information
-  - Always use this tool to get the current price of a cryptocurrency based on Bitkub API.
-  🧠 Behavior:
-  - Always ask for the cryptocurrency name.
-  - Always confirm the information provided by the user before getting the price.
-  - Always return insights about the price.
-  - Always suggest the next steps for the user.
-  - Always return insights and next steps.
-  - Fiat currency currently supported only THB.
+  description: `Use this tool to get the **current real-time price of a cryptocurrency** from the Bitkub API.
+
+  ✅ **Required for**:
+  - Retrieving current cryptocurrency price information.
+  - Any question asking for the latest price of a specific cryptocurrency.
+
+  🧠 **Behavior**:
+  - **Always ask for the cryptocurrency symbol** (e.g., BTC, ETH).
+  - Supports only **THB** as the fiat currency.
+  - **Always confirm the information provided by the user** before fetching the price.
+  - Always return clear insights about the price and suggest actionable next steps.
+  - **Do not** fetch crypto prices if the tool is disabled; instead, inform the user to enable it.
   `,
   parameters: z.object({
     currency: z.string().describe("The cryptocurrency symbol, e.g., BTC, ETH"),
@@ -410,58 +405,6 @@ export const getCryptoPriceTool = tool({
   },
 });
 
-export const getCryptoBalanceTool = tool({
-  description: `Use this tool to retrieve the current crypto balances of the authenticated user from Bitkub.
-        
-        ✅ Required for:
-        - Checking wallet balances
-        - Showing all available coins in the user’s account
-      
-        🧠 Behavior:
-        - Always inform the user of the coin and available amount
-        - Always return a list of balances
-        - Always confirm the result is based on real-time data
-        `,
-  parameters: z.object({}),
-  execute: async () => {
-    try {
-      const path = "/api/v3/market/balances";
-      const method = "POST";
-      const timestamp = Date.now();
-      const body = {};
-
-      const sigPayload = `${timestamp}${method}${path}${JSON.stringify(body)}`;
-      const signature = crypto
-        .createHmac("sha256", API_SECRET)
-        .update(sigPayload)
-        .digest("hex");
-
-      const res = await fetch(`https://api.bitkub.com${path}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "X-BTK-APIKEY": API_KEY,
-          "X-BTK-TIMESTAMP": timestamp.toString(),
-          "X-BTK-SIGN": signature,
-        },
-        body: JSON.stringify(body),
-      });
-
-      const json = await res.json();
-
-      return {
-        balances: json.result,
-      };
-    } catch (error) {
-      console.error("getCryptoBalance error:", error);
-      return {
-        error: "Failed to fetch balances",
-      };
-    }
-  },
-});
-
 export const getCryptoMarketSummaryTool = tool({
   description: `Use this tool to get an overview of the cryptocurrency market on Bitkub.
 
@@ -509,9 +452,19 @@ export const getCryptoMarketSummaryTool = tool({
 });
 
 export const askQuestionTool = tool({
-  description: `You are a helpful assistant. Check your knowledge base before answering any questions.Assume the user has uploaded documents.
-    Only respond to questions using information from tool calls.
-    if no relevant information is found in the tool calls, respond, "Sorry, I don't know..".`,
+  description: `Use this tool to **answer questions based on the user's uploaded documents**, acting as your intelligent knowledge base.
+
+  ✅ **Required for**:
+  - Any question related to the content of uploaded documents.
+  - Retrieving specific information from your knowledge base.
+
+  🧠 **Behavior**:
+  - **You MUST call this tool** if the user asks a document-related question, this tool is enabled, and documents are uploaded.
+  - Only respond to questions using information directly from tool calls.
+  - If no relevant information is found, respond with "No relevant documents found for this question."
+  - **Do not** answer document-based questions if the tool is disabled, no documents are uploaded, or there is insufficient credit; instead, inform the user of the specific reason.
+  - Responses will be formatted using markdown, including headings, bullet points, and chronological order for date/time questions.
+  `,
   parameters: z.object({
     question: z.string().describe("Question to ask about the documents"),
   }),
@@ -650,6 +603,7 @@ export const generateTTS = tool({
   - Always suggest the closest supported alternative if the voice is unclear
   - Always confirm the information provided by the user before generating the audio
   - Maximum length of audio is 2 minutes
+  - **Do not** generate text-to-speech if the tool is disabled; instead, inform the user to enable it.
 
   Example usage:
   - "Convert this summary to speech using a natural voice"
@@ -835,7 +789,17 @@ export const generateTTS = tool({
 });
 
 export const allDocumentTool = tool({
-  description: "Use this tool to return all documents file path",
+  description: `Use this tool to **retrieve metadata for all uploaded documents** for the authenticated user, including their IDs, names, titles, and public URLs.
+
+  ✅ **Required for**:
+  - Listing all documents available to the user.
+  - Providing an overview of the user's uploaded files.
+
+  🧠 **Behavior**:
+  - Returns a list containing the document ID, name, title, and a generated public URL for each uploaded document.
+  - Accessible only to authenticated users.
+  - **Do not** return document information if no documents are uploaded; instead, inform the user to upload documents.
+  `,
   parameters: z.object({
     title: z.string().describe("Title of the document"),
   }),

@@ -82,13 +82,11 @@ export async function processPDF(
       chunkOverlap: 50, // Overlap between chunks to maintain context
       separators: ["\n\n", "\n", "。", "。", "，", "，"], // Try to split at paragraphs, then lines, then Thai punctuation
     });
-
     const chunks = await splitter.createDocuments([thaiNormalizedText]);
     // Filter out any empty chunks
     const filteredChunks = chunks.filter(
       (chunk) => chunk.pageContent.trim().length > 0
     );
-
     // Initialize the lite tokenizer
     const encoder = new Tiktoken(cl100k_base);
 
