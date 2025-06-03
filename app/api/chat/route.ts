@@ -85,55 +85,19 @@ export async function POST(req: NextRequest) {
 
     ---
 
-    📈 **Current Tool Status**:
+ 
+    📈 **Current Tool Status (Internal Only)**:
     -   **Credit Balance**: ${creditData?.balance}
-        ${
-          creditData?.balance === 0
-            ? "Your credit balance is 0. Please inform the user that tools cannot be used until credits are added."
-            : "You have credits available to use tools."
-        }
-    -   **Ask Question**: ${
-      configData?.ask_question_enabled
-        ? documentsData?.length
-          ? "✅ Enabled (Documents uploaded)"
-          : "❌ No documents uploaded. Inform the user to upload documents."
-        : "❌ Disabled. Inform the user to enable askQuestion."
-    }
-    -   **Bar Chart**: ${
-      configData?.generate_bar_chart_enabled
-        ? "✅ Enabled"
-        : "❌ Disabled. Inform the user to enable generateBarChart."
-    }
-    -   **Pie Chart**: ${
-      configData?.generate_pie_chart_enabled
-        ? "✅ Enabled"
-        : "❌ Disabled. Inform the user to enable generatePieChart."
-    }
-    -   **Crypto Price**: ${
-      configData?.get_crypto_price_enabled
-        ? "✅ Enabled"
-        : "❌ Disabled. Inform the user to enable getCryptoPrice."
-    }
-    -   **Crypto Market Summary**: ${
+    -   **Ask Question Enabled**: ${configData?.ask_question_enabled}
+    -   **Documents Uploaded**: ${documentsData!.length > 0}
+    -   **Bar Chart Enabled**: ${configData?.generate_bar_chart_enabled}
+    -   **Pie Chart Enabled**: ${configData?.generate_pie_chart_enabled}
+    -   **Crypto Price Enabled**: ${configData?.get_crypto_price_enabled}
+    -   **Crypto Market Summary Enabled**: ${
       configData?.get_crypto_market_summary_enabled
-        ? "✅ Enabled"
-        : "❌ Disabled. Inform the user to enable getCryptoMarketSummary."
     }
-    -   **Text to Speech**: ${
-      configData?.generate_tts_enabled
-        ? "✅ Enabled"
-        : "❌ Disabled. Inform the user to enable generateTTS."
-    }
-    -   **All Documents**: ${
-      documentsData?.length
-        ? "✅ Enabled (Documents uploaded)"
-        : "❌ No documents uploaded. Inform the user to upload documents."
-    }
-    -   **Web Search**: ${
-      configData?.web_search_enabled
-        ? "✅ Enabled"
-        : "❌ Disabled. Inform the user to enable webSearch."
-    }
+    -   **Text to Speech Enabled**: ${configData?.generate_tts_enabled}
+    -   **Web Search Enabled**: ${configData?.web_search_enabled}
 
     ---
 
@@ -144,10 +108,20 @@ export async function POST(req: NextRequest) {
     -   Confirm crucial information with the user before executing complex tasks (e.g., chart data, TTS script).
     -   If user intent is ambiguous, ask clarifying questions instead of guessing.
 
+    **Credit Management**:
+    -   If ${
+      creditData?.balance === 0
+    }, politely inform the user that tools cannot be used because they don't have enough credit. Use the exact phrase "You don't have enough credit."
+
     **Document Handling**:
     -   For questions about uploaded documents, use the \`askQuestion\` tool.
-    -   For listing all uploaded documents, use the \`allDocumentTool\`.
-    -   If a document-related tool is requested but disabled or no documents are uploaded, politely guide the user on how to proceed (e.g., "Please upload documents to use this feature" or "Please enable document tools in your settings").
+    -   For listing all uploaded documents, use the \`allDocument\` tool.
+    -   If a document-related tool is requested but ${
+      configData?.ask_question_enabled
+    } is false, politely inform the user: "Document tools are disabled."
+    -   If a document-related tool is requested but ${
+      documentsData?.length
+    } is 0, politely inform the user: "No documents uploaded."
 
     **Chart Generation (Pie & Bar)**:
     -   **Always confirm the data and chart type** with the user before generating.
@@ -155,23 +129,32 @@ export async function POST(req: NextRequest) {
     -   Support common customizations like title, colors, and data series.
     -   If an unsupported chart type is requested (e.g., line chart), suggest the closest supported alternatives.
     -   Provide simple, friendly insights based on the chart data.
-    -   If chart tools are disabled, inform the user to enable them.
+    -   If ${configData?.generate_bar_chart_enabled} or ${
+      configData?.generate_pie_chart_enabled
+    } is false when a chart is requested, politely inform the user: "Chart tools are disabled. Please enable them in your settings."
 
     **Cryptocurrency Data**:
     -   For current cryptocurrency prices, use the \`getCryptoPriceTool\`.
     -   For an overview of the crypto market, use the \`getCryptoMarketSummaryTool\`.
     -   Always clearly state crypto names, values, and any comparisons.
-    -   If crypto tools are disabled, inform the user to enable them.
+    -   If ${configData?.get_crypto_price_enabled} or ${
+      configData?.get_crypto_market_summary_enabled
+    } is false when crypto data is requested, politely inform the user: "Crypto tools are disabled. Please enable them in your settings."
 
     **Text to Speech (TTS)**:
     -   Use the \`generateTTS\` tool for any request to convert text to audio, including single-speaker summaries, multi-speaker conversations, podcasts, interviews, debates, or voice messages.
     -   **Always confirm the topic, style, speakers, and script** with the user before generating audio.
     -   **Always ask for speaker names and voice preferences**, and suggest closest supported alternatives if a voice is unclear.
-    -   If the TTS tool is disabled, inform the user to enable it.
+    -   If ${
+      configData?.generate_tts_enabled
+    } is false when TTS is requested, politely inform the user: "Text to Speech is disabled. Please enable it in your settings."
 
     **Web Search**:
     -   Use the \`webSearch\` tool for any request to search the web for current, external information from the internet.
-    -   If the web search tool is disabled, inform the user to enable it.
+    -   If ${
+      configData?.web_search_enabled
+    } is false when web search is requested, politely inform the user: "Web Search is disabled. Please enable it in your settings."
+
 
     **Thai Text Handling**:
     -   When processing Thai text:

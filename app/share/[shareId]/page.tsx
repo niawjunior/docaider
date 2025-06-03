@@ -21,6 +21,7 @@ import { FaRegFaceSadCry } from "react-icons/fa6";
 import TableComponent from "@/app/components/Table";
 import Image from "next/image";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import WebSearchComponent from "@/app/components/WebSearch";
 
 function extractTextFromChildren(children: any): string {
   if (typeof children === "string") return children;
@@ -587,6 +588,54 @@ const SharePage = () => {
                                       key={message.id}
                                       title={result.title}
                                       rows={result.rows}
+                                    />
+                                  ) : (
+                                    <div
+                                      key={message.id}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <p className="text-white text-sm">
+                                        Something went wrong. Please try again.
+                                      </p>
+
+                                      <FaRegFaceSadCry />
+                                    </div>
+                                  );
+                                }
+
+                                if (
+                                  part.toolInvocation.toolName === "webSearch"
+                                ) {
+                                  const result = (part.toolInvocation as any)
+                                    ?.result;
+                                  const query = (part.toolInvocation as any)
+                                    ?.args?.query;
+                                  if (
+                                    !("result" in part.toolInvocation) &&
+                                    message.id ===
+                                      data?.messages[data?.messages.length - 1]
+                                        ?.id &&
+                                    status === "streaming"
+                                  ) {
+                                    return (
+                                      <div
+                                        key={message.id}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <p className="text-white text-sm">
+                                          Web searching ...
+                                        </p>
+                                        <div className="flex items-center justify-center py-4">
+                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                  return result ? (
+                                    <WebSearchComponent
+                                      key={message.id}
+                                      searchResults={result}
+                                      query={query}
                                     />
                                   ) : (
                                     <div
