@@ -36,6 +36,7 @@ export async function middleware(request: NextRequest) {
         get_crypto_price_enabled: true,
         get_crypto_market_summary_enabled: true,
         ask_question_enabled: true,
+        web_search_enabled: true,
         generate_tts_enabled: true,
         language_preference: "th",
         theme_preference: "dark",

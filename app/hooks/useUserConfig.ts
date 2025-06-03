@@ -15,6 +15,7 @@ export interface UserConfig {
   get_crypto_market_summary_enabled: boolean;
   generate_tts_enabled: boolean;
   ask_question_enabled: boolean;
+  web_search_enabled: boolean;
   language_preference: string;
   theme_preference: string;
   notification_settings: {

@@ -1,7 +1,8 @@
-import { tool } from "ai";
+import { generateText, tool } from "ai";
 import { z } from "zod";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
 
 import { createClient } from "../utils/supabase/server";
 import { findRelevantContent } from "../utils/embedding";
@@ -828,5 +829,48 @@ export const allDocumentTool = tool({
         };
       }),
     };
+  },
+});
+
+export const webSearchTool = tool({
+  description: `Use this tool to perform a **web search** and retrieve current, external information from the internet. This is suitable for general knowledge, news, or any information not found in your uploaded documents.
+  
+  ✅ **Required for**:
+  - Answering general knowledge questions that require up-to-date information.
+  - Getting current events, news, or facts from external sources.
+  - Researching topics that are not covered by the user's uploaded documents.
+
+  🧠 **Behavior**:
+  - Always extract the most specific and relevant keywords/phrases from the user's request for the search query.
+  - Return concise, summarized snippets from the top search results.
+  - If no relevant information is found, explicitly state "No relevant information found on the web for your query."
+  - **Do not** use this tool for questions that can be answered by uploaded documents (use \`askQuestionTool\` instead).
+  - **Do not** use this tool for generating charts or getting crypto-specific data if dedicated tools are available.
+  - **Do not** perform a web search if the tool is disabled; instead, inform the user to enable it.
+  `,
+  parameters: z.object({
+    query: z
+      .string()
+      .describe(
+        "The concise search query to execute (e.g., 'latest AI breakthroughs', 'weather in New York')."
+      ),
+  }),
+  execute: async ({ query }) => {
+    try {
+      const { text, sources } = await generateText({
+        model: google("gemini-1.5-flash", {
+          useSearchGrounding: true,
+        }),
+        prompt: query,
+      });
+
+      return {
+        text,
+        sources,
+      };
+    } catch (error: any) {
+      console.error("Web search tool error:", error);
+      return { error: `Failed to perform web search: ${error.message}` };
+    }
   },
 });

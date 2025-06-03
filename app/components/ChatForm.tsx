@@ -25,6 +25,7 @@ import {
   FaCopy,
   FaTrash,
   FaVolumeUp,
+  FaSearch,
 } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 
@@ -61,6 +62,7 @@ import router from "next/router";
 import Image from "next/image";
 import { FcCancel } from "react-icons/fc";
 import TableComponent from "./Table";
+import WebSearchComponent from "./WebSearch";
 
 const toolIcons = {
   generateBarChart: <FaChartBar />,
@@ -69,6 +71,7 @@ const toolIcons = {
   getCryptoMarketSummary: <FaChartLine />,
   askQuestion: <FaQuestion />,
   generateTTS: <FaVolumeUp />,
+  webSearch: <FaSearch />,
 };
 
 interface ChatFormProps {
@@ -132,6 +135,12 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   const { config, updateConfig } = useUserConfig(session?.user?.id || "");
 
   const tools = [
+    {
+      name: "webSearch",
+      description:
+        "Search the web for current, external information from the internet",
+      enabled: config?.web_search_enabled ?? true,
+    },
     {
       name: "askQuestion",
       description: "Ask a question about the uploaded documents",
@@ -519,6 +528,9 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
 
     Object.entries(updates).forEach(([key, value]) => {
       switch (key) {
+        case "webSearch":
+          mappedUpdates.web_search_enabled = value;
+          break;
         case "generateBarChart":
           mappedUpdates.generate_bar_chart_enabled = value;
           break;
@@ -1288,6 +1300,50 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                               </div>
                             );
                           }
+
+                          if (part.toolInvocation.toolName === "webSearch") {
+                            const result = (part.toolInvocation as any)?.result;
+                            const query = (part.toolInvocation as any)?.args
+                              ?.query;
+                            if (
+                              !("result" in part.toolInvocation) &&
+                              message.id ===
+                                messages[messages.length - 1]?.id &&
+                              status === "streaming"
+                            ) {
+                              return (
+                                <div
+                                  key={message.id}
+                                  className="flex items-center gap-2"
+                                >
+                                  <p className="text-white text-sm">
+                                    Web searching ...
+                                  </p>
+                                  <div className="flex items-center justify-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return result ? (
+                              <WebSearchComponent
+                                key={message.id}
+                                searchResults={result}
+                                query={query}
+                              />
+                            ) : (
+                              <div
+                                key={message.id}
+                                className="flex items-center gap-2"
+                              >
+                                <p className="text-white text-sm">
+                                  Something went wrong. Please try again.
+                                </p>
+
+                                <FaRegFaceSadCry />
+                              </div>
+                            );
+                          }
                         }
                       }
                     })}
@@ -1456,7 +1512,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                         <h3 className="font-medium leading-none truncate">
                           {tool.name}
                         </h3>
-                        <p className="text-sm text-muted-foreground mt-2">
+                        <p className="text-xs text-muted-foreground mt-2">
                           {tool.description}
                         </p>
                       </div>

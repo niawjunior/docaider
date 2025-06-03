@@ -12,6 +12,7 @@ import {
   getCryptoPriceTool,
   generateTTS,
   allDocumentTool,
+  webSearchTool,
 } from "@/app/tools/llm-tools";
 
 export async function POST(req: NextRequest) {
@@ -58,6 +59,7 @@ export async function POST(req: NextRequest) {
     askQuestion: askQuestionTool,
     generateTTS: generateTTS,
     allDocument: allDocumentTool,
+    webSearch: webSearchTool,
   };
 
   const result = streamText({
@@ -127,6 +129,11 @@ export async function POST(req: NextRequest) {
         ? "✅ Enabled (Documents uploaded)"
         : "❌ No documents uploaded. Inform the user to upload documents."
     }
+    -   **Web Search**: ${
+      configData?.web_search_enabled
+        ? "✅ Enabled"
+        : "❌ Disabled. Inform the user to enable webSearch."
+    }
 
     ---
 
@@ -161,6 +168,10 @@ export async function POST(req: NextRequest) {
     -   **Always confirm the topic, style, speakers, and script** with the user before generating audio.
     -   **Always ask for speaker names and voice preferences**, and suggest closest supported alternatives if a voice is unclear.
     -   If the TTS tool is disabled, inform the user to enable it.
+
+    **Web Search**:
+    -   Use the \`webSearch\` tool for any request to search the web for current, external information from the internet.
+    -   If the web search tool is disabled, inform the user to enable it.
 
     **Thai Text Handling**:
     -   When processing Thai text:
