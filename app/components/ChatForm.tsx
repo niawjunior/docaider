@@ -221,11 +221,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       subtitle: "with one speaker",
     },
     {
-      title: "Create a podcast based on the document",
-      subtitle: "with two speakers",
-    },
-    {
-      title: "What is the current price of Bitcoin?",
+      title: "What is the latest news in Thailand?",
       subtitle: "as of today",
     },
     {

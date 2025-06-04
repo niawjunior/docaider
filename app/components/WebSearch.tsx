@@ -37,10 +37,10 @@ const WebSearchComponent: FC<WebSearchComponentProps> = ({
   query,
 }) => {
   return (
-    <Card className="w-full max-w-4xl mx-auto my-4 border-l-4 border-l-blue-500">
-      <CardHeader className="pb-2">
+    <Card className="w-full bg-zinc-900 rounded-xl p-4 border-[2px] border-blue-500">
+      <CardHeader className="p-0">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+          <CardTitle className="text-md font-semibold flex flex-wrap items-center gap-2">
             <span className="text-blue-500">Web Search Results</span>
             {query && (
               <span className="text-sm font-normal text-muted-foreground">
@@ -50,7 +50,7 @@ const WebSearchComponent: FC<WebSearchComponentProps> = ({
           </CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="p-0">
         <div className="prose dark:prose-invert max-w-none">
           <ReactMarkdown
             components={{

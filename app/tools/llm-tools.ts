@@ -833,12 +833,14 @@ export const allDocumentTool = tool({
 });
 
 export const webSearchTool = tool({
-  description: `Use this tool to perform a **web search** and retrieve current, external information from the internet. This is suitable for general knowledge, news, or any information not found in your uploaded documents.
+  description: `
+  Use this tool to perform a **web search** and retrieve current, external information from the internet. This is suitable for general knowledge, news, or any information not found in your uploaded documents. **This can also be used for current date/time queries if no specific date tool is available.**
   
   ✅ **Required for**:
   - Answering general knowledge questions that require up-to-date information.
   - Getting current events, news, or facts from external sources.
   - Researching topics that are not covered by the user's uploaded documents.
+  - **Obtaining the current date or time if directly asked.**
 
   🧠 **Behavior**:
   - Always extract the most specific and relevant keywords/phrases from the user's request for the search query.
@@ -846,7 +848,9 @@ export const webSearchTool = tool({
   - If no relevant information is found, explicitly state "No relevant information found on the web for your query."
   - **Do not** use this tool for questions that can be answered by uploaded documents (use \`askQuestionTool\` instead).
   - **Do not** use this tool for generating charts or getting crypto-specific data if dedicated tools are available.
-  - **Do not** perform a web search if the tool is disabled; instead, inform the user to enable it.
+  - **Do not** use this tool if web search is disabled; instead, inform the user to enable it.
+  - **The current date and time is: ${new Date().toLocaleDateString()}.** Use this information for date-sensitive queries like "next incoming holiday".
+
   `,
   parameters: z.object({
     query: z
