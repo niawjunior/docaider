@@ -63,6 +63,15 @@ import Image from "next/image";
 import { FcCancel } from "react-icons/fc";
 import TableComponent from "./Table";
 import WebSearchComponent from "./WebSearch";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const toolIcons = {
   generateBarChart: <FaChartBar />,
@@ -114,7 +123,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   const [isDeleteImageLoading, setIsDeleteImageLoading] = useState(false);
   const [isUploadImageLoading, setIsUploadImageLoading] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
-
+  const [currentTool, setCurrentTool] = useState<string>("");
   const [documents, setDocuments] = useState<
     {
       title: string;
@@ -261,6 +270,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     handleInputChange,
     status,
     setInput,
+    append,
     setMessages,
   } = useChat({
     api: "/api/chat",
@@ -269,6 +279,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     sendExtraMessageFields: true,
     body: {
       chatId,
+      currentTool,
     },
     async onToolCall({ toolCall }) {
       // // Check if user has credits data and enough credits
@@ -608,6 +619,12 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
             // clear images
             setUploadedImages([]);
           } else {
+            // if (currentTool) {
+            //   append({
+            //     role: "user",
+            //     content: `${input} use ${currentTool}`,
+            //   });
+            // }
             handleSubmit(e as unknown as React.FormEvent);
           }
         }
@@ -1472,26 +1489,57 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                     </Tooltip>
                   </TooltipProvider>
 
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Button
-                          variant="outline"
-                          className="ml-2 relative"
-                          size="icon"
-                          onClick={() => setIsToolModalOpen(true)}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="outline-none">
+                      <Button
+                        variant="outline"
+                        className="ml-2 relative"
+                        size="icon"
+                      >
+                        <FaHammer className="h-8 w-8" />
+                        <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
+                          {tools.length}
+                        </div>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuLabel>Available tools</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {tools.map((tool) => (
+                        <DropdownMenuCheckboxItem
+                          key={tool.name}
+                          className="flex items-center gap-2 cursor-pointer"
+                          checked={currentTool === tool.name}
+                          onCheckedChange={(checked) =>
+                            setCurrentTool(tool.name)
+                          }
                         >
-                          <FaHammer className="h-8 w-8" />
-                          <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                            {tools.length}
+                          <div className="h-8 w-8 flex items-center justify-center">
+                            {toolIcons[tool.name as keyof typeof toolIcons]}
                           </div>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Manage tools</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium leading-none truncate">
+                              {tool.name}
+                            </h3>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              {tool.description}
+                            </p>
+                          </div>
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {currentTool && (
+                    <Button
+                      onClick={() => setCurrentTool("")}
+                      variant="outline"
+                      className="ml-2 cursor-pointer border hover:text-white"
+                    >
+                      {currentTool}
+                      <TiDelete className="ml-2" />
+                    </Button>
+                  )}
                 </div>
               </div>
               {/* Show uploaded images */}

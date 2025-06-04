@@ -17,7 +17,7 @@ import {
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
-  const { messages, chatId } = await req.json();
+  const { messages, chatId, currentTool } = await req.json();
 
   // Get the user from the request
 
@@ -31,13 +31,6 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "application/json" },
     });
   }
-
-  // Get user config to check askQuestion settings
-  const { data: configData } = await supabase
-    .from("user_config")
-    .select("*")
-    .eq("id", user.id)
-    .single();
 
   // Get user credit
   const { data: creditData } = await supabase
@@ -74,39 +67,14 @@ export async function POST(req: NextRequest) {
     2.  Choose the most appropriate tool based on the user's explicit request.
     3.  If multiple tools could apply, prioritize the most specific and relevant one.
     4.  If no tool is suitable, respond directly using natural language.
-    
+    5.  **Current tool**: ${currentTool}
+    6.  If current tool is not null, use it.
     ‼️ **IMPORTANT Tool Usage Rules**:
     * **Document Questions (askQuestion)**: If the user asks about a document AND the 'askQuestion' tool is enabled AND documents are uploaded, you **MUST** call the \`askQuestion\` tool. Do NOT provide a generic response or suggest enabling tools if all conditions are met.
     * **Tool Unavailability**: If you cannot call a tool due to specific conditions, respond with the exact reason from the options below:
-        * "Document tools are disabled."
         * "No documents uploaded."
-        * "You don't have enough credit."
+        * "You don't have enough credit."    
 
-    ---
-
- 
-   📈 **Current Tool Status (Internal Only)**:
-    -   **Credit Balance**: ${creditData?.balance}
-    -   **Ask Question Enabled**: ${
-      configData?.ask_question_enabled ? "Yes" : "No"
-    }
-    -   **Documents Uploaded**: ${documentsData!.length > 0 ? "Yes" : "No"}
-    -   **Bar Chart Enabled**: ${
-      configData?.generate_bar_chart_enabled ? "Yes" : "No"
-    }
-    -   **Pie Chart Enabled**: ${
-      configData?.generate_pie_chart_enabled ? "Yes" : "No"
-    }
-    -   **Crypto Price Enabled**: ${
-      configData?.get_crypto_price_enabled ? "Yes" : "No"
-    }
-    -   **Crypto Market Summary Enabled**: ${
-      configData?.get_crypto_market_summary_enabled ? "Yes" : "No"
-    }
-    -   **Text to Speech Enabled**: ${
-      configData?.generate_tts_enabled ? "Yes" : "No"
-    }
-    -   **Web Search Enabled**: ${configData?.web_search_enabled ? "Yes" : "No"}
 
     ---
 
@@ -123,44 +91,29 @@ export async function POST(req: NextRequest) {
     **Document Handling**:
     -   For questions about uploaded documents, use the \`askQuestion\` tool.
     -   For listing all uploaded documents, use the \`allDocument\` tool.
-    -   If a document-related tool is requested but ${
-      configData?.ask_question_enabled
-    } is false, politely inform the user: "Document tools are disabled."
-    -   If a document-related tool is requested but ${
-      documentsData?.length
-    } is 0, politely inform the user: "No documents uploaded."
+    -   Current document count: ${documentsData?.length}
+    -   If a document-related tool is requested but document count is 0, politely inform the user: "No documents uploaded."
 
     **Chart Generation (Pie & Bar)**:
+    -   For chart generation, use the \`generatePieChart\` or \`generateBarChart\` tool.
     -   **Always confirm the data and chart type** with the user before generating.
     -   If the chart type is unclear, ask clarifying questions (e.g., "Would you prefer a pie chart or a bar chart for this data?").
     -   Support common customizations like title, colors, and data series.
     -   If an unsupported chart type is requested (e.g., line chart), suggest the closest supported alternatives.
     -   Provide simple, friendly insights based on the chart data.
-    -   If ${configData?.generate_bar_chart_enabled} or ${
-      configData?.generate_pie_chart_enabled
-    } is false when a chart is requested, politely inform the user: "Chart tools are disabled. Please enable them in your settings."
 
     **Cryptocurrency Data**:
     -   For current cryptocurrency prices, use the \`getCryptoPriceTool\`.
     -   For an overview of the crypto market, use the \`getCryptoMarketSummaryTool\`.
     -   Always clearly state crypto names, values, and any comparisons.
-    -   If ${configData?.get_crypto_price_enabled} or ${
-      configData?.get_crypto_market_summary_enabled
-    } is false when crypto data is requested, politely inform the user: "Crypto tools are disabled. Please enable them in your settings."
 
     **Text to Speech (TTS)**:
     -   Use the \`generateTTS\` tool for any request to convert text to audio, including single-speaker summaries, multi-speaker conversations, podcasts, interviews, debates, or voice messages.
     -   **Always confirm the topic, style, speakers, and script** with the user before generating audio.
     -   **Always ask for speaker names and voice preferences**, and suggest closest supported alternatives if a voice is unclear.
-    -   If ${
-      configData?.generate_tts_enabled
-    } is false when TTS is requested, politely inform the user: "Text to Speech is disabled. Please enable it in your settings."
 
     **Web Search**:
     -   Use the \`webSearch\` tool for any request to search the web for current, external information from the internet. This includes general knowledge, news, facts, current events and **including the current date or time.**
-    -   If ${
-      configData?.web_search_enabled
-    } is false when web search is requested, politely inform the user: "Web Search is disabled. Please enable it in your settings."
 
     **Thai Text Handling**:
     -   When processing Thai text:

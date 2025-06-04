@@ -84,7 +84,6 @@ export const generatePieChartTool = tool({
   - If the user asks for "default colors" or doesn't specify, a distinct color palette will be generated.
   - **Always confirm the information provided by the user** before generating the chart.
   - **Always suggest the closest supported alternative** if the chart type is unclear.
-  - **Do not** generate a pie chart if the tool is disabled; instead, inform the user to enable it.
   `,
   parameters: z.object({
     title: z.string().optional().describe("The pie chart title"),
@@ -201,7 +200,6 @@ export const generateBarChartTool = tool({
   - **Always ask for color preferences**; if no color is provided, use a default color.
   - **Always confirm the information provided by the user** before generating the chart.
   - **Always suggest the closest supported alternative** if the chart type is unclear.
-  - **Do not** generate a bar chart if the tool is disabled; instead, inform the user to enable it.
   `,
   parameters: z.object({
     title: z.string().optional().describe("The bar chart title"),
@@ -292,7 +290,6 @@ export const getCryptoPriceTool = tool({
   - Supports only **THB** as the fiat currency.
   - **Always confirm the information provided by the user** before fetching the price.
   - Always return clear insights about the price and suggest actionable next steps.
-  - **Do not** fetch crypto prices if the tool is disabled; instead, inform the user to enable it.
   `,
   parameters: z.object({
     currency: z.string().describe("The cryptocurrency symbol, e.g., BTC, ETH"),
@@ -463,7 +460,6 @@ export const askQuestionTool = tool({
   - **You MUST call this tool** if the user asks a document-related question, this tool is enabled, and documents are uploaded.
   - Only respond to questions using information directly from tool calls.
   - If no relevant information is found, respond with "No relevant documents found for this question."
-  - **Do not** answer document-based questions if the tool is disabled, no documents are uploaded, or there is insufficient credit; instead, inform the user of the specific reason.
   - Responses will be formatted using markdown, including headings, bullet points, and chronological order for date/time questions.
   `,
   parameters: z.object({
@@ -597,7 +593,6 @@ export const generateTTS = tool({
   - Always suggest the closest supported alternative if the voice is unclear
   - Always confirm the information provided by the user before generating the audio
   - Maximum length of audio is 2 minutes
-  - **Do not** generate text-to-speech if the tool is disabled; instead, inform the user to enable it.
 
   Example usage:
   - "Convert this summary to speech using a natural voice"
@@ -840,8 +835,8 @@ export const webSearchTool = tool({
   - Return concise, summarized snippets from the top search results.
   - If no relevant information is found, explicitly state "No relevant information found on the web for your query."
   - **Do not** use this tool for questions that can be answered by uploaded documents (use \`askQuestionTool\` instead).
-  - **Do not** use this tool for generating charts or getting crypto-specific data if dedicated tools are available.
-  - **Do not** use this tool if web search is disabled; instead, inform the user to enable it.
+  - **Do not** use this tool for generating charts (use \`generatePieChartTool\` or \`generateBarChartTool\` instead).
+  - **Do not** use this tool for getting crypto-specific data (use \`getCryptoPriceTool\` or \`getCryptoMarketSummaryTool\` instead).
   - **The current date and time is: ${new Date().toLocaleDateString()}.** Use this information for date-sensitive queries like "next incoming holiday".
 
   `,
