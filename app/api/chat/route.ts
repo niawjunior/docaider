@@ -55,6 +55,12 @@ export async function POST(req: NextRequest) {
     webSearch: webSearchTool,
   };
 
+  const userMessage = messages[messages.length - 1];
+  if (currentTool) {
+    userMessage.parts[0].text = `${userMessage.parts[0].text} use ${currentTool}`;
+  }
+
+  messages[messages.length - 1] = userMessage;
   const result = streamText({
     model: openai("gpt-4o-mini"),
     toolChoice: creditData?.balance === 0 ? "none" : "auto",
