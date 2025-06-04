@@ -244,6 +244,10 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       title: "Visualize my monthly spending",
       subtitle: "as a pie chart with colors by category",
     },
+    {
+      title: "How to write a book?",
+      subtitle: "about ghost story",
+    },
   ];
 
   useEffect(() => {
@@ -897,17 +901,103 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                     {message.parts.map((part, index) => {
                       if (part.type === "text") {
                         return (
-                          <p
-                            key={index}
-                            className={clsx(
-                              "px-4 leading-relaxed whitespace-pre-wrap py-2 rounded-2xl text-sm text-white",
-                              isUser
-                                ? "bg-blue-600 text-white inline-block"
-                                : " text-white"
-                            )}
-                          >
-                            {part.text}
-                          </p>
+                          <div key={index} className="">
+                            <ReactMarkdown
+                              rehypePlugins={[rehypeHighlight]}
+                              components={{
+                                h1: ({ children }) => (
+                                  <h1 className="px-4 py-2 text-xl font-bold text-white">
+                                    {children}
+                                  </h1>
+                                ),
+                                h2: ({ children }) => (
+                                  <h2 className="px-4 py-2 text-lg font-semibold text-white">
+                                    {children}
+                                  </h2>
+                                ),
+                                h3: ({ children }) => (
+                                  <h3 className="px-4 py-2 text-base font-medium text-white">
+                                    {children}
+                                  </h3>
+                                ),
+                                p: ({ children }) => (
+                                  <p
+                                    className={clsx(
+                                      "px-4 py-2 leading-relaxed whitespace-pre-wrap  rounded-2xl text-sm text-white",
+                                      isUser
+                                        ? "bg-blue-600 text-white inline-block"
+                                        : " text-white"
+                                    )}
+                                  >
+                                    {children}
+                                  </p>
+                                ),
+                                ul: ({ children }) => (
+                                  <ul className="list-disc pl-8  py-2 text-white">
+                                    {children}
+                                  </ul>
+                                ),
+                                ol: ({ children }) => (
+                                  <ol className="list-decimal pl-8  py-2 text-white">
+                                    {children}
+                                  </ol>
+                                ),
+                                li: ({ children }) => (
+                                  <li className="py-2 text-white">
+                                    {children}
+                                  </li>
+                                ),
+
+                                strong: ({ children }) => (
+                                  <strong className="font-bold text-white">
+                                    {children}
+                                  </strong>
+                                ),
+                                em: ({ children }) => (
+                                  <em className="italic text-white">
+                                    {children}
+                                  </em>
+                                ),
+                                // ✅ Inline code
+                                code({ node, className, children, ...props }) {
+                                  const language =
+                                    className?.replace("language-", "") ?? "";
+                                  const codeString =
+                                    extractTextFromChildren(children);
+
+                                  const handleCopy = () => {
+                                    navigator.clipboard.writeText(codeString);
+                                    toast("Copied to clipboard", {
+                                      duration: 1500,
+                                    });
+                                  };
+
+                                  return (
+                                    <div className="relative group my-4">
+                                      <Button
+                                        variant="ghost"
+                                        onClick={handleCopy}
+                                        size="icon"
+                                        className="absolute top-2  right-2 text-xs px-2 py-1 rounded hover:bg-zinc-700"
+                                      >
+                                        <FaCopy />
+                                      </Button>
+                                      <pre className="rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm">
+                                        <code
+                                          className={`language-${language}`}
+                                          {...props}
+                                        >
+                                          {children}
+                                        </code>
+                                      </pre>
+                                    </div>
+                                  );
+                                },
+                              }}
+                            >
+                              {part.text}
+                            </ReactMarkdown>
+                          </div>
                         );
                       } else {
                         if (part.type === "tool-invocation") {
@@ -1109,37 +1199,44 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                   rehypePlugins={[rehypeHighlight]}
                                   components={{
                                     h1: ({ children }) => (
-                                      <h1 className="text-xl font-bold mb-4 text-white">
+                                      <h1 className="px-4 py-2 text-xl font-bold text-white">
                                         {children}
                                       </h1>
                                     ),
                                     h2: ({ children }) => (
-                                      <h2 className="text-lg font-semibold mb-3 text-white">
+                                      <h2 className="px-4 py-2 text-lg font-semibold text-white">
                                         {children}
                                       </h2>
                                     ),
                                     h3: ({ children }) => (
-                                      <h3 className="text-base font-medium mb-2 text-white">
+                                      <h3 className="px-4 py-2 text-base font-medium text-white">
                                         {children}
                                       </h3>
                                     ),
                                     p: ({ children }) => (
-                                      <p className="mb-4 text-white">
+                                      <p
+                                        className={clsx(
+                                          "px-4 py-2 leading-relaxed whitespace-pre-wrap  rounded-2xl text-sm text-white",
+                                          isUser
+                                            ? "bg-blue-600 text-white inline-block"
+                                            : " text-white"
+                                        )}
+                                      >
                                         {children}
                                       </p>
                                     ),
                                     ul: ({ children }) => (
-                                      <ul className="list-disc pl-6 mb-4 text-white">
+                                      <ul className="list-disc pl-8  py-2 text-white">
                                         {children}
                                       </ul>
                                     ),
                                     ol: ({ children }) => (
-                                      <ol className="list-decimal pl-6 mb-4 text-white">
+                                      <ol className="list-decimal pl-8  py-2 text-white">
                                         {children}
                                       </ol>
                                     ),
                                     li: ({ children }) => (
-                                      <li className="mb-2 text-white">
+                                      <li className="py-2 text-white">
                                         {children}
                                       </li>
                                     ),
@@ -1182,7 +1279,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                             variant="ghost"
                                             onClick={handleCopy}
                                             size="icon"
-                                            className="absolute top-2 right-2 text-xs px-2 py-1 rounded hover:bg-zinc-700"
+                                            className="absolute top-2  right-2 text-xs px-2 py-1 rounded hover:bg-zinc-700"
                                           >
                                             <FaCopy />
                                           </Button>

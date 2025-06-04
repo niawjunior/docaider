@@ -565,13 +565,6 @@ export const askQuestionTool = tool({
       • Option B
       • Considerations for each
 
-
-      # Date/Time Examples
-      ## Upcoming Events
-      • Next holiday: January 1, 2025 (New Year's Day)
-        - 15 days from today
-      • Next public holiday: January 27, 2025 (Makha Bucha Day)
-        - 41 days from today
       `,
       });
 
