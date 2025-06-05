@@ -26,7 +26,6 @@ An AI-powered case search and resolution system that helps users quickly find re
 - **Pie Charts**: Generate interactive pie charts from structured data
 - **Bar Charts**: Create detailed bar charts for data comparison
 - **Custom Styling**: Customize charts with different colors and themes
-- **Responsive Visuals**: Charts that work across all device sizes
 
 ### 3. Web Search Integration
 
@@ -40,7 +39,6 @@ An AI-powered case search and resolution system that helps users quickly find re
 - **AI Voice Generation**: Convert text to natural-sounding speech
 - **Customizable Output**: Adjust voice style and parameters
 - **Podcast Creation**: Generate audio content with multiple speakers
-- **Audio Export**: Download or share generated audio files
 
 ### 5. Cryptocurrency Tools
 
@@ -52,13 +50,12 @@ An AI-powered case search and resolution system that helps users quickly find re
 ## Tech Stack
 
 - **Frontend**: Next.js 15.3 with TypeScript
-- **UI Components**: Radix UI, Tailwind CSS, Shadcn UI
+- **UI Components**: Tailwind CSS, Shadcn UI
 - **AI/ML**: OpenAI Embeddings, Vector Search
 - **Backend**: Next.js API Routes
-- **Database**: Vector Database (Pinecone/Weaviate/Chroma)
-- **State Management**: React Context, Zustand
-- **Authentication**: NextAuth.js
-- **Icons**: Lucide React, React Icons
+- **Database**: Vector Database (Supabase)
+- **Authentication**: Supabase Auth
+- **Icons**: React Icons
 
 ## Getting Started
 
@@ -67,7 +64,8 @@ An AI-powered case search and resolution system that helps users quickly find re
 - Node.js 18 or higher
 - npm or yarn package manager
 - OpenAI API key (for embeddings and AI features)
-- Vector database account (Pinecone/Weaviate/Chroma)
+- Google Generative AI API key (for web search and TTS)
+- Supabase account (for vector database and authentication)
 
 ### Installation
 
