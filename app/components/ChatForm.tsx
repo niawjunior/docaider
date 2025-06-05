@@ -135,7 +135,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       document_name: string;
     }[]
   >([]);
-  const [isToolModalOpen, setIsToolModalOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -1502,7 +1501,11 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                         </div>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent>
+                    <DropdownMenuContent
+                      className=" h-[300px]"
+                      align="start"
+                      side="top"
+                    >
                       <DropdownMenuLabel>Available tools</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       {tools.map((tool) => (
@@ -1632,43 +1635,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                   }}
                   documents={documents}
                 />
-              </DialogContent>
-            </Dialog>
-
-            <Dialog open={isToolModalOpen} onOpenChange={setIsToolModalOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Available Tools</DialogTitle>
-                </DialogHeader>
-                <ScrollArea className="h-[300px] overflow-y-auto">
-                  {tools.map((tool) => (
-                    <div
-                      key={tool.name}
-                      className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-background/50 hover:bg-background/70 transition-colors"
-                    >
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        {toolIcons[tool.name as keyof typeof toolIcons]}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium leading-none truncate">
-                          {tool.name}
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {tool.description}
-                        </p>
-                      </div>
-
-                      <Switch
-                        id={tool.name}
-                        key={tool.name}
-                        checked={tool.enabled}
-                        onCheckedChange={(checked) =>
-                          handleUpdateConfig({ [tool.name]: checked })
-                        }
-                      />
-                    </div>
-                  ))}
-                </ScrollArea>
               </DialogContent>
             </Dialog>
 
