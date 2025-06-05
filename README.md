@@ -14,33 +14,40 @@ An AI-powered case search and resolution system that helps users quickly find re
 
 ## Key Features
 
-### 1. Intelligent Case Search
+### 1. Document Analysis & Q&A
 
-- Natural language understanding for case queries
-- Vector-based semantic search for finding similar cases
-- Filter by categories, status, and date ranges
-- Highlight relevant snippets in search results
+- **Ask Questions**: Get precise answers from your uploaded documents
+- **Semantic Search**: Find relevant information using natural language queries
+- **Document Management**: View and organize all your uploaded documents in one place
+- **Context-Aware Responses**: AI understands document context for accurate answers
 
-### 2. AI-Powered Analysis
+### 2. Data Visualization
 
-- Automatic root cause identification
-- Suggested resolutions based on historical data
-- Similar case recommendations
-- Confidence scoring for search results
+- **Pie Charts**: Generate interactive pie charts from structured data
+- **Bar Charts**: Create detailed bar charts for data comparison
+- **Custom Styling**: Customize charts with different colors and themes
+- **Responsive Visuals**: Charts that work across all device sizes
 
-### 3. Case Management
+### 3. Web Search Integration
 
-- Track case status and resolution progress
-- Add notes and updates to cases
-- Link related cases together
-- Export case details and search results
+- **Real-time Web Search**: Access current information from the internet
+- **Comprehensive Results**: Get summarized search results with sources
+- **Current Events**: Stay updated with the latest information
+- **Knowledge Expansion**: Combine document knowledge with web information
 
-### 4. Knowledge Base
+### 4. Text-to-Speech (TTS)
 
-- Store and retrieve common solutions
-- Categorize and tag cases for better organization
-- Version control for solution articles
-- Feedback loop for improving result relevance
+- **AI Voice Generation**: Convert text to natural-sounding speech
+- **Customizable Output**: Adjust voice style and parameters
+- **Podcast Creation**: Generate audio content with multiple speakers
+- **Audio Export**: Download or share generated audio files
+
+### 5. Cryptocurrency Tools
+
+- **Real-time Crypto Prices**: Get current prices for any cryptocurrency
+- **Market Overview**: View comprehensive market summaries
+- **Multiple Fiat Currencies**: Check prices in your preferred currency
+- **Market Trends**: Stay updated with the latest market movements
 
 ## Tech Stack
 
