@@ -881,7 +881,7 @@ export const weatherTool = tool({
   }),
   execute: async ({ location }) => {
     try {
-      const result = await weather.getCurrentWeather(location.trim());
+      const result = await weather.getCurrentWeather(location);
 
       return {
         result: result?.current,

@@ -26,6 +26,7 @@ import {
   FaTrash,
   FaVolumeUp,
   FaSearch,
+  FaCloud,
 } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 
@@ -58,9 +59,7 @@ import { useShareUrl } from "../hooks/useShareUrl";
 import { Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useQueryClient } from "@tanstack/react-query";
-import router from "next/router";
 import Image from "next/image";
-import { FcCancel } from "react-icons/fc";
 import TableComponent from "./Table";
 import WebSearchComponent from "./WebSearch";
 import {
@@ -82,6 +81,7 @@ const toolIcons = {
   askQuestion: <FaQuestion />,
   generateTTS: <FaVolumeUp />,
   webSearch: <FaSearch />,
+  weather: <FaCloud />,
 };
 
 interface ChatFormProps {
@@ -148,37 +148,34 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       name: "webSearch",
       description:
         "Search the web for current, external information from the internet",
-      enabled: config?.web_search_enabled ?? true,
     },
     {
       name: "askQuestion",
       description: "Ask a question about the uploaded documents",
-      enabled: config?.ask_question_enabled ?? true,
     },
     {
       name: "generateTTS",
       description: "Generate a text to speech, e.g. for podcasting",
-      enabled: config?.generate_tts_enabled ?? true,
+    },
+    {
+      name: "weather",
+      description: "Get the current weather",
     },
     {
       name: "generateBarChart",
       description: "Generate a bar chart",
-      enabled: config?.generate_bar_chart_enabled ?? true,
     },
     {
       name: "generatePieChart",
       description: "Generate a pie chart",
-      enabled: config?.generate_pie_chart_enabled ?? true,
     },
     {
       name: "getCryptoPrice",
       description: "Get the current price of a cryptocurrency",
-      enabled: config?.get_crypto_price_enabled ?? true,
     },
     {
       name: "getCryptoMarketSummary",
       description: "Get a summary of the current market for a cryptocurrency",
-      enabled: config?.get_crypto_market_summary_enabled ?? true,
     },
   ];
 
@@ -530,43 +527,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
         description: "Failed to toggle document status. Please try again.",
       });
     }
-  };
-
-  const handleUpdateConfig = async (
-    updates: Partial<Record<string, boolean>>
-  ) => {
-    const mappedUpdates: Partial<UserConfig> = {};
-
-    Object.entries(updates).forEach(([key, value]) => {
-      switch (key) {
-        case "webSearch":
-          mappedUpdates.web_search_enabled = value;
-          break;
-        case "generateBarChart":
-          mappedUpdates.generate_bar_chart_enabled = value;
-          break;
-        case "generatePieChart":
-          mappedUpdates.generate_pie_chart_enabled = value;
-          break;
-        case "getCryptoPrice":
-          mappedUpdates.get_crypto_price_enabled = value;
-          break;
-        case "getCryptoMarketSummary":
-          mappedUpdates.get_crypto_market_summary_enabled = value;
-          break;
-        case "askQuestion":
-          mappedUpdates.ask_question_enabled = value;
-          break;
-        case "generateTTS":
-          mappedUpdates.generate_tts_enabled = value;
-          break;
-      }
-    });
-
-    await updateConfig(mappedUpdates);
-    toast.success("Config updated successfully", {
-      duration: 3000,
-    });
   };
 
   const handleShare = async () => {
