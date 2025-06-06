@@ -1502,16 +1502,18 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
-                      className=" h-[300px]"
+                      className="h-[300px] max-w-[300px]"
                       align="start"
                       side="top"
+                      sideOffset={10}
+                      alignOffset={-25}
                     >
                       <DropdownMenuLabel>Available tools</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       {tools.map((tool) => (
                         <DropdownMenuCheckboxItem
                           key={tool.name}
-                          className="flex items-center gap-2 cursor-pointer"
+                          className="flex items-center gap-2 px-2 cursor-pointer"
                           checked={currentTool === tool.name}
                           onCheckedChange={(checked) =>
                             setCurrentTool(tool.name)
@@ -1524,7 +1526,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                             <h3 className="font-medium leading-none truncate">
                               {tool.name}
                             </h3>
-                            <p className="text-xs text-muted-foreground mt-2">
+                            <p className="text-xs text-muted-foreground mt-2 ">
                               {tool.description}
                             </p>
                           </div>
@@ -1537,10 +1539,10 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                     <Button
                       onClick={() => setCurrentTool("")}
                       variant="outline"
-                      className="ml-2 cursor-pointer border hover:text-white"
+                      className="ml-1 text-xs cursor-pointer border hover:text-white"
                     >
                       {currentTool}
-                      <TiDelete className="ml-2" />
+                      <TiDelete className="ml-1" />
                     </Button>
                   )}
                 </div>
