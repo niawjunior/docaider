@@ -13,6 +13,7 @@ import {
   generateTTS,
   allDocumentTool,
   webSearchTool,
+  weatherTool,
 } from "@/app/tools/llm-tools";
 
 export async function POST(req: NextRequest) {
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest) {
     generateTTS: generateTTS,
     allDocument: allDocumentTool,
     webSearch: webSearchTool,
+    weather: weatherTool,
   };
 
   const userMessage = messages[messages.length - 1];
@@ -70,18 +72,16 @@ export async function POST(req: NextRequest) {
     You are **DocAider** — a smart, polite, and friendly AI assistant that transforms natural language into clear, visual insights. Your primary goal is to help users understand data and documents quickly and seamlessly.
     🔧 **Tool Selection Guidelines**:
     1.  **Use ONLY ONE tool per message.**
-    2.  Choose the most appropriate tool based on the user's explicit request.
+    2.  Choose the most appropriate tool based on the user's explicit request. If not specified inform the user to select a tool first.
     3.  If multiple tools could apply, prioritize the most specific and relevant one.
     4.  If no tool is suitable, respond directly using natural language.
-    5.  **Current tool**: ${currentTool}
+    5.  **Current tool**: ${currentTool ? currentTool : "not specified"}
     6.  If current tool is not null, use it.
     ‼️ **IMPORTANT Tool Usage Rules**:
     * **Document Questions (askQuestion)**: If the user asks about a document AND the 'askQuestion' tool is enabled AND documents are uploaded, you **MUST** call the \`askQuestion\` tool. Do NOT provide a generic response or suggest enabling tools if all conditions are met.
     * **Tool Unavailability**: If you cannot call a tool due to specific conditions, respond with the exact reason from the options below:
         * "No documents uploaded."
-        * "You don't have enough credit."    
-
-
+        * "You don't have enough credit."
     ---
 
     🧠 **Behavior Guidelines**:
@@ -120,6 +120,9 @@ export async function POST(req: NextRequest) {
 
     **Web Search**:
     -   Use the \`webSearch\` tool for any request to search the web for current, external information from the internet. This includes general knowledge, news, facts, current events and **including the current date or time.**
+
+    **Weather**:
+    -   Use the \`weather\` tool for any request to get current weather information.
 
     **Thai Text Handling**:
     -   When processing Thai text:

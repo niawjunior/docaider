@@ -72,6 +72,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import WeatherComponent from "./WeatherComponent";
 
 const toolIcons = {
   generateBarChart: <FaChartBar />,
@@ -1439,6 +1440,50 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                 key={message.id}
                                 searchResults={result}
                                 query={query}
+                              />
+                            ) : (
+                              <div
+                                key={message.id}
+                                className="flex items-center gap-2"
+                              >
+                                <p className="text-white text-sm">
+                                  Something went wrong. Please try again.
+                                </p>
+
+                                <FaRegFaceSadCry />
+                              </div>
+                            );
+                          }
+
+                          if (part.toolInvocation.toolName === "weather") {
+                            const result = (part.toolInvocation as any)?.result;
+                            const query = (part.toolInvocation as any)?.args
+                              ?.location;
+                            if (
+                              !("result" in part.toolInvocation) &&
+                              message.id ===
+                                messages[messages.length - 1]?.id &&
+                              status === "streaming"
+                            ) {
+                              return (
+                                <div
+                                  key={message.id}
+                                  className="flex items-center gap-2"
+                                >
+                                  <p className="text-white text-sm">
+                                    Fetching weather ...
+                                  </p>
+                                  <div className="flex items-center justify-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return result?.result ? (
+                              <WeatherComponent
+                                key={message.id}
+                                weatherData={result.result}
+                                location={query}
                               />
                             ) : (
                               <div

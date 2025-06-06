@@ -3,6 +3,7 @@ import { z } from "zod";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { google } from "@ai-sdk/google";
+import { WeatherClient } from "@agentic/weather";
 
 import { createClient } from "../utils/supabase/server";
 import { findRelevantContent } from "../utils/embedding";
@@ -859,6 +860,31 @@ export const webSearchTool = tool({
       return {
         text,
         sources,
+      };
+    } catch (error: any) {
+      console.error("Web search tool error:", error);
+      return { error: `Failed to perform web search: ${error.message}` };
+    }
+  },
+});
+
+const weather = new WeatherClient();
+
+export const weatherTool = tool({
+  description: "Use this tool to get current weather information.",
+  parameters: z.object({
+    location: z
+      .string()
+      .describe(
+        "The location to get weather information for. use city name in English language for example: Khon Kaen"
+      ),
+  }),
+  execute: async ({ location }) => {
+    try {
+      const result = await weather.getCurrentWeather(location.trim());
+
+      return {
+        result: result?.current,
       };
     } catch (error: any) {
       console.error("Web search tool error:", error);
