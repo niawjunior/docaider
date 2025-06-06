@@ -799,7 +799,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
               </div>
             </div>
           )}
-          <div className="flex justify-end">
+          <div className="flex justify-end ">
             {messages.length > 0 && (
               <TooltipProvider>
                 <Tooltip>

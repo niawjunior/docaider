@@ -67,10 +67,10 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
 
   return (
     <aside className="bg-zinc-900 p-4 flex flex-col gap-4 h-full w-72 min-w-72 border-r border-zinc-800 z-50">
-      <div className="text-sm text-zinc-400 font-semibold mt-[50px]">
+      <div className="text-sm text-zinc-400 font-semibold mt-[55px] px-1">
         Recents
       </div>
-      <ul ref={sidebarRef} className="flex-1 overflow-y-auto scroll-hidden">
+      <ul ref={sidebarRef} className="flex-1 overflow-y-auto scroll-hidden ">
         {isLoading || creditLoading || isChatsLoading ? (
           <div className="flex items-center justify-center py-4">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>

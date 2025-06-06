@@ -113,7 +113,7 @@ const ChatLayout = ({
               )}
             </div>
             {isSidebarOpen && (
-              <div className="flex justify-end w-full">
+              <div className="flex justify-end w-full ">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
@@ -137,7 +137,7 @@ const ChatLayout = ({
         {/* Sidebar */}
         {isSidebarOpen && <Sidebar chatId={chatId} isLoading={isLoading} />}
         {/* Main */}
-        <main className="flex-1 w-full flex flex-col p-4 overflow-hidden ">
+        <main className="flex-1 w-full flex flex-col p-2 overflow-hidden ">
           <div className="text-center w-full gap-8  p-0 h-full flex flex-col items-center">
             <div className="rounded-xl  w-full min-w-[300px]">{children}</div>
           </div>

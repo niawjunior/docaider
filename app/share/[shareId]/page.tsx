@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import BarChart from "@/app/components/BarChart";
 import CryptoPriceOverview from "@/app/components/CryptoPriceOverview";
@@ -22,6 +23,7 @@ import TableComponent from "@/app/components/Table";
 import Image from "next/image";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import WebSearchComponent from "@/app/components/WebSearch";
+import WeatherComponent from "@/app/components/WeatherComponent";
 
 function extractTextFromChildren(children: any): string {
   if (typeof children === "string") return children;
@@ -49,7 +51,8 @@ const SharePage = () => {
     if (!response.ok) {
       throw new Error("Failed to fetch share data");
     }
-    return response.json();
+    const data = await response.json();
+    return data.messages;
   };
 
   // Add this function to handle image load
@@ -60,7 +63,7 @@ const SharePage = () => {
     }));
   };
 
-  const { data, isLoading } = useQuery({
+  const { data: messages, isLoading } = useQuery({
     queryKey: ["share", shareId],
     queryFn: fetchShareData,
     retry: 1,
@@ -82,7 +85,7 @@ const SharePage = () => {
 
     el.addEventListener("scroll", handleScroll);
     return () => el.removeEventListener("scroll", handleScroll);
-  }, [data?.messages]);
+  }, [messages]);
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -93,7 +96,7 @@ const SharePage = () => {
     <GlobalLoader />
   ) : (
     <div className="flex h-dvh bg-black text-white">
-      <main className="flex-1 w-full flex flex-col p-4 overflow-hidden ">
+      <main className="flex-1 w-full flex flex-col overflow-hidden ">
         <div className="flex items-center justify-between md:p-4 p-0">
           <Button
             variant="ghost"
@@ -105,7 +108,7 @@ const SharePage = () => {
           <div className="flex flex-col gap-1">
             <h1 className="  text-white ">This is a copy of a conversation.</h1>
             <p className="text-xs self-end text-zinc-400">
-              {dayjs(data?.messages.createdAt).format("DD/MM/YYYY HH:mm:ss")}
+              {dayjs(messages.createdAt).format("DD/MM/YYYY HH:mm:ss")}
             </p>
           </div>
         </div>
@@ -118,11 +121,11 @@ const SharePage = () => {
                   className={clsx(
                     "overflow-auto scroll-hidden px-2",
 
-                    data?.messages?.length > 0 &&
+                    messages?.length > 0 &&
                       " py-4 md:h-[calc(100dvh-140px)] h-[calc(100dvh-100px)]"
                   )}
                 >
-                  {data?.messages.map((message: any) => {
+                  {messages.map((message: any) => {
                     const isUser = message.role === "user";
                     return (
                       <div
@@ -172,18 +175,11 @@ const SharePage = () => {
                                 </div>
                               );
                             })}
+
                           {message.parts.map((part: any, index: any) => {
                             if (part.type === "text") {
                               return (
-                                <p
-                                  key={index}
-                                  className={clsx(
-                                    "px-4 leading-relaxed whitespace-pre-wrap py-2 rounded-2xl text-sm text-white",
-                                    isUser
-                                      ? "bg-blue-600 text-white inline-block"
-                                      : " text-white"
-                                  )}
-                                >
+                                <div key={index} className="">
                                   <ReactMarkdown
                                     rehypePlugins={[rehypeHighlight]}
                                     components={{
@@ -242,7 +238,6 @@ const SharePage = () => {
                                       ),
                                       // ✅ Inline code
                                       code({
-                                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
                                         node,
                                         className,
                                         children,
@@ -288,7 +283,7 @@ const SharePage = () => {
                                   >
                                     {part.text}
                                   </ReactMarkdown>
-                                </p>
+                                </div>
                               );
                             } else {
                               if (part.type === "tool-invocation") {
@@ -302,8 +297,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data?.messages[data?.messages.length - 1]
-                                        ?.id &&
+                                      messages[messages.length - 1]?.id &&
                                     status === "streaming"
                                   ) {
                                     return (
@@ -347,8 +341,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data?.messages[data?.messages.length - 1]
-                                        ?.id &&
+                                      messages[messages.length - 1]?.id &&
                                     status === "streaming"
                                   ) {
                                     return (
@@ -392,8 +385,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data?.messages[data?.messages.length - 1]
-                                        ?.id &&
+                                      messages[messages.length - 1]?.id &&
                                     status === "streaming"
                                   ) {
                                     return (
@@ -439,8 +431,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data?.messages[data?.messages.length - 1]
-                                        ?.id &&
+                                      messages[messages.length - 1]?.id &&
                                     status === "streaming"
                                   ) {
                                     return (
@@ -481,8 +472,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data?.messages[data?.messages.length - 1]
-                                        ?.id &&
+                                      messages[messages.length - 1]?.id &&
                                     status === "streaming"
                                   ) {
                                     return (
@@ -559,7 +549,6 @@ const SharePage = () => {
                                           ),
                                           // ✅ Inline code
                                           code({
-                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
                                             node,
                                             className,
                                             children,
@@ -630,8 +619,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data?.messages[data?.messages.length - 1]
-                                        ?.id &&
+                                      messages[messages.length - 1]?.id &&
                                     status === "streaming"
                                   ) {
                                     return (
@@ -677,8 +665,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data?.messages[data?.messages.length - 1]
-                                        ?.id &&
+                                      messages[messages.length - 1]?.id &&
                                     status === "streaming"
                                   ) {
                                     return (
@@ -725,8 +712,7 @@ const SharePage = () => {
                                   if (
                                     !("result" in part.toolInvocation) &&
                                     message.id ===
-                                      data?.messages[data?.messages.length - 1]
-                                        ?.id &&
+                                      messages[messages.length - 1]?.id &&
                                     status === "streaming"
                                   ) {
                                     return (
@@ -735,7 +721,7 @@ const SharePage = () => {
                                         className="flex items-center gap-2"
                                       >
                                         <p className="text-white text-sm">
-                                          Web searching ...
+                                          Searching the web ...
                                         </p>
                                         <div className="flex items-center justify-center py-4">
                                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
@@ -748,6 +734,53 @@ const SharePage = () => {
                                       key={message.id}
                                       searchResults={result}
                                       query={query}
+                                    />
+                                  ) : (
+                                    <div
+                                      key={message.id}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <p className="text-white text-sm">
+                                        Something went wrong. Please try again.
+                                      </p>
+
+                                      <FaRegFaceSadCry />
+                                    </div>
+                                  );
+                                }
+
+                                if (
+                                  part.toolInvocation.toolName === "weather"
+                                ) {
+                                  const result = (part.toolInvocation as any)
+                                    ?.result;
+                                  const query = (part.toolInvocation as any)
+                                    ?.args?.location;
+                                  if (
+                                    !("result" in part.toolInvocation) &&
+                                    message.id ===
+                                      messages[messages.length - 1]?.id &&
+                                    status === "streaming"
+                                  ) {
+                                    return (
+                                      <div
+                                        key={message.id}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <p className="text-white text-sm">
+                                          Fetching weather ...
+                                        </p>
+                                        <div className="flex items-center justify-center py-4">
+                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                  return result?.result ? (
+                                    <WeatherComponent
+                                      key={message.id}
+                                      weatherData={result.result}
+                                      location={query}
                                     />
                                   ) : (
                                     <div
