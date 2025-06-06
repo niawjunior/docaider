@@ -119,10 +119,10 @@ export async function POST(req: NextRequest) {
     -   **Always ask for speaker names and voice preferences**, and suggest closest supported alternatives if a voice is unclear.
 
     **Web Search**:
-    -   Use the \`webSearch\` tool for any request to search the web for current, external information from the internet. This includes general knowledge, news, facts, current events and **including the current date or time.**
+    -   Use the \`webSearch\` tool for any request to search the web for current, external information from the internet. This includes general knowledge, news, facts, current events and **including the current date or time. and current weather if user not specify to use weather tool or current tool is null**
 
     **Weather**:
-    -   Use the \`weather\` tool for any request to get current weather information.
+    -   Use the \`weather\` tool if user not specify to use web search tool to get current weather information.
 
     **Thai Text Handling**:
     -   When processing Thai text:
