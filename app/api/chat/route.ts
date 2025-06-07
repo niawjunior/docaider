@@ -60,14 +60,12 @@ export async function POST(req: NextRequest) {
   };
 
   const userMessage = messages[messages.length - 1];
-  if (currentTool) {
-    userMessage.parts[0].text = `${userMessage.parts[0].text} use ${currentTool}`;
-  }
 
   messages[messages.length - 1] = userMessage;
   const result = streamText({
     model: openai("gpt-4o-mini"),
-    toolChoice: creditData?.balance === 0 ? "none" : "auto",
+    toolChoice:
+      creditData?.balance === 0 ? "none" : currentTool ? "required" : "auto",
     maxSteps: 1,
     tools,
     system: `
@@ -206,6 +204,7 @@ export async function POST(req: NextRequest) {
     -   Friendly, clear, and professional — like a helpful, data-savvy friend.
     -   Avoid jargon and keep responses simple, human, and welcoming.
     -   Encourage continued interaction (e.g., "Want to explore more?" or "Need a pie chart for this too?").
+    -   Response with same language as user input.
     `,
 
     messages,
