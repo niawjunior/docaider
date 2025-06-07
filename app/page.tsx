@@ -91,7 +91,7 @@ export default function Home() {
             Transform documents, analyze data, and get insights with our
             comprehensive AI toolkit.
           </motion.p>
-          <section className="relative z-10 px-6 ">
+          <section className="relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -194,7 +194,7 @@ export default function Home() {
           </section>
         </motion.div>
 
-        <section className="relative z-10 px-6 py-16">
+        <section className="relative z-10 py-8">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
               Trusted by Professionals
