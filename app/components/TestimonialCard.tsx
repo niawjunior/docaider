@@ -27,7 +27,7 @@ export function TestimonialCard({
           {avatar}
         </div>
         <div>
-          <h4 className="font-semibold text-white">{name}</h4>
+          <h3 className="font-semibold text-white text-base">{name}</h3>
           <p className="text-sm text-gray-400">
             {role} at {company}
           </p>

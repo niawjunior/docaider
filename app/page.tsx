@@ -273,7 +273,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mt-6 text-center text-xs text-gray-600">
+        <div className="mt-6 text-center text-xs text-gray-400">
           © {new Date().getFullYear()} DocAider. All rights reserved.
         </div>
       </footer>
