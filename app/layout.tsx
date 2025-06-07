@@ -15,10 +15,9 @@ export const metadata: Metadata = {
     default: "DocAider - Your AI Document Assistant",
     template: "%s | DocAider",
   },
-  description:
-    "Transform documents into insights with DocAider's AI-powered document analysis and visualization tools",
+  description: "AI-Powered Document & Data Platform",
   keywords:
-    "document analysis, AI assistant, text analysis, data visualization, document processing",
+    "document analysis, AI assistant, text analysis, data visualization, document processing, AI-powered document analysis, AI-powered data visualization, AI-powered document processing",
   authors: [
     {
       name: "Pasupol Bunsaen",
@@ -40,8 +39,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "DocAider - Your AI Document Assistant",
-    description:
-      "Transform documents into insights with DocAider's AI-powered document analysis and visualization tools",
+    description: "AI-Powered Document & Data Platform",
     url: "https://docaider.com",
     siteName: "DocAider",
     images: [
@@ -58,8 +56,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "DocAider - Your AI Document Assistant",
-    description:
-      "Transform documents into insights with DocAider's AI-powered document analysis and visualization tools",
+    description: "AI-Powered Document & Data Platform",
     images: ["https://docaider.com/og-image.png"],
   },
   icons: {

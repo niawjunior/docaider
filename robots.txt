@@ -1,0 +1,26 @@
+# robots.txt for DocAider - AI-Powered Document & Data Platform
+# Last updated: 2025-06-07
+
+User-agent: *
+Allow: /$
+Allow: /chat
+Allow: /login
+Allow: /signup
+Allow: /terms
+Allow: /privacy
+Allow: /contact
+Allow: /api/og  # For OpenGraph image generation
+
+# Disallow admin and sensitive areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /auth/
+Disallow: /dashboard/
+Disallow: /settings/
+Disallow: /billing/
+
+# Sitemap location (uncomment and update with your actual sitemap URL)
+# Sitemap: https://docaider.com/sitemap.xml
+
+# Crawl-delay: 10  # Uncomment and adjust if you need to limit crawl rate
