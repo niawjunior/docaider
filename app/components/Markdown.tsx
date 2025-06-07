@@ -126,8 +126,8 @@ const Markdown = ({ isUser, text, images, banner }: MarkdownProps) => {
                 className="relative group rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
               >
                 <Image
-                  width={100}
-                  height={100}
+                  width={50}
+                  height={50}
                   src={image}
                   className="w-full h-full object-cover"
                   alt={`Image ${index}`}
