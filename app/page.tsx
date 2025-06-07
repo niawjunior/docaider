@@ -106,7 +106,7 @@ export default function Home() {
                 <FeatureCard
                   icon="data"
                   title="Data Visualization"
-                  description="Create beautiful bar and pie charts from your data with simple prompts."
+                  description="Create beautiful bar and pie charts from your data."
                   features={[
                     "Generate Bar Charts",
                     "Create Pie Charts",
@@ -117,7 +117,7 @@ export default function Home() {
                 <FeatureCard
                   icon="document"
                   title="Document Intelligence"
-                  description="Process and analyze documents with advanced AI capabilities."
+                  description="Process and analyze documents with AI."
                   features={[
                     "Document Q&A",
                     "Text Extraction",
@@ -128,7 +128,7 @@ export default function Home() {
                 <FeatureCard
                   icon="crypto"
                   title="Market Data"
-                  description="Get real-time cryptocurrency market data and price information."
+                  description="Get real-time cryptocurrency market data."
                   features={[
                     "Crypto Prices",
                     "Market Summaries",
@@ -139,7 +139,7 @@ export default function Home() {
                 <FeatureCard
                   icon="web"
                   title="Web Search"
-                  description="Find and extract information from the web with AI-powered search."
+                  description="Find and extract information from the web."
                   features={[
                     "Web Search",
                     "Content Extraction",
