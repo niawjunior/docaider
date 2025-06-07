@@ -256,7 +256,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
             <span className="font-bold text-white">✨ DocAider</span> &mdash;
-            Turn text into stunning visualizations.
+            AI-Powered Document & Data Platform
           </div>
 
           <div className="flex flex-wrap gap-4 justify-center md:justify-end text-gray-400">
