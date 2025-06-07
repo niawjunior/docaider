@@ -898,14 +898,16 @@ export const webScrapingTool = tool({
     
     ✅ **Required for**:
     - Scraping any website into clean markdown or structured data.
-  
     `,
   parameters: z.object({
     url: z
       .string()
       .describe("The website url to scrape. Example: https://example.com"),
+
+    language: z.string().describe("The language to scrape. Example: en, th"),
   }),
-  execute: async ({ url }) => {
+  execute: async ({ url, language }) => {
+    console.log(language);
     const firecrawl = new FirecrawlClient();
 
     try {
@@ -936,7 +938,7 @@ export const webScrapingTool = tool({
         - Exclude unnecessary JSON blobs, scripts.
         - Focus on extracting the readable article (e.g., news, blog, product update).
         - If the article has sections (e.g., summary, bullet points), format them cleanly.
-        
+        - Must return the article in ${language} language.
         Output in clean Markdown with readable formatting.
         
          - Respond to the user in Markdown format.
@@ -947,6 +949,7 @@ export const webScrapingTool = tool({
           - Use backticks (\`) for code snippets
           - Use **bold** for important terms
           - Use *italic* for emphasis
+  
 
           # Date/Time Handling
           - When answering date-related questions:
@@ -979,7 +982,6 @@ export const webScrapingTool = tool({
           \`\`\`
 
           # Tools
-          - Use the askQuestion tool to retrieve information
           - Format responses for ReactMarkdown compatibility
 
           # Examples

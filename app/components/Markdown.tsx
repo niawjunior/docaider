@@ -126,6 +126,12 @@ const Markdown = ({ isUser, text, images, banner }: MarkdownProps) => {
                 className="relative group rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
               >
                 <Image
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none"; // Hide broken image
+                    // OR
+                    // target.src = '/fallback-image.jpg';  // Show fallback image
+                  }}
                   width={200}
                   height={200}
                   src={image}

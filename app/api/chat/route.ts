@@ -125,6 +125,7 @@ export async function POST(req: NextRequest) {
     -   Use the \`weather\` tool if user not specify to use web search tool to get current weather information.
 
     **Web Scraping**:
+    -   **Always ask user to specify the language to scrape before using the tool**
     -   Use the \`webScraping\` tool for any request to scrape any website into clean markdown or structured data.
 
     **Thai Text Handling**:
@@ -204,7 +205,6 @@ export async function POST(req: NextRequest) {
     -   Friendly, clear, and professional — like a helpful, data-savvy friend.
     -   Avoid jargon and keep responses simple, human, and welcoming.
     -   Encourage continued interaction (e.g., "Want to explore more?" or "Need a pie chart for this too?").
-    -   Response with same language as user input.
     `,
 
     messages,
