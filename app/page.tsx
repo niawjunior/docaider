@@ -7,6 +7,7 @@ import Link from "next/link";
 import { signOut } from "./login/action";
 import { Button } from "@/components/ui/button";
 import { FeatureCard } from "./components/FeatureCard";
+import { TestimonialCard } from "./components/TestimonialCard";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -78,7 +79,7 @@ export default function Home() {
           initial="hidden"
           animate="show"
           variants={containerVariants}
-          className="text-center space-y-8 max-w-4xl relative"
+          className="text-center space-y-8 max-w-7xl relative"
         >
           <motion.h1
             variants={itemVariants}
@@ -96,7 +97,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="max-w-6xl mx-auto"
+              className=" mx-auto"
             >
               <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-8">
                 Powerful Features for Your Data Needs
@@ -171,8 +172,8 @@ export default function Home() {
               </div>
             </motion.div>
           </section>
-          <section className="relative z-10 px-6  bg-zinc-900/50">
-            <div className="max-w-4xl mx-auto text-center">
+          <section className="relative z-10  bg-zinc-900/50">
+            <div className="max-w-7xl mx-auto text-center">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
                 Ready to Transform Your Workflow?
               </h2>
@@ -192,6 +193,64 @@ export default function Home() {
             </div>
           </section>
         </motion.div>
+
+        <section className="relative z-10 px-6 py-16">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
+              Trusted by Professionals
+            </h2>
+            <p className="text-xl text-gray-400 text-center mb-12 max-w-2xl mx-auto">
+              See what our users are saying about their experience with our
+              platform.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <TestimonialCard
+                name="Sarah Johnson"
+                role="Data Analyst"
+                company="TechCorp"
+                avatar="SJ"
+                rating={5}
+                content="DocAider has completely transformed how we analyze documents. The AI-powered insights save us hours of manual work every week."
+              />
+              <TestimonialCard
+                name="Michael Chen"
+                role="Product Manager"
+                company="InnoTech"
+                avatar="MC"
+                rating={4}
+                content="The data visualization tools are incredibly intuitive. I can create professional charts in seconds. The only reason for 4 stars is we'd love to see more chart types in future updates."
+              />
+              <TestimonialCard
+                name="Emily Rodriguez"
+                role="Researcher"
+                company="Global Insights"
+                avatar="ER"
+                rating={5}
+                content="The document intelligence features are game-changing. It's like having a research assistant that works 24/7. The accuracy is impressive!"
+              />
+            </div>
+
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <TestimonialCard
+                name="David Kim"
+                role="Financial Analyst"
+                company="WealthFront"
+                avatar="DK"
+                content="The real-time market data integration is incredibly accurate. It's become an essential tool for our daily market analysis."
+                rating={4}
+              />
+              <TestimonialCard
+                name="Priya Patel"
+                role="Content Strategist"
+                company="ContentMint"
+                avatar="PP"
+                content="The web search and content extraction features have streamlined our research process significantly. Highly recommended!"
+                rating={5}
+              />
+            </div>
+          </div>
+        </section>
       </div>
       <footer className="w-full bg-zinc-900 border-t border-zinc-800 px-6 py-10 text-gray-400 text-sm">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">

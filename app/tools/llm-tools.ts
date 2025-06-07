@@ -870,7 +870,15 @@ export const webSearchTool = tool({
 });
 
 export const weatherTool = tool({
-  description: "Use this tool to get current weather information.",
+  description: `
+  Use this tool to get current weather information.
+
+  - Check the validity of the location before using the tool.
+  - If location is not a valid location, inform the user that the location is not valid.
+  - If location is valid, use the \`weather\` tool to get weather information.
+  - Always confirm the location with the user before using the tool.
+
+  `,
   parameters: z.object({
     location: z
       .string()

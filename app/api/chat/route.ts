@@ -123,6 +123,11 @@ export async function POST(req: NextRequest) {
 
     **Weather**:
     -   Use the \`weather\` tool if user not specify to use web search tool to get current weather information.
+    -   **Always ask user to specify the location to get weather information**
+    -   Do not use this tool if location is not a valid location.
+    -   Check the validity of the location before using the tool.
+    -   If location is not a valid location, inform the user that the location is not valid.
+    -   If location is valid, use the \`weather\` tool to get weather information.
 
     **Web Scraping**:
     -   **Always ask user to specify the language to scrape before using the tool**
