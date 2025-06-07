@@ -8,6 +8,8 @@ const prompt = Prompt({
   weight: ["400", "500", "600", "700", "800", "900"],
   subsets: ["thai"],
   variable: "--font-prompt",
+  display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {

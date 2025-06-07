@@ -87,7 +87,10 @@ export default function Home() {
           >
             AI-Powered Document & Data Platform
           </motion.h1>
-          <motion.p variants={itemVariants} className="text-xl text-gray-300">
+          <motion.p
+            variants={itemVariants}
+            className="text-xl text-gray-300 font-medium leading-relaxed max-w-3xl mx-auto"
+          >
             Transform documents, analyze data, and get insights with our
             comprehensive AI toolkit.
           </motion.p>
