@@ -81,7 +81,7 @@ const toolIcons = {
   generateTTS: <FaVolumeUp />,
   webSearch: <FaSearch />,
   weather: <FaCloud />,
-  firecrawl: <TbWorld />,
+  webScraping: <TbWorld />,
 };
 
 interface ChatFormProps {
@@ -138,7 +138,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
         "Search the web for current, external information from the internet",
     },
     {
-      name: "firecrawl",
+      name: "webScraping",
       description: "Get information from a website",
     },
     {
@@ -1255,7 +1255,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                             );
                           }
 
-                          if (part.toolInvocation.toolName === "firecrawl") {
+                          if (part.toolInvocation.toolName === "webScraping") {
                             const result = (part.toolInvocation as any)?.result;
 
                             if (

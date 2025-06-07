@@ -893,7 +893,7 @@ export const weatherTool = tool({
   },
 });
 
-export const firecrawlTool = tool({
+export const webScrapingTool = tool({
   description: `Use this tool to scraping any website into clean markdown or structured data
     
     ✅ **Required for**:
