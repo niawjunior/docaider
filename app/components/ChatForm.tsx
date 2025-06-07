@@ -3,6 +3,7 @@
 
 import { Message, useChat } from "@ai-sdk/react";
 import { TiDelete } from "react-icons/ti";
+import { TbWorld } from "react-icons/tb";
 
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
@@ -80,6 +81,7 @@ const toolIcons = {
   generateTTS: <FaVolumeUp />,
   webSearch: <FaSearch />,
   weather: <FaCloud />,
+  firecrawl: <TbWorld />,
 };
 
 interface ChatFormProps {
@@ -134,6 +136,10 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       name: "webSearch",
       description:
         "Search the web for current, external information from the internet",
+    },
+    {
+      name: "firecrawl",
+      description: "Get information from a website",
     },
     {
       name: "askQuestion",
