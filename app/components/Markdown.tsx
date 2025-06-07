@@ -119,15 +119,15 @@ const Markdown = ({ isUser, text, images, banner }: MarkdownProps) => {
             {" "}
             Images{" "}
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-4">
             {images?.map((image, index) => (
               <div
                 key={index}
                 className="relative group rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
               >
                 <Image
-                  width={50}
-                  height={50}
+                  width={200}
+                  height={200}
                   src={image}
                   className="w-full h-full object-cover"
                   alt={`Image ${index}`}
