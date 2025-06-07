@@ -4,6 +4,7 @@ import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { google } from "@ai-sdk/google";
 import { WeatherClient } from "@agentic/weather";
+import { FirecrawlClient } from "@agentic/firecrawl";
 
 import { createClient } from "../utils/supabase/server";
 import { findRelevantContent } from "../utils/embedding";
@@ -868,8 +869,6 @@ export const webSearchTool = tool({
   },
 });
 
-const weather = new WeatherClient();
-
 export const weatherTool = tool({
   description: "Use this tool to get current weather information.",
   parameters: z.object({
@@ -880,6 +879,7 @@ export const weatherTool = tool({
       ),
   }),
   execute: async ({ location }) => {
+    const weather = new WeatherClient();
     try {
       const result = await weather.getCurrentWeather(location);
 
@@ -888,6 +888,122 @@ export const weatherTool = tool({
       };
     } catch (error: any) {
       console.error("Web search tool error:", error);
+      return { error: `Failed to perform web search: ${error.message}` };
+    }
+  },
+});
+
+export const firecrawlTool = tool({
+  description: `Use this tool to scraping any website into clean markdown or structured data
+    
+    ✅ **Required for**:
+    - Scraping any website into clean markdown or structured data.
+  
+    `,
+  parameters: z.object({
+    url: z
+      .string()
+      .describe("The website url to scrape. Example: https://example.com"),
+  }),
+  execute: async ({ url }) => {
+    const firecrawl = new FirecrawlClient();
+
+    try {
+      const res = (await firecrawl.scrapeUrl(url)) as any;
+
+      const markdown = res.data.markdown;
+
+      const { object } = await generateObject({
+        model: google("gemini-1.5-flash"),
+        schema: z.object({
+          title: z.string().describe("The title of the article"),
+          content: z.string().describe("The rewritten article content"),
+          images: z.array(z.string()).describe("The images of the article"),
+          banner: z.string().optional().describe("The banner of the article"),
+        }),
+        prompt: `
+        You are an expert writer helping to rewrite web content extracted from a page. 
+        Here is the raw Markdown content scraped from a website:
+        ---
+        ${markdown}
+        ---
+
+        banner: ${res.data.metadata?.ogImage}
+        
+        Please:
+        - Clean up any escaped characters (e.g., double backslashes).
+        - Summarize or rewrite the article content clearly and concisely.
+        - Exclude unnecessary JSON blobs, scripts.
+        - Focus on extracting the readable article (e.g., news, blog, product update).
+        - If the article has sections (e.g., summary, bullet points), format them cleanly.
+        
+        Output in clean Markdown with readable formatting.
+        
+         - Respond to the user in Markdown format.
+         # Formatting Guidelines
+          - Use clear, descriptive headings (## Heading)
+          - Use bullet points (•) for lists
+          - Use numbered lists (1., 2., etc.) for steps
+          - Use backticks (\`) for code snippets
+          - Use **bold** for important terms
+          - Use *italic* for emphasis
+
+          # Date/Time Handling
+          - When answering date-related questions:
+            • Today is ${new Date().toISOString()}
+            • Always provide accurate dates from the document
+            • Maintain chronological order
+            • Compare dates relative to current date
+            • Format dates consistently (YYYY-MM-DD or full date format)
+            • For "next" or "upcoming" questions:
+              - Sort dates chronologically
+              - Return the first date that's in the future
+              - Include days until the event
+
+          # Response Structure
+          ## Summary
+          - Start with a clear, concise summary
+          - Use **bold** for key points
+
+          ## Steps
+          1. Numbered steps for procedures
+          2. Clear, actionable instructions
+
+          ## Options
+          • Bullet points for alternatives
+          • Clear separation of ideas
+
+          ## Code
+          \`\`\`javascript
+          // Example code block
+          \`\`\`
+
+          # Tools
+          - Use the askQuestion tool to retrieve information
+          - Format responses for ReactMarkdown compatibility
+
+          # Examples
+          ## Issue Summary
+          • Key symptoms
+          • Impact on users
+
+          ## Solution Steps
+          1. First step
+          2. Second step
+          3. Verification
+
+          ## Alternative Approaches
+          • Option A
+          • Option B
+          • Considerations for each
+        `,
+      });
+
+      return {
+        result: object,
+      };
+    } catch (error: any) {
+      console.error("Firecrawl tool error:", error);
       return { error: `Failed to perform web search: ${error.message}` };
     }
   },

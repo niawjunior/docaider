@@ -43,11 +43,8 @@ import {
 } from "@/components/ui/dialog";
 import { createClient } from "../utils/supabase/client";
 import { toast } from "sonner";
-import { Switch } from "@/components/ui/switch";
-import useUserConfig, { UserConfig } from "../hooks/useUserConfig";
+import useUserConfig from "../hooks/useUserConfig";
 import useSupabaseSession from "../hooks/useSupabaseSession";
-import { useCredit } from "../hooks/useCredit";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
 import {
   Tooltip,
   TooltipContent,
@@ -72,6 +69,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import WeatherComponent from "./WeatherComponent";
+import Markdown from "./Markdown";
 
 const toolIcons = {
   generateBarChart: <FaChartBar />,
@@ -87,17 +85,6 @@ const toolIcons = {
 interface ChatFormProps {
   chatId?: string;
   initialMessages?: Message[];
-}
-
-function extractTextFromChildren(children: any): string {
-  if (typeof children === "string") return children;
-  if (Array.isArray(children)) {
-    return children.map(extractTextFromChildren).join("");
-  }
-  if (typeof children === "object" && children?.props?.children) {
-    return extractTextFromChildren(children.props.children);
-  }
-  return "";
 }
 
 interface UploadedImage {
@@ -141,7 +128,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
   const { session } = useSupabaseSession();
-  const { config, updateConfig } = useUserConfig(session?.user?.id || "");
 
   const tools = [
     {
@@ -879,101 +865,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                       if (part.type === "text") {
                         return (
                           <div key={index} className="">
-                            <ReactMarkdown
-                              rehypePlugins={[rehypeHighlight]}
-                              components={{
-                                h1: ({ children }) => (
-                                  <h1 className="px-4 py-2 text-xl font-bold text-white">
-                                    {children}
-                                  </h1>
-                                ),
-                                h2: ({ children }) => (
-                                  <h2 className="px-4 py-2 text-lg font-semibold text-white">
-                                    {children}
-                                  </h2>
-                                ),
-                                h3: ({ children }) => (
-                                  <h3 className="px-4 py-2 text-base font-medium text-white">
-                                    {children}
-                                  </h3>
-                                ),
-                                p: ({ children }) => (
-                                  <p
-                                    className={clsx(
-                                      "px-4 py-2 leading-relaxed whitespace-pre-wrap  rounded-2xl text-sm text-white",
-                                      isUser
-                                        ? "bg-blue-600 text-white inline-block"
-                                        : " text-white"
-                                    )}
-                                  >
-                                    {children}
-                                  </p>
-                                ),
-                                ul: ({ children }) => (
-                                  <ul className="list-disc pl-8  py-2 text-white">
-                                    {children}
-                                  </ul>
-                                ),
-                                ol: ({ children }) => (
-                                  <ol className="list-decimal pl-8  py-2 text-white">
-                                    {children}
-                                  </ol>
-                                ),
-                                li: ({ children }) => (
-                                  <li className="py-2 text-white">
-                                    {children}
-                                  </li>
-                                ),
-
-                                strong: ({ children }) => (
-                                  <strong className="font-bold text-white">
-                                    {children}
-                                  </strong>
-                                ),
-                                em: ({ children }) => (
-                                  <em className="italic text-white">
-                                    {children}
-                                  </em>
-                                ),
-                                // ✅ Inline code
-                                code({ node, className, children, ...props }) {
-                                  const language =
-                                    className?.replace("language-", "") ?? "";
-                                  const codeString =
-                                    extractTextFromChildren(children);
-
-                                  const handleCopy = () => {
-                                    navigator.clipboard.writeText(codeString);
-                                    toast("Copied to clipboard", {
-                                      duration: 1500,
-                                    });
-                                  };
-
-                                  return (
-                                    <div className="relative group my-4">
-                                      <Button
-                                        variant="ghost"
-                                        onClick={handleCopy}
-                                        size="icon"
-                                        className="absolute top-2  right-2 text-xs px-2 py-1 rounded hover:bg-zinc-700"
-                                      >
-                                        <FaCopy />
-                                      </Button>
-                                      <pre className="rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm">
-                                        <code
-                                          className={`language-${language}`}
-                                          {...props}
-                                        >
-                                          {children}
-                                        </code>
-                                      </pre>
-                                    </div>
-                                  );
-                                },
-                              }}
-                            >
-                              {part.text}
-                            </ReactMarkdown>
+                            <Markdown isUser={isUser} text={part.text} />
                           </div>
                         );
                       } else {
@@ -1172,109 +1064,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                             }
                             return result ? (
                               <div key={index}>
-                                <ReactMarkdown
-                                  rehypePlugins={[rehypeHighlight]}
-                                  components={{
-                                    h1: ({ children }) => (
-                                      <h1 className="px-4 py-2 text-xl font-bold text-white">
-                                        {children}
-                                      </h1>
-                                    ),
-                                    h2: ({ children }) => (
-                                      <h2 className="px-4 py-2 text-lg font-semibold text-white">
-                                        {children}
-                                      </h2>
-                                    ),
-                                    h3: ({ children }) => (
-                                      <h3 className="px-4 py-2 text-base font-medium text-white">
-                                        {children}
-                                      </h3>
-                                    ),
-                                    p: ({ children }) => (
-                                      <p
-                                        className={clsx(
-                                          "px-4 py-2 leading-relaxed whitespace-pre-wrap  rounded-2xl text-sm text-white",
-                                          isUser
-                                            ? "bg-blue-600 text-white inline-block"
-                                            : " text-white"
-                                        )}
-                                      >
-                                        {children}
-                                      </p>
-                                    ),
-                                    ul: ({ children }) => (
-                                      <ul className="list-disc pl-8  py-2 text-white">
-                                        {children}
-                                      </ul>
-                                    ),
-                                    ol: ({ children }) => (
-                                      <ol className="list-decimal pl-8  py-2 text-white">
-                                        {children}
-                                      </ol>
-                                    ),
-                                    li: ({ children }) => (
-                                      <li className="py-2 text-white">
-                                        {children}
-                                      </li>
-                                    ),
-
-                                    strong: ({ children }) => (
-                                      <strong className="font-bold text-white">
-                                        {children}
-                                      </strong>
-                                    ),
-                                    em: ({ children }) => (
-                                      <em className="italic text-white">
-                                        {children}
-                                      </em>
-                                    ),
-                                    // ✅ Inline code
-                                    code({
-                                      node,
-                                      className,
-                                      children,
-                                      ...props
-                                    }) {
-                                      const language =
-                                        className?.replace("language-", "") ??
-                                        "";
-                                      const codeString =
-                                        extractTextFromChildren(children);
-
-                                      const handleCopy = () => {
-                                        navigator.clipboard.writeText(
-                                          codeString
-                                        );
-                                        toast("Copied to clipboard", {
-                                          duration: 1500,
-                                        });
-                                      };
-
-                                      return (
-                                        <div className="relative group my-4">
-                                          <Button
-                                            variant="ghost"
-                                            onClick={handleCopy}
-                                            size="icon"
-                                            className="absolute top-2  right-2 text-xs px-2 py-1 rounded hover:bg-zinc-700"
-                                          >
-                                            <FaCopy />
-                                          </Button>
-                                          <pre className="rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm">
-                                            <code
-                                              className={`language-${language}`}
-                                              {...props}
-                                            >
-                                              {children}
-                                            </code>
-                                          </pre>
-                                        </div>
-                                      );
-                                    },
-                                  }}
-                                >
-                                  {result}
-                                </ReactMarkdown>
+                                <Markdown isUser={isUser} text={result} />
                               </div>
                             ) : (
                               <div
@@ -1444,6 +1234,51 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                 key={message.id}
                                 weatherData={result.result}
                                 location={query}
+                              />
+                            ) : (
+                              <div
+                                key={message.id}
+                                className="flex items-center gap-2"
+                              >
+                                <p className="text-white text-sm">
+                                  Something went wrong. Please try again.
+                                </p>
+
+                                <FaRegFaceSadCry />
+                              </div>
+                            );
+                          }
+
+                          if (part.toolInvocation.toolName === "firecrawl") {
+                            const result = (part.toolInvocation as any)?.result;
+
+                            if (
+                              !("result" in part.toolInvocation) &&
+                              message.id ===
+                                messages[messages.length - 1]?.id &&
+                              status === "streaming"
+                            ) {
+                              return (
+                                <div
+                                  key={message.id}
+                                  className="flex items-center gap-2"
+                                >
+                                  <p className="text-white text-sm">
+                                    Crawling website ...
+                                  </p>
+                                  <div className="flex items-center justify-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return result?.result ? (
+                              <Markdown
+                                key={message.id}
+                                text={result.result.content}
+                                isUser={isUser}
+                                images={result.result.images}
+                                banner={result.result.banner}
                               />
                             ) : (
                               <div

@@ -14,6 +14,7 @@ import {
   allDocumentTool,
   webSearchTool,
   weatherTool,
+  firecrawlTool,
 } from "@/app/tools/llm-tools";
 
 export async function POST(req: NextRequest) {
@@ -55,6 +56,7 @@ export async function POST(req: NextRequest) {
     allDocument: allDocumentTool,
     webSearch: webSearchTool,
     weather: weatherTool,
+    firecrawl: firecrawlTool,
   };
 
   const userMessage = messages[messages.length - 1];
@@ -123,6 +125,9 @@ export async function POST(req: NextRequest) {
 
     **Weather**:
     -   Use the \`weather\` tool if user not specify to use web search tool to get current weather information.
+
+    **Firecrawl**:
+    -   Use the \`firecrawl\` tool for any request to scrape any website into clean markdown or structured data.
 
     **Thai Text Handling**:
     -   When processing Thai text:

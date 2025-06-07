@@ -31,13 +31,6 @@ export async function middleware(request: NextRequest) {
       // Initialize user config
       const { error: configError } = await supabase.from("user_config").insert({
         id: user.id,
-        generate_bar_chart_enabled: true,
-        generate_pie_chart_enabled: true,
-        get_crypto_price_enabled: true,
-        get_crypto_market_summary_enabled: true,
-        ask_question_enabled: true,
-        web_search_enabled: true,
-        generate_tts_enabled: true,
         language_preference: "th",
         theme_preference: "dark",
         notification_settings: {
