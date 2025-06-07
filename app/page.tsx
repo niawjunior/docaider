@@ -39,10 +39,20 @@ export default function Home() {
   return (
     <div className="w-full h-screen flex flex-col">
       <div className="absolute top-0 w-full px-6 py-4 flex justify-between items-center z-50 ">
-        <Link href="/">
-          <span className="text-white text-xl font-bold">✨ DocAider</span>
-        </Link>
-        <div className="flex gap-4 text-sm text-gray-300">
+        <div className="flex gap-4 items-center">
+          <Link href="/">
+            <span className="text-white text-xl font-bold">✨ DocAider</span>
+          </Link>
+        </div>
+
+        <div className="flex gap-2 text-sm text-gray-300">
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/pricing")}
+            className="text-sm"
+          >
+            Pricing
+          </Button>
           {session ? (
             <>
               <Button variant="ghost" onClick={() => router.push("/chat")}>
@@ -84,6 +94,10 @@ export default function Home() {
           <motion.h1
             variants={itemVariants}
             className="text-4xl md:mt-10 mt-6 md:text-5xl tracking-tight font-extrabold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
+            style={{
+              contentVisibility: "auto",
+              containIntrinsicSize: "auto 300px",
+            }}
           >
             AI-Powered Document & Data Platform
           </motion.h1>
