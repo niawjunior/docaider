@@ -15,7 +15,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="h-full w-full px-6 py-4 flex justify-between items-center z-50">
         <div className="flex gap-4 items-center">
           <Link href="/">
-            <span className="text-white text-xl font-bold">✨ DocAider</span>
+            <span className="text-white lg:text-xl text-md font-bold">
+              ✨ DocAider
+            </span>
           </Link>
         </div>
 
