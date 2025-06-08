@@ -2,12 +2,9 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import useSupabaseSession from "./hooks/useSupabaseSession";
-import Link from "next/link";
-import { signOut } from "./login/action";
-import { Button } from "@/components/ui/button";
 import { FeatureCard } from "./components/FeatureCard";
 import { TestimonialCard } from "./components/TestimonialCard";
+import MainLayout from "./components/MainLayout";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -34,50 +31,8 @@ const itemVariants = {
 export default function Home() {
   const router = useRouter();
 
-  const { session } = useSupabaseSession();
-
   return (
-    <div className="w-full h-screen flex flex-col">
-      <div className="absolute top-0 w-full px-6 py-4 flex justify-between items-center z-50 ">
-        <div className="flex gap-4 items-center">
-          <Link href="/">
-            <span className="text-white lg:text-xl text-md font-bold">
-              ✨ DocAider
-            </span>
-          </Link>
-        </div>
-
-        <div className="flex gap-2 text-sm text-gray-300">
-          <Button
-            variant="ghost"
-            onClick={() => router.push("/pricing")}
-            className="text-sm"
-          >
-            Pricing
-          </Button>
-          {session ? (
-            <>
-              <Button variant="ghost" onClick={() => router.push("/chat")}>
-                Dashboard
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() =>
-                  signOut().then(() => {
-                    window.location.reload();
-                  })
-                }
-              >
-                Sign Out
-              </Button>
-            </>
-          ) : (
-            <Button variant="ghost" onClick={() => router.push("/login")}>
-              Sign In
-            </Button>
-          )}
-        </div>
-      </div>
+    <MainLayout>
       <video
         className="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none blur-xs"
         autoPlay
@@ -86,7 +41,7 @@ export default function Home() {
         playsInline
         src="/docaider-demo.mp4" // Replace with your actual video path
       />
-      <div className="flex-1 flex flex-col items-center justify-center px-4 mt-12 lg:mt-0 py-8">
+      <div className="flex-1 flex flex-col items-center justify-center  mt-4 lg:mt-0 py-4">
         <motion.div
           initial="hidden"
           animate="show"
@@ -95,7 +50,7 @@ export default function Home() {
         >
           <motion.h1
             variants={itemVariants}
-            className="text-4xl md:mt-10 mt-6 md:text-5xl tracking-tight font-extrabold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
+            className="text-4xl md:text-5xl tracking-tight font-extrabold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
             style={{
               contentVisibility: "auto",
               containIntrinsicSize: "auto 300px",
@@ -271,31 +226,6 @@ export default function Home() {
           </div>
         </section>
       </div>
-      <footer className="w-full bg-zinc-900 border-t border-zinc-800 px-6 py-10 text-gray-400 text-sm">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="text-center md:text-left">
-            <span className="font-bold text-white">✨ DocAider</span> &mdash;
-            AI-Powered Document & Data Platform
-          </div>
-
-          <div className="flex flex-wrap gap-4 justify-center md:justify-end text-gray-400">
-            <Link href="/privacy" className="hover:text-white transition">
-              Privacy
-            </Link>
-            <Link href="/terms" className="hover:text-white transition">
-              Terms
-            </Link>
-
-            <Link href="/contact" className="hover:text-white transition">
-              Contact
-            </Link>
-          </div>
-        </div>
-
-        <div className="mt-6 text-center text-xs text-gray-400">
-          © {new Date().getFullYear()} DocAider. All rights reserved.
-        </div>
-      </footer>
-    </div>
+    </MainLayout>
   );
 }
