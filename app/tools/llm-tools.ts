@@ -213,7 +213,7 @@ export const generateBarChartTool = tool({
           color: z
             .string()
             .describe(
-              "Series color. Always ask for color and if the user doesn't ask for color, use the default color."
+              "Series color. Optional - if not provided, will use a distinct color from the default palette."
             ),
         })
       )
@@ -232,6 +232,25 @@ export const generateBarChartTool = tool({
   }),
   execute: async ({ title, seriesData, backgroundColor, textColor }) => {
     try {
+      // If no colors are provided in seriesData, generate a distinct color palette
+      if (seriesData?.length && !seriesData.some((item) => item.color)) {
+        const defaultColors = [
+          "#FF6B6B", // Red
+          "#4ECDC4", // Teal
+          "#45B7D1", // Blue
+          "#96CEB4", // Green
+          "#FFEEAD", // Yellow
+          "#D4A5A5", // Pink
+          "#9B59B6", // Purple
+          "#3498DB", // Blue
+          "#E67E22", // Orange
+          "#2ECC71", // Green
+        ];
+        seriesData = seriesData.map((item, index) => ({
+          ...item,
+          color: defaultColors[index % defaultColors.length],
+        }));
+      }
       const { object } = await generateObject({
         model: openai("gpt-4o-mini"),
         schema: z.object({
@@ -244,7 +263,7 @@ export const generateBarChartTool = tool({
                 color: z
                   .string()
                   .describe(
-                    "Series color. Always ask for color and if the user doesn't ask for color, use the default color."
+                    "Series color. Optional - if not provided, will use a distinct color from the default palette."
                   ),
               })
             )
