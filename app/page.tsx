@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { FeatureCard } from "./components/FeatureCard";
 import { TestimonialCard } from "./components/TestimonialCard";
 import MainLayout from "./components/MainLayout";
-import { FaArrowDown } from "react-icons/fa";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -229,27 +228,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        {/* Scroll Indicator */}
-        <motion.div
-          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{
-            opacity: 1,
-            y: [0, -8, 0],
-          }}
-          transition={{
-            delay: 0.8,
-            duration: 1.5,
-            repeat: Infinity,
-            repeatType: "loop",
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <FaArrowDown className="text-white w-6 h-6 border border-white rounded-full p-2" />
-            <span className="text-sm text-white ">Scroll to explore</span>
-          </div>
-        </motion.div>
       </div>
     </MainLayout>
   );

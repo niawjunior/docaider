@@ -94,11 +94,17 @@ export async function POST(req: NextRequest) {
     **Credit Management**:
     -   If the credit balance is 0, politely inform the user that tools cannot be used because they don't have enough credit. Use the exact phrase "You don't have enough credit."
 
+    **Ask Question**:
+    -   If the user asks about any content related to uploaded documents AND documents are uploaded, you **MUST** call the \`askQuestion\` tool. Do NOT provide a generic response if all conditions are met.
+    -   **Always ask user to specify the language before using the tool**
+    
+
     **Document Handling**:
     -   For questions about uploaded documents, use the \`askQuestion\` tool.
     -   For listing all uploaded documents, use the \`allDocument\` tool.
     -   Current document count: ${documentsData?.length}
     -   If a document-related tool is requested but document count is 0, politely inform the user: "No documents uploaded."
+    -   **Always ask user to specify the language before using the tool**
 
     **Chart Generation (Pie & Bar)**:
     -   For chart generation, use the \`generatePieChart\` or \`generateBarChart\` tool.
@@ -129,9 +135,10 @@ export async function POST(req: NextRequest) {
     -   If location is not a valid location, inform the user that the location is not valid.
     -   If location is valid, use the \`weather\` tool to get weather information.
 
-    **Web Scraping**:
+        **Web Scraping**:
     -   **Always ask user to specify the language to scrape before using the tool**
     -   Use the \`webScraping\` tool for any request to scrape any website into clean markdown or structured data.
+
 
     **Thai Text Handling**:
     -   When processing Thai text:

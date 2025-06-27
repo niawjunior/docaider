@@ -485,8 +485,11 @@ export const askQuestionTool = tool({
   `,
   parameters: z.object({
     question: z.string().describe("Question to ask about the documents"),
+    language: z
+      .string()
+      .describe("The language to ask the question. Example: en, th"),
   }),
-  execute: async ({ question }) => {
+  execute: async ({ question, language }) => {
     try {
       const supabase = await createClient();
       const { data: user } = await supabase.auth.getUser();
@@ -525,6 +528,10 @@ export const askQuestionTool = tool({
         }),
         prompt,
         system: `You are a helpful assistant that can answer questions based on uploaded documents. Format your responses clearly and professionally:
+
+      Please:
+        - Must return the article in ${language} language.
+        
       # Formatting Guidelines
       - Use clear, descriptive headings (## Heading)
       - Use bullet points (•) for lists
@@ -858,7 +865,7 @@ export const webSearchTool = tool({
   - **Do not** use this tool for questions that can be answered by uploaded documents (use \`askQuestionTool\` instead).
   - **Do not** use this tool for generating charts (use \`generatePieChartTool\` or \`generateBarChartTool\` instead).
   - **Do not** use this tool for getting crypto-specific data (use \`getCryptoPriceTool\` or \`getCryptoMarketSummaryTool\` instead).
-  - **The current date and time is: ${new Date().toLocaleDateString()}.** Use this information for date-sensitive queries like "next incoming holiday".
+
 
   `,
   parameters: z.object({
@@ -874,7 +881,7 @@ export const webSearchTool = tool({
         model: google("gemini-1.5-flash", {
           useSearchGrounding: true,
         }),
-        prompt: query,
+        prompt: `${query}`,
       });
 
       return {
