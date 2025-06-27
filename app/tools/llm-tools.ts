@@ -805,54 +805,6 @@ export const generateTTS = tool({
   },
 });
 
-export const allDocumentTool = tool({
-  description: `Use this tool to **retrieve metadata for all uploaded documents** for the authenticated user, including their IDs, names, titles, and public URLs.
-
-  ✅ **Required for**:
-  - Listing all documents available to the user.
-  - Providing an overview of the user's uploaded files.
-
-  🧠 **Behavior**:
-  - Returns a list containing the document ID, name, title, and a generated public URL for each uploaded document.
-  - Accessible only to authenticated users.
-  - **Do not** return document information if no documents are uploaded; instead, inform the user to upload documents.
-  `,
-  parameters: z.object({
-    title: z.string().describe("Title of the document"),
-  }),
-  execute: async ({ title }) => {
-    const supabase = await createClient();
-    const { data: user } = await supabase.auth.getUser();
-
-    if (!user?.user?.id) {
-      throw new Error("User not authenticated");
-    }
-    const { data: allDocuments } = await supabase
-      .from("documents")
-      .select("document_id, document_name, title")
-      .eq("user_id", user.user.id);
-
-    // Get unique documents by document_id
-    const documentsData = Array.from(
-      new Map(allDocuments?.map((item) => [item.document_id, item])).values()
-    );
-    if (!documentsData) {
-      throw new Error("Failed to fetch documents");
-    }
-    return {
-      title,
-      rows: documentsData.map((doc) => {
-        return {
-          document_id: doc.document_id,
-          document_name: doc.document_name,
-          title: doc.title,
-          url: `user_${user.user.id}/${doc.document_name}`,
-        };
-      }),
-    };
-  },
-});
-
 export const webSearchTool = tool({
   description: `
   Use this tool to perform a **web search** and retrieve current, external information from the internet. This is suitable for general knowledge, news, or any information not found in your uploaded documents. **This can also be used for current date/time queries if no specific date tool is available.**

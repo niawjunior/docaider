@@ -4,6 +4,14 @@ import { createClient } from "../utils/supabase/server";
 
 const embeddingModel = openai.embedding("text-embedding-3-small");
 
+const cleanText = (input: string): string => {
+  return input
+    .normalize("NFC") // Normalize Unicode characters
+    .replace(/\u0000/g, "") // Remove null characters
+    .replace(/\s+/g, " ") // Clean whitespace
+    .trim();
+};
+
 export const generateChunks = (input: string): string[] => {
   // Split Thai text using spaces and punctuation
   return input
@@ -17,11 +25,7 @@ export const generateEmbeddings = async (
   value: string
 ): Promise<Array<{ embedding: number[]; content: string }>> => {
   // Clean and normalize Thai text before generating embeddings
-  const cleanedText = value
-    .normalize("NFC") // Normalize Unicode characters
-    .replace(/\u0000/g, "") // Remove null characters
-    .replace(/\s+/g, " ") // Clean whitespace
-    .trim();
+  const cleanedText = cleanText(value);
 
   const chunks = generateChunks(cleanedText);
   const { embeddings } = await embedMany({
@@ -33,11 +37,7 @@ export const generateEmbeddings = async (
 
 export const generateEmbedding = async (value: string): Promise<number[]> => {
   // Clean and normalize Thai text before generating embeddings
-  const cleanedText = value
-    .normalize("NFC") // Normalize Unicode characters
-    .replace(/\u0000/g, "") // Remove null characters
-    .replace(/\s+/g, " ") // Clean whitespace
-    .trim();
+  const cleanedText = cleanText(value);
 
   const { embedding } = await embed({
     model: embeddingModel,

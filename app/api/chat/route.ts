@@ -11,7 +11,6 @@ import {
   getCryptoMarketSummaryTool,
   getCryptoPriceTool,
   generateTTS,
-  allDocumentTool,
   webSearchTool,
   weatherTool,
 } from "@/app/tools/llm-tools";
@@ -57,7 +56,6 @@ export async function POST(req: NextRequest) {
     getCryptoMarketSummary: getCryptoMarketSummaryTool,
     askQuestion: askQuestionTool,
     generateTTS: generateTTS,
-    allDocument: allDocumentTool,
     webSearch: webSearchTool,
     weather: weatherTool,
   };
@@ -100,8 +98,12 @@ export async function POST(req: NextRequest) {
 
     **Document Handling**:
     -   For questions about uploaded documents, use the \`askQuestion\` tool.
-    -   For listing all uploaded documents, use the \`allDocument\` tool.
     -   Current document count: ${documentsData?.length}
+    -   Documents Name:  ${
+      documentsData?.length > 0
+        ? documentsData?.map((doc) => doc.title).join(", ")
+        : "No documents uploaded."
+    }
     -   If a document-related tool is requested but document count is 0, politely inform the user: "No documents uploaded."
     -   **Always ask user to specify the language before using the tool**
 

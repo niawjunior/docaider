@@ -132,12 +132,12 @@ export default function DocumentUpload({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="file">PDF File</Label>
+            <Label htmlFor="file">Supported file types: PDF, CSV</Label>
             <div className="relative w-full">
               <Input
                 id="file"
                 type="file"
-                accept=".pdf"
+                accept=".pdf,.csv"
                 onChange={handleFileChange}
                 disabled={isUploading}
               />

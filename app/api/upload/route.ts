@@ -1,5 +1,4 @@
-// /app/api/pdf/route.ts
-import { uploadPDF } from "@/app/utils/pdf/pdfProcessor";
+import { uploadFile } from "@/app/utils/file/fileProcessor";
 import { NextRequest } from "next/server";
 import { createClient } from "@/app/utils/supabase/server";
 
@@ -31,14 +30,15 @@ export async function POST(req: NextRequest) {
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    const nodeFile = new File([arrayBuffer], `${title}.pdf`, {
+    const fileExtension = file.name.split(".").pop();
+    const nodeFile = new File([arrayBuffer], `${title}.${fileExtension}`, {
       type: file.type,
     });
     const userId = user?.id;
 
-    const result = await uploadPDF(nodeFile, title, userId);
+    const result = await uploadFile(nodeFile, title, userId);
 
-    // Get user credit
+    // // Get user credit
     const { data: creditData } = await supabase
       .from("credits")
       .select("balance")
@@ -58,9 +58,9 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error processing PDF:", error);
+    console.error("Error processing File:", error);
     return new Response(
-      JSON.stringify({ success: false, error: "Failed to process PDF" }),
+      JSON.stringify({ success: false, error: "Failed to process File" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json" },

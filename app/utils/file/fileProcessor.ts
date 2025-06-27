@@ -4,6 +4,7 @@ import { embed } from "ai";
 import { createClient } from "../supabase/server";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { v4 as uuidv4 } from "uuid";
+import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
 
 export interface DocumentChunk {
   chunk: string;
@@ -37,7 +38,37 @@ async function splitUntilTokenLimit(
   ];
 }
 
-export async function processPDF(
+const fileLoader = (file: File) => {
+  const fileExtension = file.name.split(".").pop();
+  switch (fileExtension) {
+    case "pdf":
+      return pdfLoader(file);
+    case "csv":
+      return csvLoader(file);
+    default:
+      throw new Error("Unsupported file type");
+  }
+};
+
+const pdfLoader = async (file: File) => {
+  // Read the file as an ArrayBuffer
+  const fileBuffer = await file.arrayBuffer();
+
+  // Parse PDF
+  const data = await pdf(Buffer.from(fileBuffer));
+  return data.text;
+};
+
+const csvLoader = async (file: File) => {
+  const loader = new CSVLoader(file, {
+    separator: ",",
+  });
+  const docs = await loader.load();
+  const text = docs.map((doc) => doc.pageContent).join("\n");
+  return text;
+};
+
+export async function processFile(
   file: File,
   title: string,
   userId?: string,
@@ -45,15 +76,11 @@ export async function processPDF(
   fileName?: string
 ): Promise<DocumentChunk[]> {
   try {
-    // Read the file as an ArrayBuffer
-    const fileBuffer = await file.arrayBuffer();
-
     // Parse PDF
-    const data = await pdf(Buffer.from(fileBuffer));
-    const text = data.text;
+    const data = await fileLoader(file);
 
     // Normalize and clean the text
-    const normalizedText = text
+    const normalizedText = data
       .normalize("NFC") // Normalize Unicode characters
       .replace(/\u0000/g, "") // Remove null characters
       .replace(/\r\n/g, "\n") // Normalize newlines
@@ -143,12 +170,12 @@ export async function processPDF(
 
     return documentChunks;
   } catch (error) {
-    console.error("Error processing PDF:", error);
-    throw new Error("Failed to process PDF");
+    console.error("Error processing File:", error);
+    throw new Error("Failed to process File");
   }
 }
 
-export async function uploadPDF(
+export async function uploadFile(
   file: File,
   title: string,
   userId?: string
@@ -157,7 +184,8 @@ export async function uploadPDF(
     const supabase = await createClient();
     // Encode the filename to handle special characters
     const documentId = uuidv4();
-    const fileName = `${documentId}.pdf`;
+    const fileExtension = file.name.split(".").pop();
+    const fileName = `${documentId}.${fileExtension}`;
 
     const storagePath = `user_${userId}/${fileName}`;
 
@@ -173,8 +201,8 @@ export async function uploadPDF(
       throw new Error(`Storage upload error: ${storageError.message}`);
     }
 
-    await processPDF(file, title, userId, storageData.id, fileName);
-    return "PDF uploaded and processed successfully";
+    await processFile(file, title, userId, storageData.id, fileName);
+    return "File uploaded and processed successfully";
   } catch (error) {
     throw error;
   }

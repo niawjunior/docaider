@@ -655,53 +655,6 @@ const SharePage = () => {
                                     </div>
                                   );
                                 }
-
-                                if (
-                                  part.toolInvocation.toolName === "allDocument"
-                                ) {
-                                  const result = (part.toolInvocation as any)
-                                    ?.result;
-
-                                  if (
-                                    !("result" in part.toolInvocation) &&
-                                    message.id ===
-                                      messages[messages.length - 1]?.id &&
-                                    status === "streaming"
-                                  ) {
-                                    return (
-                                      <div
-                                        key={message.id}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <p className="text-white text-sm">
-                                          Fetching documents ...
-                                        </p>
-                                        <div className="flex items-center justify-center py-4">
-                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                  return result ? (
-                                    <TableComponent
-                                      key={message.id}
-                                      title={result.title}
-                                      rows={result.rows}
-                                    />
-                                  ) : (
-                                    <div
-                                      key={message.id}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <p className="text-white text-sm">
-                                        Something went wrong. Please try again.
-                                      </p>
-
-                                      <FaRegFaceSadCry />
-                                    </div>
-                                  );
-                                }
-
                                 if (
                                   part.toolInvocation.toolName === "webSearch"
                                 ) {
