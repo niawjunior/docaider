@@ -1,9 +1,11 @@
 "use client";
 import { motion } from "framer-motion";
-import { Coins, VolumeIcon } from "lucide-react";
+import { VolumeIcon } from "lucide-react";
 import { FaCheck, FaFile } from "react-icons/fa";
 import { FaCloud, FaChartBar } from "react-icons/fa6";
 import { TbWorld } from "react-icons/tb";
+import { IoIosChatbubbles } from "react-icons/io";
+
 interface FeatureCardProps {
   icon: string;
   title: string;
@@ -29,7 +31,7 @@ export function FeatureCard({
           {icon === "web" && <TbWorld />}
           {icon === "tts" && <VolumeIcon />}
           {icon === "weather" && <FaCloud />}
-          {icon === "crypto" && <Coins />}
+          {icon === "chat" && <IoIosChatbubbles />}
           {title}
         </div>
       </div>

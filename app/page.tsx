@@ -71,7 +71,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className=" mx-auto"
+              className=" mx-auto "
             >
               <h2
                 id="features"
@@ -80,7 +80,7 @@ export default function Home() {
                 Powerful Features for Your Data Needs
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
                 <FeatureCard
                   icon="data"
                   title="Data Visualization"
@@ -100,17 +100,6 @@ export default function Home() {
                     "Document Q&A",
                     "Text Extraction",
                     "Content Analysis",
-                  ]}
-                />
-
-                <FeatureCard
-                  icon="crypto"
-                  title="Market Data"
-                  description="Get real-time cryptocurrency market data."
-                  features={[
-                    "Crypto Prices",
-                    "Market Summaries",
-                    "Trend Analysis",
                   ]}
                 />
 
@@ -144,6 +133,16 @@ export default function Home() {
                     "AI Voice Generation",
                     "Multiple Languages",
                     "Customizable Voices",
+                  ]}
+                />
+                <FeatureCard
+                  icon="chat"
+                  title="Multi-Chat with Memory"
+                  description="Create and manage multiple chat sessions with persistent memory."
+                  features={[
+                    "Multiple Concurrent Chats",
+                    "Session-Based Memory",
+                    "Context-Aware Responses",
                   ]}
                 />
               </div>
@@ -210,12 +209,12 @@ export default function Home() {
 
             <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
               <TestimonialCard
-                name="David Kim"
-                role="Financial Analyst"
-                company="WealthFront"
-                avatar="DK"
-                content="The real-time market data integration is incredibly accurate. It's become an essential tool for our daily market analysis."
-                rating={4}
+                name="Sofia Nguyen"
+                role="Product Manager"
+                company="Acme AI"
+                avatar="SN"
+                content="I love how I can juggle multiple conversations and each one remembers its context. It feels like having several smart assistants at once."
+                rating={5}
               />
               <TestimonialCard
                 name="Priya Patel"

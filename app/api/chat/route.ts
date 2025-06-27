@@ -8,8 +8,6 @@ import {
   askQuestionTool,
   generateBarChartTool,
   generatePieChartTool,
-  getCryptoMarketSummaryTool,
-  getCryptoPriceTool,
   generateTTS,
   webSearchTool,
   weatherTool,
@@ -52,8 +50,6 @@ export async function POST(req: NextRequest) {
   const tools = {
     generateBarChart: generateBarChartTool,
     generatePieChart: generatePieChartTool,
-    getCryptoPrice: getCryptoPriceTool,
-    getCryptoMarketSummary: getCryptoMarketSummaryTool,
     askQuestion: askQuestionTool,
     generateTTS: generateTTS,
     webSearch: webSearchTool,
@@ -95,7 +91,6 @@ export async function POST(req: NextRequest) {
     **Credit Management**:
     -   If the credit balance is 0, politely inform the user that tools cannot be used because they don't have enough credit. Use the exact phrase "You don't have enough credit."
     
-
     **Document Handling**:
     -   For questions about uploaded documents, use the \`askQuestion\` tool.
     -   Current document count: ${documentsData?.length}
@@ -115,11 +110,6 @@ export async function POST(req: NextRequest) {
     -   If an unsupported chart type is requested (e.g., line chart), suggest the closest supported alternatives.
     -   Provide simple, friendly insights based on the chart data.
 
-    **Cryptocurrency Data**:
-    -   For current cryptocurrency prices, use the \`getCryptoPriceTool\`.
-    -   For an overview of the crypto market, use the \`getCryptoMarketSummaryTool\`.
-    -   Always clearly state crypto names, values, and any comparisons.
-
     **Text to Speech (TTS)**:
     -   Use the \`generateTTS\` tool for any request to convert text to audio, including single-speaker summaries, multi-speaker conversations, podcasts, interviews, debates, or voice messages.
     -   **Always confirm the topic, style, speakers, and script** with the user before generating audio.
@@ -127,6 +117,7 @@ export async function POST(req: NextRequest) {
 
     **Web Search**:
     -   Use the \`webSearch\` tool for any request to search the web for current, external information from the internet. This includes general knowledge, news, facts, current events and **including the current date or time. and current weather if user not specify to use weather tool or current tool is null**
+    
 
     **Weather**:
     -   Use the \`weather\` tool if user not specify to use web search tool to get current weather information.
@@ -143,12 +134,11 @@ export async function POST(req: NextRequest) {
         * Maintain Thai character combinations.
         * Preserve Thai punctuation marks.
         * Use appropriate Thai-specific character handling.
-
     ---
 
     🎯 **Your Mission**:
     -   Transform user's natural language into clear, visual insights.
-    -   Make data visualization and crypto information accessible, clear, and engaging.
+    -   Make data visualization accessible, clear, and engaging.
     -   Provide fast, accurate answers, beautiful visuals, and friendly encouragement.
     -   Respond concisely and professionally, always avoiding technical jargon, raw code, JSON, or internal framework details.
     -   Respond to the user in Markdown format.

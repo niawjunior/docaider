@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import BarChart from "@/app/components/BarChart";
-import CryptoPriceOverview from "@/app/components/CryptoPriceOverview";
-import CryptoSummary from "@/app/components/CryptoSummary";
 import GlobalLoader from "@/app/components/GlobalLoader";
 import PieChart from "@/app/components/PieChart";
 import { Button } from "@/components/ui/button";
@@ -19,7 +17,6 @@ import rehypeHighlight from "rehype-highlight";
 import { toast } from "sonner";
 import "highlight.js/styles/github-dark.css"; // or choose another theme
 import { FaRegFaceSadCry } from "react-icons/fa6";
-import TableComponent from "@/app/components/Table";
 import Image from "next/image";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import WebSearchComponent from "@/app/components/WebSearch";
@@ -362,94 +359,6 @@ const SharePage = () => {
                                     <div key={index}>
                                       <BarChart option={result?.chartData} />
                                     </div>
-                                  ) : (
-                                    <div
-                                      key={message.id}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <p className="text-white text-sm">
-                                        Something went wrong. Please try again.
-                                      </p>
-
-                                      <FaRegFaceSadCry />
-                                    </div>
-                                  );
-                                }
-
-                                if (
-                                  part.toolInvocation.toolName ===
-                                  "getCryptoPrice"
-                                ) {
-                                  const result = (part.toolInvocation as any)
-                                    ?.result;
-                                  if (
-                                    !("result" in part.toolInvocation) &&
-                                    message.id ===
-                                      messages[messages.length - 1]?.id &&
-                                    status === "streaming"
-                                  ) {
-                                    return (
-                                      <div
-                                        key={message.id}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <p className="text-white text-sm">
-                                          Fetching crypto price...
-                                        </p>
-                                        <div className="flex items-center justify-center py-4">
-                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                  return result ? (
-                                    <CryptoPriceOverview
-                                      key={index}
-                                      result={result}
-                                    />
-                                  ) : (
-                                    <div
-                                      key={message.id}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <p className="text-white text-sm">
-                                        Something went wrong. Please try again.
-                                      </p>
-
-                                      <FaRegFaceSadCry />
-                                    </div>
-                                  );
-                                }
-
-                                if (
-                                  part.toolInvocation.toolName ===
-                                  "getCryptoMarketSummary"
-                                ) {
-                                  const result = (part.toolInvocation as any)
-                                    ?.result;
-
-                                  if (
-                                    !("result" in part.toolInvocation) &&
-                                    message.id ===
-                                      messages[messages.length - 1]?.id &&
-                                    status === "streaming"
-                                  ) {
-                                    return (
-                                      <div
-                                        key={message.id}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <p className="text-white text-sm">
-                                          Fetching crypto market summary ...
-                                        </p>
-                                        <div className="flex items-center justify-center py-4">
-                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                  return result ? (
-                                    <CryptoSummary key={index} data={result} />
                                   ) : (
                                     <div
                                       key={message.id}

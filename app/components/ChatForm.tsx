@@ -3,7 +3,6 @@
 
 import { Message, useChat } from "@ai-sdk/react";
 import { TiDelete } from "react-icons/ti";
-import { TbWorld } from "react-icons/tb";
 
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
@@ -11,30 +10,22 @@ import { IoArrowDownSharp } from "react-icons/io5";
 import dayjs from "dayjs";
 import DocumentUpload from "./DocumentUpload";
 import "highlight.js/styles/github-dark.css"; // or choose another theme
-import rehypeHighlight from "rehype-highlight";
 import { FaRegFaceSadCry } from "react-icons/fa6";
 import {
-  FaBitcoin,
   FaChartBar,
-  FaChartLine,
   FaChartPie,
   FaFilePdf,
   FaHammer,
   FaQuestion,
   FaShare,
   FaArrowUp,
-  FaCopy,
-  FaTrash,
   FaVolumeUp,
   FaSearch,
   FaCloud,
 } from "react-icons/fa";
-import ReactMarkdown from "react-markdown";
 
 import BarChart from "./BarChart";
 import PieChart from "./PieChart";
-import CryptoSummary from "./CryptoSummary";
-import CryptoPriceOverview from "./CryptoPriceOverview";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -44,7 +35,6 @@ import {
 } from "@/components/ui/dialog";
 import { createClient } from "../utils/supabase/client";
 import { toast } from "sonner";
-import useUserConfig from "../hooks/useUserConfig";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import {
   Tooltip,
@@ -52,19 +42,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
 import { useShareUrl } from "../hooks/useShareUrl";
 import { Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
-import TableComponent from "./Table";
 import WebSearchComponent from "./WebSearch";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -75,13 +62,10 @@ import Markdown from "./Markdown";
 const toolIcons = {
   generateBarChart: <FaChartBar />,
   generatePieChart: <FaChartPie />,
-  getCryptoPrice: <FaBitcoin />,
-  getCryptoMarketSummary: <FaChartLine />,
   askQuestion: <FaQuestion />,
   generateTTS: <FaVolumeUp />,
   webSearch: <FaSearch />,
   weather: <FaCloud />,
-  webScraping: <TbWorld />,
 };
 
 interface ChatFormProps {
@@ -137,10 +121,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
         "Search the web for current, external information from the internet",
     },
     {
-      name: "webScraping",
-      description: "Get information from a website",
-    },
-    {
       name: "askQuestion",
       description: "Ask a question about the uploaded documents",
     },
@@ -159,14 +139,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     {
       name: "generatePieChart",
       description: "Generate a pie chart",
-    },
-    {
-      name: "getCryptoPrice",
-      description: "Get the current price of a cryptocurrency",
-    },
-    {
-      name: "getCryptoMarketSummary",
-      description: "Get a summary of the current market for a cryptocurrency",
     },
   ];
 
@@ -876,7 +848,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                               </div>
                             );
                           }
-
                           if (
                             part.toolInvocation.toolName === "generateBarChart"
                           ) {
@@ -918,92 +889,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                               </div>
                             );
                           }
-
-                          if (
-                            part.toolInvocation.toolName === "getCryptoPrice"
-                          ) {
-                            const result = (part.toolInvocation as any)?.result;
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Fetching crypto price...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result ? (
-                              <CryptoPriceOverview
-                                key={index}
-                                result={result}
-                              />
-                            ) : (
-                              <div
-                                key={message.id}
-                                className="flex items-center gap-2"
-                              >
-                                <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
-                                </p>
-
-                                <FaRegFaceSadCry />
-                              </div>
-                            );
-                          }
-
-                          if (
-                            part.toolInvocation.toolName ===
-                            "getCryptoMarketSummary"
-                          ) {
-                            const result = (part.toolInvocation as any)?.result;
-
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Fetching crypto market summary ...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result ? (
-                              <CryptoSummary key={index} data={result} />
-                            ) : (
-                              <div
-                                key={message.id}
-                                className="flex items-center gap-2"
-                              >
-                                <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
-                                </p>
-
-                                <FaRegFaceSadCry />
-                              </div>
-                            );
-                          }
-
                           if (part.toolInvocation.toolName === "askQuestion") {
                             const result = (part.toolInvocation as any)?.result;
                             if (
@@ -1155,51 +1040,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                                 key={message.id}
                                 weatherData={result.result}
                                 location={query}
-                              />
-                            ) : (
-                              <div
-                                key={message.id}
-                                className="flex items-center gap-2"
-                              >
-                                <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
-                                </p>
-
-                                <FaRegFaceSadCry />
-                              </div>
-                            );
-                          }
-
-                          if (part.toolInvocation.toolName === "webScraping") {
-                            const result = (part.toolInvocation as any)?.result;
-
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Crawling website ...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result?.result ? (
-                              <Markdown
-                                key={message.id}
-                                text={result.result.content}
-                                isUser={isUser}
-                                images={result.result.images}
-                                banner={result.result.banner}
                               />
                             ) : (
                               <div
