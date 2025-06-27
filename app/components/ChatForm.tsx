@@ -120,7 +120,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       created_at: string;
       url: string;
       id: string;
-      active: boolean;
       document_id: string;
       document_name: string;
     }[]
@@ -417,7 +416,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
             created_at: doc.created_at || new Date().toISOString(),
             url: publicUrl.publicUrl,
             id: doc.id,
-            active: doc.active,
             document_id: doc.document_id,
             document_name: doc.document_name,
           };
@@ -477,46 +475,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       toast("Error deleting document", {
         duration: 5000,
         description: "Failed to delete document. Please try again.",
-      });
-    }
-  };
-
-  const handleToggleDocumentActive = async (doc: {
-    id: string;
-    active: boolean;
-  }) => {
-    try {
-      const supabase = await createClient();
-      const { data: user } = await supabase.auth.getUser();
-
-      if (!user?.user?.id) return;
-
-      const { error } = await supabase
-        .from("documents")
-        .update({ active: !doc.active })
-        .eq("id", doc.id);
-
-      if (error) throw error;
-
-      // Update the local state
-      setDocuments((prev) =>
-        prev.map((d) => (d.id === doc.id ? { ...d, active: !doc.active } : d))
-      );
-
-      toast(
-        `Document ${doc.active ? "deactivated" : "activated"} successfully`,
-        {
-          duration: 3000,
-          description: doc.active
-            ? "The document has been deactivated and will not be used in searches."
-            : "The document has been activated and will be used in searches.",
-        }
-      );
-    } catch (error) {
-      console.error("Error toggling document status:", error);
-      toast("Error toggling document status", {
-        duration: 5000,
-        description: "Failed to toggle document status. Please try again.",
       });
     }
   };
@@ -1476,7 +1434,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                 <DocumentUpload
                   onUpload={handleDocumentUpload}
                   onDelete={handleDeleteDocument}
-                  onToggleActive={handleToggleDocumentActive}
                   onClose={() => {
                     setIsPdfModalOpen(false);
                     fetchDocuments();

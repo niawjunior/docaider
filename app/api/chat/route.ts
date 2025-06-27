@@ -14,7 +14,6 @@ import {
   allDocumentTool,
   webSearchTool,
   weatherTool,
-  webScrapingTool,
 } from "@/app/tools/llm-tools";
 
 export async function POST(req: NextRequest) {
@@ -41,10 +40,15 @@ export async function POST(req: NextRequest) {
     .eq("user_id", user.id)
     .single();
 
-  const { data: documentsData } = await supabase
+  const { data: allDocuments } = await supabase
     .from("documents")
     .select("document_id, document_name, title")
     .eq("user_id", user.id);
+
+  // Get unique documents by document_id
+  const documentsData = Array.from(
+    new Map(allDocuments?.map((item) => [item.document_id, item])).values()
+  );
   // Get tools
   const tools = {
     generateBarChart: generateBarChartTool,
@@ -56,7 +60,6 @@ export async function POST(req: NextRequest) {
     allDocument: allDocumentTool,
     webSearch: webSearchTool,
     weather: weatherTool,
-    webScraping: webScrapingTool,
   };
 
   const userMessage = messages[messages.length - 1];
@@ -93,10 +96,6 @@ export async function POST(req: NextRequest) {
 
     **Credit Management**:
     -   If the credit balance is 0, politely inform the user that tools cannot be used because they don't have enough credit. Use the exact phrase "You don't have enough credit."
-
-    **Ask Question**:
-    -   If the user asks about any content related to uploaded documents AND documents are uploaded, you **MUST** call the \`askQuestion\` tool. Do NOT provide a generic response if all conditions are met.
-    -   **Always ask user to specify the language before using the tool**
     
 
     **Document Handling**:
@@ -134,11 +133,6 @@ export async function POST(req: NextRequest) {
     -   Check the validity of the location before using the tool.
     -   If location is not a valid location, inform the user that the location is not valid.
     -   If location is valid, use the \`weather\` tool to get weather information.
-
-        **Web Scraping**:
-    -   **Always ask user to specify the language to scrape before using the tool**
-    -   Use the \`webScraping\` tool for any request to scrape any website into clean markdown or structured data.
-
 
     **Thai Text Handling**:
     -   When processing Thai text:

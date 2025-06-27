@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { FaFilePdf } from "react-icons/fa";
@@ -9,7 +8,6 @@ interface DocumentsListProps {
     created_at: string;
     url: string;
     id: string;
-    active: boolean;
     document_id: string;
     document_name: string;
     title: string;
@@ -21,14 +19,9 @@ interface DocumentsListProps {
     document_name: string;
     title: string;
   }) => Promise<void>;
-  onToggleActive?: (doc: { id: string; active: boolean }) => Promise<void>;
 }
 
-const DocumentsList = ({
-  documents,
-  onDelete,
-  onToggleActive,
-}: DocumentsListProps) => {
+const DocumentsList = ({ documents, onDelete }: DocumentsListProps) => {
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async (doc: {
@@ -45,19 +38,6 @@ const DocumentsList = ({
       await onDelete(doc);
     } catch (error) {
       console.error("Error deleting document:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleToggleActive = async (doc: { id: string; active: boolean }) => {
-    if (!onToggleActive) return;
-
-    try {
-      setLoading(true);
-      await onToggleActive({ id: doc.id, active: !doc.active });
-    } catch (error) {
-      console.error("Error toggling document status:", error);
     } finally {
       setLoading(false);
     }
@@ -100,12 +80,6 @@ const DocumentsList = ({
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
-                <Switch
-                  checked={doc.active}
-                  onCheckedChange={(checked) =>
-                    handleToggleActive({ id: doc.id, active: checked })
-                  }
-                />
               </div>
             </div>
           ))

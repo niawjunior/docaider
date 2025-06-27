@@ -68,7 +68,6 @@ export const findRelevantContent = async (
   //   SELECT *
   //   FROM documents
   //   WHERE documents.user_id = user_id::uuid  -- Cast text to uuid
-  //   AND documents.active = true;
   // $$;
 
   // -- Then keep the match_documents function using the user_documents
@@ -95,7 +94,7 @@ export const findRelevantContent = async (
     "match_documents",
     {
       query_embedding: questionEmbedding,
-      match_threshold: 0.1,
+      match_threshold: 0.2,
       match_count: 200,
       user_id: userId,
     }

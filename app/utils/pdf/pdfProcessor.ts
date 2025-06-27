@@ -132,7 +132,6 @@ export async function processPDF(
           user_id: userId,
           document_id: documentId,
           document_name: fileName,
-          active: true,
         })
         .select()
         .single();

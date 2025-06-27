@@ -827,16 +827,21 @@ export const allDocumentTool = tool({
     if (!user?.user?.id) {
       throw new Error("User not authenticated");
     }
-    const { data } = await supabase
+    const { data: allDocuments } = await supabase
       .from("documents")
       .select("document_id, document_name, title")
       .eq("user_id", user.user.id);
-    if (!data) {
+
+    // Get unique documents by document_id
+    const documentsData = Array.from(
+      new Map(allDocuments?.map((item) => [item.document_id, item])).values()
+    );
+    if (!documentsData) {
       throw new Error("Failed to fetch documents");
     }
     return {
       title,
-      rows: data.map((doc) => {
+      rows: documentsData.map((doc) => {
         return {
           document_id: doc.document_id,
           document_name: doc.document_name,

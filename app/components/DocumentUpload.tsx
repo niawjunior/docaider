@@ -26,11 +26,9 @@ interface DocumentUploadProps {
     created_at: string;
     url: string;
     id: string;
-    active: boolean;
     document_id: string;
     document_name: string;
   }[];
-  onToggleActive?: (doc: { id: string; active: boolean }) => Promise<void>;
 }
 
 export default function DocumentUpload({
@@ -38,7 +36,6 @@ export default function DocumentUpload({
   onDelete,
   onClose,
   documents,
-  onToggleActive,
 }: DocumentUploadProps) {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -163,11 +160,7 @@ export default function DocumentUpload({
             <span className="text-xs text-gray-500">1 credit</span>
           </Button>
         </form>
-        <DocumentsList
-          documents={documents}
-          onDelete={handleDelete}
-          onToggleActive={onToggleActive}
-        />
+        <DocumentsList documents={documents} onDelete={handleDelete} />
       </CardContent>
     </Card>
   );
