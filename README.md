@@ -1,14 +1,14 @@
 # DocAider
 
-An AI-powered case search and resolution system that helps users quickly find relevant support cases and solutions using natural language processing and semantic search.
+An AI-powered Knowledge Management and Retrieval-Augmented Generation (RAG) system that helps users build, manage, and query their knowledge base using natural language processing and semantic search.
 
 ## Features
 
-- 🔍 **Semantic Search**: Find relevant cases using natural language queries or keywords
-- 🤖 **AI-Powered Resolution**: Get AI-generated summaries and solutions for support cases
-- 🏷️ **Smart Categorization**: Automatically tag and categorize cases by root cause and resolution
-- 📊 **Interactive Interface**: Modern, responsive UI with real-time search results
-- 🔄 **Context-Aware**: Understands technical jargon and domain-specific terminology
+- 🔍 **Semantic Search**: Find relevant information using natural language queries or keywords
+- 🤖 **AI-Powered Knowledge Retrieval**: Get AI-generated answers from your document repository
+- 🏷️ **Smart Knowledge Organization**: Automatically process and structure information from documents
+- 📊 **Knowledge Analytics**: Track usage and identify gaps in your knowledge base
+- 🔄 **Context-Aware Responses**: Understands technical jargon and domain-specific terminology
 - 🔐 **Secure & Private**: Enterprise-grade security with role-based access control
 - 🚀 **Fast & Scalable**: Built for performance with efficient vector search capabilities
 
@@ -21,31 +21,33 @@ An AI-powered case search and resolution system that helps users quickly find re
 - **Document Management**: View and organize all your uploaded documents in one place
 - **Context-Aware Responses**: AI understands document context for accurate answers
 
-### 2. Data Visualization
+### 2. Knowledge Base Creation
 
-- **Pie Charts**: Generate interactive pie charts from structured data
-- **Bar Charts**: Create detailed bar charts for data comparison
-- **Custom Styling**: Customize charts with different colors and themes
+- **Document Processing**: Upload and process various document formats (PDF, CSV, TXT, DOCX)
+- **Knowledge Extraction**: Automatically extract key information from documents
+- **Knowledge Organization**: Structure and categorize information for efficient retrieval
+- **Multilingual Support**: Process and understand documents in multiple languages
 
-### 3. Web Search Integration
+### 3. Retrieval-Augmented Generation
 
-- **Real-time Web Search**: Access current information from the internet
-- **Comprehensive Results**: Get summarized search results with sources
-- **Current Events**: Stay updated with the latest information
-- **Knowledge Expansion**: Combine document knowledge with web information
+- **Contextual Responses**: Generate responses based on your knowledge base
+- **Source Attribution**: Identify which documents provided the information
+- **Confidence Scoring**: Understand the reliability of generated responses
+- **Knowledge Gaps Identification**: Identify areas where more information is needed
 
-### 4. Text-to-Speech (TTS)
+### 4. Vector Database Integration
 
-- **AI Voice Generation**: Convert text to natural-sounding speech
-- **Customizable Output**: Adjust voice style and parameters
-- **Podcast Creation**: Generate audio content with multiple speakers
+- **Efficient Storage**: Store document embeddings for fast retrieval
+- **Semantic Matching**: Match queries to the most relevant document sections
+- **Scalable Architecture**: Handle growing knowledge bases with ease
+- **Real-time Updates**: Update knowledge base with new information seamlessly
 
-### 5. Cryptocurrency Tools
+### 5. Knowledge Analytics
 
-- **Real-time Crypto Prices**: Get current prices for any cryptocurrency
-- **Market Overview**: View comprehensive market summaries
-- **Multiple Fiat Currencies**: Check prices in your preferred currency
-- **Market Trends**: Stay updated with the latest market movements
+- **Usage Insights**: Track which documents are most frequently queried
+- **Knowledge Coverage**: Identify strengths and gaps in your knowledge base
+- **Query Patterns**: Understand what information users seek most often
+- **Performance Metrics**: Monitor response quality and retrieval accuracy
 
 ## Tech Stack
 
@@ -64,7 +66,6 @@ An AI-powered case search and resolution system that helps users quickly find re
 - Node.js 18 or higher
 - npm or yarn package manager
 - OpenAI API key (for embeddings and AI features)
-- Google Generative AI API key (for web search and TTS)
 - Supabase account (for vector database and authentication)
 
 ### Installation
@@ -97,8 +98,6 @@ NEXT_PUBLIC_SITE_URL=<your_site_url>
 NEXT_PUBLIC_SUPABASE_URL=<your_supabase_url>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your_supabase_anon_key>
 OPENAI_API_KEY=<your_openai_api_key>
-GOOGLE_GENERATIVE_AI_API_KEY=<your_google_generative_ai_api_key>
-
 ```
 
 5. Run database migrations (if applicable)

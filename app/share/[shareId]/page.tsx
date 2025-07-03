@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import BarChart from "@/app/components/BarChart";
 import GlobalLoader from "@/app/components/GlobalLoader";
-import PieChart from "@/app/components/PieChart";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
@@ -17,10 +15,6 @@ import rehypeHighlight from "rehype-highlight";
 import { toast } from "sonner";
 import "highlight.js/styles/github-dark.css"; // or choose another theme
 import { FaRegFaceSadCry } from "react-icons/fa6";
-import Image from "next/image";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import WebSearchComponent from "@/app/components/WebSearch";
-import WeatherComponent from "@/app/components/WeatherComponent";
 
 function extractTextFromChildren(children: any): string {
   if (typeof children === "string") return children;
@@ -38,11 +32,6 @@ const SharePage = () => {
   const { shareId } = useParams();
   const [isAtBottom, setIsAtBottom] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
-  const [selectedImage, setSelectedImage] = useState<{
-    url: string;
-    name: string;
-  } | null>(null);
   const fetchShareData = async () => {
     const response = await fetch(`/api/share/${shareId}`);
     if (!response.ok) {
@@ -50,14 +39,6 @@ const SharePage = () => {
     }
     const data = await response.json();
     return data.messages;
-  };
-
-  // Add this function to handle image load
-  const handleImageLoad = (messageId: string, index: number) => {
-    setLoadedImages((prev) => ({
-      ...prev,
-      [`${messageId}-${index}`]: true,
-    }));
   };
 
   const { data: messages, isLoading } = useQuery({
@@ -137,42 +118,6 @@ const SharePage = () => {
                             message.toolInvocations?.length && "w-full"
                           )}
                         >
-                          {message.experimental_attachments
-                            ?.filter((attachment: any) =>
-                              attachment.contentType?.startsWith("image/")
-                            )
-                            .map((attachment: any, index: any) => {
-                              const imageKey = `${message.id}-${index}`;
-                              const isLoaded = loadedImages[imageKey];
-
-                              return (
-                                <div key={imageKey} className="relative">
-                                  <Image
-                                    loading="lazy"
-                                    width={200}
-                                    height={200}
-                                    className={`rounded-lg p-2 object-cover w-[200px] h-[200px] transition-opacity duration-300 ${
-                                      isLoaded
-                                        ? "opacity-100"
-                                        : "opacity-0 absolute"
-                                    }`}
-                                    onClick={() =>
-                                      setSelectedImage({
-                                        url: attachment.url,
-                                        name:
-                                          attachment.name || "Image Preview",
-                                      })
-                                    }
-                                    onLoad={() =>
-                                      handleImageLoad(message.id, index)
-                                    }
-                                    src={attachment.url}
-                                    alt={attachment.name || "Uploaded image"}
-                                  />
-                                </div>
-                              );
-                            })}
-
                           {message.parts.map((part: any, index: any) => {
                             if (part.type === "text") {
                               return (
@@ -284,95 +229,6 @@ const SharePage = () => {
                               );
                             } else {
                               if (part.type === "tool-invocation") {
-                                if (
-                                  part.toolInvocation.toolName ===
-                                  "generatePieChart"
-                                ) {
-                                  const result = (part.toolInvocation as any)
-                                    ?.result;
-
-                                  if (
-                                    !("result" in part.toolInvocation) &&
-                                    message.id ===
-                                      messages[messages.length - 1]?.id &&
-                                    status === "streaming"
-                                  ) {
-                                    return (
-                                      <div
-                                        key={message.id}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <p className="text-white text-sm">
-                                          Generating chart...
-                                        </p>
-                                        <div className="flex items-center justify-center py-4">
-                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                  return result ? (
-                                    <div key={index}>
-                                      <PieChart option={result?.chartData} />
-                                    </div>
-                                  ) : (
-                                    <div
-                                      key={message.id}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <p className="text-white text-sm">
-                                        Something went wrong. Please try again.
-                                      </p>
-
-                                      <FaRegFaceSadCry />
-                                    </div>
-                                  );
-                                }
-
-                                if (
-                                  part.toolInvocation.toolName ===
-                                  "generateBarChart"
-                                ) {
-                                  const result = (part.toolInvocation as any)
-                                    ?.result;
-                                  if (
-                                    !("result" in part.toolInvocation) &&
-                                    message.id ===
-                                      messages[messages.length - 1]?.id &&
-                                    status === "streaming"
-                                  ) {
-                                    return (
-                                      <div
-                                        key={message.id}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <p className="text-white text-sm">
-                                          Generating chart...
-                                        </p>
-                                        <div className="flex items-center justify-center py-4">
-                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                  return result ? (
-                                    <div key={index}>
-                                      <BarChart option={result?.chartData} />
-                                    </div>
-                                  ) : (
-                                    <div
-                                      key={message.id}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <p className="text-white text-sm">
-                                        Something went wrong. Please try again.
-                                      </p>
-
-                                      <FaRegFaceSadCry />
-                                    </div>
-                                  );
-                                }
-
                                 if (
                                   part.toolInvocation.toolName === "askQuestion"
                                 ) {
@@ -519,144 +375,6 @@ const SharePage = () => {
                                     </div>
                                   );
                                 }
-
-                                if (
-                                  part.toolInvocation.toolName === "generateTTS"
-                                ) {
-                                  const result = (part.toolInvocation as any)
-                                    ?.result;
-                                  if (
-                                    !("result" in part.toolInvocation) &&
-                                    message.id ===
-                                      messages[messages.length - 1]?.id &&
-                                    status === "streaming"
-                                  ) {
-                                    return (
-                                      <div
-                                        key={message.id}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <p className="text-white text-sm">
-                                          Creating audio ...
-                                        </p>
-                                        <div className="flex items-center justify-center py-4">
-                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                  return result ? (
-                                    <audio
-                                      key={message.id}
-                                      src={result}
-                                      controls
-                                    />
-                                  ) : (
-                                    <div
-                                      key={message.id}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <p className="text-white text-sm">
-                                        Something went wrong. Please try again.
-                                      </p>
-
-                                      <FaRegFaceSadCry />
-                                    </div>
-                                  );
-                                }
-                                if (
-                                  part.toolInvocation.toolName === "webSearch"
-                                ) {
-                                  const result = (part.toolInvocation as any)
-                                    ?.result;
-                                  const query = (part.toolInvocation as any)
-                                    ?.args?.query;
-                                  if (
-                                    !("result" in part.toolInvocation) &&
-                                    message.id ===
-                                      messages[messages.length - 1]?.id &&
-                                    status === "streaming"
-                                  ) {
-                                    return (
-                                      <div
-                                        key={message.id}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <p className="text-white text-sm">
-                                          Searching the web ...
-                                        </p>
-                                        <div className="flex items-center justify-center py-4">
-                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                  return result ? (
-                                    <WebSearchComponent
-                                      key={message.id}
-                                      searchResults={result}
-                                      query={query}
-                                    />
-                                  ) : (
-                                    <div
-                                      key={message.id}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <p className="text-white text-sm">
-                                        Something went wrong. Please try again.
-                                      </p>
-
-                                      <FaRegFaceSadCry />
-                                    </div>
-                                  );
-                                }
-
-                                if (
-                                  part.toolInvocation.toolName === "weather"
-                                ) {
-                                  const result = (part.toolInvocation as any)
-                                    ?.result;
-                                  const query = (part.toolInvocation as any)
-                                    ?.args?.location;
-                                  if (
-                                    !("result" in part.toolInvocation) &&
-                                    message.id ===
-                                      messages[messages.length - 1]?.id &&
-                                    status === "streaming"
-                                  ) {
-                                    return (
-                                      <div
-                                        key={message.id}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <p className="text-white text-sm">
-                                          Fetching weather ...
-                                        </p>
-                                        <div className="flex items-center justify-center py-4">
-                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                  return result?.result ? (
-                                    <WeatherComponent
-                                      key={message.id}
-                                      weatherData={result.result}
-                                      location={query}
-                                    />
-                                  ) : (
-                                    <div
-                                      key={message.id}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <p className="text-white text-sm">
-                                        Something went wrong. Please try again.
-                                      </p>
-
-                                      <FaRegFaceSadCry />
-                                    </div>
-                                  );
-                                }
                               }
                             }
                           })}
@@ -686,29 +404,6 @@ const SharePage = () => {
                 </div>
               </div>
             </div>
-
-            <Dialog
-              open={!!selectedImage}
-              onOpenChange={(open) => !open && setSelectedImage(null)}
-            >
-              <DialogContent className="max-w-[90vw] max-h-[90vh]">
-                <div className="relative w-full h-full flex items-center justify-center">
-                  {selectedImage && (
-                    <Image
-                      placeholder="blur"
-                      loading="lazy"
-                      blurDataURL={selectedImage.url}
-                      src={selectedImage.url}
-                      alt={selectedImage.name || "Preview"}
-                      width={400}
-                      height={400}
-                      className="max-w-full max-h-[70vh] object-contain"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  )}
-                </div>
-              </DialogContent>
-            </Dialog>
           </div>
         </div>
       </main>

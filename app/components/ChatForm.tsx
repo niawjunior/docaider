@@ -11,21 +11,8 @@ import dayjs from "dayjs";
 import DocumentUpload from "./DocumentUpload";
 import "highlight.js/styles/github-dark.css"; // or choose another theme
 import { FaRegFaceSadCry } from "react-icons/fa6";
-import {
-  FaChartBar,
-  FaChartPie,
-  FaFilePdf,
-  FaHammer,
-  FaQuestion,
-  FaShare,
-  FaArrowUp,
-  FaVolumeUp,
-  FaSearch,
-  FaCloud,
-} from "react-icons/fa";
+import { FaFilePdf, FaHammer, FaQuestion, FaShare } from "react-icons/fa";
 
-import BarChart from "./BarChart";
-import PieChart from "./PieChart";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -46,8 +33,6 @@ import { useShareUrl } from "../hooks/useShareUrl";
 import { Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useQueryClient } from "@tanstack/react-query";
-import Image from "next/image";
-import WebSearchComponent from "./WebSearch";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -56,16 +41,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import WeatherComponent from "./WeatherComponent";
 import Markdown from "./Markdown";
 
 const toolIcons = {
-  generateBarChart: <FaChartBar />,
-  generatePieChart: <FaChartPie />,
   askQuestion: <FaQuestion />,
-  generateTTS: <FaVolumeUp />,
-  webSearch: <FaSearch />,
-  weather: <FaCloud />,
 };
 
 interface ChatFormProps {
@@ -82,20 +61,11 @@ interface UploadedImage {
 }
 
 export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
-  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
-  const [selectedImage, setSelectedImage] = useState<{
-    url: string;
-    name: string;
-  } | null>(null);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCreateShareLoading, setIsCreateShareLoading] = useState(false);
   const { shareData, error: shareError, refresh } = useShareUrl(chatId!);
   const queryClient = useQueryClient();
-  const [isDragging, setIsDragging] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
-  const [isDeleteImageLoading, setIsDeleteImageLoading] = useState(false);
-  const [isUploadImageLoading, setIsUploadImageLoading] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [currentTool, setCurrentTool] = useState<string>("");
   const [documents, setDocuments] = useState<
@@ -116,39 +86,10 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
 
   const tools = [
     {
-      name: "webSearch",
-      description:
-        "Search the web for current, external information from the internet",
-    },
-    {
       name: "askQuestion",
       description: "Ask a question about the uploaded documents",
     },
-    {
-      name: "generateTTS",
-      description: "Generate a text to speech, e.g. for podcasting",
-    },
-    {
-      name: "weather",
-      description: "Get the current weather",
-    },
-    {
-      name: "generateBarChart",
-      description: "Generate a bar chart",
-    },
-    {
-      name: "generatePieChart",
-      description: "Generate a pie chart",
-    },
   ];
-
-  // Add this function to handle image load
-  const handleImageLoad = (messageId: string, index: number) => {
-    setLoadedImages((prev) => ({
-      ...prev,
-      [`${messageId}-${index}`]: true,
-    }));
-  };
 
   const handleDocumentUpload = async (file: File, title: string) => {
     const formData = new FormData();
@@ -186,36 +127,28 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
 
   const suggestedPrompts = [
     {
-      title: "Create a podcast script about the ghost story",
-      subtitle: "with one speaker",
-    },
-    {
-      title: "What is the latest news in Thailand?",
-      subtitle: "as of today",
-    },
-    {
       title: "Tell me about the document",
-      subtitle: "Who is the author?",
+      subtitle: "Specific question about the document",
     },
     {
-      title: "Show me a bar chart",
-      subtitle: "of monthly expenses by category",
+      title: "What is the author of the document?",
+      subtitle: "Specific question about the document",
     },
     {
-      title: "Create a pie chart",
-      subtitle: "comparing revenue from different regions",
-    },
-    {
-      title: "Compare income and expenses",
-      subtitle: "in a bar chart format",
-    },
-    {
-      title: "Visualize my monthly spending",
-      subtitle: "as a pie chart with colors by category",
+      title: "What is the title of the document?",
+      subtitle: "Specific question about the document",
     },
     {
       title: "How to write a book?",
-      subtitle: "about ghost story",
+      subtitle: "General question",
+    },
+    {
+      title: "What is the capital of Thailand?",
+      subtitle: "General question",
+    },
+    {
+      title: "What is the population of Thailand?",
+      subtitle: "General question",
     },
   ];
 
@@ -230,7 +163,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     handleInputChange,
     status,
     setInput,
-    append,
     setMessages,
   } = useChat({
     api: "/api/chat",
@@ -337,15 +269,11 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     if (promptToSubmit !== null) {
       setInput(promptToSubmit);
       setTimeout(() => {
-        if (!isUploadImageLoading) {
-          handleSubmit(new Event("submit"));
-          setPromptToSubmit(null); // reset
-          // clear images
-          setUploadedImages([]);
-        }
+        handleSubmit(new Event("submit"));
+        setPromptToSubmit(null); // reset
       }, 100);
     }
-  }, [promptToSubmit, handleSubmit, setInput, isUploadImageLoading]);
+  }, [promptToSubmit, handleSubmit, setInput]);
 
   const handlePromptClick = (e: React.MouseEvent, text: string) => {
     e.preventDefault();
@@ -486,30 +414,9 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     if (e.key === "Enter" && !e.shiftKey) {
       if (isDesktop) {
         e.preventDefault();
-        if (!isUploadImageLoading) {
-          console.log("input", input);
-          console.log("uploadedImages", uploadedImages);
+        console.log("input", input);
 
-          if (uploadedImages.length > 0 && input) {
-            handleSubmit(e as unknown as React.FormEvent, {
-              experimental_attachments: uploadedImages.map((img) => ({
-                name: img.file.name,
-                contentType: img.file.type,
-                url: img.publicUrl!,
-              })),
-            });
-            // clear images
-            setUploadedImages([]);
-          } else {
-            // if (currentTool) {
-            //   append({
-            //     role: "user",
-            //     content: `${input} use ${currentTool}`,
-            //   });
-            // }
-            handleSubmit(e as unknown as React.FormEvent);
-          }
-        }
+        handleSubmit(e as unknown as React.FormEvent);
       }
     }
   };
@@ -524,148 +431,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Add these new handlers
-  const handleDragOver = (e: React.DragEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!isDragging) {
-      setIsDragging(true);
-    }
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    const files = Array.from(e.dataTransfer.files);
-    handleFiles(files);
-  };
-
-  const handleFiles = (files: File[]) => {
-    const imageFiles = files.filter((file) => file.type.startsWith("image/"));
-
-    if (imageFiles.length === 0) {
-      toast("Please upload image files only");
-      return;
-    }
-
-    const newImages = imageFiles.map((file) => ({
-      url: URL.createObjectURL(file),
-      file,
-      isUploading: false,
-      uploadProgress: 0,
-    }));
-    setUploadedImages((prev) => [...prev, ...newImages]);
-
-    // Start uploading the new images
-    newImages.forEach((image, index) => {
-      const globalIndex = uploadedImages.length + index;
-      uploadImage(globalIndex, image.file);
-    });
-  };
-
-  const removeImage = async (index: number) => {
-    const imageToRemove = uploadedImages[index];
-
-    // If the image was successfully uploaded to Supabase, delete it
-    if (imageToRemove.publicUrl) {
-      setIsDeleteImageLoading(true);
-      try {
-        const supabase = await createClient();
-        // Extract the file path from the public URL
-        const filePath = imageToRemove.publicUrl.split("/").pop();
-        if (filePath) {
-          // Delete the file from Supabase storage
-          const { error } = await supabase.storage
-            .from("chat-images")
-            .remove([filePath]);
-
-          if (error) {
-            console.error("Error deleting image:", error);
-            toast.error("Failed to delete image from storage");
-            return;
-          }
-        }
-      } catch (error) {
-        console.error("Error deleting image:", error);
-        toast.error("Failed to delete image");
-        return;
-      } finally {
-        setIsDeleteImageLoading(false);
-      }
-    }
-    // Remove the image from the UI
-    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
-
-    // Revoke the object URL to prevent memory leaks
-    if (imageToRemove.url.startsWith("blob:")) {
-      URL.revokeObjectURL(imageToRemove.url);
-    }
-  };
-
-  const uploadImageToSupabase = async (file: File): Promise<string> => {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Math.random()
-      .toString(36)
-      .substring(2, 15)}-${Date.now()}.${fileExt}`;
-    const supabase = await createClient();
-    setIsUploadImageLoading(true);
-    const { data, error } = await supabase.storage
-      .from("chat-images") // Replace with your Supabase bucket name
-      .upload(fileName, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-
-    if (error) {
-      console.error("Error uploading image:", error);
-      throw error;
-    }
-
-    setIsUploadImageLoading(false);
-    // Get public URL
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("chat-images").getPublicUrl(fileName);
-
-    return publicUrl;
-  };
-
-  const uploadImage = async (index: number, file: File) => {
-    try {
-      // Update state to show loading
-      setUploadedImages((prev) =>
-        prev.map((img, i) =>
-          i === index ? { ...img, isUploading: true, uploadProgress: 0 } : img
-        )
-      );
-
-      const publicUrl = await uploadImageToSupabase(file);
-
-      // Update state with the public URL
-      setUploadedImages((prev) =>
-        prev.map((img, i) =>
-          i === index ? { ...img, isUploading: false, publicUrl } : img
-        )
-      );
-    } catch (error) {
-      console.error("Upload failed:", error);
-      setUploadedImages((prev) =>
-        prev.map((img, i) =>
-          i === index ? { ...img, isUploading: false } : img
-        )
-      );
-      toast.error("Failed to upload image");
-    }
-  };
-
   return (
     <>
       <form
@@ -675,9 +440,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
         className={clsx(
           "flex flex-col items-center gap-4 md:h-[calc(100dvh-60px)] md:mt-0 mt-[50px] justify-center h-[calc(100dvh-100px)] overflow-y-auto scroll-hidden"
         )}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
       >
         {messages.length === 0 && (
           <>
@@ -708,19 +470,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
         )}
 
         <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-[10px] relative">
-          {/* Add drag overlay */}
-          {isDragging && (
-            <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded-lg pointer-events-none z-10">
-              <div className="text-center p-6 bg-zinc-800 rounded-lg">
-                <p className="text-xl font-medium mb-2">
-                  Drop your images here
-                </p>
-                <p className="text-sm text-zinc-400">
-                  Support for PNG, JPG, GIF up to 10MB
-                </p>
-              </div>
-            </div>
-          )}
           <div className="flex justify-end ">
             {messages.length > 0 && (
               <TooltipProvider>
@@ -766,37 +515,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                       message.toolInvocations?.length && "w-full"
                     )}
                   >
-                    {message.experimental_attachments
-                      ?.filter((attachment) =>
-                        attachment.contentType?.startsWith("image/")
-                      )
-                      .map((attachment, index) => {
-                        const imageKey = `${message.id}-${index}`;
-                        const isLoaded = loadedImages[imageKey];
-
-                        return (
-                          <div key={imageKey} className="relative">
-                            <Image
-                              loading="lazy"
-                              width={200}
-                              height={200}
-                              className={`rounded-lg p-2 object-cover w-[200px] h-[200px] transition-opacity duration-300 ${
-                                isLoaded ? "opacity-100" : "opacity-0 absolute"
-                              }`}
-                              onClick={() =>
-                                setSelectedImage({
-                                  url: attachment.url,
-                                  name: attachment.name || "Image Preview",
-                                })
-                              }
-                              onLoad={() => handleImageLoad(message.id, index)}
-                              src={attachment.url}
-                              alt={attachment.name || "Uploaded image"}
-                            />
-                          </div>
-                        );
-                      })}
-
                     {message.parts.map((part, index) => {
                       if (part.type === "text") {
                         return (
@@ -806,89 +524,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                         );
                       } else {
                         if (part.type === "tool-invocation") {
-                          if (
-                            part.toolInvocation.toolName === "generatePieChart"
-                          ) {
-                            const result = (part.toolInvocation as any)?.result;
-
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Generating chart...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result ? (
-                              <div key={index}>
-                                <PieChart option={result?.chartData} />
-                              </div>
-                            ) : (
-                              <div
-                                key={message.id}
-                                className="flex items-center gap-2"
-                              >
-                                <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
-                                </p>
-
-                                <FaRegFaceSadCry />
-                              </div>
-                            );
-                          }
-                          if (
-                            part.toolInvocation.toolName === "generateBarChart"
-                          ) {
-                            const result = (part.toolInvocation as any)?.result;
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Generating chart...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result ? (
-                              <div key={index}>
-                                <BarChart option={result?.chartData} />
-                              </div>
-                            ) : (
-                              <div
-                                key={message.id}
-                                className="flex items-center gap-2"
-                              >
-                                <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
-                                </p>
-
-                                <FaRegFaceSadCry />
-                              </div>
-                            );
-                          }
                           if (part.toolInvocation.toolName === "askQuestion") {
                             const result = (part.toolInvocation as any)?.result;
                             if (
@@ -915,132 +550,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                               <div key={index}>
                                 <Markdown isUser={isUser} text={result} />
                               </div>
-                            ) : (
-                              <div
-                                key={message.id}
-                                className="flex items-center gap-2"
-                              >
-                                <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
-                                </p>
-
-                                <FaRegFaceSadCry />
-                              </div>
-                            );
-                          }
-
-                          if (part.toolInvocation.toolName === "generateTTS") {
-                            const result = (part.toolInvocation as any)?.result;
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Creating audio ...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result ? (
-                              <audio key={message.id} src={result} controls />
-                            ) : (
-                              <div
-                                key={message.id}
-                                className="flex items-center gap-2"
-                              >
-                                <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
-                                </p>
-
-                                <FaRegFaceSadCry />
-                              </div>
-                            );
-                          }
-
-                          if (part.toolInvocation.toolName === "webSearch") {
-                            const result = (part.toolInvocation as any)?.result;
-                            const query = (part.toolInvocation as any)?.args
-                              ?.query;
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Searching the web ...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result ? (
-                              <WebSearchComponent
-                                key={message.id}
-                                searchResults={result}
-                                query={query}
-                              />
-                            ) : (
-                              <div
-                                key={message.id}
-                                className="flex items-center gap-2"
-                              >
-                                <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
-                                </p>
-
-                                <FaRegFaceSadCry />
-                              </div>
-                            );
-                          }
-
-                          if (part.toolInvocation.toolName === "weather") {
-                            const result = (part.toolInvocation as any)?.result;
-                            const query = (part.toolInvocation as any)?.args
-                              ?.location;
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Fetching weather ...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result?.result ? (
-                              <WeatherComponent
-                                key={message.id}
-                                weatherData={result.result}
-                                location={query}
-                              />
                             ) : (
                               <div
                                 key={message.id}
@@ -1148,41 +657,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                   )}
                 </div>
               </div>
-              {/* Show uploaded images */}
-              {uploadedImages.length > 0 && (
-                <div className="flex flex-wrap gap-4 absolute bottom-[80px] left-[150px]">
-                  {uploadedImages.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <Button
-                        variant="outline"
-                        className="relative bottom-[-5px]"
-                        size="icon"
-                        disabled={isDeleteImageLoading}
-                      >
-                        <Image
-                          src={image.url}
-                          alt={`Uploaded ${index + 1}`}
-                          width={10}
-                          height={10}
-                          className="h-[35px] w-[35px] object-cover rounded-md"
-                        />
-                        <div
-                          onClick={() => removeImage(index)}
-                          className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-red-500 rounded-full"
-                        >
-                          <TiDelete />
-                        </div>
-                        {image.isUploading && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-md">
-                            <Loader2 className="animate-spin h-6 w-6" />
-                          </div>
-                        )}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
               {!isAtBottom && (
                 <button
                   onClick={() =>
@@ -1206,20 +680,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                   onKeyDown={handleKeyDown}
                   className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
                 />
-                <Button
-                  onClick={() => {
-                    if (!isUploadImageLoading) {
-                      handleSubmit();
-                      // clear images
-                      setUploadedImages([]);
-                    }
-                  }}
-                  variant="outline"
-                  disabled={status !== "ready" || !input.trim()}
-                  className="h-10 w-10 rounded-full border bg-white border-zinc-400 absolute right-2 bottom-2"
-                >
-                  <FaArrowUp />
-                </Button>
               </div>
             </div>
 
@@ -1305,29 +765,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                     <p className="text-sm text-red-400 mt-2">
                       {shareError.message}
                     </p>
-                  )}
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            <Dialog
-              open={!!selectedImage}
-              onOpenChange={(open) => !open && setSelectedImage(null)}
-            >
-              <DialogContent className="max-w-[90vw] max-h-[90vh]">
-                <div className="relative w-full h-full flex items-center justify-center">
-                  {selectedImage && (
-                    <Image
-                      placeholder="blur"
-                      loading="lazy"
-                      blurDataURL={selectedImage.url}
-                      src={selectedImage.url}
-                      alt={selectedImage.name || "Preview"}
-                      width={400}
-                      height={400}
-                      className="max-w-full max-h-[70vh] object-contain"
-                      onClick={(e) => e.stopPropagation()}
-                    />
                   )}
                 </div>
               </DialogContent>

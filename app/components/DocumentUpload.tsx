@@ -132,16 +132,16 @@ export default function DocumentUpload({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="file">Supported file types: PDF, CSV</Label>
+            <Label htmlFor="file">Supported file types: PDF, CSV, TXT, DOCX</Label>
             <div className="relative w-full">
               <Input
                 id="file"
                 type="file"
-                accept=".pdf,.csv"
+                accept=".pdf,.csv,.txt,.docx"
                 onChange={handleFileChange}
                 disabled={isUploading}
               />
-              <p className="text-xs text-gray-500">Maximum file size: 3MB</p>
+              <p className="text-xs text-gray-500">Maximum file size: 3MB. Documents will be processed for knowledge retrieval.</p>
             </div>
           </div>
           <Button

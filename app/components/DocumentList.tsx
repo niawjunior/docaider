@@ -45,11 +45,11 @@ const DocumentsList = ({ documents, onDelete }: DocumentsListProps) => {
 
   return (
     <div className="mt-4">
-      <h3 className="text-sm font-medium mb-2">Your Documents</h3>
+      <h3 className="text-sm font-medium mb-2">Your Knowledge Base</h3>
       <div className="space-y-2 overflow-y-auto max-h-[200px]">
         {documents?.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No documents uploaded yet
+            Your knowledge base is empty. Upload documents to start building your knowledge repository.
           </p>
         ) : (
           documents?.map((doc) => (
@@ -60,7 +60,7 @@ const DocumentsList = ({ documents, onDelete }: DocumentsListProps) => {
               <div>
                 <p className="text-sm font-medium">{doc.title}</p>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(doc.created_at).toLocaleDateString()}
+                  Added to knowledge base: {new Date(doc.created_at).toLocaleDateString()}
                 </p>
               </div>
               <div className="flex items-center gap-2">

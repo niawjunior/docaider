@@ -56,14 +56,14 @@ export default function Home() {
               containIntrinsicSize: "auto 300px",
             }}
           >
-            AI-Powered Document & Data Platform
+            AI-Powered Knowledge Management Platform
           </motion.h1>
           <motion.p
             variants={itemVariants}
             className="text-xl text-gray-300 font-medium leading-relaxed max-w-3xl mx-auto"
           >
-            Transform documents, analyze data, and get insights with our
-            comprehensive AI toolkit.
+            Transform your documents into intelligent knowledge bases with our
+            RAG-powered AI toolkit.
           </motion.p>
           <section className="relative z-10">
             <motion.div
@@ -77,21 +77,10 @@ export default function Home() {
                 id="features"
                 className="text-3xl md:text-4xl font-bold text-white text-center mb-8"
               >
-                Powerful Features for Your Data Needs
+                Powerful Features for Knowledge Management
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
-                <FeatureCard
-                  icon="data"
-                  title="Data Visualization"
-                  description="Create beautiful bar and pie charts from your data."
-                  features={[
-                    "Generate Bar Charts",
-                    "Create Pie Charts",
-                    "Interactive Visualizations",
-                  ]}
-                />
-
                 <FeatureCard
                   icon="document"
                   title="Document Intelligence"
@@ -104,35 +93,24 @@ export default function Home() {
                 />
 
                 <FeatureCard
-                  icon="web"
-                  title="Web Search"
-                  description="Find and extract information from the web."
+                  icon="knowledge"
+                  title="Knowledge Base Creation"
+                  description="Build intelligent knowledge bases from your documents."
                   features={[
-                    "Web Search",
-                    "Content Extraction",
-                    "Data Collection",
+                    "Automatic Indexing",
+                    "Semantic Search",
+                    "Knowledge Extraction",
                   ]}
                 />
 
                 <FeatureCard
-                  icon="weather"
-                  title="Weather Data"
-                  description="Get accurate weather information for any location."
+                  icon="rag"
+                  title="Retrieval-Augmented Generation"
+                  description="Enhance AI responses with your own knowledge base."
                   features={[
-                    "Current Conditions",
-                    "Forecasts",
-                    "Location-based Data",
-                  ]}
-                />
-
-                <FeatureCard
-                  icon="tts"
-                  title="Text-to-Speech"
-                  description="Convert text into natural-sounding speech."
-                  features={[
-                    "AI Voice Generation",
-                    "Multiple Languages",
-                    "Customizable Voices",
+                    "Context-Aware Responses",
+                    "Source Attribution",
+                    "Factual Grounding",
                   ]}
                 />
                 <FeatureCard
@@ -143,6 +121,26 @@ export default function Home() {
                     "Multiple Concurrent Chats",
                     "Session-Based Memory",
                     "Context-Aware Responses",
+                  ]}
+                />
+                <FeatureCard
+                  icon="vector"
+                  title="Vector Database Integration"
+                  description="Store and retrieve knowledge using advanced vector embeddings."
+                  features={[
+                    "Semantic Similarity Search",
+                    "Efficient Knowledge Retrieval",
+                    "Scalable Document Storage",
+                  ]}
+                />
+                <FeatureCard
+                  icon="analytics"
+                  title="Knowledge Analytics"
+                  description="Gain insights from your knowledge base usage and performance."
+                  features={[
+                    "Usage Patterns Analysis",
+                    "Knowledge Gap Identification",
+                    "Relevance Metrics",
                   ]}
                 />
               </div>
@@ -195,7 +193,7 @@ export default function Home() {
                 company="InnoTech"
                 avatar="MC"
                 rating={4}
-                content="The data visualization tools are incredibly intuitive. I can create professional charts in seconds. The only reason for 4 stars is we'd love to see more chart types in future updates."
+                content="The knowledge management tools are incredibly intuitive. I can create and query knowledge bases in seconds. The only reason for 4 stars is we'd love to see more advanced RAG features in future updates."
               />
               <TestimonialCard
                 name="Emily Rodriguez"
@@ -221,7 +219,7 @@ export default function Home() {
                 role="Content Strategist"
                 company="ContentMint"
                 avatar="PP"
-                content="The web search and content extraction features have streamlined our research process significantly. Highly recommended!"
+                content="The knowledge base creation and RAG features have streamlined our research process significantly. Highly recommended!"
                 rating={5}
               />
             </div>
