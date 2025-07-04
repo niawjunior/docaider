@@ -145,26 +145,6 @@ export default function Home() {
               </div>
             </motion.div>
           </section>
-          <section className="relative z-10  bg-zinc-900/50">
-            <div className="max-w-7xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                Ready to Transform Your Workflow?
-              </h2>
-              <p className="text-xl text-gray-300 mb-8">
-                Join thousands of professionals who use our platform to save
-                time and make better decisions.
-              </p>
-
-              <motion.button
-                onClick={() => router.push("/chat")}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-gradient-to-r cursor-pointer from-orange-500 to-red-500 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg hover:shadow-orange-500/30"
-              >
-                Get Started for Free
-              </motion.button>
-            </div>
-          </section>
         </motion.div>
 
         <section className="relative z-10 py-8">
