@@ -42,6 +42,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Markdown from "./Markdown";
+import { useDocuments } from "../hooks/useDocuments";
 
 const toolIcons = {
   askQuestion: <FaQuestion />,
@@ -335,6 +336,8 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     fetchDocuments();
   }, []);
 
+  const { deleteDocument } = useDocuments();
+
   const handleDeleteDocument = async (doc: {
     title: string;
     url: string;
@@ -342,41 +345,21 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     document_id: string;
     document_name: string;
   }) => {
-    try {
-      const supabase = await createClient();
-      const { data: user } = await supabase.auth.getUser();
-      if (!user?.user?.id) return;
-
-      // 1. Delete the file from Supabase storage
-      const { error: storageError } = await supabase.storage
-        .from("documents")
-        .remove([`user_${user.user.id}/${doc.document_name}`]);
-
-      if (storageError) throw storageError;
-
-      // 2. Delete all chunks with the same document_id
-      const { error: dbError } = await supabase
-        .from("documents")
-        .delete()
-        .eq("document_id", doc.document_id);
-
-      if (dbError) throw dbError;
-
-      // 3. Remove the document from local state (filter by document_id)
-      setDocuments((prev) =>
-        prev.filter((d) => d.document_id !== doc.document_id)
-      );
-
-      toast("Document deleted successfully", {
-        duration: 3000,
-      });
-    } catch (error) {
-      console.error("Error deleting document:", error);
-      toast("Error deleting document", {
-        duration: 5000,
-        description: "Failed to delete document. Please try again.",
-      });
-    }
+    // Call the deleteDocument mutation from the useDocuments hook
+    deleteDocument.mutate(
+      {
+        documentId: doc.document_id,
+        documentName: doc.document_name,
+      },
+      {
+        onSuccess: () => {
+          // Update local state after successful deletion
+          setDocuments((prev) =>
+            prev.filter((d) => d.document_id !== doc.document_id)
+          );
+        },
+      }
+    );
   };
 
   const handleShare = async () => {

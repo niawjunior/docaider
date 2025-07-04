@@ -5,6 +5,8 @@ import { createClient } from "../supabase/server";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { v4 as uuidv4 } from "uuid";
 import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
+import { db } from "../../../db/config";
+import { documents } from "../../../db/schema";
 
 export interface DocumentChunk {
   chunk: string;
@@ -117,9 +119,6 @@ export async function processFile(
     // Initialize the lite tokenizer
     const encoder = new Tiktoken(cl100k_base);
 
-    // Generate embeddings for each chunk
-    const supabase = await createClient();
-
     // Filter chunks that fit within the 8192 token limit
     const validChunks: string[] = [];
 
@@ -149,22 +148,21 @@ export async function processFile(
       embedding: embeddings[index],
     }));
 
+    // Use Drizzle ORM to insert documents
     for (let i = 0; i < documentChunks.length; i++) {
-      const { error } = await supabase
-        .from("documents")
-        .upsert({
+      try {
+        await db.insert(documents).values({
           title,
           chunk: documentChunks[i].chunk.replace(/\u0000/g, ""),
           embedding: documentChunks[i].embedding,
-          user_id: userId,
-          document_id: documentId,
-          document_name: fileName,
-        })
-        .select()
-        .single();
-      if (error) {
-        console.error("Error inserting into Supabase:", error);
-        throw new Error(`Failed to insert chunk ${i + 1}: ${error.message}`);
+          userId: userId,
+          documentId: documentId,
+          documentName: fileName,
+          active: true
+        });
+      } catch (error) {
+        console.error("Error inserting document with Drizzle:", error);
+        throw new Error(`Failed to insert chunk ${i + 1}`);
       }
     }
 
@@ -189,7 +187,8 @@ export async function uploadFile(
 
     const storagePath = `user_${userId}/${fileName}`;
 
-    // Upload file to Supabase storage with user-specific path
+    // We still need to use Supabase for file storage
+    // Drizzle ORM doesn't handle file storage
     const { error: storageError, data: storageData } = await supabase.storage
       .from("documents")
       .upload(storagePath, file, {

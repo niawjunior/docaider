@@ -7,6 +7,9 @@ import { createClient } from "../../utils/supabase/server";
 import {
   askQuestionTool,
 } from "@/app/tools/llm-tools";
+import { db } from "../../../db/config";
+import { credits, documents, chats } from "../../../db/schema";
+import { eq, and } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -25,22 +28,49 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Get user credit
-  const { data: creditData } = await supabase
-    .from("credits")
-    .select("balance")
-    .eq("user_id", user.id)
-    .single();
+  // Get user credit using Drizzle ORM
+  const creditData = await db
+    .select({ balance: credits.balance })
+    .from(credits)
+    .where(eq(credits.userId, user.id))
+    .limit(1);
 
-  const { data: allDocuments } = await supabase
-    .from("documents")
-    .select("document_id, document_name, title")
-    .eq("user_id", user.id);
+  // Get documents using Drizzle ORM
+  const allDocuments = await db
+    .select({
+      documentId: documents.documentId,
+      documentName: documents.documentName,
+      title: documents.title
+    })
+    .from(documents)
+    .where(
+      and(
+        eq(documents.userId, user.id),
+        eq(documents.active, true)
+      )
+    );
 
-  // Get unique documents by document_id
-  const documentsData = Array.from(
-    new Map(allDocuments?.map((item) => [item.document_id, item])).values()
-  );
+  // Define proper types for document data
+  type DocumentData = {
+    documentId: string | null;
+    documentName: string | null;
+    title: string;
+  };
+
+  // Filter out documents with null documentId and create a map for deduplication
+  const documentMap = new Map<string, DocumentData>();
+  
+  // Only add documents with non-null documentId to the map
+  allDocuments.forEach(doc => {
+    if (doc.documentId) {
+      // If this documentId isn't in the map yet or we want to replace an existing entry
+      documentMap.set(doc.documentId, doc);
+    }
+  });
+  
+  // Convert the map values to an array for our unique documents
+  const uniqueDocuments = Array.from(documentMap.values());
+
   // Get tools
   const tools = {
     askQuestion: askQuestionTool,
@@ -52,7 +82,7 @@ export async function POST(req: NextRequest) {
   const result = streamText({
     model: openai("gpt-4o-mini"),
     toolChoice:
-      creditData?.balance === 0 ? "none" : currentTool ? "required" : "auto",
+      creditData.length === 0 || creditData[0].balance <= 0 ? "none" : currentTool ? "required" : "auto",
     maxSteps: 1,
     tools,
     system: `
@@ -83,10 +113,10 @@ export async function POST(req: NextRequest) {
     
     **Knowledge Management**:
     -   For questions about uploaded documents, use the \`askQuestion\` tool.
-    -   Current document count: ${documentsData?.length}
+    -   Current document count: ${uniqueDocuments.length}
     -   Documents Name:  ${
-      documentsData?.length > 0
-        ? documentsData?.map((doc) => doc.title).join(", ")
+      uniqueDocuments.length > 0
+        ? uniqueDocuments.map((doc: { title: string } | undefined) => doc?.title).join(", ")
         : "No documents uploaded."
     }
     -   If a document-related tool is requested but document count is 0, politely inform the user: "No documents uploaded."
@@ -193,15 +223,17 @@ export async function POST(req: NextRequest) {
 
       const totalCreditCost = toolNames?.length || 0;
       if (totalCreditCost > 0) {
-        await supabase
-          .from("credits")
-          .update({
-            balance:
-              creditData?.balance - totalCreditCost < 0
-                ? 0
-                : creditData?.balance - totalCreditCost,
-          })
-          .eq("user_id", user.id);
+        // Update credit using Drizzle ORM
+        if (creditData.length > 0) {
+          const newBalance = Math.max(0, creditData[0].balance - totalCreditCost);
+          await db
+            .update(credits)
+            .set({
+              balance: newBalance,
+              updatedAt: new Date().toISOString()
+            })
+            .where(eq(credits.userId, user.id));
+        }
       }
     },
 
@@ -226,14 +258,21 @@ export async function POST(req: NextRequest) {
         return;
       }
 
-      await supabase
-        .from("chats")
-        .upsert({
+      // Store chat using Drizzle ORM
+      await db
+        .insert(chats)
+        .values({
           id: chatId,
           messages: finalMessages,
-          user_id: user.id,
+          userId: user.id,
+          createdAt: new Date().toISOString()
         })
-        .eq("id", chatId);
+        .onConflictDoUpdate({
+          target: chats.id,
+          set: {
+            messages: finalMessages
+          }
+        });
     },
 
     onError: async (error) => {

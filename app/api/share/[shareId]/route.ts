@@ -1,32 +1,43 @@
-import { createClient } from "@/app/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
+import { db } from "../../../../db/config";
+import { chatShares, chats } from "../../../../db/schema";
+import { eq } from "drizzle-orm";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ shareId: string }> }
 ) {
-  const supabase = await createClient();
   const { shareId } = await params;
   try {
-    // First, find the chat ID from the share ID
-    const { data: shareData, error: shareError } = await supabase
-      .from("chat_shares")
-      .select("chat_id, messages, created_at")
-      .eq("share_id", shareId)
-      .single();
+    // Find the chat ID from the share ID using Drizzle ORM
+    const shareData = await db
+      .select({
+        chatId: chatShares.chatId,
+        messages: chatShares.messages,
+        createdAt: chatShares.createdAt
+      })
+      .from(chatShares)
+      .where(eq(chatShares.shareId, shareId))
+      .limit(1);
 
-    if (shareError || !shareData) {
+    if (!shareData || shareData.length === 0) {
       return NextResponse.json(
         { error: "Invalid share link" },
         { status: 404 }
       );
     }
 
+    // Define a type for the messages structure
+    type MessagesContainer = { messages: any[] };
+    
+    // Access messages safely with type checking
+    const messagesData = shareData[0].messages as MessagesContainer | null;
+    
     return NextResponse.json({
-      chatId: shareData.chat_id,
-      messages: shareData.messages.messages,
-      createdAt: shareData.created_at,
+      chatId: shareData[0].chatId,
+      messages: messagesData?.messages || [],
+      createdAt: shareData[0].createdAt,
     });
   } catch (error) {
     console.error("Error fetching shared chat:", error);
@@ -40,33 +51,28 @@ export async function GET(
 export async function POST(req: NextRequest) {
   try {
     const { chatId } = await req.json();
-    const supabase = await createClient();
     // Generate a unique share ID
     const shareId = uuidv4();
-    const { data: messages, error: messagesError } = await supabase
-      .from("chats")
-      .select("messages")
-      .eq("id", chatId)
-      .single();
-    if (messagesError) {
-      throw messagesError;
+    
+    // First get the messages using Drizzle ORM
+    const messages = await db
+      .select({ messages: chats.messages })
+      .from(chats)
+      .where(eq(chats.id, chatId))
+      .limit(1);
+    
+    if (!messages || messages.length === 0) {
+      throw new Error("Chat not found");
     }
 
-    // Create a share record in Supabase
-    const { error: shareError } = await supabase
-      .from("chat_shares")
-      .insert([
-        {
-          chat_id: chatId,
-          share_id: shareId,
-          messages: messages,
-        },
-      ])
-      .select();
-
-    if (shareError) {
-      throw shareError;
-    }
+    // Create a share record using Drizzle ORM
+    await db.insert(chatShares).values({
+      chatId: chatId,
+      shareId: shareId,
+      messages: messages[0].messages,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
 
     return NextResponse.json({
       shareId,

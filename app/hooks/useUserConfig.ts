@@ -2,25 +2,24 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { createClient } from "../utils/supabase/client";
-
-const supabase = createClient();
+import { getUserConfig, updateUserConfig } from "../utils/db-actions";
 
 export interface UserConfig {
   id: string;
-  user_id: string;
-  language_preference: string;
-  theme_preference: string;
-  notification_settings: {
-    email: boolean;
-    push: boolean;
-  };
-  chat_settings: {
-    temperature: number;
-    max_tokens: number;
-  };
-  default_currency: string;
-  timezone: string;
+  createdAt: string;
+  updatedAt: string;
+  languagePreference: string | null;
+  themePreference: string | null;
+  notificationSettings: {
+    email?: boolean;
+    push?: boolean;
+  } | unknown;
+  chatSettings: {
+    temperature?: number;
+    max_tokens?: number;
+  } | unknown;
+  defaultCurrency: string | null;
+  timezone: string | null;
 }
 
 export default function useUserConfig(userId: string) {
@@ -30,14 +29,11 @@ export default function useUserConfig(userId: string) {
 
   const getConfig = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("user_config")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      if (error) throw error;
-      setConfig(data);
+      // Use server action instead of API route
+      const data = await getUserConfig(userId);
+      if (data) {
+        setConfig(data);
+      }
     } catch (err) {
       console.error("Error fetching user config:", err);
       setError(
@@ -50,15 +46,16 @@ export default function useUserConfig(userId: string) {
 
   const updateConfig = async (updates: Partial<UserConfig>) => {
     try {
-      const { error } = await supabase
-        .from("user_config")
-        .update(updates)
-        .eq("id", userId);
-
-      if (error) throw error;
-
-      // Optimistically update state
-      setConfig((prev) => (prev ? { ...prev, ...updates } : null));
+      // Use server action instead of API route
+      const updatedConfig = await updateUserConfig(userId, updates);
+      
+      // Update state with the returned config
+      if (updatedConfig) {
+        setConfig(updatedConfig);
+      } else {
+        // Optimistically update state if no config returned
+        setConfig((prev) => (prev ? { ...prev, ...updates } : null));
+      }
     } catch (err) {
       console.error("Error updating user config:", err);
       throw err instanceof Error ? err : new Error("Failed to update config");

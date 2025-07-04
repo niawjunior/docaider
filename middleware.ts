@@ -15,7 +15,6 @@ export async function middleware(request: NextRequest) {
       .select("id")
       .eq("id", user.id)
       .single();
-
     if (!existingUser) {
       // User doesn't exist, create a new user
       const { error: userError } = await supabase.from("users").insert({
@@ -23,11 +22,9 @@ export async function middleware(request: NextRequest) {
         email: user.email,
         display_name: user.user_metadata?.full_name || user.email || "",
       });
-
       if (userError) {
         console.error("Error creating user:", userError);
       }
-
       // Initialize user config
       const { error: configError } = await supabase.from("user_config").insert({
         id: user.id,
@@ -42,17 +39,14 @@ export async function middleware(request: NextRequest) {
           max_tokens: 2000,
         },
       });
-
       if (configError) {
         console.error("Error creating user config:", configError);
       }
-
       // Initialize user credits
       const { error: creditsError } = await supabase.from("credits").insert({
         user_id: user.id,
         balance: 50,
       });
-
       if (creditsError) {
         console.error("Error creating user credits:", creditsError);
       }

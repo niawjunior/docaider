@@ -17,7 +17,6 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
   const { credit, isLoading: creditLoading } = useCredit(
     session?.user.id || ""
   );
-  // const { userConfig } = useUserConfig(session?.user.id || "");
   const sidebarRef = useRef<HTMLUListElement>(null);
   const router = useRouter();
 

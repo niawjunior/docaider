@@ -87,14 +87,10 @@ export const documents = pgTable(
   "documents",
   {
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    id: bigint({ mode: "number" }).primaryKey().generatedByDefaultAsIdentity({
-      name: "documents_id_seq",
-      startWith: 1,
-      increment: 1,
-      minValue: 1,
-      maxValue: 9223372036854775807,
-      cache: 1,
-    }),
+    id: bigint({ mode: "number" })
+      .generatedByDefaultAsIdentity()
+      .primaryKey()
+      .notNull(),
     title: text().notNull(),
     chunk: text().notNull(),
     embedding: vector({ dimensions: 1536 }).notNull(),
@@ -103,7 +99,7 @@ export const documents = pgTable(
     active: boolean().default(true),
     documentName: text("document_name"),
   },
-  (table) => [
+  () => [
     pgPolicy("Users can read their own active documents", {
       as: "permissive",
       for: "select",

@@ -1,6 +1,9 @@
 import { uploadFile } from "@/app/utils/file/fileProcessor";
 import { NextRequest } from "next/server";
 import { createClient } from "@/app/utils/supabase/server";
+import { db } from "../../../db/config";
+import { credits } from "../../../db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -38,20 +41,26 @@ export async function POST(req: NextRequest) {
 
     const result = await uploadFile(nodeFile, title, userId);
 
-    // // Get user credit
-    const { data: creditData } = await supabase
-      .from("credits")
-      .select("balance")
-      .eq("user_id", user.id)
-      .single();
-
-    // update credit
-    await supabase
-      .from("credits")
-      .update({
-        balance: creditData?.balance - 1,
+    // Get user credit using Drizzle ORM
+    const creditData = await db.select({ balance: credits.balance })
+      .from(credits)
+      .where(eq(credits.userId, user.id))
+      .limit(1);
+      
+    if (creditData.length === 0) {
+      return new Response(JSON.stringify({ error: "Credit not found" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    
+    // Update credit using Drizzle ORM
+    await db.update(credits)
+      .set({ 
+        balance: creditData[0].balance - 1,
+        updatedAt: new Date().toISOString()
       })
-      .eq("user_id", user.id);
+      .where(eq(credits.userId, user.id));
 
     return new Response(JSON.stringify({ success: true, message: result }), {
       status: 200,

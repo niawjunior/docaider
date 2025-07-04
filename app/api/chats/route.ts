@@ -1,5 +1,8 @@
 import { createClient } from "../../utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "../../../db/config";
+import { chats } from "../../../db/schema";
+import { eq, desc } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -13,16 +16,17 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { data, error } = await supabase
-      .from("chats")
-      .select("id, created_at, messages")
-      .eq("user_id", user!.user!.id)
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1); // inclusive
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    // Using Drizzle ORM to fetch chats
+    const data = await db.select({
+      id: chats.id,
+      created_at: chats.createdAt,
+      messages: chats.messages
+    })
+    .from(chats)
+    .where(eq(chats.userId, user.user!.id))
+    .orderBy(desc(chats.createdAt))
+    .limit(limit)
+    .offset(offset);
 
     return NextResponse.json(data);
   } catch (error) {

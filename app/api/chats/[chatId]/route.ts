@@ -1,5 +1,8 @@
 import { createClient } from "../../../utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "../../../../db/config";
+import { chats } from "../../../../db/schema";
+import { eq, and } from "drizzle-orm";
 
 export async function GET(
   _request: NextRequest,
@@ -15,25 +18,23 @@ export async function GET(
   }
 
   try {
-    const { data, error } = await supabase
-      .from("chats")
-      .select("messages")
-      .eq("id", chatId)
-      .eq("user_id", user!.user!.id)
-      .single();
+    const data = await db
+      .select({
+        messages: chats.messages,
+      })
+      .from(chats)
+      .where(and(eq(chats.id, chatId), eq(chats.userId, user!.user!.id)))
+      .limit(1);
 
-    if (error?.code === "PGRST116") {
+    if (!data || data.length === 0) {
       return NextResponse.json([]);
-    }
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     if (!data) {
       return NextResponse.json({ error: "Chat not found" }, { status: 404 });
     }
 
-    return NextResponse.json(data.messages); // returns an array of messages
+    return NextResponse.json(data[0].messages); // returns an array of messages
   } catch (error) {
     console.error("Error fetching chat:", error);
     return NextResponse.json(

@@ -1,6 +1,6 @@
 import { embed, embedMany } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { createClient } from "../utils/supabase/server";
+import { createClient } from "./supabase/client";
 
 const embeddingModel = openai.embedding("text-embedding-3-small");
 
@@ -49,58 +49,43 @@ export const generateEmbedding = async (value: string): Promise<number[]> => {
 interface DatabaseChunk {
   chunk: string;
   embedding: number[];
+  [key: string]: unknown;
 }
 
 export const findRelevantContent = async (
   userId: string,
   question: string
 ): Promise<DatabaseChunk[]> => {
-  const supabase = await createClient();
-  const questionEmbedding = await generateEmbedding(question);
+  try {
+    const questionEmbedding = await generateEmbedding(question);
 
-  //   -- First, create a function that only returns documents for a user
-  // CREATE OR REPLACE FUNCTION get_user_documents(
-  //   user_id text  -- Using text to match what we pass from TypeScript
-  // )
-  // RETURNS SETOF documents
-  // LANGUAGE sql SECURITY DEFINER
-  // AS $$
-  //   SELECT *
-  //   FROM documents
-  //   WHERE documents.user_id = user_id::uuid  -- Cast text to uuid
-  // $$;
+    // Create Supabase client
+    const supabase = await createClient();
 
-  // -- Then keep the match_documents function using the user_documents
-  // CREATE OR REPLACE FUNCTION match_documents (
-  //   query_embedding vector(512),
-  //   match_threshold float,
-  //   match_count int,
-  //   user_id text  -- Using text to match what we pass from TypeScript
-  // )
-  // RETURNS SETOF documents
-  // LANGUAGE sql SECURITY DEFINER
-  // AS $$
-  //   -- First get the user's documents using our new function
-  //   WITH user_docs AS (
-  //     SELECT * FROM get_user_documents(user_id)
-  //   )
-  //   SELECT *
-  //   FROM user_docs
-  //   WHERE user_docs.embedding <=> query_embedding < 1 - match_threshold
-  //   ORDER BY user_docs.embedding <=> query_embedding ASC
-  //   LIMIT least(match_count, 200);
-  // $$;
-  const { data: relevantChunks, error } = await supabase.rpc(
-    "match_documents",
-    {
-      query_embedding: questionEmbedding,
-      match_threshold: 0.2,
-      match_count: 200,
-      user_id: userId,
+    // Use Supabase RPC for vector similarity search
+    const { data: relevantChunks, error } = await supabase.rpc(
+      "match_documents",
+      {
+        query_embedding: questionEmbedding,
+        user_id: userId,
+        match_threshold: 0.1, // Adjust threshold as needed
+        match_count: 500, // Maximum number of matches to return
+      }
+    );
+
+    if (error) {
+      console.error("Error in vector search:", error);
+      throw new Error(`Vector search failed: ${error.message}`);
     }
-  );
 
-  if (error) throw error;
+    if (!relevantChunks || relevantChunks.length === 0) {
+      console.log("No relevant content found");
+      return [];
+    }
 
-  return relevantChunks;
+    return relevantChunks as DatabaseChunk[];
+  } catch (error) {
+    console.error("Error finding relevant content:", error);
+    throw error;
+  }
 };

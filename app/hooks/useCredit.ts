@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createClient } from "../utils/supabase/client";
 import { Credit } from "../hooks/useUserCredit";
 
 export function useCredit(userId: string) {
@@ -12,15 +11,24 @@ export function useCredit(userId: string) {
   } = useQuery<Credit | null>({
     queryKey: ["credit", userId],
     queryFn: async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("credits")
-        .select()
-        .eq("user_id", userId)
-        .single();
-
-      if (error) throw error;
-      return data as Credit;
+      try {
+        // Call the API endpoint to get credit information
+        const response = await fetch(`/api/credits`);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            // No credit found for this user
+            return null;
+          }
+          throw new Error(`Error fetching credit: ${response.statusText}`);
+        }
+        
+        // Return the credit data
+        return await response.json();
+      } catch (err) {
+        console.error("Error fetching credit:", err);
+        throw err;
+      }
     },
     enabled: !!userId,
     retry: 1,
@@ -29,16 +37,26 @@ export function useCredit(userId: string) {
 
   const updateCredit = useMutation<number, Error, number>({
     mutationFn: async (newBalance: number) => {
-      const supabase = createClient();
-      const { error, data } = await supabase
-        .from("credits")
-        .update({ balance: newBalance })
-        .eq("user_id", userId)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data?.balance || newBalance;
+      try {
+        // Call the API endpoint to update credit balance
+        const response = await fetch(`/api/credits/update`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ newBalance }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error updating credit: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        return data.balance;
+      } catch (err) {
+        console.error("Error updating credit:", err);
+        throw err;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["credit", userId] });
