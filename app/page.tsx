@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { FeatureCard } from "./components/FeatureCard";
 import { TestimonialCard } from "./components/TestimonialCard";
 import MainLayout from "./components/MainLayout";
@@ -29,8 +28,6 @@ const itemVariants = {
 };
 
 export default function Home() {
-  const router = useRouter();
-
   return (
     <MainLayout>
       <video
