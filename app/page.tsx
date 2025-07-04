@@ -62,8 +62,7 @@ export default function Home() {
             variants={itemVariants}
             className="text-xl text-gray-300 font-medium leading-relaxed max-w-3xl mx-auto"
           >
-            Transform your documents into intelligent knowledge bases with our
-            RAG-powered AI toolkit.
+            Transform your documents into intelligent knowledge bases with AI
           </motion.p>
           <section className="relative z-10">
             <motion.div
