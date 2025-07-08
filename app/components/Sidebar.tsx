@@ -98,7 +98,7 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
 
       <div className="text-xs border-t border-zinc-700 pt-4 mt-4">
         <div className="flex items-center gap-2">
-          <span className="text-sm">Knowledge Credits:</span>
+          <span className="text-sm">Credits:</span>
           {creditLoading ? (
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
           ) : (

@@ -2,7 +2,7 @@ import { embed, embedMany } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { createClient } from "./supabase/client";
 
-const embeddingModel = openai.embedding("text-embedding-3-small");
+const embeddingModel = openai.embedding("text-embedding-3-large");
 
 const cleanText = (input: string): string => {
   return input

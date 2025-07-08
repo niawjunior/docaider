@@ -29,6 +29,7 @@ interface DocumentUploadProps {
     document_id: string;
     document_name: string;
   }[];
+  isDeleteLoading?: boolean;
 }
 
 export default function DocumentUpload({
@@ -36,6 +37,7 @@ export default function DocumentUpload({
   onDelete,
   onClose,
   documents,
+  isDeleteLoading,
 }: DocumentUploadProps) {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -133,13 +135,13 @@ export default function DocumentUpload({
           </div>
           <div className="space-y-2">
             <Label htmlFor="file">
-              Supported file types: PDF, CSV, TXT, DOCX
+              Supported file types: PDF, CSV, DOC, DOCX
             </Label>
             <div className="relative w-full">
               <Input
                 id="file"
                 type="file"
-                accept=".pdf,.csv,.txt,.docx"
+                accept=".pdf,.csv,.doc,.docx"
                 onChange={handleFileChange}
                 disabled={isUploading}
               />
@@ -165,7 +167,11 @@ export default function DocumentUpload({
             <span className="text-xs text-gray-500">1 credit</span>
           </Button>
         </form>
-        <DocumentsList documents={documents} onDelete={handleDelete} />
+        <DocumentsList
+          documents={documents}
+          onDelete={handleDelete}
+          isDeleteLoading={isDeleteLoading}
+        />
       </CardContent>
     </Card>
   );

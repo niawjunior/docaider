@@ -5,6 +5,8 @@ import { createClient } from "../supabase/server";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { v4 as uuidv4 } from "uuid";
 import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
+import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
+
 import { db } from "../../../db/config";
 import { documents } from "../../../db/schema";
 
@@ -47,6 +49,10 @@ const fileLoader = (file: File) => {
       return pdfLoader(file);
     case "csv":
       return csvLoader(file);
+    case "doc":
+      return docLoader(file);
+    case "docx":
+      return docxLoader(file);
     default:
       throw new Error("Unsupported file type");
   }
@@ -70,6 +76,24 @@ const csvLoader = async (file: File) => {
   return text;
 };
 
+const docLoader = async (file: File) => {
+  const loader = new DocxLoader(file, {
+    type: "doc",
+  });
+  const docs = await loader.load();
+  const text = docs.map((doc) => doc.pageContent).join("\n");
+  return text;
+};
+
+const docxLoader = async (file: File) => {
+  const loader = new DocxLoader(file, {
+    type: "docx",
+  });
+  const docs = await loader.load();
+  const text = docs.map((doc) => doc.pageContent).join("\n");
+  return text;
+};
+
 export async function processFile(
   file: File,
   title: string,
@@ -78,7 +102,7 @@ export async function processFile(
   fileName?: string
 ): Promise<DocumentChunk[]> {
   try {
-    // Parse PDF
+    // Parse file
     const data = await fileLoader(file);
 
     // Normalize and clean the text
@@ -107,9 +131,8 @@ export async function processFile(
       });
     // Split text into chunks with better context
     const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 500, // Maximum characters per chunk
-      chunkOverlap: 50, // Overlap between chunks to maintain context
-      separators: ["\n\n", "\n", "。", "。", "，", "，"], // Try to split at paragraphs, then lines, then Thai punctuation
+      chunkSize: 100, // Maximum characters per chunk
+      chunkOverlap: 0, // Overlap between chunks to maintain context
     });
     const chunks = await splitter.createDocuments([thaiNormalizedText]);
     // Filter out any empty chunks
@@ -135,7 +158,7 @@ export async function processFile(
     const embeddings: number[][] = await Promise.all(
       validChunks.map(async (chunkText) => {
         const { embedding } = await embed({
-          model: openai.embedding("text-embedding-3-small"),
+          model: openai.embedding("text-embedding-3-large"),
           value: chunkText,
         });
         return embedding;
@@ -153,12 +176,12 @@ export async function processFile(
       try {
         await db.insert(documents).values({
           title,
-          chunk: documentChunks[i].chunk.replace(/\u0000/g, ""),
+          chunk: documentChunks[i].chunk,
           embedding: documentChunks[i].embedding,
           userId: userId,
           documentId: documentId,
           documentName: fileName,
-          active: true
+          active: true,
         });
       } catch (error) {
         console.error("Error inserting document with Drizzle:", error);

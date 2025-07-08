@@ -51,20 +51,18 @@ const toolIcons = {
 interface ChatFormProps {
   chatId?: string;
   initialMessages?: Message[];
+  suggestedPrompts: { title: string; subtitle: string }[];
 }
 
-interface UploadedImage {
-  url: string;
-  file: File;
-  isUploading: boolean;
-  uploadProgress: number;
-  publicUrl?: string;
-}
-
-export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
+export default function ChatForm({
+  chatId,
+  initialMessages,
+  suggestedPrompts,
+}: ChatFormProps) {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCreateShareLoading, setIsCreateShareLoading] = useState(false);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const { shareData, error: shareError, refresh } = useShareUrl(chatId!);
   const queryClient = useQueryClient();
   const [isDesktop, setIsDesktop] = useState(false);
@@ -126,33 +124,6 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     }
   };
 
-  const suggestedPrompts = [
-    {
-      title: "Tell me about the document",
-      subtitle: "Specific question about the document",
-    },
-    {
-      title: "What is the author of the document?",
-      subtitle: "Specific question about the document",
-    },
-    {
-      title: "What is the title of the document?",
-      subtitle: "Specific question about the document",
-    },
-    {
-      title: "How to write a book?",
-      subtitle: "General question",
-    },
-    {
-      title: "What is the capital of Thailand?",
-      subtitle: "General question",
-    },
-    {
-      title: "What is the population of Thailand?",
-      subtitle: "General question",
-    },
-  ];
-
   useEffect(() => {
     // Focus on load
     textareaRef.current?.focus();
@@ -174,19 +145,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
       chatId,
       currentTool,
     },
-    async onToolCall({ toolCall }) {
-      // // Check if user has credits data and enough credits
-      // if (
-      //   !credit ||
-      //   credit.balance === undefined ||
-      //   credit.balance < tool.creditCost
-      // ) {
-      //   toast.error(
-      //     `Not enough credits. You need ${tool.creditCost} credits for this action.`
-      //   );
-      //   return;
-      // }
-    },
+    async onToolCall({ toolCall }) {},
     onFinish: async (response) => {
       const totalCreditCost = response.toolInvocations?.length;
 
@@ -346,6 +305,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
     document_name: string;
   }) => {
     // Call the deleteDocument mutation from the useDocuments hook
+    setIsDeleteLoading(true);
     deleteDocument.mutate(
       {
         documentId: doc.document_id,
@@ -357,6 +317,15 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
           setDocuments((prev) =>
             prev.filter((d) => d.document_id !== doc.document_id)
           );
+        },
+        onError: () => {
+          toast("Error deleting document", {
+            duration: 5000,
+            description: "Failed to delete your document. Please try again.",
+          });
+        },
+        onSettled: () => {
+          setIsDeleteLoading(false);
         },
       }
     );
@@ -679,6 +648,7 @@ export default function ChatForm({ chatId, initialMessages }: ChatFormProps) {
                     fetchDocuments();
                   }}
                   documents={documents}
+                  isDeleteLoading={isDeleteLoading}
                 />
               </DialogContent>
             </Dialog>

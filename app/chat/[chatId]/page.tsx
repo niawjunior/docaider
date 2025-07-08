@@ -21,12 +21,42 @@ export default function ChatPage() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  const suggestedPrompts = [
+    {
+      title: "Tell me about the document",
+      subtitle: "Specific question about the document",
+    },
+    {
+      title: "What is the author of the document?",
+      subtitle: "Specific question about the document",
+    },
+    {
+      title: "What is the title of the document?",
+      subtitle: "Specific question about the document",
+    },
+    {
+      title: "How to write a book?",
+      subtitle: "General question",
+    },
+    {
+      title: "What is the capital of Thailand?",
+      subtitle: "General question",
+    },
+    {
+      title: "What is the population of Thailand?",
+      subtitle: "General question",
+    },
+  ];
   return isLoading ? (
     <GlobalLoader />
   ) : (
     <div>
       <Layout chatId={chatId as string} isLoading={isLoading}>
-        <ChatForm initialMessages={messages} chatId={chatId as string} />
+        <ChatForm
+          initialMessages={messages}
+          chatId={chatId as string}
+          suggestedPrompts={suggestedPrompts}
+        />
       </Layout>
     </div>
   );

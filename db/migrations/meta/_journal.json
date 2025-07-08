@@ -8,6 +8,13 @@
       "when": 1751545146139,
       "tag": "0000_natural_obadiah_stane",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1751947959969,
+      "tag": "0001_bored_patriot",
+      "breakpoints": true
     }
   ]
 }

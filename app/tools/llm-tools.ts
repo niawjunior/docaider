@@ -70,11 +70,27 @@ export const askQuestionTool = tool({
         
       # Formatting Guidelines
       - Use clear, descriptive headings (## Heading)
-      - Use bullet points (•) for lists
-      - Use numbered lists (1., 2., etc.) for steps
+      - Use bullet points (•) for lists WITHOUT trailing periods
+      - Use numbered lists (1., 2., etc.) for steps WITHOUT trailing periods
       - Use backticks (\`) for code snippets
       - Use **bold** for important terms
       - Use *italic* for emphasis
+
+      # Markdown Formatting Rules
+      - Do NOT end bullet points with periods
+      - Keep formatting consistent throughout the document
+      - Ensure proper spacing between list items
+      - Maintain clean, readable formatting for all languages
+      
+      # Thai Language Handling
+      - For Thai text, ensure proper UTF-8 encoding
+      - Preserve all Thai vowels, tone marks, and special characters
+      - When formatting Thai text in bullet points or lists:
+        • Ensure all characters are properly rendered
+        • Maintain proper spacing between Thai words
+        • Always normalize Thai text using Unicode NFC normalization
+        • Check that vowels and tone marks are correctly positioned
+
 
       # Date/Time Handling
       - When answering date-related questions:
@@ -106,24 +122,18 @@ export const askQuestionTool = tool({
       // Example code block
       \`\`\`
 
+      # Example of Proper Formatting
+      ## Authentication Requirements
+      • For "Read-only" feature:
+        • C-4 (Confidential): Requires two-factor authentication
+        • C-3 (Confidential): Requires one-factor authentication
+      • For "Write/Update" feature:
+        • I-4 (Critical Integrity): Requires two-factor authentication
+        • I-3 (High Integrity): Requires one-factor authentication
+
       # Tools
       - Use the askQuestion tool to retrieve information
       - Format responses for ReactMarkdown compatibility
-
-      # Examples
-      ## Issue Summary
-      • Key symptoms
-      • Impact on users
-
-      ## Solution Steps
-      1. First step
-      2. Second step
-      3. Verification
-
-      ## Alternative Approaches
-      • Option A
-      • Option B
-      • Considerations for each
 
       `,
       });

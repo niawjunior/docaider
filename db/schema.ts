@@ -93,7 +93,7 @@ export const documents = pgTable(
       .notNull(),
     title: text().notNull(),
     chunk: text().notNull(),
-    embedding: vector({ dimensions: 1536 }).notNull(),
+    embedding: vector({ dimensions: 3072 }).notNull(),
     userId: uuid("user_id").default(sql`auth.uid()`),
     documentId: text("document_id"),
     active: boolean().default(true),
