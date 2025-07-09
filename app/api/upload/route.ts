@@ -1,4 +1,5 @@
 import { uploadFile } from "@/app/utils/file/fileProcessor";
+import { checkDuplicateTitle } from "@/app/utils/file/checkDuplicateTitle";
 import { NextRequest } from "next/server";
 import { createClient } from "@/app/utils/supabase/server";
 import { db } from "../../../db/config";
@@ -27,6 +28,20 @@ export async function POST(req: NextRequest) {
         JSON.stringify({ error: "File and title are required" }),
         {
           status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+    
+    // Check if a document with the same title already exists for this user
+    const isDuplicate = await checkDuplicateTitle(title, user.id);
+    if (isDuplicate) {
+      return new Response(
+        JSON.stringify({ 
+          error: "A document with this title already exists. Please use a different title." 
+        }),
+        {
+          status: 409, // Conflict status code
           headers: { "Content-Type": "application/json" },
         }
       );

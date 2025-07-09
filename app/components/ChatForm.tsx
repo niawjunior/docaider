@@ -91,40 +91,6 @@ export default function ChatForm({
     },
   ];
 
-  const handleDocumentUpload = async (file: File, title: string) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("title", title);
-
-    try {
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (!response.ok) {
-        toast("Error uploading document", {
-          duration: 5000,
-          description: "Failed to upload document. Please try again.",
-        });
-      } else {
-        toast("Document uploaded successfully", {
-          duration: 5000,
-          description: "You have used 1 credit.",
-        });
-
-        // refresh credit
-        await queryClient.invalidateQueries({
-          queryKey: ["credit", session?.user?.id],
-        });
-      }
-    } catch {
-      toast("Error uploading document", {
-        duration: 5000,
-        description: "Failed to upload document. Please try again.",
-      });
-    }
-  };
-
   useEffect(() => {
     // Focus on load
     textareaRef.current?.focus();
@@ -391,7 +357,7 @@ export default function ChatForm({
           e.preventDefault();
         }}
         className={clsx(
-          "flex flex-col items-center gap-4 md:h-[calc(100dvh-60px)] md:mt-0 mt-[50px] justify-center h-[calc(100dvh-100px)] overflow-y-auto scroll-hidden"
+          "flex flex-col items-center gap-4 md:h-[calc(100dvh-20px)] md:mt-0 mt-[50px] justify-center h-[calc(100dvh-100px)] overflow-y-auto scroll-hidden"
         )}
       >
         {messages.length === 0 && (
@@ -621,7 +587,7 @@ export default function ChatForm({
                   <IoArrowDownSharp />
                 </button>
               )}
-              <div className="flex items-center gap-3 w-full relative">
+              <div className="flex items-center flex-col gap-3 w-full relative">
                 <Textarea
                   value={input}
                   ref={textareaRef}
@@ -633,6 +599,9 @@ export default function ChatForm({
                   onKeyDown={handleKeyDown}
                   className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
                 />
+                <div className=" text-muted-foreground text-sm">
+                  Docaider can make mistakes. Check important info.
+                </div>
               </div>
             </div>
 
@@ -642,7 +611,6 @@ export default function ChatForm({
                   <DialogTitle>Manage Knowledge Base </DialogTitle>
                 </DialogHeader>
                 <DocumentUpload
-                  onUpload={handleDocumentUpload}
                   onDelete={handleDeleteDocument}
                   onClose={() => {
                     setIsPdfModalOpen(false);

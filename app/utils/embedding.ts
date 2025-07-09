@@ -96,7 +96,7 @@ export const findRelevantContent = async (
         query_embedding: questionEmbedding,
         user_id: userId,
         match_threshold: 0.1, // Adjust threshold as needed
-        match_count: 500, // Maximum number of matches to return
+        match_count: 1000, // Maximum number of matches to return
         ...(documentIds &&
           documentIds.length > 0 && {
             document_ids: documentIds.map((d) => d.document_id),
