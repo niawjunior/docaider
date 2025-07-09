@@ -4,16 +4,18 @@ import { openai } from "@ai-sdk/openai";
 import { NextRequest } from "next/server";
 
 import { createClient } from "../../utils/supabase/server";
-import {
-  askQuestionTool,
-} from "@/app/tools/llm-tools";
+import { askQuestionTool } from "@/app/tools/llm-tools";
 import { db } from "../../../db/config";
 import { credits, documents, chats } from "../../../db/schema";
 import { eq, and } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
-  const { messages, chatId, currentTool } = await req.json();
+  const { messages, chatId, currentTool } = (await req.json()) as {
+    messages: any[];
+    chatId: string;
+    currentTool: string;
+  };
 
   // Get the user from the request
 
@@ -40,15 +42,10 @@ export async function POST(req: NextRequest) {
     .select({
       documentId: documents.documentId,
       documentName: documents.documentName,
-      title: documents.title
+      title: documents.title,
     })
     .from(documents)
-    .where(
-      and(
-        eq(documents.userId, user.id),
-        eq(documents.active, true)
-      )
-    );
+    .where(and(eq(documents.userId, user.id), eq(documents.active, true)));
 
   // Define proper types for document data
   type DocumentData = {
@@ -59,18 +56,17 @@ export async function POST(req: NextRequest) {
 
   // Filter out documents with null documentId and create a map for deduplication
   const documentMap = new Map<string, DocumentData>();
-  
+
   // Only add documents with non-null documentId to the map
-  allDocuments.forEach(doc => {
+  allDocuments.forEach((doc) => {
     if (doc.documentId) {
       // If this documentId isn't in the map yet or we want to replace an existing entry
       documentMap.set(doc.documentId, doc);
     }
   });
-  
+
   // Convert the map values to an array for our unique documents
   const uniqueDocuments = Array.from(documentMap.values());
-
   // Get tools
   const tools = {
     askQuestion: askQuestionTool,
@@ -82,7 +78,11 @@ export async function POST(req: NextRequest) {
   const result = streamText({
     model: openai("gpt-4o-mini"),
     toolChoice:
-      creditData.length === 0 || creditData[0].balance <= 0 ? "none" : currentTool ? "required" : "auto",
+      creditData.length === 0 || creditData[0].balance <= 0
+        ? "none"
+        : currentTool
+        ? "required"
+        : "auto",
     maxSteps: 1,
     tools,
     system: `
@@ -95,7 +95,15 @@ export async function POST(req: NextRequest) {
     5.  **Current tool**: ${currentTool ? currentTool : "not specified"}
     6.  If current tool is not null, use it.
     ‼️ **IMPORTANT Tool Usage Rules**:
-    * **Document Questions (askQuestion)**: If the user asks about a document AND the 'askQuestion' tool is enabled AND documents are uploaded, you **MUST** call the \`askQuestion\` tool. Do NOT provide a generic response or suggest enabling tools if all conditions are met.
+    ** Current document count: ${uniqueDocuments.length} **
+    ** Documents Name:  ${
+      uniqueDocuments.length > 0
+        ? uniqueDocuments
+            .map((doc: { title: string } | undefined) => doc?.title)
+            .join(", ")
+        : "No documents uploaded."
+    } **
+    * **Document Questions (askQuestion)**: If the user asks about a document AND the 'askQuestion' tool is enabled AND documents are uploaded, you **MUST** call the \`askQuestion\` tool.Do NOT provide a generic response or suggest enabling tools if all conditions are met.
     * **Tool Unavailability**: If you cannot call a tool due to specific conditions, respond with the exact reason from the options below:
         * "No documents uploaded."
         * "You don't have enough credit."
@@ -116,7 +124,9 @@ export async function POST(req: NextRequest) {
     -   Current document count: ${uniqueDocuments.length}
     -   Documents Name:  ${
       uniqueDocuments.length > 0
-        ? uniqueDocuments.map((doc: { title: string } | undefined) => doc?.title).join(", ")
+        ? uniqueDocuments
+            .map((doc: { title: string } | undefined) => doc?.title)
+            .join(", ")
         : "No documents uploaded."
     }
     -   If a document-related tool is requested but document count is 0, politely inform the user: "No documents uploaded."
@@ -225,12 +235,15 @@ export async function POST(req: NextRequest) {
       if (totalCreditCost > 0) {
         // Update credit using Drizzle ORM
         if (creditData.length > 0) {
-          const newBalance = Math.max(0, creditData[0].balance - totalCreditCost);
+          const newBalance = Math.max(
+            0,
+            creditData[0].balance - totalCreditCost
+          );
           await db
             .update(credits)
             .set({
               balance: newBalance,
-              updatedAt: new Date().toISOString()
+              updatedAt: new Date().toISOString(),
             })
             .where(eq(credits.userId, user.id));
         }
@@ -265,13 +278,13 @@ export async function POST(req: NextRequest) {
           id: chatId,
           messages: finalMessages,
           userId: user.id,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         })
         .onConflictDoUpdate({
           target: chats.id,
           set: {
-            messages: finalMessages
-          }
+            messages: finalMessages,
+          },
         });
     },
 

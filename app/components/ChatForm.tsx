@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Markdown from "./Markdown";
 import { useDocuments } from "../hooks/useDocuments";
+import { Badge } from "@/components/ui/badge";
 
 const toolIcons = {
   askQuestion: <FaQuestion />,

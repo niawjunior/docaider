@@ -1,25 +1,29 @@
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
-import { FaFilePdf } from "react-icons/fa";
+import { FaEye } from "react-icons/fa";
+
+interface Document {
+  title: string;
+  url: string;
+  id: string;
+  document_id: string;
+  document_name: string;
+  created_at: string;
+}
 
 interface DocumentsListProps {
-  documents?: {
-    created_at: string;
+  documents: Document[];
+  onDelete: (doc: {
+    title: string;
     url: string;
     id: string;
     document_id: string;
     document_name: string;
-    title: string;
-  }[];
-  onDelete?: (doc: {
-    url: string;
-    id: string;
-    document_id: string;
-    document_name: string;
-    title: string;
   }) => Promise<void>;
   isDeleteLoading?: boolean;
+  onSelectDocuments?: (selectedDocs: Document[]) => void;
+  selectedDocuments?: Document[];
 }
 
 const DocumentsList = ({
@@ -58,38 +62,47 @@ const DocumentsList = ({
             your knowledge repository.
           </p>
         ) : (
-          documents?.map((doc) => (
-            <div
-              key={doc.document_name}
-              className="flex items-center justify-between p-2 bg-muted rounded-md"
-            >
-              <div>
-                <p className="text-sm font-medium">{doc.title}</p>
-                <p className="text-xs text-muted-foreground">
-                  Added to knowledge base:{" "}
-                  {new Date(doc.created_at).toLocaleDateString()}
-                </p>
+          documents?.map((doc) => {
+            return (
+              <div
+                key={doc.document_name}
+                className={`flex items-center justify-between p-2 rounded-md`}
+              >
+                <div className="flex items-center gap-2">
+                  <div>
+                    <p className="text-sm font-medium">{doc.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Added: {new Date(doc.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(doc.url, "_blank");
+                    }}
+                    disabled={loading || isDeleteLoading}
+                  >
+                    <FaEye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(doc);
+                    }}
+                    disabled={loading || isDeleteLoading}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={loading}
-                  onClick={() => window.open(doc.url, "_blank")}
-                >
-                  <FaFilePdf className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleDelete(doc)}
-                  disabled={loading || isDeleteLoading}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

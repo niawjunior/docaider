@@ -24,8 +24,11 @@ export const askQuestionTool = tool({
     language: z
       .string()
       .describe("The language to ask the question. Example: en, th"),
+    selectedDocumentNames: z
+      .array(z.string())
+      .describe("Always ask for document names to filter the search"),
   }),
-  execute: async ({ question, language }) => {
+  execute: async ({ question, language, selectedDocumentNames }) => {
     try {
       const supabase = await createClient();
       const { data: user } = await supabase.auth.getUser();
@@ -35,7 +38,11 @@ export const askQuestionTool = tool({
       }
 
       // Get relevant chunks using our utility function
-      const relevantChunks = await findRelevantContent(user.user.id, question);
+      const relevantChunks = await findRelevantContent(
+        user.user.id,
+        question,
+        selectedDocumentNames
+      );
 
       if (!relevantChunks || relevantChunks.length === 0) {
         return "No relevant documents found for this question.";

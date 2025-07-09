@@ -1,6 +1,9 @@
 import { embed, embedMany } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { createClient } from "./supabase/client";
+import { db } from "../../db/config";
+import { documents } from "../../db/schema";
+import { eq, and, inArray } from "drizzle-orm";
 
 const embeddingModel = openai.embedding("text-embedding-3-large");
 
@@ -54,7 +57,8 @@ interface DatabaseChunk {
 
 export const findRelevantContent = async (
   userId: string,
-  question: string
+  question: string,
+  selectedDocumentNames?: string[]
 ): Promise<DatabaseChunk[]> => {
   try {
     const questionEmbedding = await generateEmbedding(question);
@@ -62,14 +66,41 @@ export const findRelevantContent = async (
     // Create Supabase client
     const supabase = await createClient();
 
+    // Get document_id from document_name using Drizzle ORM
+    let documentIds: { document_id: string | null }[] = [];
+
+    if (selectedDocumentNames && selectedDocumentNames.length > 0) {
+      documentIds = await db
+        .select({ document_id: documents.documentId })
+        .from(documents)
+        .where(
+          and(
+            eq(documents.userId, userId),
+            eq(documents.active, true),
+            inArray(documents.title, selectedDocumentNames)
+          )
+        );
+
+      if (documentIds.length === 0) {
+        console.log("No matching documents found for the selected names");
+        return [];
+      }
+    }
+
     // Use Supabase RPC for vector similarity search
     const { data: relevantChunks, error } = await supabase.rpc(
-      "match_documents",
+      documentIds && documentIds.length > 0
+        ? "match_selected_documents"
+        : "match_documents",
       {
         query_embedding: questionEmbedding,
         user_id: userId,
         match_threshold: 0.1, // Adjust threshold as needed
         match_count: 500, // Maximum number of matches to return
+        ...(documentIds &&
+          documentIds.length > 0 && {
+            document_ids: documentIds.map((d) => d.document_id),
+          }),
       }
     );
 

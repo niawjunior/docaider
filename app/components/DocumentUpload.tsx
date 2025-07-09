@@ -11,7 +11,7 @@ import { formatBytes } from "../utils/formatBytes";
 import { useCredit } from "../hooks/useCredit";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 
-interface DocumentUploadProps {
+export interface DocumentUploadProps {
   onUpload: (file: File, title: string) => Promise<void>;
   onDelete: (doc: {
     title: string;
@@ -20,16 +20,34 @@ interface DocumentUploadProps {
     document_id: string;
     document_name: string;
   }) => Promise<void>;
-  onClose: () => void;
-  documents?: {
+  onClose?: () => void;
+  onSelectDocuments?: (
+    selectedDocs: {
+      title: string;
+      url: string;
+      id: string;
+      document_id: string;
+      document_name: string;
+      created_at: string;
+    }[]
+  ) => void;
+  documents: {
     title: string;
-    created_at: string;
     url: string;
     id: string;
     document_id: string;
     document_name: string;
+    created_at: string;
   }[];
   isDeleteLoading?: boolean;
+  selectedDocuments?: {
+    title: string;
+    url: string;
+    id: string;
+    document_id: string;
+    document_name: string;
+    created_at: string;
+  }[];
 }
 
 export default function DocumentUpload({
@@ -43,9 +61,9 @@ export default function DocumentUpload({
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [fileSizeError, setFileSizeError] = useState<string | null>(null);
-  const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
   const { session } = useSupabaseSession();
   const { credit } = useCredit(session?.user?.id || "");
+  const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +75,9 @@ export default function DocumentUpload({
       setTitle("");
       setFile(null);
 
-      onClose();
+      if (onClose) {
+        onClose();
+      }
     } catch (error) {
       console.error("Error uploading document:", error);
     } finally {
