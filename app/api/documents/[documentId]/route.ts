@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/app/utils/supabase/server";
 import { db } from "@/db/config";
-import { documents } from "@/db/schema";
+import { documents, documentChunks } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 /**
@@ -41,8 +41,27 @@ export async function DELETE(
       );
     }
 
+    // get document from database using Drizzle ORM
+    const [document] = await db
+      .select()
+      .from(documents)
+      .where(eq(documents.documentId, documentId));
+
+    if (!document) {
+      return NextResponse.json(
+        { error: "Document not found" },
+        { status: 404 }
+      );
+    }
+
     // 2. Delete document from database using Drizzle ORM
     await db.delete(documents).where(eq(documents.documentId, documentId));
+
+    // 3. Delete document chunks from database using Drizzle ORM
+
+    await db
+      .delete(documentChunks)
+      .where(eq(documentChunks.documentId, String(document.id)));
 
     return NextResponse.json({ success: true });
   } catch (error) {

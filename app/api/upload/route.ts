@@ -2,9 +2,6 @@ import { uploadFile } from "@/app/utils/file/fileProcessor";
 import { checkDuplicateTitle } from "@/app/utils/file/checkDuplicateTitle";
 import { NextRequest } from "next/server";
 import { createClient } from "@/app/utils/supabase/server";
-import { db } from "../../../db/config";
-import { credits } from "../../../db/schema";
-import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -23,6 +20,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("file");
     const title = formData.get("title") as string;
+    const isKnowledgeBase = formData.get("isKnowledgeBase") === "true";
     if (!file || !(file instanceof Blob) || !title) {
       return new Response(
         JSON.stringify({ error: "File and title are required" }),
@@ -32,13 +30,14 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-    
+
     // Check if a document with the same title already exists for this user
-    const isDuplicate = await checkDuplicateTitle(title, user.id);
+    const isDuplicate = await checkDuplicateTitle(title, user.id, isKnowledgeBase);
     if (isDuplicate) {
       return new Response(
-        JSON.stringify({ 
-          error: "A document with this title already exists. Please use a different title." 
+        JSON.stringify({
+          error:
+            "A document with this title already exists. Please use a different title.",
         }),
         {
           status: 409, // Conflict status code
@@ -54,30 +53,9 @@ export async function POST(req: NextRequest) {
     });
     const userId = user?.id;
 
-    const result = await uploadFile(nodeFile, title, userId);
+    const result = await uploadFile(nodeFile, title, userId, isKnowledgeBase);
 
-    // Get user credit using Drizzle ORM
-    const creditData = await db.select({ balance: credits.balance })
-      .from(credits)
-      .where(eq(credits.userId, user.id))
-      .limit(1);
-      
-    if (creditData.length === 0) {
-      return new Response(JSON.stringify({ error: "Credit not found" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-    
-    // Update credit using Drizzle ORM
-    await db.update(credits)
-      .set({ 
-        balance: creditData[0].balance - 1,
-        updatedAt: new Date().toISOString()
-      })
-      .where(eq(credits.userId, user.id));
-
-    return new Response(JSON.stringify({ success: true, message: result }), {
+    return new Response(JSON.stringify(result), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });

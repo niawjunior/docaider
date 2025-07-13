@@ -1,0 +1,1 @@
+ALTER TABLE "document_chunks" ADD COLUMN "user_id" uuid DEFAULT auth.uid();

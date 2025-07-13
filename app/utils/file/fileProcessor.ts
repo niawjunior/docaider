@@ -8,7 +8,7 @@ import { Document } from "@langchain/core/documents";
 import { OpenAIEmbeddings } from "@langchain/openai";
 
 import { db } from "../../../db/config";
-import { documents } from "../../../db/schema";
+import { documentChunks, documents } from "../../../db/schema";
 
 export interface DocumentChunk {
   chunk: string;
@@ -66,7 +66,8 @@ export async function processFile(
   title: string,
   userId?: string,
   documentId?: string,
-  fileName?: string
+  fileName?: string,
+  isKnowledgeBase = false
 ): Promise<Document[]> {
   try {
     // Parse file
@@ -87,20 +88,41 @@ export async function processFile(
       chunks.map((d) => d.pageContent)
     );
 
-    // Use Drizzle ORM to insert documents
+    // First, insert the main document record
+    let mainDocumentId;
+    try {
+      const result = await db
+        .insert(documents)
+        .values({
+          title,
+          documentName: fileName,
+          documentId: documentId, // This is the knowledge base ID if applicable
+          userId,
+          isKnowledgeBase,
+          active: true,
+        })
+        .returning({ insertedId: documents.id });
+
+      mainDocumentId = result[0].insertedId;
+      console.log("Inserted main document with ID:", mainDocumentId);
+    } catch (error) {
+      console.error("Error inserting main document:", error);
+      throw new Error("Failed to insert main document record");
+    }
+
+    // Then insert all chunks referencing the main document
     for (let i = 0; i < chunks.length; i++) {
       try {
-        await db.insert(documents).values({
-          title,
+        await db.insert(documentChunks).values({
+          documentId: mainDocumentId.toString(), // Reference to the main document
           chunk: chunks[i].pageContent,
           embedding: chunkEmbeddings[i],
-          userId: userId,
-          documentId: documentId,
-          documentName: fileName,
+          userId,
           active: true,
+          isKnowledgeBase,
         });
       } catch (error) {
-        console.error("Error inserting document with Drizzle:", error);
+        console.error("Error inserting document chunk with Drizzle:", error);
         throw new Error(`Failed to insert chunk ${i + 1}`);
       }
     }
@@ -115,8 +137,9 @@ export async function processFile(
 export async function uploadFile(
   file: File,
   title: string,
-  userId?: string
-): Promise<string> {
+  userId?: string,
+  isKnowledgeBase = false
+): Promise<{ success: boolean; message: string; documentId: string }> {
   try {
     const supabase = await createClient();
     // Encode the filename to handle special characters
@@ -139,9 +162,25 @@ export async function uploadFile(
       throw new Error(`Storage upload error: ${storageError.message}`);
     }
 
-    await processFile(file, title, userId, storageData.id, fileName);
-    return "File uploaded and processed successfully";
+    await processFile(
+      file,
+      title,
+      userId,
+      storageData.id,
+      fileName,
+      isKnowledgeBase
+    );
+    return {
+      success: true,
+      message: "File uploaded and processed successfully",
+      documentId: storageData.id,
+    };
   } catch (error) {
-    throw error;
+    console.error("Error uploading file:", error);
+    return {
+      success: false,
+      message: "Failed to upload file",
+      documentId: "",
+    };
   }
 }

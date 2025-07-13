@@ -13,11 +13,12 @@ export const askQuestionTool = tool({
   - Any question related to the content of uploaded documents.
   - Retrieving specific information from your knowledge base.
 
+  - If current document count is more than 1, you **MUST** Ask user to specify the document name to filter the search.
   🧠 **Behavior**:
-  - **You MUST call this tool** if the user asks a document-related question, this tool is enabled, and documents are uploaded.
   - Only respond to questions using information directly from tool calls.
   - If no relevant information is found, respond with "No relevant documents found for this question."
   - Responses will be formatted using markdown, including headings, bullet points, and chronological order for date/time questions.
+  - **Always ask for document names to filter the search**.
   `,
   parameters: z.object({
     question: z.string().describe("Question to ask about the documents"),
@@ -26,7 +27,7 @@ export const askQuestionTool = tool({
       .describe("The language to ask the question. Example: en, th"),
     selectedDocumentNames: z
       .array(z.string())
-      .describe("Always ask for document names to filter the search"),
+      .describe("Must ask for document names to filter the search"),
   }),
   execute: async ({ question, language, selectedDocumentNames }) => {
     try {

@@ -1,9 +1,37 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FeatureCard } from "./components/FeatureCard";
 import { TestimonialCard } from "./components/TestimonialCard";
 import MainLayout from "./components/MainLayout";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Loader2, ArrowRight, Database } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { formatDistanceToNow } from "date-fns";
+
+interface KnowledgeBase {
+  id: string;
+  name: string;
+  description: string;
+  isPublic: boolean;
+  userId: string;
+  documentCount: number;
+  createdAt: string;
+  updatedAt: string;
+  profiles: {
+    fullName: string | null;
+    avatarUrl: string | null;
+  } | null;
+}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -28,6 +56,29 @@ const itemVariants = {
 };
 
 export default function Home() {
+  const [publicKnowledgeBases, setPublicKnowledgeBases] = useState<
+    KnowledgeBase[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    async function fetchPublicKnowledgeBases() {
+      try {
+        const response = await fetch("/api/knowledge-base?public=true");
+        if (response.ok) {
+          const data = await response.json();
+          setPublicKnowledgeBases(data.knowledgeBases);
+        }
+      } catch (error) {
+        console.error("Error fetching public knowledge bases:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchPublicKnowledgeBases();
+  }, []);
   return (
     <MainLayout>
       <video
@@ -147,6 +198,80 @@ export default function Home() {
         <section className="relative z-10 py-8">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
+              Public Knowledge Bases
+            </h2>
+            <p className="text-xl text-gray-400 text-center mb-8 max-w-2xl mx-auto">
+              Explore public knowledge bases created by our community.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {isLoading ? (
+                <div className="col-span-full flex justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : publicKnowledgeBases.length > 0 ? (
+                publicKnowledgeBases.slice(0, 6).map((kb) => (
+                  <Card
+                    key={kb.id}
+                    className="overflow-hidden border-gray-800 bg-gray-950/50 backdrop-blur-sm hover:bg-gray-900/50 transition-colors"
+                  >
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-xl font-bold truncate">
+                        {kb.name}
+                      </CardTitle>
+                      <CardDescription className="text-gray-400">
+                        {kb.documentCount} document
+                        {kb.documentCount !== 1 ? "s" : ""}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-300 line-clamp-2">
+                        {kb.description || "No description provided."}
+                      </p>
+                    </CardContent>
+                    <CardFooter className="flex justify-between items-center pt-2 border-t border-gray-800">
+                      <div className="text-xs text-gray-400">
+                        Updated {formatDistanceToNow(new Date(kb.updatedAt))}{" "}
+                        ago
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => router.push(`/knowledge/${kb.id}`)}
+                      >
+                        Explore <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12 border border-dashed border-gray-700 rounded-lg">
+                  <Database className="h-12 w-12 mx-auto text-gray-600 mb-4" />
+                  <h3 className="text-xl font-medium text-gray-300 mb-2">
+                    No public knowledge bases yet
+                  </h3>
+                  <p className="text-gray-400 mb-4">
+                    Be the first to create and share a knowledge base!
+                  </p>
+                  <Button onClick={() => router.push("/dashboard")}>
+                    Go to Dashboard
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {publicKnowledgeBases.length > 0 && (
+              <div className="flex justify-center">
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/dashboard?tab=public")}
+                >
+                  View All Public Knowledge Bases
+                </Button>
+              </div>
+            )}
+
+            <h2 className="text-3xl md:text-4xl font-bold text-white text-center mt-16 mb-4">
               Trusted by Professionals
             </h2>
             <p className="text-xl text-gray-400 text-center mb-12 max-w-2xl mx-auto">

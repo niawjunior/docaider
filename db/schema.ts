@@ -83,21 +83,51 @@ export const chats = pgTable("chats", {
   userId: uuid("user_id").default(sql`auth.uid()`),
 });
 
-export const documents = pgTable(
-  "documents",
+// Main documents table - stores unique document metadata
+export const documents = pgTable("documents", {
+  id: bigint({ mode: "number" })
+    .generatedByDefaultAsIdentity()
+    .primaryKey()
+    .notNull(),
+  title: text().notNull(),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+    mode: "string",
+  }).default(sql`timezone('utc'::text, now())`),
+  updatedAt: timestamp("updated_at", {
+    withTimezone: true,
+    mode: "string",
+  }).default(sql`timezone('utc'::text, now())`),
+  // Keep the original documentId field for backward compatibility
+  documentId: text("document_id"),
+  userId: uuid("user_id").default(sql`auth.uid()`),
+  documentName: text("document_name"),
+  isKnowledgeBase: boolean("is_knowledge_base").default(false),
+  active: boolean().default(true),
+});
+
+// Document chunks table - stores individual chunks with embeddings
+export const documentChunks = pgTable(
+  "document_chunks",
   {
-    // You can use { mode: "bigint" } if numbers are exceeding js number limitations
     id: bigint({ mode: "number" })
       .generatedByDefaultAsIdentity()
       .primaryKey()
       .notNull(),
-    title: text().notNull(),
+    documentId: text("document_id").notNull(),
+    userId: uuid("user_id").default(sql`auth.uid()`),
     chunk: text().notNull(),
     embedding: vector({ dimensions: 3072 }).notNull(),
-    userId: uuid("user_id").default(sql`auth.uid()`),
-    documentId: text("document_id"),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    }).default(sql`timezone('utc'::text, now())`),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "string",
+    }).default(sql`timezone('utc'::text, now())`),
     active: boolean().default(true),
-    documentName: text("document_name"),
+    isKnowledgeBase: boolean("is_knowledge_base").default(false),
   },
   () => [
     pgPolicy("Users can read their own active documents", {
@@ -198,6 +228,60 @@ export const chatShares = pgTable(
       as: "permissive",
       for: "select",
       to: ["public"],
+    }),
+  ]
+);
+
+export const knowledgeBases = pgTable(
+  "knowledge_bases",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    name: text().notNull(),
+    description: text(),
+    isPublic: boolean("is_public").default(false),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    }).default(sql`timezone('utc'::text, now())`),
+    documentIds: text("document_ids").array(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "string",
+    }).default(sql`timezone('utc'::text, now())`),
+  },
+  () => [
+    pgPolicy("Users can view their own knowledge bases", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+    pgPolicy("Anyone can view public knowledge bases", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(is_public = true)`,
+    }),
+    pgPolicy("Users can insert their own knowledge bases", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(auth.uid() = user_id)`,
+    }),
+    pgPolicy("Users can update their own knowledge bases", {
+      as: "permissive",
+      for: "update",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+    pgPolicy("Users can delete their own knowledge bases", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
     }),
   ]
 );

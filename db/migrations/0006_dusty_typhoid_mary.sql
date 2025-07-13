@@ -1,0 +1,2 @@
+ALTER TABLE "documents" ADD COLUMN "created_at" timestamp with time zone DEFAULT timezone('utc'::text, now());--> statement-breakpoint
+ALTER TABLE "documents" ADD COLUMN "updated_at" timestamp with time zone DEFAULT timezone('utc'::text, now());

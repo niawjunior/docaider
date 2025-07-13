@@ -72,6 +72,7 @@ export default function ChatForm({
     {
       title: string;
       created_at: string;
+      updated_at: string;
       url: string;
       id: string;
       document_id: string;
@@ -218,7 +219,8 @@ export default function ChatForm({
       const { data: documents, error } = await supabase
         .from("documents")
         .select("*")
-        .eq("user_id", user.user.id);
+        .eq("user_id", user.user.id)
+        .eq("is_knowledge_base", false);
 
       if (error) throw error;
 
@@ -245,6 +247,7 @@ export default function ChatForm({
             id: doc.id,
             document_id: doc.document_id,
             document_name: doc.document_name,
+            updated_at: doc.updated_at || new Date().toISOString(),
           };
         })
       );
@@ -618,6 +621,7 @@ export default function ChatForm({
                   }}
                   documents={documents}
                   isDeleteLoading={isDeleteLoading}
+                  isShowDocumentList={true}
                 />
               </DialogContent>
             </Dialog>

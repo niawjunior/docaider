@@ -7,9 +7,10 @@ interface Document {
   title: string;
   url: string;
   id: string;
-  document_id: string;
-  document_name: string;
-  created_at: string;
+  documentId: string;
+  documentName: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface DocumentsListProps {
@@ -18,8 +19,10 @@ interface DocumentsListProps {
     title: string;
     url: string;
     id: string;
-    document_id: string;
-    document_name: string;
+    documentId: string;
+    documentName: string;
+    createdAt: string;
+    updatedAt: string;
   }) => Promise<void>;
   isDeleteLoading?: boolean;
   onSelectDocuments?: (selectedDocs: Document[]) => void;
@@ -37,8 +40,10 @@ const DocumentsList = ({
     title: string;
     url: string;
     id: string;
-    document_id: string;
-    document_name: string;
+    documentId: string;
+    documentName: string;
+    createdAt: string;
+    updatedAt: string;
   }) => {
     if (!onDelete) return;
 
@@ -65,14 +70,14 @@ const DocumentsList = ({
           documents?.map((doc) => {
             return (
               <div
-                key={doc.document_name}
+                key={doc.documentName}
                 className={`flex items-center justify-between p-2 rounded-md`}
               >
                 <div className="flex items-center gap-2">
                   <div>
                     <p className="text-sm font-medium">{doc.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      Added: {new Date(doc.created_at).toLocaleDateString()}
+                      Added: {new Date(doc.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>

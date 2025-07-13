@@ -67,11 +67,11 @@ export const findRelevantContent = async (
     const supabase = await createClient();
 
     // Get document_id from document_name using Drizzle ORM
-    let documentIds: { document_id: string | null }[] = [];
+    let documentIds: { id: number | null }[] = [];
 
     if (selectedDocumentNames && selectedDocumentNames.length > 0) {
       documentIds = await db
-        .select({ document_id: documents.documentId })
+        .select({ id: documents.id })
         .from(documents)
         .where(
           and(
@@ -86,12 +86,12 @@ export const findRelevantContent = async (
         return [];
       }
     }
-
+    console.log("documentIds", documentIds);
     // Use Supabase RPC for vector similarity search
     const { data: relevantChunks, error } = await supabase.rpc(
       documentIds && documentIds.length > 0
-        ? "match_selected_documents"
-        : "match_documents",
+        ? "match_selected_document_chunks"
+        : "match_document_chunks",
       {
         query_embedding: questionEmbedding,
         user_id: userId,
@@ -99,7 +99,7 @@ export const findRelevantContent = async (
         match_count: 1000, // Maximum number of matches to return
         ...(documentIds &&
           documentIds.length > 0 && {
-            document_ids: documentIds.map((d) => d.document_id),
+            document_ids: documentIds.map((d) => d.id),
           }),
       }
     );

@@ -33,7 +33,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
             <>
               <Button
                 variant="ghost"
-                onClick={() => router.push("/chat")}
+                onClick={() => router.push("/dashboard")}
                 className="text-sm p-2"
               >
                 Dashboard

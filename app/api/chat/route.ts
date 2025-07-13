@@ -37,18 +37,27 @@ export async function POST(req: NextRequest) {
     .where(eq(credits.userId, user.id))
     .limit(1);
 
-  // Get documents using Drizzle ORM
+  // Get documents using Drizzle ORM - only get main document metadata, not chunks
   const allDocuments = await db
     .select({
+      id: documents.id,
       documentId: documents.documentId,
       documentName: documents.documentName,
       title: documents.title,
     })
     .from(documents)
-    .where(and(eq(documents.userId, user.id), eq(documents.active, true)));
+    .where(
+      and(
+        eq(documents.userId, user.id),
+        eq(documents.active, true),
+        eq(documents.isKnowledgeBase, false)
+      )
+    )
+    .orderBy(documents.updatedAt);
 
   // Define proper types for document data
   type DocumentData = {
+    id: number;
     documentId: string | null;
     documentName: string | null;
     title: string;
@@ -103,7 +112,7 @@ export async function POST(req: NextRequest) {
             .join(", ")
         : "No documents uploaded."
     } **
-    * **Document Questions (askQuestion)**: If the user asks about a document AND the 'askQuestion' tool is enabled AND documents are uploaded, you **MUST** call the \`askQuestion\` tool.Do NOT provide a generic response or suggest enabling tools if all conditions are met.
+    * **Document Questions (askQuestion)**: If the user asks about a document AND documents are uploaded, you **MUST** call the \`askQuestion\` tool.Do NOT provide a generic response or suggest enabling tools if all conditions are met.
     * **Tool Unavailability**: If you cannot call a tool due to specific conditions, respond with the exact reason from the options below:
         * "No documents uploaded."
         * "You don't have enough credit."
@@ -122,6 +131,8 @@ export async function POST(req: NextRequest) {
     **Knowledge Management**:
     -   For questions about uploaded documents, use the \`askQuestion\` tool.
     -   Current document count: ${uniqueDocuments.length}
+    -   **If current document count is more than 1, you **MUST** Ask user to specify the document name to filter the search.**
+    -   * Always ask the user to specify the language to ask the question. Example: en, th*
     -   Documents Name:  ${
       uniqueDocuments.length > 0
         ? uniqueDocuments
