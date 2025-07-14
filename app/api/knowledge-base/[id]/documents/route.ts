@@ -56,6 +56,7 @@ export async function GET(
         isKnowledgeBase: documents.isKnowledgeBase,
         createdAt: documents.createdAt,
         updatedAt: documents.updatedAt,
+        url: documents.url,
       })
       .from(documents)
       .where(inArray(documents.documentId, knowledgeBase.documentIds))

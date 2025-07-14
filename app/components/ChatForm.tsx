@@ -71,12 +71,12 @@ export default function ChatForm({
   const [documents, setDocuments] = useState<
     {
       title: string;
-      created_at: string;
-      updated_at: string;
       url: string;
       id: string;
-      document_id: string;
-      document_name: string;
+      documentId: string;
+      documentName: string;
+      createdAt: string;
+      updatedAt: string;
     }[]
   >([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -233,26 +233,7 @@ export default function ChatForm({
         }
       });
 
-      // Get public URLs for each file
-      const documentsWithUrls = await Promise.all(
-        Array.from(grouped.values()).map(async (doc: any) => {
-          const { data: publicUrl } = await supabase.storage
-            .from("documents")
-            .getPublicUrl(`user_${user.user.id}/${doc.document_name}`);
-
-          return {
-            title: doc.title,
-            created_at: doc.created_at || new Date().toISOString(),
-            url: publicUrl.publicUrl,
-            id: doc.id,
-            document_id: doc.document_id,
-            document_name: doc.document_name,
-            updated_at: doc.updated_at || new Date().toISOString(),
-          };
-        })
-      );
-
-      setDocuments(documentsWithUrls);
+      setDocuments(documents);
     } catch (error) {
       console.error("Error fetching documents:", error);
       toast("Error fetching documents", {
@@ -271,21 +252,23 @@ export default function ChatForm({
     title: string;
     url: string;
     id: string;
-    document_id: string;
-    document_name: string;
+    documentId: string;
+    documentName: string;
+    createdAt: string;
+    updatedAt: string;
   }) => {
     // Call the deleteDocument mutation from the useDocuments hook
     setIsDeleteLoading(true);
     deleteDocument.mutate(
       {
-        documentId: doc.document_id,
-        documentName: doc.document_name,
+        documentId: doc.documentId,
+        documentName: doc.documentName,
       },
       {
         onSuccess: () => {
           // Update local state after successful deletion
           setDocuments((prev) =>
-            prev.filter((d) => d.document_id !== doc.document_id)
+            prev.filter((d) => d.documentId !== doc.documentId)
           );
         },
         onError: () => {

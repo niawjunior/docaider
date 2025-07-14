@@ -100,6 +100,7 @@ export const documents = pgTable("documents", {
   }).default(sql`timezone('utc'::text, now())`),
   // Keep the original documentId field for backward compatibility
   documentId: text("document_id"),
+  url: text("url"),
   userId: uuid("user_id").default(sql`auth.uid()`),
   documentName: text("document_name"),
   isKnowledgeBase: boolean("is_knowledge_base").default(false),

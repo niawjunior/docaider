@@ -9,10 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Save, ArrowLeft, Trash2 } from "lucide-react";
+import { Loader2, Save, ArrowLeft, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import DocumentUpload from "@/app/components/DocumentUpload";
 import { useDocuments } from "@/app/hooks/useDocuments";
+import GlobalLoader from "@/app/components/GlobalLoader";
+import Link from "next/link";
 
 interface Document {
   title: string;
@@ -31,9 +33,11 @@ export default function EditKnowledgeBasePage() {
   const [isPublic, setIsPublic] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
+    null
+  );
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
-  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   const { deleteDocument } = useDocuments();
 
   useEffect(() => {
@@ -156,9 +160,8 @@ export default function EditKnowledgeBasePage() {
   };
 
   const handleDeleteDocument = async (doc: Document) => {
+    setSelectedDocument(doc);
     // Call the deleteDocument mutation from the useDocuments hook
-    setIsDeleteLoading(true);
-    console.log("doc", doc);
     deleteDocument.mutate(
       {
         documentId: doc.documentId,
@@ -180,21 +183,26 @@ export default function EditKnowledgeBasePage() {
             }
 
             const knowledgeBaseData = await getResponse.json();
+            console.log("knowledgeBaseData in delete:", knowledgeBaseData);
             // Filter out the deleted document ID
-            const currentDocIds = knowledgeBaseData.documentIds || [];
+            const currentDocIds =
+              knowledgeBaseData.knowledgeBase.documentIds || [];
             const updatedDocIds = currentDocIds.filter(
               (id: string) => id !== doc.documentId
             );
+            console.log("updatedDocIds:", updatedDocIds);
 
             // Update the knowledge base with the filtered documentIds
             await updateKnowledgeBaseDocumentIds(updatedDocIds);
-            setIsDeleteLoading(false);
+            setSelectedDocument(null);
           } catch (error) {
+            setSelectedDocument(null);
             console.error("Error updating knowledge base documentIds:", error);
             toast("Document was deleted but failed to update knowledge base");
           }
         },
         onError: () => {
+          setSelectedDocument(null);
           toast("Error deleting document", {
             duration: 5000,
             description: "Failed to delete your document. Please try again.",
@@ -232,11 +240,7 @@ export default function EditKnowledgeBasePage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto py-8 px-4 flex justify-center items-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
+    return <GlobalLoader />;
   }
 
   return (
@@ -316,8 +320,12 @@ export default function EditKnowledgeBasePage() {
         <div className="lg:col-span-2">
           <Tabs defaultValue="current">
             <TabsList className="mb-4 w-full">
-              <TabsTrigger value="current">Current Documents</TabsTrigger>
-              <TabsTrigger value="upload">Upload New Document</TabsTrigger>
+              <TabsTrigger disabled={deleteDocument.isPending} value="current">
+                Current Documents
+              </TabsTrigger>
+              <TabsTrigger disabled={deleteDocument.isPending} value="upload">
+                Upload New Document
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="current">
@@ -342,16 +350,31 @@ export default function EditKnowledgeBasePage() {
                               {new Date(doc.updatedAt).toLocaleDateString()}
                             </p>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteDocument(doc)}
-                          >
-                            {isDeleteLoading && (
-                              <Loader2 size={16} className="animate-spin" />
-                            )}
-                            {!isDeleteLoading && <Trash2 size={16} />}
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Link
+                              target="_blank"
+                              href={doc.url}
+                              className="cursor-pointer"
+                            >
+                              <Button variant="ghost" size="icon">
+                                <Eye size={16} />
+                              </Button>
+                            </Link>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteDocument(doc)}
+                              disabled={deleteDocument.isPending}
+                            >
+                              {deleteDocument.isPending &&
+                                selectedDocument?.id === doc.id && (
+                                  <Loader2 size={16} className="animate-spin" />
+                                )}
+                              {selectedDocument?.id !== doc.id && (
+                                <Trash2 size={16} />
+                              )}
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -364,7 +387,7 @@ export default function EditKnowledgeBasePage() {
                 onDelete={handleDeleteDocument}
                 onFinish={handleFinishUpload}
                 documents={documents}
-                isDeleteLoading={isDeleteLoading}
+                isDeleteLoading={deleteDocument.isPending}
                 isKnowledgeBase={true}
               />
             </TabsContent>

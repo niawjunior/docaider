@@ -67,7 +67,8 @@ export async function processFile(
   userId?: string,
   documentId?: string,
   fileName?: string,
-  isKnowledgeBase = false
+  isKnowledgeBase = false,
+  publicUrl?: string
 ): Promise<Document[]> {
   try {
     // Parse file
@@ -100,6 +101,7 @@ export async function processFile(
           userId,
           isKnowledgeBase,
           active: true,
+          url: publicUrl,
         })
         .returning({ insertedId: documents.id });
 
@@ -158,9 +160,13 @@ export async function uploadFile(
         upsert: false,
       });
 
+    const publicUrl = `${
+      process.env.NEXT_PUBLIC_SUPABASE_URL
+    }/storage/v1/object/public/${storageData!.fullPath}`;
     if (storageError) {
       throw new Error(`Storage upload error: ${storageError.message}`);
     }
+    console.log(storageData.fullPath);
 
     await processFile(
       file,
@@ -168,7 +174,8 @@ export async function uploadFile(
       userId,
       storageData.id,
       fileName,
-      isKnowledgeBase
+      isKnowledgeBase,
+      publicUrl
     );
     return {
       success: true,

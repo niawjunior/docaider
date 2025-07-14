@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Eye, Edit, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/app/utils/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -19,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import GlobalLoader from "./GlobalLoader";
 
 interface KnowledgeBase {
   id: string;
@@ -109,26 +109,7 @@ export default function KnowledgeBaseList({
   }
 
   if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[...Array(6)].map((_, i) => (
-          <Card key={i} className="overflow-hidden">
-            <CardContent className="p-6">
-              <Skeleton className="h-6 w-3/4 mb-4" />
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-2/3" />
-            </CardContent>
-            <CardFooter className="flex justify-between p-6 pt-0">
-              <Skeleton className="h-9 w-20" />
-              <div className="flex gap-2">
-                <Skeleton className="h-9 w-9" />
-                <Skeleton className="h-9 w-9" />
-              </div>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
-    );
+    return <GlobalLoader />;
   }
 
   if (knowledgeBases.length === 0) {

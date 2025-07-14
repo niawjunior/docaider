@@ -1,1 +1,0 @@
-ALTER TABLE "document_chunks" ALTER COLUMN "document_id" SET DATA TYPE text;

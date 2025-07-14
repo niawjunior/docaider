@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 /**
  * Custom hook for document operations
- * @returns Object with document operations
+ * @returns Object with document operations and loading states
  */
 export const useDocuments = () => {
   const queryClient = useQueryClient();

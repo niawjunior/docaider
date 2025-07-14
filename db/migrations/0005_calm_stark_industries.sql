@@ -1,1 +1,0 @@
-ALTER TABLE "documents" ADD COLUMN "is_knowledge_base" boolean DEFAULT false;

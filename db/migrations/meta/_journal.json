@@ -5,71 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1751545146139,
-      "tag": "0000_natural_obadiah_stane",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1751947959969,
-      "tag": "0001_bored_patriot",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1752057497450,
-      "tag": "0002_lovely_queen_noir",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1752395424130,
-      "tag": "0003_romantic_jackal",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1752396799289,
-      "tag": "0004_quiet_forgotten_one",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1752398683822,
-      "tag": "0005_calm_stark_industries",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1752402810864,
-      "tag": "0006_dusty_typhoid_mary",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1752407143521,
-      "tag": "0007_wealthy_the_fury",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1752407811441,
-      "tag": "0008_shiny_toxin",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1752408225039,
-      "tag": "0009_optimal_firedrake",
+      "when": 1752463492119,
+      "tag": "0000_faithful_vertigo",
       "breakpoints": true
     }
   ]
