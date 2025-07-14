@@ -16,6 +16,7 @@ import { useDocuments } from "@/app/hooks/useDocuments";
 import GlobalLoader from "@/app/components/GlobalLoader";
 import Link from "next/link";
 import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Document {
   title: string;
@@ -28,53 +29,40 @@ interface Document {
 }
 
 export default function EditKnowledgeBasePage() {
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(false);
-  const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
-    null
-  );
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
   const { deleteDocument } = useDocuments();
-
   const kbHooks = useKnowledgeBases();
+  const queryClient = useQueryClient();
+  const [currentTab, setCurrentTab] = useState("current");
 
   // Use the new React Query hooks for fetching knowledge base and its documents
   const {
     data: knowledgeBase,
     isLoading: isLoadingKB,
     error: kbError,
-  } = kbHooks.useKnowledgeBaseById(params.id as string);
+  } = kbHooks.useKnowledgeBaseById(params.id);
 
   const {
     data: kbDocuments,
     isLoading: isLoadingDocs,
     error: docsError,
-  } = kbHooks.useKnowledgeBaseDocuments(params.id as string);
+  } = kbHooks.useKnowledgeBaseDocuments(params.id);
 
-  // Set local state when data is loaded
   useEffect(() => {
     if (knowledgeBase) {
       setName(knowledgeBase.name);
       setDescription(knowledgeBase.description || "");
-      console.log("knowledgeBase", knowledgeBase);
       setIsPublic(knowledgeBase.isPublic);
     }
   }, [knowledgeBase]);
 
-  // Set documents when they're loaded
-  useEffect(() => {
-    if (kbDocuments) {
-      setDocuments(kbDocuments);
-    }
-  }, [kbDocuments]);
-
-  // Handle errors
   useEffect(() => {
     if (kbError) {
       console.error("Error fetching knowledge base:", kbError);
@@ -108,7 +96,7 @@ export default function EditKnowledgeBasePage() {
         description,
         isPublic,
       });
-      
+
       // Note: The toast and query invalidation are handled in the mutation's onSuccess callback
     } catch (error) {
       // Error handling is done in the mutation's onError callback
@@ -119,7 +107,7 @@ export default function EditKnowledgeBasePage() {
   }
 
   /**
-   * Updates the knowledge base with the provided documentIds array
+   * Update the knowledge base's document IDs
    * @param documentIds The updated array of document IDs
    * @returns Promise that resolves when the update is complete
    */
@@ -141,6 +129,11 @@ export default function EditKnowledgeBasePage() {
       kbHooks.getKnowledgeBases.refetch();
       kbHooks.getPublicKnowledgeBases.refetch();
 
+      // Invalidate the knowledge base documents query to trigger a refetch
+      queryClient.invalidateQueries({
+        queryKey: ["knowledgeBaseDocuments", params.id],
+      });
+
       return response.json();
     } catch (error) {
       console.error("Error updating knowledge base document IDs:", error);
@@ -149,7 +142,6 @@ export default function EditKnowledgeBasePage() {
   };
 
   const handleDeleteDocument = async (doc: Document) => {
-    setSelectedDocument(doc);
     // Call the deleteDocument mutation from the useDocuments hook
     deleteDocument.mutate(
       {
@@ -159,11 +151,6 @@ export default function EditKnowledgeBasePage() {
       {
         onSuccess: async () => {
           try {
-            // Update local state after successful deletion
-            setDocuments((prev) =>
-              prev.filter((d) => d.documentId !== doc.documentId)
-            );
-
             // Filter out the deleted document ID
             const currentDocIds = knowledgeBase?.document_ids || [];
             const updatedDocIds = currentDocIds.filter(
@@ -172,15 +159,12 @@ export default function EditKnowledgeBasePage() {
 
             // Update the knowledge base with the filtered documentIds
             await updateKnowledgeBaseDocumentIds(updatedDocIds);
-            setSelectedDocument(null);
           } catch (error) {
-            setSelectedDocument(null);
             console.error("Error updating knowledge base documentIds:", error);
             toast("Document was deleted but failed to update knowledge base");
           }
         },
         onError: () => {
-          setSelectedDocument(null);
           toast("Error deleting document", {
             duration: 5000,
             description: "Failed to delete your document. Please try again.",
@@ -204,9 +188,10 @@ export default function EditKnowledgeBasePage() {
       // Refetch knowledge base lists in dashboard
       kbHooks.getKnowledgeBases.refetch();
       kbHooks.getPublicKnowledgeBases.refetch();
-
       // The refetchDocuments() call is already in updateKnowledgeBaseDocumentIds
       toast("Document added to knowledge base successfully");
+      setCurrentTab("current");
+      console.log("currentTab", currentTab);
     } catch (error) {
       console.error("Error updating knowledge base:", error);
       toast("Failed to update knowledge base");
@@ -292,7 +277,7 @@ export default function EditKnowledgeBasePage() {
         </div>
 
         <div className="lg:col-span-2">
-          <Tabs defaultValue="current">
+          <Tabs value={currentTab} onValueChange={setCurrentTab}>
             <TabsList className="mb-4 w-full">
               <TabsTrigger
                 disabled={deleteDocument.isPending || isUploading}
@@ -311,14 +296,14 @@ export default function EditKnowledgeBasePage() {
             <TabsContent value="current">
               <Card>
                 <CardContent>
-                  {documents.length === 0 ? (
+                  {kbDocuments.length === 0 ? (
                     <p className="text-center text-muted-foreground py-8">
                       No documents in this knowledge base yet. Add documents
                       from the &quot;Add Documents&quot; tab.
                     </p>
                   ) : (
                     <div className="space-y-2">
-                      {documents.map((doc) => (
+                      {kbDocuments.map((doc: Document) => (
                         <div
                           key={doc.id}
                           className="flex items-center justify-between p-3 border rounded-md"
@@ -346,13 +331,7 @@ export default function EditKnowledgeBasePage() {
                               onClick={() => handleDeleteDocument(doc)}
                               disabled={deleteDocument.isPending}
                             >
-                              {deleteDocument.isPending &&
-                                selectedDocument?.id === doc.id && (
-                                  <Loader2 size={16} className="animate-spin" />
-                                )}
-                              {selectedDocument?.id !== doc.id && (
-                                <Trash2 size={16} />
-                              )}
+                              <Trash2 size={16} />
                             </Button>
                           </div>
                         </div>
@@ -367,7 +346,7 @@ export default function EditKnowledgeBasePage() {
                 onDelete={handleDeleteDocument}
                 onFinish={handleFinishUpload}
                 onUpload={(isUploading) => setIsUploading(isUploading)}
-                documents={documents}
+                documents={kbDocuments}
                 isDeleteLoading={deleteDocument.isPending}
                 isKnowledgeBase={true}
               />

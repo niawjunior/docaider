@@ -52,6 +52,7 @@ export const useDocumentUpload = () => {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["knowledgeBase"] });
       queryClient.invalidateQueries({ queryKey: ["knowledgeBases"] });
+      queryClient.invalidateQueries({ queryKey: ["knowledgeBaseDocuments"] });
 
       toast("Document uploaded successfully", {
         duration: 3000,
