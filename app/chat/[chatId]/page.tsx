@@ -52,11 +52,15 @@ export default function ChatPage() {
   ) : (
     <div>
       <Layout chatId={chatId as string} isLoading={isLoading}>
-        <ChatForm
-          initialMessages={messages}
-          chatId={chatId as string}
-          suggestedPrompts={suggestedPrompts}
-        />
+        <div className="flex justify-center  items-center min-h-screen">
+          <ChatForm
+            initialMessages={messages}
+            chatId={chatId as string}
+            suggestedPrompts={suggestedPrompts}
+            isShowTool={true}
+            isKnowledgeBase={false}
+          />
+        </div>
       </Layout>
     </div>
   );

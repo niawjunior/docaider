@@ -115,15 +115,13 @@ export default function KnowledgeBaseList({
                     </Button>
                   </>
                 )}
-                {kb.is_public && (
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => router.push(`/knowledge/${kb.id}`)}
-                  >
-                    <Eye size={16} />
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => router.push(`/knowledge/${kb.id}`)}
+                >
+                  <Eye size={16} />
+                </Button>
               </div>
             </CardFooter>
           </Card>

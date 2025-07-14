@@ -1,14 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, ArrowLeft, Send, Edit, Share2, Copy } from "lucide-react";
-import useSupabaseSession from "@/app/hooks/useSupabaseSession";
-import { formatDistanceToNow } from "date-fns";
+import { ArrowLeft, Edit, Share2, Copy } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,162 +16,96 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
+import GlobalLoader from "@/app/components/GlobalLoader";
+import useSupabaseSession from "@/app/hooks/useSupabaseSession";
+import { formatDistanceToNow } from "date-fns";
+import ChatForm from "@/app/components/ChatForm";
+// Type definitions are inferred from React Query hooks
 
-interface KnowledgeBase {
-  id: string;
-  name: string;
-  description: string;
-  isPublic: boolean;
-  userId: string;
-  documentCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Document {
-  id: number;
-  title: string;
-  fileType: string;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-  status: string;
-}
-
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
-
-export default function ViewKnowledgeBasePage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase | null>(
-    null
-  );
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isAsking, setIsAsking] = useState(false);
+export default function ViewKnowledgeBasePage() {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const { session } = useSupabaseSession();
   const router = useRouter();
+  const params = useParams<{ id: string; chatId: string }>();
+  const kbHooks = useKnowledgeBases();
+  console.log(params.id, params.chatId);
 
-  const fetchKnowledgeBaseDocuments = useCallback(async () => {
-    console.log("fetchKnowledgeBaseDocuments", params.id);
-    try {
-      const response = await fetch(
-        `/api/knowledge-base/${params.id}/documents`
-      );
+  const suggestedPrompts = [
+    {
+      title: "Tell me about the document",
+    },
+    {
+      title: "What is the author of the document?",
+    },
+    {
+      title: "What is the title of the document?",
+    },
+    {
+      title: "Summarize the document",
+    },
+  ];
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch knowledge base documents");
-      }
+  interface Document {
+    id: number;
+    title: string;
+    fileType: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    status: string;
+  }
+  // Use React Query hooks for fetching knowledge base and its documents
+  const {
+    data: knowledgeBase,
+    isLoading: isLoadingKB,
+    error: kbError,
+  } = kbHooks.useKnowledgeBaseById(params.id);
 
-      const data = await response.json();
-      setDocuments(data.documents);
-    } catch (error) {
-      console.error("Error fetching knowledge base documents:", error);
-      toast("Failed to fetch knowledge base documents");
-    }
-  }, [params.id]);
+  const {
+    data: documents,
+    isLoading: isLoadingDocs,
+    error: docsError,
+  } = kbHooks.useKnowledgeBaseDocuments(params.id);
 
-  const fetchKnowledgeBase = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/knowledge-base/${params.id}`);
+  // Handle errors
+  useEffect(() => {
+    if (kbError) {
+      console.error("Error fetching knowledge base:", kbError);
+      toast("Failed to fetch knowledge base");
 
-      if (!response.ok) {
-        if (response.status === 404) {
+      // Check if the error is due to 404 or 401
+      if (kbError instanceof Error) {
+        if (kbError.message.includes("404")) {
           toast("Knowledge base not found");
           router.push("/dashboard");
-          return;
-        }
-
-        if (response.status === 401) {
+        } else if (kbError.message.includes("401")) {
           toast("Unauthorized");
           router.push("/dashboard");
-          return;
         }
-
-        throw new Error("Failed to fetch knowledge base");
       }
-
-      const data = await response.json();
-      setKnowledgeBase(data.knowledgeBase);
-
-      // Fetch documents in the knowledge base
-      fetchKnowledgeBaseDocuments();
-    } catch (error) {
-      console.error("Error fetching knowledge base:", error);
-      toast("Failed to fetch knowledge base");
-    } finally {
-      setIsLoading(false);
     }
-  }, [params.id, router, fetchKnowledgeBaseDocuments]);
+  }, [kbError, router]);
 
   useEffect(() => {
-    fetchKnowledgeBase();
-    // Generate share URL when component mounts
+    if (docsError) {
+      console.error("Error fetching knowledge base documents:", docsError);
+      toast("Failed to fetch knowledge base documents");
+    }
+  }, [docsError]);
+
+  // Generate share URL when component mounts
+  useEffect(() => {
     const baseUrl = window.location.origin;
     setShareUrl(`${baseUrl}/knowledge/${params.id}`);
-  }, [params.id, fetchKnowledgeBase]);
+  }, [params.id]);
 
-  const handleAskQuestion = useCallback(async () => {
-    if (!question.trim()) return;
-
-    const userQuestion = question.trim();
-    setQuestion("");
-    setMessages((prev) => [...prev, { role: "user", content: userQuestion }]);
-    setIsAsking(true);
-
-    try {
-      const response = await fetch("/api/knowledge-base/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          question: userQuestion,
-          knowledgeBaseId: params.id,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to get answer");
-      }
-
-      const data = await response.json();
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.answer },
-      ]);
-    } catch (error) {
-      console.error("Error asking question:", error);
-      toast("Failed to get an answer. Please try again.");
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "I'm sorry, I encountered an error while processing your question. Please try again.",
-        },
-      ]);
-    } finally {
-      setIsAsking(false);
-    }
-  }, [params.id, question, toast]);
+  // Determine if we're still loading
+  const isLoading = isLoadingKB || isLoadingDocs;
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto py-8 px-4 flex justify-center items-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
+    return <GlobalLoader />;
   }
 
   if (!knowledgeBase) {
@@ -260,7 +191,7 @@ export default function ViewKnowledgeBasePage({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 flex flex-col gap-2">
           <Card>
             <CardHeader>
               <CardTitle>About this Knowledge Base</CardTitle>
@@ -280,7 +211,7 @@ export default function ViewKnowledgeBasePage({
                 <div className="border-t pt-4">
                   <h3 className="font-medium mb-2">Documents</h3>
                   <ul className="space-y-1 text-sm">
-                    {documents.map((doc) => (
+                    {documents.map((doc: Document) => (
                       <li key={doc.id} className="truncate">
                         • {doc.title}
                       </li>
@@ -290,6 +221,11 @@ export default function ViewKnowledgeBasePage({
               </div>
             </CardContent>
           </Card>
+          <Card>
+            <CardContent>
+              <CardTitle>Knowledge Sessions</CardTitle>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="lg:col-span-2">
@@ -297,58 +233,13 @@ export default function ViewKnowledgeBasePage({
             <CardHeader>
               <CardTitle>Ask Questions</CardTitle>
             </CardHeader>
-            <CardContent className="flex-grow flex flex-col">
-              <div className="flex-grow space-y-4 mb-4 overflow-y-auto max-h-[500px] p-2">
-                {messages.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-8">
-                    Ask a question about this knowledge base to get started.
-                  </div>
-                ) : (
-                  messages.map((message, index) => (
-                    <div
-                      key={index}
-                      className={`p-3 rounded-lg ${
-                        message.role === "user"
-                          ? "bg-primary/10 ml-8"
-                          : "bg-muted mr-8"
-                      }`}
-                    >
-                      <p className="text-sm font-medium mb-1">
-                        {message.role === "user" ? "You" : "AI Assistant"}
-                      </p>
-                      <p className="whitespace-pre-wrap">{message.content}</p>
-                    </div>
-                  ))
-                )}
-                {isAsking && (
-                  <div className="p-3 rounded-lg bg-muted mr-8 flex items-center">
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    <p>Thinking...</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                <Textarea
-                  placeholder="Ask a question about this knowledge base..."
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleAskQuestion();
-                    }
-                  }}
-                  className="resize-none"
-                  disabled={isAsking}
+            <CardContent className="flex-grow flex flex-col ">
+              <div className="flex items-end gap-2 min-h-[calc(100vh-220px)]">
+                <ChatForm
+                  isKnowledgeBase={true}
+                  suggestedPrompts={suggestedPrompts}
+                  chatId="111"
                 />
-                <Button
-                  onClick={handleAskQuestion}
-                  disabled={!question.trim() || isAsking}
-                  className="self-end"
-                >
-                  <Send size={16} />
-                </Button>
               </div>
             </CardContent>
           </Card>

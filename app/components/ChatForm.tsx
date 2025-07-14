@@ -52,13 +52,17 @@ const toolIcons = {
 interface ChatFormProps {
   chatId?: string;
   initialMessages?: Message[];
-  suggestedPrompts: { title: string; subtitle: string }[];
+  suggestedPrompts?: { title: string; subtitle?: string }[];
+  isShowTool?: boolean;
+  isKnowledgeBase?: boolean;
 }
 
 export default function ChatForm({
   chatId,
   initialMessages,
   suggestedPrompts,
+  isShowTool,
+  isKnowledgeBase,
 }: ChatFormProps) {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -112,6 +116,7 @@ export default function ChatForm({
     body: {
       chatId,
       currentTool,
+      isKnowledgeBase,
     },
     async onToolCall({ toolCall }) {},
     onFinish: async (response) => {
@@ -276,7 +281,7 @@ export default function ChatForm({
             duration: 5000,
             description: "Failed to delete your document. Please try again.",
           });
-        }
+        },
       }
     );
   };
@@ -340,7 +345,7 @@ export default function ChatForm({
           e.preventDefault();
         }}
         className={clsx(
-          "flex flex-col items-center gap-4 md:h-[calc(100dvh-20px)] md:mt-0 mt-[50px] justify-center h-[calc(100dvh-100px)] overflow-y-auto scroll-hidden"
+          "flex flex-col items-center gap-4  w-full  overflow-y-auto scroll-hidden"
         )}
       >
         {messages.length === 0 && (
@@ -350,12 +355,15 @@ export default function ChatForm({
               <p className="text-zinc-300">How can I help you today?</p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full max-h-[calc(100dvh-350px)] overflow-y-auto scroll-hidden px-2">
-              {suggestedPrompts.map((prompt, idx) => (
+              {suggestedPrompts?.map((prompt, idx) => (
                 <Button
                   variant="outline"
                   key={idx}
                   onClick={(e) => {
-                    handlePromptClick(e, `${prompt.title} ${prompt.subtitle}`);
+                    handlePromptClick(
+                      e,
+                      `${prompt.title} ${prompt.subtitle || ""}`
+                    );
                   }}
                   className=" flex flex-col justify-center items-center gap-2 h-[70px]"
                 >
@@ -372,34 +380,40 @@ export default function ChatForm({
         )}
 
         <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-[10px] relative">
-          <div className="flex justify-end ">
-            {messages.length > 0 && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="ml-2"
-                      onClick={() => handleOpenShareModal()}
-                    >
-                      <FaShare className="text-lg" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Share your chat</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
+          {!isKnowledgeBase && (
+            <div className="flex justify-end ">
+              {messages.length > 0 && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="ml-2"
+                        onClick={() => handleOpenShareModal()}
+                      >
+                        <FaShare className="text-lg" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Share your chat</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
+          )}
           <div
             ref={containerRef}
             className={clsx(
               "overflow-auto scroll-hidden px-2",
 
               messages.length > 0 &&
-                " py-4 md:h-[calc(100dvh-250px)] h-[calc(100dvh-300px)]"
+                !isKnowledgeBase &&
+                " py-4 md:h-[calc(100dvh-250px)] h-[calc(100dvh-300px)]",
+              messages.length > 0 &&
+                isKnowledgeBase &&
+                " py-4 md:h-[calc(100dvh-350px)] h-[calc(100dvh-300px)]"
             )}
           >
             {messages.map((message) => {
@@ -477,88 +491,91 @@ export default function ChatForm({
           </div>
           <div className="flex flex-col">
             <div className="sticky bottom-0 flex-col w-full py-2 px-2 flex gap-3">
-              <div className="flex justify-between items-center pt-2">
-                <div className="flex gap-2">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
+              {isShowTool && (
+                <div className="flex justify-between items-center pt-2">
+                  <div className="flex gap-2">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Button
+                            variant="outline"
+                            className="ml-2 relative"
+                            size="icon"
+                            onClick={() => setIsPdfModalOpen(true)}
+                          >
+                            <FaFilePdf className="h-8 w-8" />
+                            <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
+                              {documents?.length}
+                            </div>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Manage documents</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="outline-none">
                         <Button
                           variant="outline"
                           className="ml-2 relative"
                           size="icon"
-                          onClick={() => setIsPdfModalOpen(true)}
                         >
-                          <FaFilePdf className="h-8 w-8" />
+                          <FaHammer className="h-8 w-8" />
                           <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                            {documents?.length}
+                            {tools.length}
                           </div>
                         </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Manage documents</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger className="outline-none">
-                      <Button
-                        variant="outline"
-                        className="ml-2 relative"
-                        size="icon"
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        className="h-[300px] max-w-[300px]"
+                        align="start"
+                        side="top"
+                        sideOffset={10}
+                        alignOffset={-25}
                       >
-                        <FaHammer className="h-8 w-8" />
-                        <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                          {tools.length}
-                        </div>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="h-[300px] max-w-[300px]"
-                      align="start"
-                      side="top"
-                      sideOffset={10}
-                      alignOffset={-25}
-                    >
-                      <DropdownMenuLabel>Available tools</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {tools.map((tool) => (
-                        <DropdownMenuCheckboxItem
-                          key={tool.name}
-                          className="flex items-center gap-2 px-2 cursor-pointer"
-                          checked={currentTool === tool.name}
-                          onCheckedChange={(checked) =>
-                            setCurrentTool(tool.name)
-                          }
-                        >
-                          <div className="h-8 w-8 flex items-center justify-center">
-                            {toolIcons[tool.name as keyof typeof toolIcons]}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-medium leading-none truncate">
-                              {tool.name}
-                            </h3>
-                            <p className="text-xs text-muted-foreground mt-2 ">
-                              {tool.description}
-                            </p>
-                          </div>
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <DropdownMenuLabel>Available tools</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {tools.map((tool) => (
+                          <DropdownMenuCheckboxItem
+                            key={tool.name}
+                            className="flex items-center gap-2 px-2 cursor-pointer"
+                            checked={currentTool === tool.name}
+                            onCheckedChange={(checked) =>
+                              setCurrentTool(tool.name)
+                            }
+                          >
+                            <div className="h-8 w-8 flex items-center justify-center">
+                              {toolIcons[tool.name as keyof typeof toolIcons]}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium leading-none truncate">
+                                {tool.name}
+                              </h3>
+                              <p className="text-xs text-muted-foreground mt-2 ">
+                                {tool.description}
+                              </p>
+                            </div>
+                          </DropdownMenuCheckboxItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
 
-                  {currentTool && (
-                    <Button
-                      onClick={() => setCurrentTool("")}
-                      variant="outline"
-                      className="ml-1 text-xs cursor-pointer border hover:text-white"
-                    >
-                      {currentTool}
-                      <TiDelete className="ml-1" />
-                    </Button>
-                  )}
+                    {currentTool && (
+                      <Button
+                        onClick={() => setCurrentTool("")}
+                        variant="outline"
+                        className="ml-1 text-xs cursor-pointer border hover:text-white"
+                      >
+                        {currentTool}
+                        <TiDelete className="ml-1" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
+
               {!isAtBottom && (
                 <button
                   onClick={() =>

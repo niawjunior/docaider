@@ -36,7 +36,9 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
     hasNextPage,
     isFetchingNextPage,
     isLoading: isChatsLoading,
-  } = useChats();
+  } = useChats({
+    isKnowledgeBase: false,
+  });
 
   const chats = data?.pages.flatMap((page) => page.data) ?? [];
 

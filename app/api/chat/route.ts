@@ -11,11 +11,13 @@ import { eq, and } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
-  const { messages, chatId, currentTool } = (await req.json()) as {
-    messages: any[];
-    chatId: string;
-    currentTool: string;
-  };
+  const { messages, chatId, currentTool, isKnowledgeBase } =
+    (await req.json()) as {
+      messages: any[];
+      chatId: string;
+      currentTool: string;
+      isKnowledgeBase: boolean;
+    };
 
   // Get the user from the request
 
@@ -289,6 +291,7 @@ export async function POST(req: NextRequest) {
           id: chatId,
           messages: finalMessages,
           userId: user.id,
+          isKnowledgeBase,
           createdAt: new Date().toISOString(),
         })
         .onConflictDoUpdate({
