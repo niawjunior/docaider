@@ -343,11 +343,8 @@ export default function EditKnowledgeBasePage() {
             </TabsContent>
             <TabsContent value="upload">
               <DocumentUpload
-                onDelete={handleDeleteDocument}
                 onFinish={handleFinishUpload}
                 onUpload={(isUploading) => setIsUploading(isUploading)}
-                documents={kbDocuments}
-                isDeleteLoading={deleteDocument.isPending}
                 isKnowledgeBase={true}
               />
             </TabsContent>

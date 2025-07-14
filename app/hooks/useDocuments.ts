@@ -1,6 +1,7 @@
 // hooks/useDocuments.ts
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { createClient } from "../utils/supabase/client";
 
 /**
  * Custom hook for document operations
@@ -61,7 +62,44 @@ export const useDocuments = () => {
     },
   });
 
+  /**
+   * Get documents with optional filters
+   */
+  const useGetDocuments = ({ isKnowledgeBase = false } = {}) => {
+    return useQuery({
+      queryKey: ["documents", { isKnowledgeBase }],
+      queryFn: async () => {
+        try {
+          const supabase = await createClient();
+          const { data: user } = await supabase.auth.getUser();
+          
+          if (!user?.user?.id) {
+            throw new Error("User not authenticated");
+          }
+
+          const { data: documents, error } = await supabase
+            .from("documents")
+            .select("*")
+            .eq("user_id", user.user.id)
+            .eq("is_knowledge_base", isKnowledgeBase);
+
+          if (error) {
+            throw error;
+          }
+
+          return documents;
+        } catch (error) {
+          console.error("Error fetching documents:", error);
+          throw new Error(
+            `Failed to fetch documents: ${error instanceof Error ? error.message : "Unknown error"}`
+          );
+        }
+      },
+    });
+  };
+
   return {
     deleteDocument,
+    useGetDocuments,
   };
 };

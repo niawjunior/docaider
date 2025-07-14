@@ -83,13 +83,12 @@ export async function POST(req: NextRequest) {
     askQuestion: askQuestionTool,
   };
 
-  const userMessage = messages[messages.length - 1];
-
-  messages[messages.length - 1] = userMessage;
   const result = streamText({
     model: openai("gpt-4o-mini"),
     toolChoice:
-      creditData.length === 0 || creditData[0].balance <= 0
+      creditData.length === 0 ||
+      creditData[0].balance <= 0 ||
+      uniqueDocuments.length === 0
         ? "none"
         : currentTool
         ? "required"

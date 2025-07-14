@@ -11,15 +11,6 @@ import { formatBytes } from "../utils/formatBytes";
 import { useDocumentUpload } from "../hooks/useDocumentUpload";
 
 export interface DocumentUploadProps {
-  onDelete: (doc: {
-    title: string;
-    url: string;
-    id: string;
-    documentId: string;
-    documentName: string;
-    createdAt: string;
-    updatedAt: string;
-  }) => Promise<void>;
   onClose?: () => void;
   onSelectDocuments?: (
     selectedDocs: {
@@ -34,17 +25,6 @@ export interface DocumentUploadProps {
   ) => void;
   onFinish?: (documentId: string) => void;
   onUpload?: (isUploading: boolean) => void;
-
-  documents: {
-    title: string;
-    url: string;
-    id: string;
-    documentId: string;
-    documentName: string;
-    createdAt: string;
-    updatedAt: string;
-  }[];
-  isDeleteLoading?: boolean;
   selectedDocuments?: {
     title: string;
     url: string;
@@ -59,10 +39,7 @@ export interface DocumentUploadProps {
 }
 
 export default function DocumentUpload({
-  onDelete,
   onClose,
-  documents,
-  isDeleteLoading,
   onFinish,
   onUpload,
   isShowDocumentList,
@@ -139,24 +116,6 @@ export default function DocumentUpload({
         },
       }
     );
-  };
-
-  const handleDelete = async (doc: {
-    title: string;
-    url: string;
-    id: string;
-    documentId: string;
-    documentName: string;
-    createdAt: string;
-    updatedAt: string;
-  }) => {
-    if (!onDelete) return;
-
-    try {
-      await onDelete(doc);
-    } catch (error) {
-      console.error("Error deleting document:", error);
-    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,13 +195,7 @@ export default function DocumentUpload({
             {isUploading ? "Uploading..." : "Upload Document"}
           </Button>
         </form>
-        {isShowDocumentList && (
-          <DocumentsList
-            documents={documents}
-            onDelete={handleDelete}
-            isDeleteLoading={isDeleteLoading}
-          />
-        )}
+        {isShowDocumentList && <DocumentsList />}
       </CardContent>
     </Card>
   );

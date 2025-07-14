@@ -20,7 +20,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { createClient } from "../utils/supabase/client";
 import { toast } from "sonner";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import {
@@ -43,7 +42,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Markdown from "./Markdown";
 import { useDocuments } from "../hooks/useDocuments";
-import { Badge } from "@/components/ui/badge";
 
 const toolIcons = {
   askQuestion: <FaQuestion />,
@@ -72,22 +70,12 @@ export default function ChatForm({
   const queryClient = useQueryClient();
   const [isDesktop, setIsDesktop] = useState(false);
   const [currentTool, setCurrentTool] = useState<string>("");
-  const [documents, setDocuments] = useState<
-    {
-      title: string;
-      url: string;
-      id: string;
-      documentId: string;
-      documentName: string;
-      createdAt: string;
-      updatedAt: string;
-    }[]
-  >([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
   const { session } = useSupabaseSession();
+  const { useGetDocuments } = useDocuments();
 
   const tools = [
     {
@@ -140,6 +128,8 @@ export default function ChatForm({
   });
 
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const { data: documents = [] } = useGetDocuments({ isKnowledgeBase });
 
   useEffect(() => {
     const el = containerRef.current;
@@ -212,78 +202,6 @@ export default function ChatForm({
     e.preventDefault();
     textareaRef.current?.focus();
     setPromptToSubmit(text);
-  };
-
-  const fetchDocuments = async () => {
-    try {
-      const supabase = await createClient();
-      const { data: user } = await supabase.auth.getUser();
-      if (!user?.user?.id) return;
-
-      // Get all files in the user's directory
-      const { data: documents, error } = await supabase
-        .from("documents")
-        .select("*")
-        .eq("user_id", user.user.id)
-        .eq("is_knowledge_base", false);
-
-      if (error) throw error;
-
-      // Step 2: Group by document_id
-      const grouped = new Map<string, typeof documents>();
-
-      documents.forEach((doc) => {
-        if (!grouped.has(doc.document_id)) {
-          grouped.set(doc.document_id, doc);
-        }
-      });
-
-      setDocuments(documents);
-    } catch (error) {
-      console.error("Error fetching documents:", error);
-      toast("Error fetching documents", {
-        duration: 5000,
-        description: "Failed to fetch your documents. Please try again.",
-      });
-    }
-  };
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
-
-  const { deleteDocument } = useDocuments();
-
-  const handleDeleteDocument = async (doc: {
-    title: string;
-    url: string;
-    id: string;
-    documentId: string;
-    documentName: string;
-    createdAt: string;
-    updatedAt: string;
-  }) => {
-    // Call the deleteDocument mutation from the useDocuments hook
-    deleteDocument.mutate(
-      {
-        documentId: doc.documentId,
-        documentName: doc.documentName,
-      },
-      {
-        onSuccess: () => {
-          // Update local state after successful deletion
-          setDocuments((prev) =>
-            prev.filter((d) => d.documentId !== doc.documentId)
-          );
-        },
-        onError: (error) => {
-          console.error("Error deleting document:", error);
-          toast("Error deleting document", {
-            duration: 5000,
-            description: "Failed to delete your document. Please try again.",
-          });
-        },
-      }
-    );
   };
 
   const handleShare = async () => {
@@ -611,13 +529,9 @@ export default function ChatForm({
                   <DialogTitle>Manage Knowledge Base </DialogTitle>
                 </DialogHeader>
                 <DocumentUpload
-                  onDelete={handleDeleteDocument}
                   onClose={() => {
                     setIsPdfModalOpen(false);
-                    fetchDocuments();
                   }}
-                  documents={documents}
-                  isDeleteLoading={deleteDocument.isPending}
                   isShowDocumentList={true}
                 />
               </DialogContent>
