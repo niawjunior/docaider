@@ -63,7 +63,7 @@ export default function ChatForm({
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCreateShareLoading, setIsCreateShareLoading] = useState(false);
-  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  // Using the deleteDocument mutation from useDocuments hook for loading state
   const { shareData, error: shareError, refresh } = useShareUrl(chatId!);
   const queryClient = useQueryClient();
   const [isDesktop, setIsDesktop] = useState(false);
@@ -258,7 +258,6 @@ export default function ChatForm({
     updatedAt: string;
   }) => {
     // Call the deleteDocument mutation from the useDocuments hook
-    setIsDeleteLoading(true);
     deleteDocument.mutate(
       {
         documentId: doc.documentId,
@@ -271,15 +270,13 @@ export default function ChatForm({
             prev.filter((d) => d.documentId !== doc.documentId)
           );
         },
-        onError: () => {
+        onError: (error) => {
+          console.error("Error deleting document:", error);
           toast("Error deleting document", {
             duration: 5000,
             description: "Failed to delete your document. Please try again.",
           });
-        },
-        onSettled: () => {
-          setIsDeleteLoading(false);
-        },
+        }
       }
     );
   };
@@ -603,7 +600,7 @@ export default function ChatForm({
                     fetchDocuments();
                   }}
                   documents={documents}
-                  isDeleteLoading={isDeleteLoading}
+                  isDeleteLoading={deleteDocument.isPending}
                   isShowDocumentList={true}
                 />
               </DialogContent>

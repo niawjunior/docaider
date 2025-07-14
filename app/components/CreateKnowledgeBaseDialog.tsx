@@ -14,10 +14,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { createClient } from "@/app/utils/supabase/client";
-import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useKnowledgeBases } from "../hooks/useKnowledgeBases";
 
 interface CreateKnowledgeBaseDialogProps {
   open: boolean;
@@ -35,7 +35,9 @@ export default function CreateKnowledgeBaseDialog({
   const [isPublic, setIsPublic] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
+
+  // Import the useKnowledgeBases hook
+  const kbHooks = useKnowledgeBases();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,23 +50,13 @@ export default function CreateKnowledgeBaseDialog({
     setIsLoading(true);
 
     try {
-      // Create the knowledge base
-      const { data, error } = await supabase
-        .from("knowledge_bases")
-        .insert({
-          name: name.trim(),
-          description: description.trim(),
-          is_public: isPublic,
-          user_id: userId,
-        })
-        .select("id")
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      toast("Knowledge base created successfully");
+      // Use the createKnowledgeBase mutation from our hook
+      const result = await kbHooks.createKnowledgeBase.mutateAsync({
+        name,
+        description,
+        isPublic,
+        userId,
+      });
 
       // Reset form
       setName("");
@@ -74,8 +66,8 @@ export default function CreateKnowledgeBaseDialog({
       // Close dialog
       onOpenChange(false);
 
-      // Navigate to the edit page for the new knowledge base
-      router.push(`/knowledge/${data.id}/edit`);
+      // Navigate to the edit   page for the new knowledge base
+      router.push(`/knowledge/${result.id}/edit`);
     } catch (error: any) {
       console.error("Error creating knowledge base:", error);
       toast(error.message || "Failed to create knowledge base");

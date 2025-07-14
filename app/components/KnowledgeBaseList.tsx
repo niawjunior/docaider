@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye, Edit, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/app/utils/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -18,9 +17,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import GlobalLoader from "./GlobalLoader";
+import { useKnowledgeBases as useKnowledgeBasesHook } from "@/app/hooks/useKnowledgeBases";
 
-interface KnowledgeBase {
+// Using the type from the hook to ensure consistency
+type KnowledgeBase = {
   id: string;
   name: string;
   description: string;
@@ -29,88 +29,37 @@ interface KnowledgeBase {
   updated_at: string;
   user_id: string;
   user_name?: string;
-}
+};
 
 interface KnowledgeBaseListProps {
   userId?: string;
   isPublic: boolean;
+  knowledgeBases: KnowledgeBase[];
 }
 
 export default function KnowledgeBaseList({
   userId,
   isPublic,
+  knowledgeBases,
 }: KnowledgeBaseListProps) {
-  const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClient();
+  const kbHooks = useKnowledgeBasesHook();
 
-  useEffect(() => {
-    fetchKnowledgeBases();
-  }, [userId, isPublic]);
+  // Use the delete mutation from the hook
+  const { mutate: deleteKnowledgeBase, isPending: isDeleting } =
+    kbHooks.deleteKnowledgeBase;
 
-  async function fetchKnowledgeBases() {
-    setIsLoading(true);
-    try {
-      let query = supabase.from("knowledge_bases").select(`
-          *,
-          profiles:user_id (display_name)
-        `);
-
-      if (isPublic) {
-        query = query.eq("is_public", true);
-      } else if (userId) {
-        query = query.eq("user_id", userId);
-      }
-
-      const { data, error } = await query.order("created_at", {
-        ascending: false,
-      });
-
-      if (error) {
-        console.error("Error fetching knowledge bases:", error);
-        return;
-      }
-
-      // Transform data to include user_name from the profiles join
-      const transformedData = data.map((kb) => ({
-        ...kb,
-        user_name: kb.profiles?.display_name || "Anonymous",
-      }));
-
-      setKnowledgeBases(transformedData);
-    } catch (error) {
-      console.error("Error fetching knowledge bases:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleDelete(id: string) {
-    try {
-      const { error } = await supabase
-        .from("knowledge_bases")
-        .delete()
-        .eq("id", id);
-
-      if (error) {
-        console.error("Error deleting knowledge base:", error);
-        return;
-      }
-
-      // Refresh the list
-      fetchKnowledgeBases();
-    } catch (error) {
-      console.error("Error deleting knowledge base:", error);
-    } finally {
-      setDeleteId(null);
-    }
-  }
-
-  if (isLoading) {
-    return <GlobalLoader />;
-  }
+  const handleDelete = async (id: string) => {
+    deleteKnowledgeBase(id, {
+      onSuccess: () => {
+        setDeleteId(null);
+      },
+      onError: () => {
+        setDeleteId(null);
+      },
+    });
+  };
 
   if (knowledgeBases.length === 0) {
     return (
@@ -195,8 +144,9 @@ export default function KnowledgeBaseList({
             <AlertDialogAction
               onClick={() => deleteId && handleDelete(deleteId)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
             >
-              Delete
+              {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

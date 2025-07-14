@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/app/utils/supabase/server";
 import { db } from "@/db/config";
-import { knowledgeBases } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { documentChunks, knowledgeBases } from "@/db/schema";
+import { eq, and, inArray } from "drizzle-orm";
 
 export async function GET(
   request: Request,
@@ -150,12 +150,12 @@ export async function PATCH(
     }
 
     const { name, description, isPublic, documentIds } = await request.json();
-    
+
     // Prepare update data
     const updateData: Record<string, any> = {
       updatedAt: new Date().toISOString(),
     };
-    
+
     // Only include fields that were provided
     if (name !== undefined) {
       if (!name || name.trim() === "") {
@@ -166,15 +166,15 @@ export async function PATCH(
       }
       updateData.name = name.trim();
     }
-    
+
     if (description !== undefined) {
       updateData.description = description?.trim();
     }
-    
+
     if (isPublic !== undefined) {
       updateData.isPublic = isPublic;
     }
-    
+
     if (documentIds !== undefined) {
       updateData.documentIds = documentIds;
     }
@@ -231,11 +231,42 @@ export async function DELETE(
       );
     }
 
-    // Delete knowledge base (cascade will delete associated documents)
+    // Implement cascade deletion
+    // 1. Get document IDs from the knowledge base
+    const documentIds = existingKnowledgeBase.documentIds || [];
+
+    if (documentIds.length > 0) {
+      // 2. Get document records to find their IDs for document_chunks deletion
+      const { data: documents, error: docError } = await supabase
+        .from("documents")
+        .select("id")
+        .in("document_id", documentIds);
+
+      if (docError) throw docError;
+
+      const chunkDocIds = documents?.map((doc) => String(doc.id)) || [];
+
+      // 3. Delete document chunks first (if any)
+
+      await db
+        .delete(documentChunks)
+        .where(inArray(documentChunks.documentId, chunkDocIds));
+
+      // 4. Delete documents
+      const { error: docsDeleteError } = await supabase
+        .from("documents")
+        .delete()
+        .in("document_id", documentIds);
+
+      if (docsDeleteError) throw docsDeleteError;
+    }
+
+    // 5. Finally delete the knowledge base itself
     await db.delete(knowledgeBases).where(eq(knowledgeBases.id, id));
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
+    console.error("Error deleting knowledge base:", error);
     return NextResponse.json(
       { error: error.message || "Failed to delete knowledge base" },
       { status: 500 }

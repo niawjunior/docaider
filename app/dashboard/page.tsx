@@ -14,14 +14,26 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { GoHomeFill } from "react-icons/go";
+import { useKnowledgeBases } from "../hooks/useKnowledgeBases";
+import GlobalLoader from "../components/GlobalLoader";
 
 export default function DashboardPage() {
   const { session } = useSupabaseSession();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const router = useRouter();
 
+  const kbHooks = useKnowledgeBases();
+
+  const getKnowledgeBases = kbHooks.getKnowledgeBases;
+
+  const getPublicKnowledgeBases = kbHooks.getPublicKnowledgeBases;
+
   if (!session) {
     return null; // Don't render anything while redirecting
+  }
+
+  if (getKnowledgeBases.isLoading || getPublicKnowledgeBases.isLoading) {
+    return <GlobalLoader />;
   }
 
   return (
@@ -80,11 +92,19 @@ export default function DashboardPage() {
         <h2 className="text-xl font-semibold">My Knowledge Bases</h2>
       </div>
 
-      <KnowledgeBaseList userId={session.user.id} isPublic={false} />
+      <KnowledgeBaseList
+        knowledgeBases={getKnowledgeBases.data || []}
+        userId={session.user.id}
+        isPublic={false}
+      />
 
       <h2 className="text-xl font-semibold py-4">Public Knowledge Bases</h2>
 
-      <KnowledgeBaseList userId={session.user.id} isPublic={true} />
+      <KnowledgeBaseList
+        knowledgeBases={getPublicKnowledgeBases.data || []}
+        userId={session.user.id}
+        isPublic={true}
+      />
 
       <CreateKnowledgeBaseDialog
         open={isCreateDialogOpen}

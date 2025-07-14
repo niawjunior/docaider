@@ -15,6 +15,7 @@ import DocumentUpload from "@/app/components/DocumentUpload";
 import { useDocuments } from "@/app/hooks/useDocuments";
 import GlobalLoader from "@/app/components/GlobalLoader";
 import Link from "next/link";
+import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
 
 interface Document {
   title: string;
@@ -33,6 +34,7 @@ export default function EditKnowledgeBasePage() {
   const [isPublic, setIsPublic] = useState(false);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(
     null
   );
@@ -40,99 +42,79 @@ export default function EditKnowledgeBasePage() {
   const router = useRouter();
   const { deleteDocument } = useDocuments();
 
+  const kbHooks = useKnowledgeBases();
+
+  // Use the new React Query hooks for fetching knowledge base and its documents
+  const {
+    data: knowledgeBase,
+    isLoading: isLoadingKB,
+    error: kbError,
+  } = kbHooks.useKnowledgeBaseById(params.id as string);
+
+  const {
+    data: kbDocuments,
+    isLoading: isLoadingDocs,
+    error: docsError,
+  } = kbHooks.useKnowledgeBaseDocuments(params.id as string);
+
+  // Set local state when data is loaded
   useEffect(() => {
-    fetchKnowledgeBase();
-  }, []);
+    if (knowledgeBase) {
+      setName(knowledgeBase.name);
+      setDescription(knowledgeBase.description || "");
+      console.log("knowledgeBase", knowledgeBase);
+      setIsPublic(knowledgeBase.isPublic);
+    }
+  }, [knowledgeBase]);
 
-  async function fetchKnowledgeBase() {
-    console.log("fetchKnowledgeBase", params.id);
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/knowledge-base/${params.id}`);
+  // Set documents when they're loaded
+  useEffect(() => {
+    if (kbDocuments) {
+      setDocuments(kbDocuments);
+    }
+  }, [kbDocuments]);
 
-      if (!response.ok) {
-        if (response.status === 404) {
-          toast("Knowledge base not found");
-          router.push("/dashboard");
-          return;
-        }
-
-        if (response.status === 401) {
-          toast("Unauthorized");
-          router.push("/dashboard");
-          return;
-        }
-
-        throw new Error("Failed to fetch knowledge base");
-      }
-
-      const data = await response.json();
-      // console.log("response", data);
-      setName(data.knowledgeBase.name);
-      setDescription(data.knowledgeBase.description || "");
-      setIsPublic(data.knowledgeBase.isPublic);
-
-      // Fetch documents in the knowledge base
-      fetchKnowledgeBaseDocuments();
-    } catch (error) {
-      console.error("Error fetching knowledge base:", error);
+  // Handle errors
+  useEffect(() => {
+    if (kbError) {
+      console.error("Error fetching knowledge base:", kbError);
       toast("Failed to fetch knowledge base");
+      router.push("/dashboard");
     }
-  }
 
-  async function fetchKnowledgeBaseDocuments() {
-    setIsLoading(true);
-    try {
-      const response = await fetch(
-        `/api/knowledge-base/${params.id}/documents`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch knowledge base documents");
-      }
-
-      const data = await response.json();
-      console.log("Knowledge base documents:", data);
-      setDocuments(data?.documents || []);
-    } catch (error) {
-      console.error("Error fetching knowledge base documents:", error);
+    if (docsError) {
+      console.error("Error fetching knowledge base documents:", docsError);
       toast("Failed to fetch knowledge base documents");
-    } finally {
-      setIsLoading(false);
     }
-  }
+  }, [kbError, docsError, router]);
+
+  // Update loading state
+  useEffect(() => {
+    setIsLoading(isLoadingKB || isLoadingDocs);
+  }, [isLoadingKB, isLoadingDocs]);
 
   async function handleSave() {
     if (!name.trim()) {
       toast("Knowledge base name is required");
       return;
     }
-    setIsLoading(true);
+
     setIsSaving(true);
     try {
-      const response = await fetch(`/api/knowledge-base/${params.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          description,
-          isPublic,
-        }),
+      // Use the updateKnowledgeBase mutation from our hook
+      await kbHooks.updateKnowledgeBase.mutateAsync({
+        id: params.id as string,
+        name,
+        description,
+        isPublic,
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to update knowledge base");
-      }
-
-      toast("Knowledge base updated successfully");
+      
+      // Note: The toast and query invalidation are handled in the mutation's onSuccess callback
     } catch (error) {
-      console.error("Error updating knowledge base:", error);
-      toast("Failed to update knowledge base");
+      // Error handling is done in the mutation's onError callback
+      console.error("Error in handleSave:", error);
     } finally {
       setIsSaving(false);
-      setIsLoading(false);
     }
   }
 
@@ -141,21 +123,28 @@ export default function EditKnowledgeBasePage() {
    * @param documentIds The updated array of document IDs
    * @returns Promise that resolves when the update is complete
    */
-  const updateKnowledgeBaseDocumentIds = async (
-    documentIds: string[]
-  ): Promise<void> => {
-    const updateResponse = await fetch(`/api/knowledge-base/${params.id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        documentIds: documentIds,
-      }),
-    });
+  const updateKnowledgeBaseDocumentIds = async (documentIds: string[]) => {
+    try {
+      const response = await fetch(`/api/knowledge-base/${params.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ documentIds }),
+      });
 
-    if (!updateResponse.ok) {
-      throw new Error("Failed to update knowledge base documentIds");
+      if (!response.ok) {
+        throw new Error("Failed to update knowledge base");
+      }
+
+      // Refetch knowledge base data and documents after update
+      kbHooks.getKnowledgeBases.refetch();
+      kbHooks.getPublicKnowledgeBases.refetch();
+
+      return response.json();
+    } catch (error) {
+      console.error("Error updating knowledge base document IDs:", error);
+      throw error;
     }
   };
 
@@ -175,22 +164,11 @@ export default function EditKnowledgeBasePage() {
               prev.filter((d) => d.documentId !== doc.documentId)
             );
 
-            // Update the knowledge base's documentIds array
-            // First, fetch the current knowledge base to get existing documentIds
-            const getResponse = await fetch(`/api/knowledge-base/${params.id}`);
-            if (!getResponse.ok) {
-              throw new Error("Failed to fetch knowledge base");
-            }
-
-            const knowledgeBaseData = await getResponse.json();
-            console.log("knowledgeBaseData in delete:", knowledgeBaseData);
             // Filter out the deleted document ID
-            const currentDocIds =
-              knowledgeBaseData.knowledgeBase.documentIds || [];
+            const currentDocIds = knowledgeBase?.document_ids || [];
             const updatedDocIds = currentDocIds.filter(
               (id: string) => id !== doc.documentId
             );
-            console.log("updatedDocIds:", updatedDocIds);
 
             // Update the knowledge base with the filtered documentIds
             await updateKnowledgeBaseDocumentIds(updatedDocIds);
@@ -214,25 +192,21 @@ export default function EditKnowledgeBasePage() {
 
   const handleFinishUpload = async (documentId: string) => {
     try {
-      // First, fetch the current knowledge base to get existing document_ids
-      const getResponse = await fetch(`/api/knowledge-base/${params.id}`);
-      if (!getResponse.ok) {
-        throw new Error("Failed to fetch knowledge base");
-      }
-
-      const knowledgeBaseData = await getResponse.json();
-      console.log("knowledgeBaseData", knowledgeBaseData);
       // Prepare the updated document_ids array
-      const currentDocIds = knowledgeBaseData.knowledgeBase.documentIds || [];
+      const currentDocIds = knowledgeBase?.document_ids || [];
       const updatedDocIds = [...currentDocIds, documentId];
 
       // Update the knowledge base with the new document_ids
       await updateKnowledgeBaseDocumentIds(updatedDocIds);
 
-      toast("Document added to knowledge base successfully");
+      setIsUploading(false);
 
-      // Refresh the documents list
-      fetchKnowledgeBaseDocuments();
+      // Refetch knowledge base lists in dashboard
+      kbHooks.getKnowledgeBases.refetch();
+      kbHooks.getPublicKnowledgeBases.refetch();
+
+      // The refetchDocuments() call is already in updateKnowledgeBaseDocumentIds
+      toast("Document added to knowledge base successfully");
     } catch (error) {
       console.error("Error updating knowledge base:", error);
       toast("Failed to update knowledge base");
@@ -309,7 +283,7 @@ export default function EditKnowledgeBasePage() {
                   {isSaving && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
-                  <Save size={16} className="mr-2" />
+                  {!isSaving && <Save size={16} className="mr-2" />}
                   Save Changes
                 </Button>
               </div>
@@ -320,10 +294,16 @@ export default function EditKnowledgeBasePage() {
         <div className="lg:col-span-2">
           <Tabs defaultValue="current">
             <TabsList className="mb-4 w-full">
-              <TabsTrigger disabled={deleteDocument.isPending} value="current">
+              <TabsTrigger
+                disabled={deleteDocument.isPending || isUploading}
+                value="current"
+              >
                 Current Documents
               </TabsTrigger>
-              <TabsTrigger disabled={deleteDocument.isPending} value="upload">
+              <TabsTrigger
+                disabled={deleteDocument.isPending || isUploading}
+                value="upload"
+              >
                 Upload New Document
               </TabsTrigger>
             </TabsList>
@@ -386,6 +366,7 @@ export default function EditKnowledgeBasePage() {
               <DocumentUpload
                 onDelete={handleDeleteDocument}
                 onFinish={handleFinishUpload}
+                onUpload={(isUploading) => setIsUploading(isUploading)}
                 documents={documents}
                 isDeleteLoading={deleteDocument.isPending}
                 isKnowledgeBase={true}
