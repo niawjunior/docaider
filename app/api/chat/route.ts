@@ -6,17 +6,18 @@ import { NextRequest } from "next/server";
 import { createClient } from "../../utils/supabase/server";
 import { askQuestionTool } from "@/app/tools/llm-tools";
 import { db } from "../../../db/config";
-import { credits, documents, chats } from "../../../db/schema";
-import { eq, and } from "drizzle-orm";
+import { credits, documents, chats, knowledgeBases } from "../../../db/schema";
+import { eq, and, inArray } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
-  const { messages, chatId, currentTool, isKnowledgeBase } =
+  const { messages, chatId, currentTool, isKnowledgeBase, knowledgeBaseId } =
     (await req.json()) as {
       messages: any[];
       chatId: string;
       currentTool: string;
       isKnowledgeBase: boolean;
+      knowledgeBaseId: string;
     };
 
   // Get the user from the request
@@ -32,6 +33,8 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  console.log("knowledgeBaseId", knowledgeBaseId);
+  console.log("isKnowledgeBase", isKnowledgeBase);
   // Get user credit using Drizzle ORM
   const creditData = await db
     .select({ balance: credits.balance })
@@ -39,6 +42,15 @@ export async function POST(req: NextRequest) {
     .where(eq(credits.userId, user.id))
     .limit(1);
 
+  // Get the knowledge base
+  const [knowledgeBase] = await db
+    .select()
+    .from(knowledgeBases)
+    .where(eq(knowledgeBases.id, knowledgeBaseId));
+
+  console.log("knowledgeBase", knowledgeBase);
+
+  const knowledgeBaseDocumentIds = knowledgeBase?.documentIds || [];
   // Get documents using Drizzle ORM - only get main document metadata, not chunks
   const allDocuments = await db
     .select({
@@ -49,35 +61,23 @@ export async function POST(req: NextRequest) {
     })
     .from(documents)
     .where(
-      and(
-        eq(documents.userId, user.id),
-        eq(documents.active, true),
-        eq(documents.isKnowledgeBase, false)
-      )
+      isKnowledgeBase
+        ? // If it's a knowledge base request and we have documentIds, filter by those IDs
+          and(
+            eq(documents.userId, user.id),
+            eq(documents.active, true),
+            eq(documents.isKnowledgeBase, true),
+            inArray(documents.documentId, knowledgeBaseDocumentIds)
+          )
+        : // Otherwise use the standard filtering
+          and(
+            eq(documents.userId, user.id),
+            eq(documents.active, true),
+            eq(documents.isKnowledgeBase, isKnowledgeBase)
+          )
     )
     .orderBy(documents.updatedAt);
 
-  // Define proper types for document data
-  type DocumentData = {
-    id: number;
-    documentId: string | null;
-    documentName: string | null;
-    title: string;
-  };
-
-  // Filter out documents with null documentId and create a map for deduplication
-  const documentMap = new Map<string, DocumentData>();
-
-  // Only add documents with non-null documentId to the map
-  allDocuments.forEach((doc) => {
-    if (doc.documentId) {
-      // If this documentId isn't in the map yet or we want to replace an existing entry
-      documentMap.set(doc.documentId, doc);
-    }
-  });
-
-  // Convert the map values to an array for our unique documents
-  const uniqueDocuments = Array.from(documentMap.values());
   // Get tools
   const tools = {
     askQuestion: askQuestionTool,
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     toolChoice:
       creditData.length === 0 ||
       creditData[0].balance <= 0 ||
-      uniqueDocuments.length === 0
+      allDocuments.length === 0
         ? "none"
         : currentTool
         ? "required"
@@ -105,10 +105,10 @@ export async function POST(req: NextRequest) {
     5.  **Current tool**: ${currentTool ? currentTool : "not specified"}
     6.  If current tool is not null, use it.
     ‼️ **IMPORTANT Tool Usage Rules**:
-    ** Current document count: ${uniqueDocuments.length} **
+    ** Current document count: ${allDocuments.length} **
     ** Documents Name:  ${
-      uniqueDocuments.length > 0
-        ? uniqueDocuments
+      allDocuments.length > 0
+        ? allDocuments
             .map((doc: { title: string } | undefined) => doc?.title)
             .join(", ")
         : "No documents uploaded."
@@ -131,12 +131,12 @@ export async function POST(req: NextRequest) {
     
     **Knowledge Management**:
     -   For questions about uploaded documents, use the \`askQuestion\` tool.
-    -   Current document count: ${uniqueDocuments.length}
+    -   Current document count: ${allDocuments.length}
     -   **If current document count is more than 1, you **MUST** Ask user to specify the document name to filter the search.**
     -   * Always ask the user to specify the language to ask the question. Example: en, th*
     -   Documents Name:  ${
-      uniqueDocuments.length > 0
-        ? uniqueDocuments
+      allDocuments.length > 0
+        ? allDocuments
             .map((doc: { title: string } | undefined) => doc?.title)
             .join(", ")
         : "No documents uploaded."
@@ -291,6 +291,7 @@ export async function POST(req: NextRequest) {
           messages: finalMessages,
           userId: user.id,
           isKnowledgeBase,
+          knowledgeBaseId,
           createdAt: new Date().toISOString(),
         })
         .onConflictDoUpdate({

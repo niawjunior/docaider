@@ -1,11 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, Share2, Copy } from "lucide-react";
+import {
+  ArrowLeft,
+  Edit,
+  Share2,
+  Copy,
+  PlusCircle,
+  MessageSquarePlus,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +28,16 @@ import GlobalLoader from "@/app/components/GlobalLoader";
 import useSupabaseSession from "@/app/hooks/useSupabaseSession";
 import { formatDistanceToNow } from "date-fns";
 import ChatForm from "@/app/components/ChatForm";
+import KnowledgeSessions from "@/app/components/KnowledgeSessions";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { createChat } from "@/app/utils/aisdk/chat";
+import { useChats } from "@/app/hooks/useChats";
+import { useQueryClient } from "@tanstack/react-query";
 // Type definitions are inferred from React Query hooks
 
 export default function ViewKnowledgeBasePage() {
@@ -30,8 +47,8 @@ export default function ViewKnowledgeBasePage() {
   const router = useRouter();
   const params = useParams<{ id: string; chatId: string }>();
   const kbHooks = useKnowledgeBases();
-  console.log(params.id, params.chatId);
-
+  const [chatId, setChatId] = useState<string>("");
+  const queryClient = useQueryClient();
   const suggestedPrompts = [
     {
       title: "Tell me about the document",
@@ -69,6 +86,15 @@ export default function ViewKnowledgeBasePage() {
     error: docsError,
   } = kbHooks.useKnowledgeBaseDocuments(params.id);
 
+  const { data: knowledgeBaseChats, isLoading: isLoadingChats } = useChats({
+    isKnowledgeBase: true,
+    knowledgeBaseId: params.id,
+  });
+
+  const knowledgeBaseChatsData = useMemo(() => {
+    return knowledgeBaseChats?.pages.flatMap((page) => page.data) ?? [];
+  }, [knowledgeBaseChats]);
+
   // Handle errors
   useEffect(() => {
     if (kbError) {
@@ -89,6 +115,13 @@ export default function ViewKnowledgeBasePage() {
   }, [kbError, router]);
 
   useEffect(() => {
+    // set chatId to the first chat id
+    if (knowledgeBaseChatsData.length > 0) {
+      setChatId(knowledgeBaseChatsData[0].id);
+    }
+  }, [knowledgeBaseChatsData]);
+
+  useEffect(() => {
     if (docsError) {
       console.error("Error fetching knowledge base documents:", docsError);
       toast("Failed to fetch knowledge base documents");
@@ -102,7 +135,7 @@ export default function ViewKnowledgeBasePage() {
   }, [params.id]);
 
   // Determine if we're still loading
-  const isLoading = isLoadingKB || isLoadingDocs;
+  const isLoading = isLoadingKB || isLoadingDocs || isLoadingChats;
 
   if (isLoading) {
     return <GlobalLoader />;
@@ -117,6 +150,23 @@ export default function ViewKnowledgeBasePage() {
   const handleCopyShareLink = () => {
     navigator.clipboard.writeText(shareUrl);
     toast("Share link copied to clipboard");
+  };
+
+  const handleChatClick = (newChatId: string) => {
+    // reset the query cache
+    queryClient.resetQueries({
+      queryKey: ["chat", chatId],
+    });
+    // refetch the query
+    queryClient.refetchQueries({
+      queryKey: ["chat", chatId],
+    });
+    setChatId(newChatId);
+  };
+
+  const createNewChat = async () => {
+    const id = await createChat();
+    setChatId(id);
   };
 
   return (
@@ -222,8 +272,34 @@ export default function ViewKnowledgeBasePage() {
             </CardContent>
           </Card>
           <Card>
-            <CardContent>
+            <CardContent className="flex items-center justify-between">
               <CardTitle>Knowledge Sessions</CardTitle>
+              <CardTitle>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={createNewChat}
+                        className="text-[20px] rounded-lg"
+                      >
+                        <PlusCircle />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Create new chat</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </CardTitle>
+            </CardContent>
+            <CardContent className="max-h-[290px] overflow-y-auto">
+              <KnowledgeSessions
+                chatId={chatId}
+                knowledgeBaseId={params.id}
+                onChatClick={handleChatClick}
+              />
             </CardContent>
           </Card>
         </div>
@@ -234,13 +310,36 @@ export default function ViewKnowledgeBasePage() {
               <CardTitle>Ask Questions</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col ">
-              <div className="flex items-end gap-2 min-h-[calc(100vh-220px)]">
-                <ChatForm
-                  isKnowledgeBase={true}
-                  suggestedPrompts={suggestedPrompts}
-                  chatId="111"
-                />
-              </div>
+              {knowledgeBaseChatsData.length === 0 && !chatId ? (
+                <div className="flex flex-col items-center justify-center gap-4 min-h-[calc(100vh-220px)]">
+                  <div className="text-center">
+                    <h3 className="text-xl font-medium mb-2">
+                      No chat sessions yet
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Start a new chat to ask questions about this knowledge
+                      base
+                    </p>
+                  </div>
+                  <Button
+                    onClick={createNewChat}
+                    className="flex items-center gap-2"
+                    size="lg"
+                  >
+                    <MessageSquarePlus className="h-5 w-5" />
+                    Start New Chat
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-end gap-2 min-h-[calc(100vh-220px)]">
+                  <ChatForm
+                    isKnowledgeBase={true}
+                    knowledgeBaseId={params.id}
+                    suggestedPrompts={suggestedPrompts}
+                    chatId={chatId}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

@@ -10,6 +10,8 @@ export async function GET(request: NextRequest) {
   const limit = Number(searchParams.get("limit")) || 20;
   const offset = Number(searchParams.get("offset")) || 0;
   const isKnowledgeBase = searchParams.get("isKnowledgeBase") === "true";
+  const knowledgeBaseId = searchParams.get("knowledgeBaseId");
+  console.log("knowledgeBaseId", knowledgeBaseId);
   const { data: user } = await supabase.auth.getUser();
 
   if (!user) {
@@ -28,7 +30,10 @@ export async function GET(request: NextRequest) {
       .where(
         and(
           eq(chats.userId, user.user!.id),
-          eq(chats.isKnowledgeBase, isKnowledgeBase)
+          eq(chats.isKnowledgeBase, isKnowledgeBase),
+          ...(isKnowledgeBase && knowledgeBaseId
+            ? [eq(chats.knowledgeBaseId, knowledgeBaseId)]
+            : [])
         )
       )
       .orderBy(desc(chats.createdAt))

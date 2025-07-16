@@ -73,6 +73,11 @@ export default function KnowledgeBaseList({
     );
   }
 
+  const handleClick = (id: string) => {
+    router.push(`/knowledge/${id}`);
+    router.refresh();
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -118,7 +123,7 @@ export default function KnowledgeBaseList({
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => router.push(`/knowledge/${kb.id}`)}
+                  onClick={() => handleClick(kb.id)}
                 >
                   <Eye size={16} />
                 </Button>

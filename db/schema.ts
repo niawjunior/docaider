@@ -82,6 +82,7 @@ export const chats = pgTable("chats", {
   messages: jsonb(),
   userId: uuid("user_id").default(sql`auth.uid()`),
   isKnowledgeBase: boolean("is_knowledge_base").default(false),
+  knowledgeBaseId: uuid("knowledge_base_id"),
 });
 
 // Main documents table - stores unique document metadata

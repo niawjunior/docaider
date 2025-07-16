@@ -25,7 +25,6 @@ interface MarkdownProps {
   banner?: string;
 }
 const Markdown = ({ isUser, text, images, banner }: MarkdownProps) => {
-  console.log(images);
   return (
     <>
       {banner && (

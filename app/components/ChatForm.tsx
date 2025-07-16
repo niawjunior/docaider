@@ -31,7 +31,7 @@ import {
 import { useShareUrl } from "../hooks/useShareUrl";
 import { Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Markdown from "./Markdown";
 import { useDocuments } from "../hooks/useDocuments";
+import GlobalLoader from "./GlobalLoader";
 
 const toolIcons = {
   askQuestion: <FaQuestion />,
@@ -49,18 +50,18 @@ const toolIcons = {
 
 interface ChatFormProps {
   chatId?: string;
-  initialMessages?: Message[];
   suggestedPrompts?: { title: string; subtitle?: string }[];
   isShowTool?: boolean;
   isKnowledgeBase?: boolean;
+  knowledgeBaseId?: string;
 }
 
 export default function ChatForm({
   chatId,
-  initialMessages,
   suggestedPrompts,
   isShowTool,
-  isKnowledgeBase,
+  isKnowledgeBase = false,
+  knowledgeBaseId,
 }: ChatFormProps) {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -83,6 +84,29 @@ export default function ChatForm({
       description: "Ask a question about the uploaded documents",
     },
   ];
+  const {
+    data: initialMessages,
+    isLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: ["chat", chatId],
+    queryFn: async () => {
+      if (!chatId) {
+        return []; // Return empty array if no chatId
+      }
+      const response = await fetch(
+        `/api/chats/${chatId}?isKnowledgeBase=${isKnowledgeBase}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch chat data");
+      }
+      return response.json();
+    },
+    enabled: !!chatId, // Only run the query when chatId exists
+    staleTime: 0, // Consider data stale immediately
+    refetchOnMount: true, // Always refetch on component mount
+    refetchOnWindowFocus: false, // Don't
+  });
 
   useEffect(() => {
     // Focus on load
@@ -99,12 +123,14 @@ export default function ChatForm({
   } = useChat({
     api: "/api/chat",
     id: chatId,
-    initialMessages: initialMessages,
+    initialMessages: initialMessages || [],
     sendExtraMessageFields: true,
+
     body: {
       chatId,
       currentTool,
       isKnowledgeBase,
+      knowledgeBaseId,
     },
     async onToolCall({ toolCall }) {},
     onFinish: async (response) => {
@@ -256,6 +282,9 @@ export default function ChatForm({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  if (isLoading || isFetching) {
+    return <GlobalLoader />;
+  }
   return (
     <>
       <form
@@ -266,7 +295,7 @@ export default function ChatForm({
           "flex flex-col items-center gap-4  w-full  overflow-y-auto scroll-hidden"
         )}
       >
-        {messages.length === 0 && (
+        {messages?.length === 0 && (
           <>
             <div className="md:mt-0 mt-[100px] ">
               <p className="text-2xl font-bold">Hello there!</p>
