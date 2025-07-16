@@ -49,7 +49,7 @@ export default function DocumentUpload({
   const [file, setFile] = useState<File | null>(null);
   const [fileSizeError, setFileSizeError] = useState<string | null>(null);
   const [titleError, setTitleError] = useState<string | null>(null);
-  const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
   // Use the document upload hook
   const { uploadDocument, isUploading } = useDocumentUpload();
