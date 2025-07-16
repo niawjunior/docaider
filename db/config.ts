@@ -19,7 +19,9 @@ const connectionString = process.env.DATABASE_URL || "";
 // Connection options
 const connectionOptions = {
   max: 10,
-  ssl: process.env.NODE_ENV === "production",
+  ssl: {
+    rejectUnauthorized: false,
+  },
 };
 
 // Create a query client (for normal queries)

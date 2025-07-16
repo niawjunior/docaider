@@ -8,7 +8,8 @@ export default {
   schema: "./db/schema.ts",
   out: "./db/migrations",
   dbCredentials: {
-    url: process.env.DATABASE_URL!,
+    url: `${process.env.DATABASE_URL}?sslmode=no-verify`,
+    ssl: true,
   },
   dialect: "postgresql",
   verbose: true,
