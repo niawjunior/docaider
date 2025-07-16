@@ -33,8 +33,6 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  console.log("knowledgeBaseId", knowledgeBaseId);
-  console.log("isKnowledgeBase", isKnowledgeBase);
   // Get user credit using Drizzle ORM
   const creditData = await db
     .select({ balance: credits.balance })
@@ -42,15 +40,32 @@ export async function POST(req: NextRequest) {
     .where(eq(credits.userId, user.id))
     .limit(1);
 
-  // Get the knowledge base
-  const [knowledgeBase] = await db
-    .select()
-    .from(knowledgeBases)
-    .where(eq(knowledgeBases.id, knowledgeBaseId));
+  // Get the knowledge base if knowledgeBaseId is provided
+  let knowledgeBaseDocumentIds: string[] = [];
 
-  console.log("knowledgeBase", knowledgeBase);
+  if (isKnowledgeBase && knowledgeBaseId) {
+    const [knowledgeBase] = await db
+      .select()
+      .from(knowledgeBases)
+      .where(eq(knowledgeBases.id, knowledgeBaseId));
 
-  const knowledgeBaseDocumentIds = knowledgeBase?.documentIds || [];
+    // If knowledge base exists, get its document IDs
+    if (knowledgeBase) {
+      knowledgeBaseDocumentIds = knowledgeBase.documentIds || [];
+    } else {
+      console.warn(`Knowledge base with ID ${knowledgeBaseId} not found`);
+      // If we're in knowledge base mode but the KB doesn't exist, return empty documents
+      if (isKnowledgeBase) {
+        return new Response(
+          JSON.stringify({ message: "Knowledge base not found" }),
+          {
+            status: 404,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+    }
+  }
   // Get documents using Drizzle ORM - only get main document metadata, not chunks
   const allDocuments = await db
     .select({
@@ -61,13 +76,15 @@ export async function POST(req: NextRequest) {
     })
     .from(documents)
     .where(
-      isKnowledgeBase
-        ? // If it's a knowledge base request and we have documentIds, filter by those IDs
+      isKnowledgeBase && knowledgeBaseId
+        ? // If it's a knowledge base request with valid ID and we have documentIds
           and(
             eq(documents.userId, user.id),
             eq(documents.active, true),
             eq(documents.isKnowledgeBase, true),
-            inArray(documents.documentId, knowledgeBaseDocumentIds)
+            knowledgeBaseDocumentIds.length > 0
+              ? inArray(documents.documentId, knowledgeBaseDocumentIds)
+              : eq(documents.id, -1) // No matching documents if empty array (impossible condition)
           )
         : // Otherwise use the standard filtering
           and(
@@ -134,13 +151,7 @@ export async function POST(req: NextRequest) {
     -   Current document count: ${allDocuments.length}
     -   **If current document count is more than 1, you **MUST** Ask user to specify the document name to filter the search.**
     -   * Always ask the user to specify the language to ask the question. Example: en, th*
-    -   Documents Name:  ${
-      allDocuments.length > 0
-        ? allDocuments
-            .map((doc: { title: string } | undefined) => doc?.title)
-            .join(", ")
-        : "No documents uploaded."
-    }
+    
     -   If a document-related tool is requested but document count is 0, politely inform the user: "No documents uploaded."
     -   Emphasize RAG capabilities when answering questions about documents.
     -   Suggest knowledge organization strategies when appropriate.

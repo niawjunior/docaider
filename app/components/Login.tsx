@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 const LoginComponent = () => {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callback_url") || "/chat";
+  const callbackUrl = searchParams.get("callback_url") || "/dashboard";
   return (
     <div className="h-[calc(100dvh-250px)] flex items-center justify-center  text-white overflow-hidden ">
       {/* Login Box */}

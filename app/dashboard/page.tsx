@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Plus } from "lucide-react";
+import { MessageCircle, Plus, CreditCard, Mail } from "lucide-react";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import KnowledgeBaseList from "../components/KnowledgeBaseList";
 import CreateKnowledgeBaseDialog from "../components/CreateKnowledgeBaseDialog";
@@ -16,77 +16,113 @@ import {
 import { GoHomeFill } from "react-icons/go";
 import { useKnowledgeBases } from "../hooks/useKnowledgeBases";
 import GlobalLoader from "../components/GlobalLoader";
+import { Badge } from "@/components/ui/badge";
+import { useCredit } from "../hooks/useCredit";
 
 export default function DashboardPage() {
   const { session } = useSupabaseSession();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const router = useRouter();
+  const [userEmail, setUserEmail] = useState<string>("");
 
   const kbHooks = useKnowledgeBases();
 
+  console.log(session?.user?.id);
+  // Get user credit information
+  const { credit, isLoading: creditLoading } = useCredit(
+    session?.user.id || ""
+  );
   const getKnowledgeBases = kbHooks.getKnowledgeBases;
 
   const getPublicKnowledgeBases = kbHooks.getPublicKnowledgeBases;
+
+  // Set user email when session is available
+  useEffect(() => {
+    if (session?.user?.email) {
+      setUserEmail(session.user.email);
+    }
+  }, [session]);
 
   if (!session) {
     return null; // Don't render anything while redirecting
   }
 
-  if (getKnowledgeBases.isLoading || getPublicKnowledgeBases.isLoading) {
+  if (
+    getKnowledgeBases.isLoading ||
+    getPublicKnowledgeBases.isLoading ||
+    creditLoading
+  ) {
     return <GlobalLoader />;
   }
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="flex gap-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <Button
-                size="icon"
-                onClick={() => router.push("/")}
-                className="text-[20px] rounded-lg"
-              >
-                <GoHomeFill />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Go to home</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <Button
-                size="icon"
-                onClick={() => router.push("/chat")}
-                className="text-[20px] rounded-lg"
-              >
-                <MessageCircle />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Go to chat</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <Button
-                size="icon"
-                onClick={() => setIsCreateDialogOpen(true)}
-                className="text-[20px] rounded-lg"
-              >
-                <Plus />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Create knowledge base</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Button
+                  size="icon"
+                  onClick={() => router.push("/")}
+                  className="text-[20px] rounded-lg"
+                >
+                  <GoHomeFill />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Go to home</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Button
+                  size="icon"
+                  onClick={() => router.push("/chat")}
+                  className="text-[20px] rounded-lg"
+                >
+                  <MessageCircle />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Go to chat</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Button
+                  size="icon"
+                  onClick={() => setIsCreateDialogOpen(true)}
+                  className="text-[20px] rounded-lg"
+                >
+                  <Plus />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Create knowledge base</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+
+        {/* User info and credits section */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Mail size={16} className="text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">{userEmail}</span>
+          </div>
+          <Badge
+            variant="outline"
+            className="flex items-center gap-2 px-3 py-1"
+          >
+            <CreditCard size={16} />
+            <span>{credit?.balance || 0} credits</span>
+          </Badge>
+        </div>
       </div>
       <div className="flex justify-between items-center py-4">
         <h2 className="text-xl font-semibold">My Knowledge Bases</h2>

@@ -12,7 +12,7 @@ export async function signInWithGoogle(callbackUrl?: string) {
       redirectTo: `${
         process.env.NEXT_PUBLIC_SITE_URL
       }/auth/callback?callback_url=${encodeURIComponent(
-        callbackUrl || "/chat"
+        callbackUrl || "/dashboard"
       )}`,
     },
   });

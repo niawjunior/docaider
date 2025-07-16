@@ -12,6 +12,7 @@ import {
   Copy,
   PlusCircle,
   MessageSquarePlus,
+  Eye,
 } from "lucide-react";
 import {
   Dialog,
@@ -38,6 +39,7 @@ import {
 import { createChat } from "@/app/utils/aisdk/chat";
 import { useChats } from "@/app/hooks/useChats";
 import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 // Type definitions are inferred from React Query hooks
 
 export default function ViewKnowledgeBasePage() {
@@ -72,6 +74,7 @@ export default function ViewKnowledgeBasePage() {
     updatedAt: string;
     userId: string;
     status: string;
+    url: string;
   }
   // Use React Query hooks for fetching knowledge base and its documents
   const {
@@ -263,7 +266,16 @@ export default function ViewKnowledgeBasePage() {
                   <ul className="space-y-1 text-sm">
                     {documents.map((doc: Document) => (
                       <li key={doc.id} className="truncate">
-                        • {doc.title}
+                        <Badge variant="outline">
+                          <Link
+                            href={doc.url}
+                            target="_blank"
+                            className="flex items-center gap-2 p-1"
+                          >
+                            {doc.title}
+                            <Eye size={16} />
+                          </Link>
+                        </Badge>
                       </li>
                     ))}
                   </ul>
