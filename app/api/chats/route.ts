@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
   const offset = Number(searchParams.get("offset")) || 0;
   const isKnowledgeBase = searchParams.get("isKnowledgeBase") === "true";
   const knowledgeBaseId = searchParams.get("knowledgeBaseId");
-  console.log("knowledgeBaseId", knowledgeBaseId);
   const { data: user } = await supabase.auth.getUser();
 
   if (!user) {

@@ -7,7 +7,6 @@ import { toast } from "sonner";
 const DocumentsList = () => {
   const { useGetDocuments } = useDocuments();
   const { data: documents = [] } = useGetDocuments({ isKnowledgeBase: false });
-  console.log(documents);
   const { deleteDocument } = useDocuments();
   const handleDelete = async (doc: {
     title: string;

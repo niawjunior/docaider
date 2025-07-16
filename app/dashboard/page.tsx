@@ -27,7 +27,6 @@ export default function DashboardPage() {
 
   const kbHooks = useKnowledgeBases();
 
-  console.log(session?.user?.id);
   // Get user credit information
   const { credit, isLoading: creditLoading } = useCredit(
     session?.user.id || ""

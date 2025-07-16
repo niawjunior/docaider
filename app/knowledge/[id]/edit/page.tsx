@@ -191,7 +191,6 @@ export default function EditKnowledgeBasePage() {
       // The refetchDocuments() call is already in updateKnowledgeBaseDocumentIds
       toast("Document added to knowledge base successfully");
       setCurrentTab("current");
-      console.log("currentTab", currentTab);
     } catch (error) {
       console.error("Error updating knowledge base:", error);
       toast("Failed to update knowledge base");

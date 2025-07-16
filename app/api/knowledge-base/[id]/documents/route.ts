@@ -14,7 +14,6 @@ export async function GET(
       data: { session },
     } = await supabase.auth.getSession();
     const { id } = await params;
-    // console.log("id", id);
 
     // Get the knowledge base
     const [knowledgeBase] = await db

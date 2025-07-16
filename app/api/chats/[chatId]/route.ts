@@ -17,9 +17,6 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  console.log("user", user);
-  console.log("chatId", chatId);
-
   try {
     const data = await db
       .select({
