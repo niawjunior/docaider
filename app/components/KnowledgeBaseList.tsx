@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2 } from "lucide-react";
+import { Eye, Edit, Trash2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
@@ -24,23 +24,25 @@ type KnowledgeBase = {
   id: string;
   name: string;
   description: string;
-  is_public: boolean;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
-  user_name?: string;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  userName?: string;
 };
 
 interface KnowledgeBaseListProps {
   userId?: string;
   isPublic: boolean;
   knowledgeBases: KnowledgeBase[];
+  onOpenCreateKnowledgeBaseDialog: () => void;
 }
 
 export default function KnowledgeBaseList({
   userId,
   isPublic,
   knowledgeBases,
+  onOpenCreateKnowledgeBaseDialog,
 }: KnowledgeBaseListProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const router = useRouter();
@@ -50,6 +52,7 @@ export default function KnowledgeBaseList({
   const { mutate: deleteKnowledgeBase, isPending: isDeleting } =
     kbHooks.deleteKnowledgeBase;
 
+  console.log(knowledgeBases);
   const handleDelete = async (id: string) => {
     deleteKnowledgeBase(id, {
       onSuccess: () => {
@@ -69,6 +72,17 @@ export default function KnowledgeBaseList({
             ? "No public knowledge bases available yet."
             : "You haven't created any knowledge bases yet."}
         </p>
+        {!isPublic && (
+          <Button
+            onClick={() => {
+              onOpenCreateKnowledgeBaseDialog();
+            }}
+            className="mx-auto"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Create Knowledge Base
+          </Button>
+        )}
       </Card>
     );
   }
@@ -78,6 +92,7 @@ export default function KnowledgeBaseList({
     router.refresh();
   };
 
+  console.log(knowledgeBases);
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -86,23 +101,23 @@ export default function KnowledgeBaseList({
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-semibold text-lg truncate">{kb.name}</h3>
-                {kb.is_public && <Badge>Public</Badge>}
+                {kb.isPublic && <Badge>Public</Badge>}
               </div>
               <p className="text-muted-foreground text-sm mb-2 line-clamp-2">
                 {kb.description}
               </p>
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>
-                  Updated {formatDistanceToNow(new Date(kb.updated_at))} ago
+                  Updated {formatDistanceToNow(new Date(kb.updatedAt))} ago
                 </span>
               </div>
               {isPublic && (
-                <p className="text-xs mt-2">Created by {kb.user_name}</p>
+                <p className="text-xs mt-2">Created by {kb.userName}</p>
               )}
             </CardContent>
             <CardFooter className="flex  p-6 pt-0">
               <div className="flex gap-2">
-                {!isPublic && userId === kb.user_id && (
+                {!isPublic && userId === kb.userId && (
                   <>
                     <Button
                       variant="outline"

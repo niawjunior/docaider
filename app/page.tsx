@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FeatureCard } from "./components/FeatureCard";
 import { TestimonialCard } from "./components/TestimonialCard";
@@ -8,7 +7,6 @@ import MainLayout from "./components/MainLayout";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -17,21 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ArrowRight, Database } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
-
-interface KnowledgeBase {
-  id: string;
-  name: string;
-  description: string;
-  isPublic: boolean;
-  userId: string;
-  documentCount: number;
-  createdAt: string;
-  updatedAt: string;
-  profiles: {
-    fullName: string | null;
-    avatarUrl: string | null;
-  } | null;
-}
+import { useKnowledgeBases } from "./hooks/useKnowledgeBases";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -56,29 +40,12 @@ const itemVariants = {
 };
 
 export default function Home() {
-  const [publicKnowledgeBases, setPublicKnowledgeBases] = useState<
-    KnowledgeBase[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const kbHooks = useKnowledgeBases();
+
+  const getPublicKnowledgeBases = kbHooks.getPublicKnowledgeBases;
+  console.log("getPublicKnowledgeBases", getPublicKnowledgeBases.data);
   const router = useRouter();
 
-  useEffect(() => {
-    async function fetchPublicKnowledgeBases() {
-      try {
-        const response = await fetch("/api/knowledge-base?public=true");
-        if (response.ok) {
-          const data = await response.json();
-          setPublicKnowledgeBases(data.knowledgeBases);
-        }
-      } catch (error) {
-        console.error("Error fetching public knowledge bases:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchPublicKnowledgeBases();
-  }, []);
   return (
     <MainLayout>
       <video
@@ -205,12 +172,14 @@ export default function Home() {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {isLoading ? (
+              {getPublicKnowledgeBases.isLoading ? (
                 <div className="col-span-full flex justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
-              ) : publicKnowledgeBases.length > 0 ? (
-                publicKnowledgeBases.slice(0, 6).map((kb) => (
+              ) : getPublicKnowledgeBases &&
+                getPublicKnowledgeBases.data &&
+                getPublicKnowledgeBases.data.length > 0 ? (
+                getPublicKnowledgeBases.data.slice(0, 6).map((kb: any) => (
                   <Card
                     key={kb.id}
                     className="overflow-hidden border-gray-800 bg-gray-950/50 backdrop-blur-sm hover:bg-gray-900/50 transition-colors"
@@ -219,21 +188,23 @@ export default function Home() {
                       <CardTitle className="text-xl font-bold truncate">
                         {kb.name}
                       </CardTitle>
-                      <CardDescription className="text-gray-400">
-                        {kb.documentCount} document
-                        {kb.documentCount !== 1 ? "s" : ""}
-                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-gray-300 line-clamp-2">
                         {kb.description || "No description provided."}
                       </p>
+                      {kb.isPublic && (
+                        <p className="text-xs mt-2 text-gray-400">
+                          Created by {kb.userName}
+                        </p>
+                      )}
                     </CardContent>
                     <CardFooter className="flex justify-between items-center pt-2 border-t border-gray-800">
                       <div className="text-xs text-gray-400">
                         Updated {formatDistanceToNow(new Date(kb.updatedAt))}{" "}
                         ago
                       </div>
+
                       <Button
                         variant="ghost"
                         size="sm"
@@ -260,16 +231,18 @@ export default function Home() {
               )}
             </div>
 
-            {publicKnowledgeBases.length > 0 && (
-              <div className="flex justify-center">
-                <Button
-                  variant="outline"
-                  onClick={() => router.push("/dashboard?tab=public")}
-                >
-                  View All Public Knowledge Bases
-                </Button>
-              </div>
-            )}
+            {getPublicKnowledgeBases &&
+              getPublicKnowledgeBases.data &&
+              getPublicKnowledgeBases.data.length > 0 && (
+                <div className="flex justify-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push("/dashboard?tab=public")}
+                  >
+                    View All Public Knowledge Bases
+                  </Button>
+                </div>
+              )}
 
             <h2 className="text-3xl md:text-4xl font-bold text-white text-center mt-16 mb-4">
               Trusted by Professionals

@@ -17,6 +17,16 @@ import GlobalLoader from "@/app/components/GlobalLoader";
 import Link from "next/link";
 import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Document {
   title: string;
@@ -41,6 +51,11 @@ export default function EditKnowledgeBasePage() {
   const kbHooks = useKnowledgeBases();
   const queryClient = useQueryClient();
   const [currentTab, setCurrentTab] = useState("current");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  // Use the delete mutation from the hook
+  const { mutate: deleteKnowledgeBase, isPending: isDeleting } =
+    kbHooks.deleteKnowledgeBase;
 
   // Use the new React Query hooks for fetching knowledge base and its documents
   const {
@@ -197,159 +212,208 @@ export default function EditKnowledgeBasePage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    deleteKnowledgeBase(id, {
+      onSuccess: () => {
+        toast("Knowledge base deleted successfully");
+        router.push("/dashboard");
+      },
+      onError: () => {
+        toast("Failed to delete knowledge base");
+      },
+    });
+  };
+
   if (isLoading) {
     return <GlobalLoader />;
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center mb-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push("/dashboard")}
-          className="mr-4"
-        >
-          <ArrowLeft size={16} className="mr-2" />
-          Back to Dashboard
-        </Button>
-        <h1 className="text-2xl font-bold">Edit Knowledge Base</h1>
-      </div>
+    <>
+      <div className="container mx-auto py-8 px-4">
+        <div className="flex items-center mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push("/dashboard")}
+            className="mr-4"
+          >
+            <ArrowLeft size={16} className="mr-2" />
+            Back to Dashboard
+          </Button>
+          <h1 className="text-2xl font-bold">Edit Knowledge Base</h1>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Knowledge Base Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter knowledge base name"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Describe what this knowledge base is about"
-                    rows={3}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="public">Make Public</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Public knowledge bases can be viewed by anyone
-                    </p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle>Knowledge Base Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter knowledge base name"
+                    />
                   </div>
-                  <Switch
-                    id="public"
-                    checked={isPublic}
-                    onCheckedChange={setIsPublic}
-                  />
-                </div>
 
-                <Button
-                  onClick={handleSave}
-                  className="w-full"
-                  disabled={isSaving}
-                >
-                  {isSaving && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {!isSaving && <Save size={16} className="mr-2" />}
-                  Save Changes
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Describe what this knowledge base is about"
+                      rows={3}
+                    />
+                  </div>
 
-        <div className="lg:col-span-2">
-          <Tabs value={currentTab} onValueChange={setCurrentTab}>
-            <TabsList className="mb-4 w-full">
-              <TabsTrigger
-                disabled={deleteDocument.isPending || isUploading}
-                value="current"
-              >
-                Current Documents
-              </TabsTrigger>
-              <TabsTrigger
-                disabled={deleteDocument.isPending || isUploading}
-                value="upload"
-              >
-                Upload New Document
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="current">
-              <Card>
-                <CardContent>
-                  {kbDocuments.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">
-                      No documents in this knowledge base yet. Add documents
-                      from the &quot;Add Documents&quot; tab.
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {kbDocuments.map((doc: Document) => (
-                        <div
-                          key={doc.id}
-                          className="flex items-center justify-between p-3 border rounded-md"
-                        >
-                          <div>
-                            <p className="font-medium">{doc.title}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {doc.documentId} • Added on{" "}
-                              {new Date(doc.updatedAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Link
-                              target="_blank"
-                              href={doc.url}
-                              className="cursor-pointer"
-                            >
-                              <Button variant="ghost" size="icon">
-                                <Eye size={16} />
-                              </Button>
-                            </Link>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeleteDocument(doc)}
-                              disabled={deleteDocument.isPending}
-                            >
-                              <Trash2 size={16} />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="public">Make Public</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Public knowledge bases can be viewed by anyone
+                      </p>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="upload">
-              <DocumentUpload
-                onFinish={handleFinishUpload}
-                onUpload={(isUploading) => setIsUploading(isUploading)}
-                isKnowledgeBase={true}
-              />
-            </TabsContent>
-          </Tabs>
+                    <Switch
+                      id="public"
+                      checked={isPublic}
+                      onCheckedChange={setIsPublic}
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleSave}
+                    className="w-full"
+                    disabled={isSaving}
+                  >
+                    {isSaving && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    {!isSaving && <Save size={16} className="mr-2" />}
+                    Save Changes
+                  </Button>
+
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={() => setDeleteId(params.id)}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    {!isDeleting && <Trash2 size={16} className="mr-2" />}
+                    Delete Knowledge Base
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="lg:col-span-2">
+            <Tabs value={currentTab} onValueChange={setCurrentTab}>
+              <TabsList className="mb-4 w-full">
+                <TabsTrigger
+                  disabled={deleteDocument.isPending || isUploading}
+                  value="current"
+                >
+                  Current Documents
+                </TabsTrigger>
+                <TabsTrigger
+                  disabled={deleteDocument.isPending || isUploading}
+                  value="upload"
+                >
+                  Upload New Document
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="current">
+                <Card>
+                  <CardContent>
+                    {kbDocuments.length === 0 ? (
+                      <p className="text-center text-muted-foreground py-8">
+                        No documents in this knowledge base yet. Add documents
+                        from the &quot;Add Documents&quot; tab.
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {kbDocuments.map((doc: Document) => (
+                          <div
+                            key={doc.id}
+                            className="flex items-center justify-between p-3 border rounded-md"
+                          >
+                            <div>
+                              <p className="font-medium">{doc.title}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {doc.documentId} • Added on{" "}
+                                {new Date(doc.updatedAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Link
+                                target="_blank"
+                                href={doc.url}
+                                className="cursor-pointer"
+                              >
+                                <Button variant="ghost" size="icon">
+                                  <Eye size={16} />
+                                </Button>
+                              </Link>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteDocument(doc)}
+                                disabled={deleteDocument.isPending}
+                              >
+                                <Trash2 size={16} />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="upload">
+                <DocumentUpload
+                  onFinish={handleFinishUpload}
+                  onUpload={(isUploading) => setIsUploading(isUploading)}
+                  isKnowledgeBase={true}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
-    </div>
+
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this knowledge base and all
+              associated documents. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteId && handleDelete(deleteId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

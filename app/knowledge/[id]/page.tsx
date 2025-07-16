@@ -255,7 +255,7 @@ export default function ViewKnowledgeBasePage() {
                   <p className="text-sm">{knowledgeBase.description}</p>
                 )}
                 <div className="text-sm text-muted-foreground">
-                  <p>Contains {knowledgeBase.documentCount} documents</p>
+                  <p>Contains {documents.length} documents</p>
                   <p>
                     Last updated{" "}
                     {formatDistanceToNow(new Date(knowledgeBase.updatedAt))} ago
@@ -263,6 +263,11 @@ export default function ViewKnowledgeBasePage() {
                 </div>
                 <div className="border-t pt-4">
                   <h3 className="font-medium mb-2">Documents</h3>
+                  {documents.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      No documents found
+                    </p>
+                  )}
                   <ul className="space-y-1 text-sm">
                     {documents.map((doc: Document) => (
                       <li key={doc.id} className="truncate">

@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useKnowledgeBases } from "../hooks/useKnowledgeBases";
@@ -34,7 +33,6 @@ export default function CreateKnowledgeBaseDialog({
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   // Import the useKnowledgeBases hook
   const kbHooks = useKnowledgeBases();
@@ -51,7 +49,7 @@ export default function CreateKnowledgeBaseDialog({
 
     try {
       // Use the createKnowledgeBase mutation from our hook
-      const result = await kbHooks.createKnowledgeBase.mutateAsync({
+      await kbHooks.createKnowledgeBase.mutateAsync({
         name,
         description,
         isPublic,
@@ -65,9 +63,6 @@ export default function CreateKnowledgeBaseDialog({
 
       // Close dialog
       onOpenChange(false);
-
-      // Navigate to the edit   page for the new knowledge base
-      router.push(`/knowledge/${result.id}/edit`);
     } catch (error: any) {
       console.error("Error creating knowledge base:", error);
       toast(error.message || "Failed to create knowledge base");

@@ -44,6 +44,7 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/auth") &&
     !request.nextUrl.pathname.startsWith("/share") &&
     !request.nextUrl.pathname.startsWith("/api/share") &&
+    !request.nextUrl.pathname.startsWith("/api/knowledge-base") &&
     !request.nextUrl.pathname.startsWith("/terms") &&
     !request.nextUrl.pathname.startsWith("/privacy") &&
     !request.nextUrl.pathname.startsWith("/contact") &&

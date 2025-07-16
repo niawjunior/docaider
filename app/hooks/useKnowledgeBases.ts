@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "../utils/supabase/client";
 import { toast } from "sonner";
 
-interface KnowledgeBase {
+// This interface is used for type checking in the API responses
+export interface KnowledgeBase {
   id: string;
   name: string;
   description: string;
@@ -76,22 +77,22 @@ export const useKnowledgeBases = () => {
   const getKnowledgeBases = useQuery({
     queryKey: ["knowledgeBases", { isPublic: false }],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("knowledge_bases")
-        .select(
-          `
-          *,
-          profiles:user_id (display_name)
-        `
-        )
-        .order("updated_at", { ascending: false });
+      try {
+        const response = await fetch(`/api/knowledge-base`);
 
-      if (error) throw error;
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Unauthorized");
+          }
+          throw new Error("Failed to fetch knowledge bases");
+        }
 
-      return data.map((kb) => ({
-        ...kb,
-        user_name: kb.profiles?.display_name,
-      })) as KnowledgeBase[];
+        const data = await response.json();
+        return data.knowledgeBases || [];
+      } catch (error) {
+        console.error("Error fetching knowledge bases:", error);
+        throw error;
+      }
     },
   });
 
@@ -101,23 +102,19 @@ export const useKnowledgeBases = () => {
   const getPublicKnowledgeBases = useQuery({
     queryKey: ["knowledgeBases", { isPublic: true }],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("knowledge_bases")
-        .select(
-          `
-          *,
-          profiles:user_id (display_name)
-        `
-        )
-        .eq("is_public", true)
-        .order("updated_at", { ascending: false });
+      try {
+        const response = await fetch(`/api/knowledge-base?isPublic=true`);
 
-      if (error) throw error;
+        if (!response.ok) {
+          throw new Error("Failed to fetch public knowledge bases");
+        }
 
-      return data.map((kb) => ({
-        ...kb,
-        user_name: kb.profiles?.display_name,
-      })) as KnowledgeBase[];
+        const data = await response.json();
+        return data.knowledgeBases || [];
+      } catch (error) {
+        console.error("Error fetching public knowledge bases:", error);
+        throw error;
+      }
     },
   });
 

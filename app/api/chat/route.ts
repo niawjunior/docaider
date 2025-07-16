@@ -42,28 +42,28 @@ export async function POST(req: NextRequest) {
 
   // Get the knowledge base if knowledgeBaseId is provided
   let knowledgeBaseDocumentIds: string[] = [];
+  let isPublicKnowledgeBase = false;
 
-  if (isKnowledgeBase && knowledgeBaseId) {
-    const [knowledgeBase] = await db
-      .select()
-      .from(knowledgeBases)
-      .where(eq(knowledgeBases.id, knowledgeBaseId));
+  const [knowledgeBase] = await db
+    .select()
+    .from(knowledgeBases)
+    .where(eq(knowledgeBases?.id, knowledgeBaseId));
 
-    // If knowledge base exists, get its document IDs
-    if (knowledgeBase) {
-      knowledgeBaseDocumentIds = knowledgeBase.documentIds || [];
-    } else {
-      console.warn(`Knowledge base with ID ${knowledgeBaseId} not found`);
-      // If we're in knowledge base mode but the KB doesn't exist, return empty documents
-      if (isKnowledgeBase) {
-        return new Response(
-          JSON.stringify({ message: "Knowledge base not found" }),
-          {
-            status: 404,
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-      }
+  // If knowledge base exists, get its document IDs
+  if (knowledgeBase) {
+    knowledgeBaseDocumentIds = knowledgeBase.documentIds || [];
+    isPublicKnowledgeBase = knowledgeBase.isPublic || false;
+  } else {
+    console.warn(`Knowledge base with ID ${knowledgeBaseId} not found`);
+    // If we're in knowledge base mode but the KB doesn't exist, return empty documents
+    if (isKnowledgeBase) {
+      return new Response(
+        JSON.stringify({ message: "Knowledge base not found" }),
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
   }
   // Get documents using Drizzle ORM - only get main document metadata, not chunks
@@ -79,9 +79,13 @@ export async function POST(req: NextRequest) {
       isKnowledgeBase && knowledgeBaseId
         ? // If it's a knowledge base request with valid ID and we have documentIds
           and(
-            eq(documents.userId, user.id),
             eq(documents.active, true),
             eq(documents.isKnowledgeBase, true),
+            // For public knowledge bases, don't filter by user ID
+            // For private knowledge bases, only show documents owned by the current user
+            isPublicKnowledgeBase !== true
+              ? eq(documents.userId, user.id)
+              : undefined,
             knowledgeBaseDocumentIds.length > 0
               ? inArray(documents.documentId, knowledgeBaseDocumentIds)
               : eq(documents.id, -1) // No matching documents if empty array (impossible condition)
@@ -125,9 +129,7 @@ export async function POST(req: NextRequest) {
     ** Current document count: ${allDocuments.length} **
     ** Documents Name:  ${
       allDocuments.length > 0
-        ? allDocuments
-            .map((doc: { title: string } | undefined) => doc?.title)
-            .join(", ")
+        ? allDocuments.map((doc) => doc?.title).join(", ")
         : "No documents uploaded."
     } **
     * **Document Questions (askQuestion)**: If the user asks about a document AND documents are uploaded, you **MUST** call the \`askQuestion\` tool.Do NOT provide a generic response or suggest enabling tools if all conditions are met.

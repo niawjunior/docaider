@@ -32,7 +32,6 @@ export default function DashboardPage() {
     session?.user.id || ""
   );
   const getKnowledgeBases = kbHooks.getKnowledgeBases;
-
   const getPublicKnowledgeBases = kbHooks.getPublicKnowledgeBases;
 
   // Set user email when session is available
@@ -131,6 +130,7 @@ export default function DashboardPage() {
         knowledgeBases={getKnowledgeBases.data || []}
         userId={session.user.id}
         isPublic={false}
+        onOpenCreateKnowledgeBaseDialog={() => setIsCreateDialogOpen(true)}
       />
 
       <h2 className="text-xl font-semibold py-4">Public Knowledge Bases</h2>
@@ -139,6 +139,7 @@ export default function DashboardPage() {
         knowledgeBases={getPublicKnowledgeBases.data || []}
         userId={session.user.id}
         isPublic={true}
+        onOpenCreateKnowledgeBaseDialog={() => setIsCreateDialogOpen(true)}
       />
 
       <CreateKnowledgeBaseDialog
