@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -11,12 +14,29 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useKnowledgeBases } from "../hooks/useKnowledgeBases";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+// Define the Zod schema for form validation
+const FormSchema = z.object({
+  name: z.string().min(1, { message: "Knowledge base name is required" }),
+  description: z.string().optional(),
+  isPublic: z.boolean(),
+});
+
+type FormValues = z.infer<typeof FormSchema>;
 
 interface CreateKnowledgeBaseDialogProps {
   open: boolean;
@@ -29,116 +49,144 @@ export default function CreateKnowledgeBaseDialog({
   onOpenChange,
   userId,
 }: CreateKnowledgeBaseDialogProps) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [isPublic, setIsPublic] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Import the useKnowledgeBases hook
   const kbHooks = useKnowledgeBases();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Initialize react-hook-form with Zod validation
+  const form = useForm<FormValues>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      isPublic: false,
+    },
+  });
 
-    if (!name.trim()) {
-      toast("Knowledge base name is required");
-      return;
-    }
-
+  // Form submission handler using react-hook-form
+  async function onSubmit(data: FormValues) {
     setIsLoading(true);
 
     try {
       // Use the createKnowledgeBase mutation from our hook
       await kbHooks.createKnowledgeBase.mutateAsync({
-        name,
-        description,
-        isPublic,
+        name: data.name,
+        description: data.description || "",
+        isPublic: data.isPublic,
         userId,
       });
 
       // Reset form
-      setName("");
-      setDescription("");
-      setIsPublic(false);
+      form.reset();
 
       // Close dialog
       onOpenChange(false);
+
+      toast.success("Knowledge base created successfully");
     } catch (error: any) {
       console.error("Error creating knowledge base:", error);
-      toast(error.message || "Failed to create knowledge base");
+      toast.error(error.message || "Failed to create knowledge base");
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Create Knowledge Base</DialogTitle>
-            <DialogDescription>
-              Create a new knowledge base to organize your documents and share
-              knowledge.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Create Knowledge Base</DialogTitle>
+          <DialogDescription>
+            Create a new knowledge base to organize your documents and share
+            knowledge.
+          </DialogDescription>
+        </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter knowledge base name"
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 py-4"
+          >
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter knowledge base name"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe what this knowledge base is about"
+                      disabled={isLoading}
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Provide details about the purpose and content of this
+                    knowledge base.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="isPublic"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel>Make Public</FormLabel>
+                    <FormDescription>
+                      Public knowledge bases can be viewed by anyone
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={isLoading}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
                 disabled={isLoading}
-                required
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe what this knowledge base is about"
-                disabled={isLoading}
-                rows={3}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="public">Make Public</Label>
-                <p className="text-sm text-muted-foreground">
-                  Public knowledge bases can be viewed by anyone
-                </p>
-              </div>
-              <Switch
-                id="public"
-                checked={isPublic}
-                onCheckedChange={setIsPublic}
-                disabled={isLoading}
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create
-            </Button>
-          </DialogFooter>
-        </form>
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

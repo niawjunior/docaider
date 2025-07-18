@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from "uuid";
 import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
 import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
-import { Document } from "@langchain/core/documents";
 import { OpenAIEmbeddings } from "@langchain/openai";
 
 import { db } from "../../../db/config";
@@ -15,7 +14,7 @@ export interface DocumentChunk {
   embedding: number[];
 }
 
-const fileLoader = async (file: File): Promise<Document[]> => {
+const fileLoader = async (file: File): Promise<string> => {
   const fileExtension = file.name.split(".").pop();
   switch (fileExtension) {
     case "pdf":
@@ -31,34 +30,42 @@ const fileLoader = async (file: File): Promise<Document[]> => {
   }
 };
 
-const pdfLoader = async (file: File) => {
-  const loader = new PDFLoader(file);
-  const docs = await loader.load();
-  return docs;
+const cleanText = (input: string): string => {
+  return input
+    .normalize("NFC") // Normalize Unicode characters
+    .replace(/\u0000/g, "") // Remove null characters
+    .replace(/\s+/g, " ") // Clean whitespace
+    .trim();
 };
 
-const csvLoader = async (file: File) => {
+const pdfLoader = async (file: File): Promise<string> => {
+  const loader = new PDFLoader(file);
+  const docs = await loader.load();
+  return cleanText(docs.map((d) => d.pageContent).join("\n"));
+};
+
+const csvLoader = async (file: File): Promise<string> => {
   const loader = new CSVLoader(file, {
     separator: ",",
   });
   const docs = await loader.load();
-  return docs;
+  return cleanText(docs.map((d) => d.pageContent).join("\n"));
 };
 
-const docLoader = async (file: File) => {
+const docLoader = async (file: File): Promise<string> => {
   const loader = new DocxLoader(file, {
     type: "doc",
   });
   const docs = await loader.load();
-  return docs;
+  return cleanText(docs.map((d) => d.pageContent).join("\n"));
 };
 
-const docxLoader = async (file: File) => {
+const docxLoader = async (file: File): Promise<string> => {
   const loader = new DocxLoader(file, {
     type: "docx",
   });
   const docs = await loader.load();
-  return docs;
+  return cleanText(docs.map((d) => d.pageContent).join("\n"));
 };
 
 export async function processFile(
@@ -69,24 +76,24 @@ export async function processFile(
   fileName?: string,
   isKnowledgeBase = false,
   publicUrl?: string
-): Promise<Document[]> {
+): Promise<string[]> {
   try {
     // Parse file
     const data = await fileLoader(file);
 
     // Split text into chunks with better context
     const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 100, // Maximum characters per chunk
+      chunkSize: 1000, // Maximum characters per chunk
       chunkOverlap: 0, // Overlap between chunks to maintain context
     });
-    const chunks = await splitter.splitDocuments(data);
+    const chunks = await splitter.splitText(data);
 
     const embeddings = new OpenAIEmbeddings({
       model: "text-embedding-3-large",
     });
 
     const chunkEmbeddings = await embeddings.embedDocuments(
-      chunks.map((d) => d.pageContent)
+      chunks.map((d) => d)
     );
 
     // First, insert the main document record
@@ -117,7 +124,7 @@ export async function processFile(
       try {
         await db.insert(documentChunks).values({
           documentId: mainDocumentId.toString(), // Reference to the main document
-          chunk: chunks[i].pageContent,
+          chunk: chunks[i],
           embedding: chunkEmbeddings[i],
           userId,
           active: true,
@@ -182,6 +189,7 @@ export async function uploadFile(
       documentId: storageData.id,
     };
   } catch (error) {
+    console.log(error);
     console.error("Error uploading file:", error);
     return {
       success: false,
