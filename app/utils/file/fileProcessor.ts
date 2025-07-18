@@ -166,7 +166,6 @@ export async function uploadFile(
     if (storageError) {
       throw new Error(`Storage upload error: ${storageError.message}`);
     }
-    console.log(storageData.fullPath);
 
     await processFile(
       file,

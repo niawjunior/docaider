@@ -40,6 +40,7 @@ import { createChat } from "@/app/utils/aisdk/chat";
 import { useChats } from "@/app/hooks/useChats";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import MainLayout from "@/app/components/MainLayout";
 // Type definitions are inferred from React Query hooks
 
 export default function ViewKnowledgeBasePage() {
@@ -133,7 +134,7 @@ export default function ViewKnowledgeBasePage() {
 
   // Generate share URL when component mounts
   useEffect(() => {
-    const baseUrl = window.location.origin;
+    const baseUrl = `${process.env.NEXT_PUBLIC_SITE_URL}`;
     setShareUrl(`${baseUrl}/knowledge/${params.id}`);
   }, [params.id]);
 
@@ -173,194 +174,197 @@ export default function ViewKnowledgeBasePage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Share Knowledge Base</DialogTitle>
-            <DialogDescription>
-              Share this link with others to give them access to this knowledge
-              base.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center space-x-2">
-            <div className="grid flex-1 gap-2">
-              <Label htmlFor="share-link">Share Link</Label>
-              <Input
-                id="share-link"
-                value={shareUrl}
-                readOnly
-                className="w-full"
-              />
-            </div>
-            <Button
-              type="button"
-              size="icon"
-              className="mt-6"
-              onClick={handleCopyShareLink}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/dashboard")}
-            className="mr-4"
-          >
-            <ArrowLeft size={16} className="mr-2" />
-            Back
-          </Button>
-          <h1 className="text-2xl font-bold">{knowledgeBase.name}</h1>
-          {knowledgeBase.isPublic && <Badge className="ml-2">Public</Badge>}
-        </div>
-        <div className="flex gap-2">
-          {knowledgeBase.isPublic && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShareDialogOpen(true)}
-            >
-              <Share2 size={16} className="mr-2" />
-              Share
-            </Button>
-          )}
-          {canEdit && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push(`/knowledge/${params.id}/edit`)}
-            >
-              <Edit size={16} className="mr-2" />
-              Edit
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 flex flex-col gap-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>About this Knowledge Base</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {knowledgeBase.description && (
-                  <p className="text-sm">{knowledgeBase.description}</p>
-                )}
-                <div className="text-sm text-muted-foreground">
-                  <p>Contains {documents.length} documents</p>
-                  <p>
-                    Last updated{" "}
-                    {formatDistanceToNow(new Date(knowledgeBase.updatedAt))} ago
-                  </p>
-                </div>
-                <div className="border-t pt-4">
-                  <h3 className="font-medium mb-2">Documents</h3>
-                  {documents.length === 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      No documents found
-                    </p>
-                  )}
-                  <ul className="space-y-1 text-sm">
-                    {documents.map((doc: Document) => (
-                      <li key={doc.id} className="truncate">
-                        <Badge variant="outline">
-                          <Link
-                            href={doc.url}
-                            target="_blank"
-                            className="flex items-center gap-2 p-1"
-                          >
-                            {doc.title}
-                            <Eye size={16} />
-                          </Link>
-                        </Badge>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+    <MainLayout>
+      <div className="px-4">
+        <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Share Knowledge Base</DialogTitle>
+              <DialogDescription>
+                Share this link with others to give them access to this
+                knowledge base.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex items-center space-x-2">
+              <div className="grid flex-1 gap-2">
+                <Label htmlFor="share-link">Share Link</Label>
+                <Input
+                  id="share-link"
+                  value={shareUrl}
+                  readOnly
+                  className="w-full"
+                />
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="flex items-center justify-between">
-              <CardTitle>Knowledge Sessions</CardTitle>
-              <CardTitle>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={createNewChat}
-                        className="text-[20px] rounded-lg"
-                      >
-                        <PlusCircle />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Create new chat</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </CardTitle>
-            </CardContent>
-            <CardContent className="max-h-[290px] overflow-y-auto">
-              <KnowledgeSessions
-                chatId={chatId}
-                knowledgeBaseId={params.id}
-                onChatClick={handleChatClick}
-              />
-            </CardContent>
-          </Card>
+              <Button
+                type="button"
+                size="icon"
+                className="mt-6"
+                onClick={handleCopyShareLink}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/dashboard")}
+              className="mr-4"
+            >
+              <ArrowLeft size={16} className="mr-2" />
+              Back
+            </Button>
+            <h1 className="text-2xl font-bold">{knowledgeBase.name}</h1>
+            {knowledgeBase.isPublic && <Badge className="ml-2">Public</Badge>}
+          </div>
+          <div className="flex gap-2">
+            {canEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push(`/knowledge/${params.id}/edit`)}
+              >
+                <Edit size={16} className="mr-2" />
+                Edit
+              </Button>
+            )}
+            {knowledgeBase.isPublic && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShareDialogOpen(true)}
+              >
+                <Share2 size={16} className="mr-2" />
+                Share
+              </Button>
+            )}
+          </div>
         </div>
 
-        <div className="lg:col-span-2">
-          <Card className="h-full flex flex-col">
-            <CardHeader>
-              <CardTitle>Ask Questions</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-grow flex flex-col ">
-              {knowledgeBaseChatsData.length === 0 && !chatId ? (
-                <div className="flex flex-col items-center justify-center gap-4 min-h-[calc(100vh-220px)]">
-                  <div className="text-center">
-                    <h3 className="text-xl font-medium mb-2">
-                      No chat sessions yet
-                    </h3>
-                    <p className="text-muted-foreground mb-4">
-                      Start a new chat to ask questions about this knowledge
-                      base
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1 flex flex-col gap-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>About this Knowledge Base</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {knowledgeBase.description && (
+                    <p className="text-sm">{knowledgeBase.description}</p>
+                  )}
+                  <div className="text-sm text-muted-foreground">
+                    <p>Contains {documents.length} documents</p>
+                    <p>
+                      Last updated{" "}
+                      {formatDistanceToNow(new Date(knowledgeBase.updatedAt))}{" "}
+                      ago
                     </p>
                   </div>
-                  <Button
-                    onClick={createNewChat}
-                    className="flex items-center gap-2"
-                    size="lg"
-                  >
-                    <MessageSquarePlus className="h-5 w-5" />
-                    Start New Chat
-                  </Button>
+                  <div className="border-t pt-4 max-h-[120px] overflow-y-auto">
+                    <h3 className="font-medium mb-2">Documents</h3>
+                    {documents.length === 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        No documents found
+                      </p>
+                    )}
+                    <ul className="space-y-1 text-sm flex gap-2 flex-wrap">
+                      {documents.map((doc: Document) => (
+                        <li key={doc.id} className="truncate">
+                          <Badge variant="outline">
+                            <Link
+                              href={doc.url}
+                              target="_blank"
+                              className="flex items-center gap-2 p-1"
+                            >
+                              {doc.title}
+                              <Eye size={16} />
+                            </Link>
+                          </Badge>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-              ) : (
-                <div className="flex items-end gap-2 min-h-[calc(100vh-220px)]">
-                  <ChatForm
-                    isKnowledgeBase={true}
-                    knowledgeBaseId={params.id}
-                    suggestedPrompts={suggestedPrompts}
-                    chatId={chatId}
-                  />
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="flex items-center justify-between">
+                <CardTitle>Knowledge Sessions</CardTitle>
+                <CardTitle>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={createNewChat}
+                          className="text-[20px] rounded-lg"
+                        >
+                          <PlusCircle />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Create new chat</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </CardTitle>
+              </CardContent>
+              <CardContent className="max-h-[110px] overflow-y-auto">
+                <KnowledgeSessions
+                  chatId={chatId}
+                  knowledgeBaseId={params.id}
+                  onChatClick={handleChatClick}
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="lg:col-span-2">
+            <Card className="h-full flex flex-col">
+              <CardHeader>
+                <CardTitle>Ask Questions</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow flex flex-col ">
+                {knowledgeBaseChatsData.length === 0 && !chatId ? (
+                  <div className="flex flex-col items-center justify-center gap-4 ">
+                    <div className="text-center">
+                      <h3 className="text-xl font-medium mb-2">
+                        No chat sessions yet
+                      </h3>
+                      <p className="text-muted-foreground mb-4">
+                        Start a new chat to ask questions about this knowledge
+                        base
+                      </p>
+                    </div>
+                    <Button
+                      onClick={createNewChat}
+                      className="flex items-center gap-2"
+                      size="lg"
+                    >
+                      <MessageSquarePlus className="h-5 w-5" />
+                      Start New Chat
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-end gap-2">
+                    <ChatForm
+                      isKnowledgeBase={true}
+                      knowledgeBaseId={params.id}
+                      suggestedPrompts={suggestedPrompts}
+                      chatId={chatId}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 }

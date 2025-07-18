@@ -32,7 +32,7 @@ const pricingPlans = [
   {
     name: "Pro",
     description: "For professionals and small teams",
-    price: "$19",
+    price: "$9",
     credits: "500",
     features: [
       "500 AI Credits",

@@ -15,6 +15,8 @@ import rehypeHighlight from "rehype-highlight";
 import { toast } from "sonner";
 import "highlight.js/styles/github-dark.css"; // or choose another theme
 import { FaRegFaceSadCry } from "react-icons/fa6";
+import MainLayout from "@/app/components/MainLayout";
+import { ArrowLeft } from "lucide-react";
 
 function extractTextFromChildren(children: any): string {
   if (typeof children === "string") return children;
@@ -73,341 +75,354 @@ const SharePage = () => {
   return isLoading ? (
     <GlobalLoader />
   ) : (
-    <div className="flex h-dvh bg-black text-white">
-      <main className="flex-1 w-full flex flex-col overflow-hidden ">
-        <div className="flex items-center justify-between md:p-4 p-0">
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            className="self-start p-0 flex"
-          >
-            <FaArrowLeft />
-          </Button>
-          <div className="flex flex-col gap-1">
-            <h1 className="  text-white ">This is a copy of a conversation.</h1>
-            <p className="text-xs self-end text-zinc-400">
-              {dayjs(messages.createdAt).format("DD/MM/YYYY HH:mm:ss")}
-            </p>
+    <MainLayout>
+      <div className="flex text-white">
+        <main className="flex-1 w-full flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between px-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBack}
+              className="mr-4"
+            >
+              <ArrowLeft size={16} className="mr-2" />
+              Back
+            </Button>
+
+            <div className="flex flex-col gap-1">
+              <h1 className="text-xs  text-white ">
+                This is a copy of a conversation.
+              </h1>
+              <p className="text-xs self-end text-zinc-400">
+                {dayjs(messages.createdAt).format("DD/MM/YYYY HH:mm:ss")}
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="text-center w-full gap-8 md:p-4 p-0 h-full flex flex-col items-center">
-          <div className="rounded-xl  w-full min-w-[300px]">
-            <div className="flex flex-col items-center gap-4 ">
-              <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-2">
-                <div
-                  ref={containerRef}
-                  className={clsx(
-                    "overflow-auto scroll-hidden px-2",
+          <div className="text-center w-full gap-8 md:p-4 p-2 h-full flex flex-col items-center">
+            <div className="rounded-xl  w-full min-w-[300px]">
+              <div className="flex flex-col items-center gap-4 ">
+                <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-2">
+                  <div
+                    ref={containerRef}
+                    className={clsx(
+                      "overflow-auto scroll-hidden px-2",
 
-                    messages?.length > 0 &&
-                      " py-4 md:h-[calc(100dvh-140px)] h-[calc(100dvh-100px)]"
-                  )}
-                >
-                  {messages.map((message: any) => {
-                    const isUser = message.role === "user";
-                    return (
-                      <div
-                        key={message.id}
-                        className={`flex py-2 ${
-                          isUser ? "justify-end" : "justify-start"
-                        }`}
-                      >
+                      messages?.length > 0 &&
+                        " py-4 md:h-[calc(100dvh-330px)] h-[calc(100dvh-100px)]"
+                    )}
+                  >
+                    {messages.map((message: any) => {
+                      const isUser = message.role === "user";
+                      return (
                         <div
-                          className={clsx(
-                            "text-sm text-left",
-                            message.toolInvocations?.length && "w-full"
-                          )}
+                          key={message.id}
+                          className={`flex py-2 ${
+                            isUser ? "justify-end" : "justify-start"
+                          }`}
                         >
-                          {message.parts.map((part: any, index: any) => {
-                            if (part.type === "text") {
-                              return (
-                                <div key={index} className="">
-                                  <ReactMarkdown
-                                    rehypePlugins={[rehypeHighlight]}
-                                    components={{
-                                      h1: ({ children }) => (
-                                        <h1 className="px-4 py-2 text-xl font-bold text-white">
-                                          {children}
-                                        </h1>
-                                      ),
-                                      h2: ({ children }) => (
-                                        <h2 className="px-4 py-2 text-lg font-semibold text-white">
-                                          {children}
-                                        </h2>
-                                      ),
-                                      h3: ({ children }) => (
-                                        <h3 className="px-4 py-2 text-base font-medium text-white">
-                                          {children}
-                                        </h3>
-                                      ),
-                                      p: ({ children }) => (
-                                        <p
-                                          className={clsx(
-                                            "px-4 py-2 leading-relaxed whitespace-pre-wrap  rounded-2xl text-sm text-white",
-                                            isUser
-                                              ? "bg-blue-600 text-white inline-block"
-                                              : " text-white"
-                                          )}
-                                        >
-                                          {children}
-                                        </p>
-                                      ),
-                                      ul: ({ children }) => (
-                                        <ul className="list-disc pl-8  py-2 text-white">
-                                          {children}
-                                        </ul>
-                                      ),
-                                      ol: ({ children }) => (
-                                        <ol className="list-decimal pl-8  py-2 text-white">
-                                          {children}
-                                        </ol>
-                                      ),
-                                      li: ({ children }) => (
-                                        <li className="py-2 text-white">
-                                          {children}
-                                        </li>
-                                      ),
+                          <div
+                            className={clsx(
+                              "text-sm text-left",
+                              message.toolInvocations?.length && "w-full"
+                            )}
+                          >
+                            {message.parts.map((part: any, index: any) => {
+                              if (part.type === "text") {
+                                return (
+                                  <div key={index} className="">
+                                    <ReactMarkdown
+                                      rehypePlugins={[rehypeHighlight]}
+                                      components={{
+                                        h1: ({ children }) => (
+                                          <h1 className="px-4 py-2 text-xl font-bold text-white">
+                                            {children}
+                                          </h1>
+                                        ),
+                                        h2: ({ children }) => (
+                                          <h2 className="px-4 py-2 text-lg font-semibold text-white">
+                                            {children}
+                                          </h2>
+                                        ),
+                                        h3: ({ children }) => (
+                                          <h3 className="px-4 py-2 text-base font-medium text-white">
+                                            {children}
+                                          </h3>
+                                        ),
+                                        p: ({ children }) => (
+                                          <p
+                                            className={clsx(
+                                              "px-4 py-2 leading-relaxed whitespace-pre-wrap  rounded-2xl text-sm text-white",
+                                              isUser
+                                                ? "bg-blue-600 text-white inline-block"
+                                                : " text-white"
+                                            )}
+                                          >
+                                            {children}
+                                          </p>
+                                        ),
+                                        ul: ({ children }) => (
+                                          <ul className="list-disc pl-8  py-2 text-white">
+                                            {children}
+                                          </ul>
+                                        ),
+                                        ol: ({ children }) => (
+                                          <ol className="list-decimal pl-8  py-2 text-white">
+                                            {children}
+                                          </ol>
+                                        ),
+                                        li: ({ children }) => (
+                                          <li className="py-2 text-white">
+                                            {children}
+                                          </li>
+                                        ),
 
-                                      strong: ({ children }) => (
-                                        <strong className="font-bold text-white">
-                                          {children}
-                                        </strong>
-                                      ),
-                                      em: ({ children }) => (
-                                        <em className="italic text-white">
-                                          {children}
-                                        </em>
-                                      ),
-                                      // ✅ Inline code
-                                      code({
-                                        node,
-                                        className,
-                                        children,
-                                        ...props
-                                      }) {
-                                        const language =
-                                          className?.replace("language-", "") ??
-                                          "";
-                                        const codeString =
-                                          extractTextFromChildren(children);
+                                        strong: ({ children }) => (
+                                          <strong className="font-bold text-white">
+                                            {children}
+                                          </strong>
+                                        ),
+                                        em: ({ children }) => (
+                                          <em className="italic text-white">
+                                            {children}
+                                          </em>
+                                        ),
+                                        // ✅ Inline code
+                                        code({
+                                          node,
+                                          className,
+                                          children,
+                                          ...props
+                                        }) {
+                                          const language =
+                                            className?.replace(
+                                              "language-",
+                                              ""
+                                            ) ?? "";
+                                          const codeString =
+                                            extractTextFromChildren(children);
 
-                                        const handleCopy = () => {
-                                          navigator.clipboard.writeText(
-                                            codeString
+                                          const handleCopy = () => {
+                                            navigator.clipboard.writeText(
+                                              codeString
+                                            );
+                                            toast("Copied to clipboard", {
+                                              duration: 1500,
+                                            });
+                                          };
+
+                                          return (
+                                            <div className="relative group my-4">
+                                              <Button
+                                                variant="ghost"
+                                                onClick={handleCopy}
+                                                size="icon"
+                                                className="absolute top-2  right-2 text-xs px-2 py-1 rounded hover:bg-zinc-700"
+                                              >
+                                                <FaCopy />
+                                              </Button>
+                                              <pre className="rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm">
+                                                <code
+                                                  className={`language-${language}`}
+                                                  {...props}
+                                                >
+                                                  {children}
+                                                </code>
+                                              </pre>
+                                            </div>
                                           );
-                                          toast("Copied to clipboard", {
-                                            duration: 1500,
-                                          });
-                                        };
-
-                                        return (
-                                          <div className="relative group my-4">
-                                            <Button
-                                              variant="ghost"
-                                              onClick={handleCopy}
-                                              size="icon"
-                                              className="absolute top-2  right-2 text-xs px-2 py-1 rounded hover:bg-zinc-700"
-                                            >
-                                              <FaCopy />
-                                            </Button>
-                                            <pre className="rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm">
-                                              <code
-                                                className={`language-${language}`}
-                                                {...props}
+                                        },
+                                      }}
+                                    >
+                                      {part.text}
+                                    </ReactMarkdown>
+                                  </div>
+                                );
+                              } else {
+                                if (part.type === "tool-invocation") {
+                                  if (
+                                    part.toolInvocation.toolName ===
+                                    "askQuestion"
+                                  ) {
+                                    const result = (part.toolInvocation as any)
+                                      ?.result;
+                                    if (
+                                      !("result" in part.toolInvocation) &&
+                                      message.id ===
+                                        messages[messages.length - 1]?.id &&
+                                      status === "streaming"
+                                    ) {
+                                      return (
+                                        <div
+                                          key={message.id}
+                                          className="flex items-center gap-2"
+                                        >
+                                          <p className="text-white text-sm">
+                                            Searching through the document...
+                                          </p>
+                                          <div className="flex items-center justify-center py-4">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                          </div>
+                                        </div>
+                                      );
+                                    }
+                                    return result ? (
+                                      <div key={index}>
+                                        <ReactMarkdown
+                                          rehypePlugins={[rehypeHighlight]}
+                                          components={{
+                                            h1: ({ children }) => (
+                                              <h1 className="px-4 py-2 text-xl font-bold text-white">
+                                                {children}
+                                              </h1>
+                                            ),
+                                            h2: ({ children }) => (
+                                              <h2 className="px-4 py-2 text-lg font-semibold text-white">
+                                                {children}
+                                              </h2>
+                                            ),
+                                            h3: ({ children }) => (
+                                              <h3 className="px-4 py-2 text-base font-medium text-white">
+                                                {children}
+                                              </h3>
+                                            ),
+                                            p: ({ children }) => (
+                                              <p
+                                                className={clsx(
+                                                  "px-4 py-2 leading-relaxed whitespace-pre-wrap  rounded-2xl text-sm text-white",
+                                                  isUser
+                                                    ? "bg-blue-600 text-white inline-block"
+                                                    : " text-white"
+                                                )}
                                               >
                                                 {children}
-                                              </code>
-                                            </pre>
-                                          </div>
-                                        );
-                                      },
-                                    }}
-                                  >
-                                    {part.text}
-                                  </ReactMarkdown>
-                                </div>
-                              );
-                            } else {
-                              if (part.type === "tool-invocation") {
-                                if (
-                                  part.toolInvocation.toolName === "askQuestion"
-                                ) {
-                                  const result = (part.toolInvocation as any)
-                                    ?.result;
-                                  if (
-                                    !("result" in part.toolInvocation) &&
-                                    message.id ===
-                                      messages[messages.length - 1]?.id &&
-                                    status === "streaming"
-                                  ) {
-                                    return (
+                                              </p>
+                                            ),
+                                            ul: ({ children }) => (
+                                              <ul className="list-disc pl-8  py-2 text-white">
+                                                {children}
+                                              </ul>
+                                            ),
+                                            ol: ({ children }) => (
+                                              <ol className="list-decimal pl-8  py-2 text-white">
+                                                {children}
+                                              </ol>
+                                            ),
+                                            li: ({ children }) => (
+                                              <li className="py-2 text-white">
+                                                {children}
+                                              </li>
+                                            ),
+
+                                            strong: ({ children }) => (
+                                              <strong className="font-bold text-white">
+                                                {children}
+                                              </strong>
+                                            ),
+                                            em: ({ children }) => (
+                                              <em className="italic text-white">
+                                                {children}
+                                              </em>
+                                            ),
+                                            // ✅ Inline code
+                                            code({
+                                              node,
+                                              className,
+                                              children,
+                                              ...props
+                                            }) {
+                                              const language =
+                                                className?.replace(
+                                                  "language-",
+                                                  ""
+                                                ) ?? "";
+                                              const codeString =
+                                                extractTextFromChildren(
+                                                  children
+                                                );
+
+                                              const handleCopy = () => {
+                                                navigator.clipboard.writeText(
+                                                  codeString
+                                                );
+                                                toast("Copied to clipboard", {
+                                                  duration: 1500,
+                                                });
+                                              };
+
+                                              return (
+                                                <div className="relative group my-4">
+                                                  <Button
+                                                    variant="ghost"
+                                                    onClick={handleCopy}
+                                                    size="icon"
+                                                    className="absolute top-2  right-2 text-xs px-2 py-1 rounded hover:bg-zinc-700"
+                                                  >
+                                                    <FaCopy />
+                                                  </Button>
+                                                  <pre className="rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm">
+                                                    <code
+                                                      className={`language-${language}`}
+                                                      {...props}
+                                                    >
+                                                      {children}
+                                                    </code>
+                                                  </pre>
+                                                </div>
+                                              );
+                                            },
+                                          }}
+                                        >
+                                          {result}
+                                        </ReactMarkdown>
+                                      </div>
+                                    ) : (
                                       <div
                                         key={message.id}
                                         className="flex items-center gap-2"
                                       >
                                         <p className="text-white text-sm">
-                                          Searching through the document...
+                                          Something went wrong. Please try
+                                          again.
                                         </p>
-                                        <div className="flex items-center justify-center py-4">
-                                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                        </div>
+
+                                        <FaRegFaceSadCry />
                                       </div>
                                     );
                                   }
-                                  return result ? (
-                                    <div key={index}>
-                                      <ReactMarkdown
-                                        rehypePlugins={[rehypeHighlight]}
-                                        components={{
-                                          h1: ({ children }) => (
-                                            <h1 className="px-4 py-2 text-xl font-bold text-white">
-                                              {children}
-                                            </h1>
-                                          ),
-                                          h2: ({ children }) => (
-                                            <h2 className="px-4 py-2 text-lg font-semibold text-white">
-                                              {children}
-                                            </h2>
-                                          ),
-                                          h3: ({ children }) => (
-                                            <h3 className="px-4 py-2 text-base font-medium text-white">
-                                              {children}
-                                            </h3>
-                                          ),
-                                          p: ({ children }) => (
-                                            <p
-                                              className={clsx(
-                                                "px-4 py-2 leading-relaxed whitespace-pre-wrap  rounded-2xl text-sm text-white",
-                                                isUser
-                                                  ? "bg-blue-600 text-white inline-block"
-                                                  : " text-white"
-                                              )}
-                                            >
-                                              {children}
-                                            </p>
-                                          ),
-                                          ul: ({ children }) => (
-                                            <ul className="list-disc pl-8  py-2 text-white">
-                                              {children}
-                                            </ul>
-                                          ),
-                                          ol: ({ children }) => (
-                                            <ol className="list-decimal pl-8  py-2 text-white">
-                                              {children}
-                                            </ol>
-                                          ),
-                                          li: ({ children }) => (
-                                            <li className="py-2 text-white">
-                                              {children}
-                                            </li>
-                                          ),
-
-                                          strong: ({ children }) => (
-                                            <strong className="font-bold text-white">
-                                              {children}
-                                            </strong>
-                                          ),
-                                          em: ({ children }) => (
-                                            <em className="italic text-white">
-                                              {children}
-                                            </em>
-                                          ),
-                                          // ✅ Inline code
-                                          code({
-                                            node,
-                                            className,
-                                            children,
-                                            ...props
-                                          }) {
-                                            const language =
-                                              className?.replace(
-                                                "language-",
-                                                ""
-                                              ) ?? "";
-                                            const codeString =
-                                              extractTextFromChildren(children);
-
-                                            const handleCopy = () => {
-                                              navigator.clipboard.writeText(
-                                                codeString
-                                              );
-                                              toast("Copied to clipboard", {
-                                                duration: 1500,
-                                              });
-                                            };
-
-                                            return (
-                                              <div className="relative group my-4">
-                                                <Button
-                                                  variant="ghost"
-                                                  onClick={handleCopy}
-                                                  size="icon"
-                                                  className="absolute top-2  right-2 text-xs px-2 py-1 rounded hover:bg-zinc-700"
-                                                >
-                                                  <FaCopy />
-                                                </Button>
-                                                <pre className="rounded-lg p-4 overflow-x-auto bg-zinc-900 text-sm">
-                                                  <code
-                                                    className={`language-${language}`}
-                                                    {...props}
-                                                  >
-                                                    {children}
-                                                  </code>
-                                                </pre>
-                                              </div>
-                                            );
-                                          },
-                                        }}
-                                      >
-                                        {result}
-                                      </ReactMarkdown>
-                                    </div>
-                                  ) : (
-                                    <div
-                                      key={message.id}
-                                      className="flex items-center gap-2"
-                                    >
-                                      <p className="text-white text-sm">
-                                        Something went wrong. Please try again.
-                                      </p>
-
-                                      <FaRegFaceSadCry />
-                                    </div>
-                                  );
                                 }
                               }
-                            }
-                          })}
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
 
-                  <div ref={bottomRef} />
-                </div>
+                    <div ref={bottomRef} />
+                  </div>
 
-                <div className="flex flex-col items-center">
-                  {!isAtBottom && (
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        bottomRef.current?.scrollIntoView({
-                          behavior: "smooth",
-                        });
-                      }}
-                      className="w-10 h-10 bottom-10 fixed  flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
-                      aria-label="Scroll to bottom"
-                    >
-                      <IoArrowDownSharp />
-                    </button>
-                  )}
+                  <div className="flex flex-col items-center">
+                    {!isAtBottom && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          bottomRef.current?.scrollIntoView({
+                            behavior: "smooth",
+                          });
+                        }}
+                        className="w-10 h-10 bottom-10 fixed  flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
+                        aria-label="Scroll to bottom"
+                      >
+                        <IoArrowDownSharp />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </MainLayout>
   );
 };
 

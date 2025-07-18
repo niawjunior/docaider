@@ -86,7 +86,6 @@ export const findRelevantContent = async (
         return [];
       }
     }
-    console.log("documentIds", documentIds);
     // Use Supabase RPC for vector similarity search
     const { data: relevantChunks, error } = await supabase.rpc(
       documentIds && documentIds.length > 0

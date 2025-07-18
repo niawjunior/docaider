@@ -52,7 +52,6 @@ export default function KnowledgeBaseList({
   const { mutate: deleteKnowledgeBase, isPending: isDeleting } =
     kbHooks.deleteKnowledgeBase;
 
-  console.log(knowledgeBases);
   const handleDelete = async (id: string) => {
     deleteKnowledgeBase(id, {
       onSuccess: () => {
@@ -92,12 +91,11 @@ export default function KnowledgeBaseList({
     router.refresh();
   };
 
-  console.log(knowledgeBases);
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {knowledgeBases.map((kb) => (
-          <Card key={kb.id} className="overflow-hidden">
+          <Card key={kb.id} className="overflow-hidden bg-zinc-900 p-0">
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-semibold text-lg truncate">{kb.name}</h3>

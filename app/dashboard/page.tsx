@@ -18,6 +18,7 @@ import { useKnowledgeBases } from "../hooks/useKnowledgeBases";
 import GlobalLoader from "../components/GlobalLoader";
 import { Badge } from "@/components/ui/badge";
 import { useCredit } from "../hooks/useCredit";
+import MainLayout from "../components/MainLayout";
 
 export default function DashboardPage() {
   const { session } = useSupabaseSession();
@@ -54,99 +55,101 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Button
-                  size="icon"
-                  onClick={() => router.push("/")}
-                  className="text-[20px] rounded-lg"
-                >
-                  <GoHomeFill />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Go to home</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Button
-                  size="icon"
-                  onClick={() => router.push("/chat")}
-                  className="text-[20px] rounded-lg"
-                >
-                  <MessageCircle />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Go to chat</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Button
-                  size="icon"
-                  onClick={() => setIsCreateDialogOpen(true)}
-                  className="text-[20px] rounded-lg"
-                >
-                  <Plus />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Create knowledge base</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-
-        {/* User info and credits section */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Mail size={16} className="text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">{userEmail}</span>
+    <MainLayout>
+      <div className="px-6">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    size="icon"
+                    onClick={() => router.push("/")}
+                    className="text-[20px] rounded-lg"
+                  >
+                    <GoHomeFill />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Go to home</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    size="icon"
+                    onClick={() => router.push("/chat")}
+                    className="text-[20px] rounded-lg"
+                  >
+                    <MessageCircle />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Go to chat</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    size="icon"
+                    onClick={() => setIsCreateDialogOpen(true)}
+                    className="text-[20px] rounded-lg"
+                  >
+                    <Plus />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Create knowledge base</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-          <Badge
-            variant="outline"
-            className="flex items-center gap-2 px-3 py-1"
-          >
-            <CreditCard size={16} />
-            <span>{credit?.balance || 0} credits</span>
-          </Badge>
+
+          {/* User info and credits section - visible only on desktop */}
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Mail size={16} className="text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{userEmail}</span>
+            </div>
+            <Badge
+              variant="outline"
+              className="flex items-center gap-2 px-3 py-1"
+            >
+              <CreditCard size={16} />
+              <span>{credit?.balance || 0} credits</span>
+            </Badge>
+          </div>
         </div>
+        <div className="flex justify-between items-center py-4">
+          <h2 className="text-xl font-semibold">My Knowledge Bases</h2>
+        </div>
+
+        <KnowledgeBaseList
+          knowledgeBases={getKnowledgeBases.data || []}
+          userId={session.user.id}
+          isPublic={false}
+          onOpenCreateKnowledgeBaseDialog={() => setIsCreateDialogOpen(true)}
+        />
+
+        <h2 className="text-xl font-semibold py-4">Public Knowledge Bases</h2>
+
+        <KnowledgeBaseList
+          knowledgeBases={getPublicKnowledgeBases.data || []}
+          userId={session.user.id}
+          isPublic={true}
+          onOpenCreateKnowledgeBaseDialog={() => setIsCreateDialogOpen(true)}
+        />
+
+        <CreateKnowledgeBaseDialog
+          open={isCreateDialogOpen}
+          onOpenChange={setIsCreateDialogOpen}
+          userId={session.user.id}
+        />
       </div>
-      <div className="flex justify-between items-center py-4">
-        <h2 className="text-xl font-semibold">My Knowledge Bases</h2>
-      </div>
-
-      <KnowledgeBaseList
-        knowledgeBases={getKnowledgeBases.data || []}
-        userId={session.user.id}
-        isPublic={false}
-        onOpenCreateKnowledgeBaseDialog={() => setIsCreateDialogOpen(true)}
-      />
-
-      <h2 className="text-xl font-semibold py-4">Public Knowledge Bases</h2>
-
-      <KnowledgeBaseList
-        knowledgeBases={getPublicKnowledgeBases.data || []}
-        userId={session.user.id}
-        isPublic={true}
-        onOpenCreateKnowledgeBaseDialog={() => setIsCreateDialogOpen(true)}
-      />
-
-      <CreateKnowledgeBaseDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-        userId={session.user.id}
-      />
-    </div>
+    </MainLayout>
   );
 }

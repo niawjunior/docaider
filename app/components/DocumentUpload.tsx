@@ -49,7 +49,7 @@ export default function DocumentUpload({
   const [file, setFile] = useState<File | null>(null);
   const [fileSizeError, setFileSizeError] = useState<string | null>(null);
   const [titleError, setTitleError] = useState<string | null>(null);
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
 
   // Use the document upload hook
   const { uploadDocument, isUploading } = useDocumentUpload();
@@ -180,7 +180,7 @@ export default function DocumentUpload({
                 disabled={isUploading}
               />
               <p className="text-xs text-gray-500">
-                Maximum file size: 3MB. Documents will be processed for
+                Maximum file size: 2MB. Documents will be processed for
                 knowledge retrieval.
               </p>
             </div>

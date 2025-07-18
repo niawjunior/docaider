@@ -67,7 +67,7 @@ export default function ChatForm({
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCreateShareLoading, setIsCreateShareLoading] = useState(false);
   // Using the deleteDocument mutation from useDocuments hook for loading state
-  const { shareData, error: shareError, refresh } = useShareUrl(chatId!);
+  const { shareData, error: shareError } = useShareUrl(chatId!);
   const queryClient = useQueryClient();
   const [isDesktop, setIsDesktop] = useState(false);
   const [currentTool, setCurrentTool] = useState<string>("");
@@ -77,7 +77,6 @@ export default function ChatForm({
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
   const { session } = useSupabaseSession();
   const { useGetDocuments } = useDocuments();
-
   const tools = [
     {
       name: "askQuestion",
@@ -233,7 +232,7 @@ export default function ChatForm({
   const handleShare = async () => {
     try {
       setIsCreateShareLoading(true);
-      const response = await fetch(`/api/share/${chatId}`, {
+      const response = await fetch(`/api/share`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -247,8 +246,9 @@ export default function ChatForm({
       }
 
       toast.success("Share link created");
+      // Invalidate and refetch the share URL query
+      queryClient.invalidateQueries({ queryKey: ["shareUrl", chatId] });
       setIsShareModalOpen(true);
-      refresh();
     } catch (error) {
       console.error("Error sharing chat:", error);
       toast.error("Failed to create share link");
@@ -265,7 +265,6 @@ export default function ChatForm({
     if (e.key === "Enter" && !e.shiftKey) {
       if (isDesktop) {
         e.preventDefault();
-        console.log("input", input);
 
         handleSubmit(e as unknown as React.FormEvent);
       }
@@ -360,7 +359,7 @@ export default function ChatForm({
                 " py-4 md:h-[calc(100dvh-250px)] h-[calc(100dvh-300px)]",
               messages.length > 0 &&
                 isKnowledgeBase &&
-                " py-4 md:h-[calc(100dvh-350px)] h-[calc(100dvh-300px)]"
+                " py-4 md:h-[calc(100dvh-490px)] h-[calc(100dvh-300px)]"
             )}
           >
             {messages.map((message) => {

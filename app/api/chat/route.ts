@@ -34,37 +34,51 @@ export async function POST(req: NextRequest) {
   }
 
   // Get user credit using Drizzle ORM
-  const creditData = await db
+  const [{ balance }] = await db
     .select({ balance: credits.balance })
     .from(credits)
     .where(eq(credits.userId, user.id))
     .limit(1);
-
   // Get the knowledge base if knowledgeBaseId is provided
   let knowledgeBaseDocumentIds: string[] = [];
   let isPublicKnowledgeBase = false;
 
-  const [knowledgeBase] = await db
-    .select()
-    .from(knowledgeBases)
-    .where(eq(knowledgeBases?.id, knowledgeBaseId));
+  try {
+    const [knowledgeBase] = await db
+      .select()
+      .from(knowledgeBases)
+      .where(eq(knowledgeBases?.id, knowledgeBaseId));
 
-  // If knowledge base exists, get its document IDs
-  if (knowledgeBase) {
-    knowledgeBaseDocumentIds = knowledgeBase.documentIds || [];
-    isPublicKnowledgeBase = knowledgeBase.isPublic || false;
-  } else {
-    console.warn(`Knowledge base with ID ${knowledgeBaseId} not found`);
-    // If we're in knowledge base mode but the KB doesn't exist, return empty documents
+    // If knowledge base exists, get its document IDs
+    if (knowledgeBase) {
+      knowledgeBaseDocumentIds = knowledgeBase.documentIds || [];
+      isPublicKnowledgeBase = knowledgeBase.isPublic || false;
+    } else {
+      console.warn(`Knowledge base with ID ${knowledgeBaseId} not found`);
+      // If we're in knowledge base mode but the KB doesn't exist, return empty documents
+      if (isKnowledgeBase) {
+        return new Response(
+          JSON.stringify({ message: "Knowledge base not found" }),
+          {
+            status: 404,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching knowledge base:", error);
+    // If we're in knowledge base mode but there was an error, return a 500 error
     if (isKnowledgeBase) {
       return new Response(
-        JSON.stringify({ message: "Knowledge base not found" }),
+        JSON.stringify({ message: "Error fetching knowledge base" }),
         {
-          status: 404,
+          status: 500,
           headers: { "Content-Type": "application/json" },
         }
       );
     }
+    // Otherwise continue with empty knowledge base
   }
   // Get documents using Drizzle ORM - only get main document metadata, not chunks
   const allDocuments = await db
@@ -107,9 +121,7 @@ export async function POST(req: NextRequest) {
   const result = streamText({
     model: openai("gpt-4o-mini"),
     toolChoice:
-      creditData.length === 0 ||
-      creditData[0].balance <= 0 ||
-      allDocuments.length === 0
+      balance <= 0 || allDocuments.length === 0
         ? "none"
         : currentTool
         ? "required"
@@ -126,16 +138,8 @@ export async function POST(req: NextRequest) {
     5.  **Current tool**: ${currentTool ? currentTool : "not specified"}
     6.  If current tool is not null, use it.
     ‼️ **IMPORTANT Tool Usage Rules**:
-    ** Current document count: ${allDocuments.length} **
-    ** Documents Name:  ${
-      allDocuments.length > 0
-        ? allDocuments.map((doc) => doc?.title).join(", ")
-        : "No documents uploaded."
-    } **
     * **Document Questions (askQuestion)**: If the user asks about a document AND documents are uploaded, you **MUST** call the \`askQuestion\` tool.Do NOT provide a generic response or suggest enabling tools if all conditions are met.
-    * **Tool Unavailability**: If you cannot call a tool due to specific conditions, respond with the exact reason from the options below:
-        * "No documents uploaded."
-        * "You don't have enough credit."
+    * **Tool Unavailability**: If you cannot call a tool due to specific conditions, respond with the possible reason
     ---
 
     🧠 **Behavior Guidelines**:
@@ -146,11 +150,18 @@ export async function POST(req: NextRequest) {
     -   If user intent is ambiguous, ask clarifying questions instead of guessing.
 
     **Credit Management**:
+    - Your current credit balance is ${balance}.
     -   If the credit balance is 0, politely inform the user that tools cannot be used because they don't have enough credit. Use the exact phrase "You don't have enough credit."
     
     **Knowledge Management**:
     -   For questions about uploaded documents, use the \`askQuestion\` tool.
     -   Current document count: ${allDocuments.length}
+        ** Documents Name:  ${
+          allDocuments.length > 0
+            ? allDocuments.map((doc) => doc?.title).join(", ")
+            : "No documents uploaded."
+        } **
+     -  **First check if there are documents available by asking the user to check the Documents section in the UI**
     -   **If current document count is more than 1, you **MUST** Ask user to specify the document name to filter the search.**
     -   * Always ask the user to specify the language to ask the question. Example: en, th*
     
@@ -259,11 +270,8 @@ export async function POST(req: NextRequest) {
       const totalCreditCost = toolNames?.length || 0;
       if (totalCreditCost > 0) {
         // Update credit using Drizzle ORM
-        if (creditData.length > 0) {
-          const newBalance = Math.max(
-            0,
-            creditData[0].balance - totalCreditCost
-          );
+        if (balance > 0) {
+          const newBalance = Math.max(0, balance - totalCreditCost);
           await db
             .update(credits)
             .set({

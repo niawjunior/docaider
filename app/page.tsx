@@ -43,7 +43,6 @@ export default function Home() {
   const kbHooks = useKnowledgeBases();
 
   const getPublicKnowledgeBases = kbHooks.getPublicKnowledgeBases;
-  console.log("getPublicKnowledgeBases", getPublicKnowledgeBases.data);
   const router = useRouter();
 
   return (
@@ -56,7 +55,7 @@ export default function Home() {
         playsInline
         src="/docaider-demo.mp4" // Replace with your actual video path
       />
-      <div className="flex-1 flex flex-col items-center justify-center  mt-4 lg:mt-0 py-4">
+      <div className="flex-1 px-4 flex flex-col items-center justify-center  mt-4 lg:mt-0 py-4">
         <motion.div
           initial="hidden"
           animate="show"

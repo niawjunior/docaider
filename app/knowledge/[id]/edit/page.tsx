@@ -9,7 +9,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Save, ArrowLeft, Trash2, Eye } from "lucide-react";
+import {
+  Loader2,
+  Save,
+  ArrowLeft,
+  Trash2,
+  Eye,
+  Share2,
+  Copy,
+} from "lucide-react";
 import { toast } from "sonner";
 import DocumentUpload from "@/app/components/DocumentUpload";
 import { useDocuments } from "@/app/hooks/useDocuments";
@@ -27,6 +35,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import MainLayout from "@/app/components/MainLayout";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Document {
   title: string;
@@ -52,6 +68,8 @@ export default function EditKnowledgeBasePage() {
   const queryClient = useQueryClient();
   const [currentTab, setCurrentTab] = useState("current");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
 
   // Use the delete mutation from the hook
   const { mutate: deleteKnowledgeBase, isPending: isDeleting } =
@@ -69,6 +87,12 @@ export default function EditKnowledgeBasePage() {
     isLoading: isLoadingDocs,
     error: docsError,
   } = kbHooks.useKnowledgeBaseDocuments(params.id);
+
+  // Generate share URL when component mounts
+  useEffect(() => {
+    const baseUrl = `${process.env.NEXT_PUBLIC_SITE_URL}`;
+    setShareUrl(`${baseUrl}/knowledge/${params.id}`);
+  }, [params.id]);
 
   useEffect(() => {
     if (knowledgeBase) {
@@ -191,12 +215,29 @@ export default function EditKnowledgeBasePage() {
 
   const handleFinishUpload = async (documentId: string) => {
     try {
-      // Prepare the updated document_ids array
-      const currentDocIds = knowledgeBase?.document_ids || [];
-      const updatedDocIds = [...currentDocIds, documentId];
+      // Fetch the latest knowledge base data to ensure we have the current documentIds
+      const response = await fetch(`/api/knowledge-base/${params.id}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch current knowledge base data");
+      }
 
-      // Update the knowledge base with the new document_ids
-      await updateKnowledgeBaseDocumentIds(updatedDocIds);
+      const { knowledgeBase: latestKB } = await response.json();
+
+      // Prepare the updated document_ids array
+      // Use documentIds from the latest knowledge base data
+      const currentDocIds = latestKB?.documentIds || [];
+
+      // Check if the document ID already exists to avoid duplicates
+      if (!currentDocIds.includes(documentId)) {
+        const updatedDocIds = [...currentDocIds, documentId];
+
+        // Update the knowledge base with the new document_ids
+        await updateKnowledgeBaseDocumentIds(updatedDocIds);
+
+        toast("Document added to knowledge base successfully");
+      } else {
+        toast("Document was already in this knowledge base");
+      }
 
       setIsUploading(false);
 
@@ -204,11 +245,13 @@ export default function EditKnowledgeBasePage() {
       kbHooks.getKnowledgeBases.refetch();
       kbHooks.getPublicKnowledgeBases.refetch();
       // The refetchDocuments() call is already in updateKnowledgeBaseDocumentIds
-      toast("Document added to knowledge base successfully");
       setCurrentTab("current");
     } catch (error) {
       console.error("Error updating knowledge base:", error);
-      toast("Failed to update knowledge base");
+      toast("Error adding document to knowledge base", {
+        description:
+          "Please try again or contact support if the issue persists.",
+      });
     }
   };
 
@@ -224,24 +267,85 @@ export default function EditKnowledgeBasePage() {
     });
   };
 
+  const handleCopyShareLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    toast("Share link copied to clipboard");
+  };
+
+  const handleClick = (id: string) => {
+    router.push(`/knowledge/${id}`);
+    router.refresh();
+  };
   if (isLoading) {
     return <GlobalLoader />;
   }
 
   return (
-    <>
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex items-center mb-6">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/dashboard")}
-            className="mr-4"
-          >
-            <ArrowLeft size={16} className="mr-2" />
-            Back to Dashboard
-          </Button>
-          <h1 className="text-2xl font-bold">Edit Knowledge Base</h1>
+    <MainLayout>
+      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Knowledge Base</DialogTitle>
+            <DialogDescription>
+              Share this link with others to give them access to this knowledge
+              base.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center space-x-2">
+            <div className="grid flex-1 gap-2">
+              <Label htmlFor="share-link">Share Link</Label>
+              <Input
+                id="share-link"
+                value={shareUrl}
+                readOnly
+                className="w-full"
+              />
+            </div>
+            <Button
+              type="button"
+              size="icon"
+              className="mt-6"
+              onClick={handleCopyShareLink}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <div className="px-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center mb-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/dashboard")}
+              className="mr-4"
+            >
+              <ArrowLeft size={16} className="mr-2" />
+              Back to Dashboard
+            </Button>
+            <h1 className="text-2xl font-bold">Edit Knowledge Base</h1>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleClick(params.id)}
+            >
+              <Eye size={16} className="mr-2" />
+              View
+            </Button>
+            {knowledgeBase.isPublic && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShareDialogOpen(true)}
+              >
+                <Share2 size={16} className="mr-2" />
+                Share
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -414,6 +518,6 @@ export default function EditKnowledgeBasePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </MainLayout>
   );
 }

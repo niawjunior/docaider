@@ -5,7 +5,6 @@ import { openai } from "@ai-sdk/openai";
 
 import { createClient } from "../utils/supabase/server";
 import { findRelevantContent } from "../utils/embedding";
-
 export const askQuestionTool = tool({
   description: `Use this tool to **answer questions based on the user's uploaded documents**, acting as your intelligent knowledge base.
 

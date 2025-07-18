@@ -15,7 +15,7 @@ export async function GET(
       .select({
         chatId: chatShares.chatId,
         messages: chatShares.messages,
-        createdAt: chatShares.createdAt
+        createdAt: chatShares.createdAt,
       })
       .from(chatShares)
       .where(eq(chatShares.shareId, shareId))
@@ -28,15 +28,9 @@ export async function GET(
       );
     }
 
-    // Define a type for the messages structure
-    type MessagesContainer = { messages: any[] };
-    
-    // Access messages safely with type checking
-    const messagesData = shareData[0].messages as MessagesContainer | null;
-    
     return NextResponse.json({
       chatId: shareData[0].chatId,
-      messages: messagesData?.messages || [],
+      messages: shareData[0].messages,
       createdAt: shareData[0].createdAt,
     });
   } catch (error) {
@@ -53,14 +47,14 @@ export async function POST(req: NextRequest) {
     const { chatId } = await req.json();
     // Generate a unique share ID
     const shareId = uuidv4();
-    
+
     // First get the messages using Drizzle ORM
     const messages = await db
       .select({ messages: chats.messages })
       .from(chats)
       .where(eq(chats.id, chatId))
       .limit(1);
-    
+
     if (!messages || messages.length === 0) {
       throw new Error("Chat not found");
     }
@@ -71,7 +65,7 @@ export async function POST(req: NextRequest) {
       shareId: shareId,
       messages: messages[0].messages,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
 
     return NextResponse.json({

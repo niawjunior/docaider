@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
-import { createClient } from "../utils/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface ShareData {
   shareId: string;
@@ -7,57 +6,51 @@ export interface ShareData {
   createdAt: string;
 }
 
-export function useShareUrl(chatId: string): {
-  shareData: ShareData | null;
-  isLoading: boolean;
-  error: Error | null;
-  refresh: () => void;
-} {
-  const [shareData, setShareData] = useState<ShareData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+/**
+ * Fetches share data for a chat from the API
+ */
+async function fetchShareData(chatId: string): Promise<ShareData | null> {
+  if (!chatId) return null;
 
-  const fetchShareData = useCallback(async () => {
-    try {
-      const supabase = await createClient();
-      const { data, error } = await supabase
-        .from("chat_shares")
-        .select("share_id, created_at")
-        .eq("chat_id", chatId)
-        .order("created_at", { ascending: false });
+  const response = await fetch(`/api/share?chatId=${chatId}`);
 
-      if (error) throw error;
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to fetch share data");
+  }
 
-      if (data && data.length > 0) {
-        setShareData({
-          shareId: data[0].share_id,
-          shareUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/share/${data[0].share_id}`,
-          createdAt: data[0].created_at,
-        });
-      } else {
-        setShareData(null);
-      }
-    } catch (err) {
-      console.log("error", err);
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch share data")
-      );
-      setShareData(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [chatId]);
+  const data = await response.json();
+  return data || null;
+}
 
-  useEffect(() => {
-    if (chatId) {
-      fetchShareData();
-    }
-  }, [chatId, fetchShareData]);
+/**
+ * Hook for managing share URLs using TanStack Query
+ */
+export function useShareUrl(chatId: string) {
+  const queryClient = useQueryClient();
+
+  const {
+    data: shareData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["shareUrl", chatId],
+    queryFn: () => fetchShareData(chatId),
+    enabled: !!chatId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  /**
+   * Refresh share data by invalidating the query
+   */
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["shareUrl", chatId] });
+  };
 
   return {
     shareData,
     isLoading,
-    error,
-    refresh: fetchShareData,
+    error: error as Error | null,
+    refresh,
   };
 }
