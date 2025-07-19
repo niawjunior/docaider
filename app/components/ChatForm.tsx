@@ -11,7 +11,13 @@ import dayjs from "dayjs";
 import DocumentUpload from "./DocumentUpload";
 import "highlight.js/styles/github-dark.css"; // or choose another theme
 import { FaRegFaceSadCry } from "react-icons/fa6";
-import { FaFilePdf, FaHammer, FaQuestion, FaShare } from "react-icons/fa";
+import {
+  FaArrowUp,
+  FaFilePdf,
+  FaHammer,
+  FaQuestion,
+  FaShare,
+} from "react-icons/fa";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -300,7 +306,7 @@ export default function ChatForm({
               <p className="text-2xl font-bold">Hello there!</p>
               <p className="text-zinc-300">How can I help you today?</p>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full max-h-[calc(100dvh-350px)] overflow-y-auto scroll-hidden px-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full md:max-h-[calc(100dvh-350px)] max-h-[calc(100dvh-550px)] overflow-y-auto scroll-hidden px-2">
               {suggestedPrompts?.map((prompt, idx) => (
                 <Button
                   variant="outline"
@@ -544,10 +550,22 @@ export default function ChatForm({
                   disabled={status !== "ready"}
                   onKeyDown={handleKeyDown}
                   className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
-                />
-                <div className=" text-muted-foreground text-sm">
-                  Docaider can make mistakes. Check important info.
-                </div>
+                ></Textarea>
+
+                <Button
+                  onClick={() => {
+                    handleSubmit();
+                    // clear images
+                  }}
+                  variant="outline"
+                  disabled={status !== "ready" || !input.trim()}
+                  className="h-10 w-10 rounded-full border bg-white border-zinc-400 absolute right-2 bottom-[12px]"
+                >
+                  <FaArrowUp />
+                </Button>
+              </div>
+              <div className=" text-muted-foreground text-sm">
+                Docaider can make mistakes. Check important info.
               </div>
             </div>
 

@@ -98,7 +98,9 @@ export default function KnowledgeBaseList({
           <Card key={kb.id} className="overflow-hidden bg-zinc-900 p-0">
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-2">
-                <h3 className="font-semibold text-lg truncate">{kb.name}</h3>
+                <h3 className="md:text-lg text-base font-semibold truncate">
+                  {kb.name}
+                </h3>
                 {kb.isPublic && <Badge>Public</Badge>}
               </div>
               <p className="text-muted-foreground text-sm mb-2 line-clamp-2">

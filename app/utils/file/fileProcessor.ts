@@ -113,7 +113,6 @@ export async function processFile(
         .returning({ insertedId: documents.id });
 
       mainDocumentId = result[0].insertedId;
-      console.log("Inserted main document with ID:", mainDocumentId);
     } catch (error) {
       console.error("Error inserting main document:", error);
       throw new Error("Failed to insert main document record");

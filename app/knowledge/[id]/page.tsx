@@ -208,7 +208,7 @@ export default function ViewKnowledgeBasePage() {
         </Dialog>
 
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
+          <div className="items-center">
             <Button
               variant="ghost"
               size="sm"
@@ -218,8 +218,9 @@ export default function ViewKnowledgeBasePage() {
               <ArrowLeft size={16} className="mr-2" />
               Back
             </Button>
-            <h1 className="text-2xl font-bold">{knowledgeBase.name}</h1>
-            {knowledgeBase.isPublic && <Badge className="ml-2">Public</Badge>}
+            <h1 className="md:text-2xl text-xl font-bold">
+              {knowledgeBase.name}
+            </h1>
           </div>
           <div className="flex gap-2">
             {canEdit && (
@@ -248,8 +249,11 @@ export default function ViewKnowledgeBasePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 flex flex-col gap-2">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex items-center justify-between">
                 <CardTitle>About this Knowledge Base</CardTitle>
+                {knowledgeBase.isPublic && (
+                  <Badge className="ml-2">Public</Badge>
+                )}
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
