@@ -97,7 +97,6 @@ export async function processFile(
     );
 
     // First, insert the main document record
-    let mainDocumentId;
     try {
       const result = await db
         .insert(documents)
@@ -112,27 +111,25 @@ export async function processFile(
         })
         .returning({ insertedId: documents.id });
 
-      mainDocumentId = result[0].insertedId;
+      // Then insert all chunks referencing the main document
+      for (let i = 0; i < chunks.length; i++) {
+        try {
+          await db.insert(documentChunks).values({
+            documentId: result[0].insertedId.toString(), // Reference to the main document
+            chunk: chunks[i],
+            embedding: chunkEmbeddings[i],
+            userId,
+            active: true,
+            isKnowledgeBase,
+          });
+        } catch (error) {
+          console.error("Error inserting document chunk with Drizzle:", error);
+          throw new Error(`Failed to insert chunk ${i + 1}`);
+        }
+      }
     } catch (error) {
       console.error("Error inserting main document:", error);
       throw new Error("Failed to insert main document record");
-    }
-
-    // Then insert all chunks referencing the main document
-    for (let i = 0; i < chunks.length; i++) {
-      try {
-        await db.insert(documentChunks).values({
-          documentId: mainDocumentId.toString(), // Reference to the main document
-          chunk: chunks[i],
-          embedding: chunkEmbeddings[i],
-          userId,
-          active: true,
-          isKnowledgeBase,
-        });
-      } catch (error) {
-        console.error("Error inserting document chunk with Drizzle:", error);
-        throw new Error(`Failed to insert chunk ${i + 1}`);
-      }
     }
 
     return chunks;

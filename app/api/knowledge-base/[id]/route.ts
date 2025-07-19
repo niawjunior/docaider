@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/app/utils/supabase/server";
 import { db } from "@/db/config";
-import { documentChunks, knowledgeBases } from "@/db/schema";
+import { documentChunks, knowledgeBases, documents } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 
 export async function GET(
@@ -236,29 +236,23 @@ export async function DELETE(
     const documentIds = existingKnowledgeBase.documentIds || [];
 
     if (documentIds.length > 0) {
-      // 2. Get document records to find their IDs for document_chunks deletion
-      const { data: documents, error: docError } = await supabase
-        .from("documents")
-        .select("id")
-        .in("document_id", documentIds);
+      // 2. Get document records using Drizzle ORM
+      const documentRecords = await db
+        .select()
+        .from(documents)
+        .where(inArray(documents.documentId, documentIds));
 
-      if (docError) throw docError;
+      if (documentRecords.length > 0) {
+        // 3. Delete document chunks first (if any)
+        await db
+          .delete(documentChunks)
+          .where(inArray(documentChunks.documentId, documentIds));
 
-      const chunkDocIds = documents?.map((doc) => String(doc.id)) || [];
-
-      // 3. Delete document chunks first (if any)
-
-      await db
-        .delete(documentChunks)
-        .where(inArray(documentChunks.documentId, chunkDocIds));
-
-      // 4. Delete documents
-      const { error: docsDeleteError } = await supabase
-        .from("documents")
-        .delete()
-        .in("document_id", documentIds);
-
-      if (docsDeleteError) throw docsDeleteError;
+        // 4. Delete documents using Drizzle ORM
+        await db
+          .delete(documents)
+          .where(inArray(documents.documentId, documentIds));
+      }
     }
 
     // 5. Finally delete the knowledge base itself

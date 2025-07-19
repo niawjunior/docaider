@@ -54,14 +54,13 @@ export async function DELETE(
       );
     }
 
-    // 2. Delete document from database using Drizzle ORM
-    await db.delete(documents).where(eq(documents.documentId, documentId));
-
     // 3. Delete document chunks from database using Drizzle ORM
-
     await db
       .delete(documentChunks)
-      .where(eq(documentChunks.documentId, String(document.id)));
+      .where(eq(documentChunks.documentId, documentId));
+
+    // 2. Delete document from database using Drizzle ORM
+    await db.delete(documents).where(eq(documents.documentId, documentId));
 
     return NextResponse.json({ success: true });
   } catch (error) {

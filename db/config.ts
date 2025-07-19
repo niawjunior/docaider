@@ -18,10 +18,10 @@ const connectionString = process.env.DATABASE_URL || "";
 
 // Connection options
 const connectionOptions = {
-  max: 10,
   ssl: {
     rejectUnauthorized: false,
   },
+  prepare: false,
 };
 
 // Create a query client (for normal queries)

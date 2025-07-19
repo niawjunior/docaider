@@ -6,6 +6,7 @@ import {
   chats,
   documents,
   chatShares,
+  documentChunks,
 } from "./schema";
 
 /**
@@ -43,9 +44,18 @@ export const chatsRelations = relations(chats, ({ one, many }) => ({
   shares: many(chatShares),
 }));
 
-// Documents relations - connects documents back to users
-export const documentsRelations = relations(documents, ({ one }) => ({
+// Documents relations - connects documents back to users and to document chunks
+export const documentsRelations = relations(documents, ({ one, many }) => ({
   user: one(users),
+  chunks: many(documentChunks),
+}));
+
+// Document chunks relations - connects document chunks back to documents
+export const documentChunksRelations = relations(documentChunks, ({ one }) => ({
+  document: one(documents, {
+    fields: [documentChunks.documentId],
+    references: [documents.id],
+  }),
 }));
 
 // Chat shares relations - connects chat shares back to chats
