@@ -4,13 +4,17 @@ An AI-powered Knowledge Management and Retrieval-Augmented Generation (RAG) syst
 
 ## Features
 
-- 🔍 **Semantic Search**: Find relevant information using natural language queries or keywords
-- 🤖 **AI-Powered Knowledge Retrieval**: Get AI-generated answers from your document repository
-- 🏷️ **Smart Knowledge Organization**: Automatically process and structure information from documents
-- 📊 **Knowledge Analytics**: Track usage and identify gaps in your knowledge base
-- 🔄 **Context-Aware Responses**: Understands technical jargon and domain-specific terminology
-- 🔐 **Secure & Private**: Enterprise-grade security with role-based access control
-- 🚀 **Fast & Scalable**: Built for performance with efficient vector search capabilities
+- 📄 Document Processing: Upload and process various file formats (PDF, DOCX, CSV) with automatic text extraction and chunking
+
+- 📚 Knowledge Base Management: Create, edit, and organize knowledge bases with an intuitive UI
+
+- 🤖 AI-Powered Chat: Ask questions about your documents and get accurate, contextual responses
+
+- 🔒 Public/Private Sharing: Control access to your knowledge with flexible sharing options
+
+- ✨ Modern UI: Built with Next.js App Router and Tailwind CSS for a responsive, accessible experience
+
+Do you want me to also make it shorter
 
 ## Key Features
 
@@ -111,21 +115,6 @@ yarn dev
 ```
 
 6. Open [http://localhost:3000](http://localhost:3000) in your browser
-
-## Project Structure
-
-```
-docaider/
-├── app/                  # Next.js 13+ app directory
-│   ├── api/              # API routes
-│   ├── components/        # Reusable React components
-│   ├── lib/              # Utility functions and configurations
-│   ├── models/           # Data models and types
-│   └── services/         # Business logic and API clients
-├── public/               # Static assets
-├── styles/               # Global styles
-└── types/                # TypeScript type definitions
-```
 
 ## Development
 
