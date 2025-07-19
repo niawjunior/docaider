@@ -1,22 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { GoHomeFill } from "react-icons/go";
-import Link from "next/link";
+import MainLayout from "../components/MainLayout";
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
-      <div className="fixed top-4 left-4 z-50">
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-white hover:text-orange-500 transition-colors"
-        >
-          <GoHomeFill /> Home
-        </Link>
-      </div>
-
-      <div className="container mx-auto px-4 py-16 max-w-4xl">
+    <MainLayout>
+      <div className="px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -88,6 +78,6 @@ export default function PrivacyPage() {
           </div>
         </motion.div>
       </div>
-    </div>
+    </MainLayout>
   );
 }

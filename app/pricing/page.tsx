@@ -71,7 +71,7 @@ export default function PricingPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-extrabold text-white  sm:tracking-tight lg:text-4xl">
             <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">

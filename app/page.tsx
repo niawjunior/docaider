@@ -64,7 +64,7 @@ export default function Home() {
         >
           <motion.h1
             variants={itemVariants}
-            className="text-4xl md:text-5xl tracking-tight font-extrabold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
+            className="text-3xl md:text-5xl tracking-tight font-extrabold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
             style={{
               contentVisibility: "auto",
               containIntrinsicSize: "auto 300px",
@@ -88,7 +88,7 @@ export default function Home() {
             >
               <h2
                 id="features"
-                className="text-3xl md:text-4xl font-bold text-white text-center mb-8"
+                className="text-2xl md:text-4xl font-bold text-white text-center mb-8"
               >
                 Powerful Features for Knowledge Management
               </h2>
