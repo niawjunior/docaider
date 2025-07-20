@@ -41,6 +41,36 @@ export const users = pgTable(
       name: "users_id_fkey",
     }).onDelete("cascade"),
     unique("unique_email").on(table.email),
+    pgPolicy("Users can view their own profile", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(auth.uid() = id)`,
+    }),
+    pgPolicy("Anyone can view public profile info", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`true`,
+    }),
+    pgPolicy("Users can insert their own profile", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(auth.uid() = id)`,
+    }),
+    pgPolicy("Users can update their own profile", {
+      as: "permissive",
+      for: "update",
+      to: ["public"],
+      using: sql`(auth.uid() = id)`,
+    }),
+    pgPolicy("Users can delete their own profile", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`(auth.uid() = id)`,
+    }),
   ]
 );
 
@@ -70,6 +100,30 @@ export const userConfig = pgTable(
       foreignColumns: [users.id],
       name: "user_config_id_fkey",
     }).onDelete("cascade"),
+    pgPolicy("Users can view their own config", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(auth.uid() = id)`,
+    }),
+    pgPolicy("Users can insert their own config", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(auth.uid() = id)`,
+    }),
+    pgPolicy("Users can update their own config", {
+      as: "permissive",
+      for: "update",
+      to: ["public"],
+      using: sql`(auth.uid() = id)`,
+    }),
+    pgPolicy("Users can delete their own config", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`(auth.uid() = id)`,
+    }),
   ]
 );
 

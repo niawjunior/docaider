@@ -81,6 +81,7 @@ export async function middleware(request: NextRequest) {
         `Unauthorized access attempt to KB edit: ${knowledgeBaseId} by user: ${user.id}`
       );
       url.pathname = "/dashboard";
+      // url.searchParams.set("error", "unauthorized");
       return NextResponse.redirect(url);
     }
   }

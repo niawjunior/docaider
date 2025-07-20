@@ -51,7 +51,8 @@ export async function GET(request: NextRequest) {
     const isPublic = url.searchParams.get("isPublic") === "true";
     // For public knowledge bases, we don't need authentication
     if (isPublic) {
-      // Query only public knowledge bases with user display names
+      // Query public knowledge bases with user display names using simple join
+      // This works now because RLS policy allows public access to user profile info
       const publicKnowledgeBases = await db
         .select({
           id: knowledgeBases.id,
