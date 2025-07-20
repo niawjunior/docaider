@@ -261,12 +261,9 @@ export async function POST(req: NextRequest) {
 
     messages: convertToModelMessages(messages),
     onStepFinish: async (response) => {
-      const tools = response.toolResults?.filter(
-        (item) => item.type === "tool-result"
-      );
-      const toolNames = tools?.map((item) => item.toolName);
+      const tools = response.toolResults;
 
-      const totalCreditCost = toolNames?.length || 0;
+      const totalCreditCost = tools?.length || 0;
       if (totalCreditCost > 0) {
         // Update credit using Drizzle ORM
         if (balance > 0) {
