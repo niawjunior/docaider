@@ -14,7 +14,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ai-sdk/google": "^1.2.18",
     "@ai-sdk/openai": "^2.0.0-beta.11",
     "@ai-sdk/react": "^2.0.0-beta.24",
     "@hookform/resolvers": "^5.1.1",

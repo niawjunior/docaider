@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { UIMessage, useChat } from "@ai-sdk/react";
+import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { TiDelete } from "react-icons/ti";
 
@@ -84,6 +84,7 @@ export default function ChatForm({
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
   const { session } = useSupabaseSession();
   const { useGetDocuments } = useDocuments();
+
   const tools = [
     {
       name: "askQuestion",
@@ -120,7 +121,7 @@ export default function ChatForm({
   // Manage input state manually (AI SDK 5.0 requirement)
   const [input, setInput] = useState("");
 
-  const { messages, status, setMessages, sendMessage } = useChat({
+  const { messages, status, sendMessage, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
       body: {
@@ -131,7 +132,6 @@ export default function ChatForm({
       },
     }),
     id: chatId,
-
     onFinish: async ({ message }) => {
       // In AI SDK 5.0, check for tool calls in the message parts
       const toolCalls =
@@ -179,17 +179,6 @@ export default function ChatForm({
     },
     []
   );
-
-  // Set initial messages if provided (AI SDK 5.0 approach)
-  useEffect(() => {
-    if (
-      initialMessages &&
-      initialMessages.length > 0 &&
-      messages.length === 0
-    ) {
-      setMessages(initialMessages);
-    }
-  }, [initialMessages, messages.length, setMessages]);
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
