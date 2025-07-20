@@ -126,7 +126,7 @@ export default function EditKnowledgeBasePage() {
   }, [params.id]);
 
   useEffect(() => {
-    if (knowledgeBase) {
+    if (knowledgeBase && session?.user?.id) {
       // 🔒 AUTHORIZATION CHECK: Only allow owner to access edit page
       if (session?.user?.id !== knowledgeBase.userId) {
         console.error("Unauthorized access attempt to edit knowledge base");
@@ -134,7 +134,7 @@ export default function EditKnowledgeBasePage() {
         router.push("/dashboard");
         return;
       }
-      
+
       form.reset({
         name: knowledgeBase.name,
         description: knowledgeBase.description || "",

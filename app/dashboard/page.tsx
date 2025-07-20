@@ -125,7 +125,7 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className="flex justify-between items-center py-4">
-          <h2 className="text-xl font-semibold">My Knowledge Bases</h2>
+          <h2 className="text-lg font-semibold">My Knowledge Bases</h2>
         </div>
 
         <KnowledgeBaseList
@@ -135,7 +135,7 @@ export default function DashboardPage() {
           onOpenCreateKnowledgeBaseDialog={() => setIsCreateDialogOpen(true)}
         />
 
-        <h2 className="text-xl font-semibold py-4">Public Knowledge Bases</h2>
+        <h2 className="text-lg font-semibold py-4">Public Knowledge Bases</h2>
 
         <KnowledgeBaseList
           knowledgeBases={getPublicKnowledgeBases.data || []}
