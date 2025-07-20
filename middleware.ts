@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
 import { updateSession } from "./app/utils/supabase/middleware";
 import { createClient } from "./app/utils/supabase/server";
 
@@ -53,48 +53,32 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 🔒 ROUTE AUTHORIZATION CHECKS
-  const url = request.nextUrl.clone();
-  const pathname = url.pathname;
-
-  // Check for Knowledge Base edit routes
+  // Only check authorization for edit routes
+  const pathname = request.nextUrl.pathname;
   const kbEditMatch = pathname.match(/^\/knowledge\/([^/]+)\/edit$/);
+  
   if (kbEditMatch) {
     const knowledgeBaseId = kbEditMatch[1];
-
-    // If user is not authenticated, redirect to login
+    
+    // Edit requires authentication
     if (!user) {
+      const url = request.nextUrl.clone();
       url.pathname = "/login";
-      return NextResponse.redirect(url);
+      return Response.redirect(url);
     }
-
-    // Check if user owns this knowledge base
+    
+    // Check ownership
     const { data: knowledgeBase } = await supabase
       .from("knowledge_bases")
       .select("user_id")
       .eq("id", knowledgeBaseId)
       .single();
-
-    // If KB doesn't exist or user doesn't own it, redirect to dashboard
+      
     if (!knowledgeBase || knowledgeBase.user_id !== user.id) {
-      console.warn(
-        `Unauthorized access attempt to KB edit: ${knowledgeBaseId} by user: ${user.id}`
-      );
+      const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
-      // url.searchParams.set("error", "unauthorized");
-      return NextResponse.redirect(url);
+      return Response.redirect(url);
     }
-  }
-
-  // Check for other protected routes that require authentication
-  const protectedRoutes = ["/dashboard", "/knowledge", "/api/knowledge-base"];
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
-
-  if (isProtectedRoute && !user) {
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
   }
 
   return await updateSession(request);
