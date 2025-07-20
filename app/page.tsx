@@ -188,7 +188,7 @@ export default function Home() {
                         {kb.name}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="min-h-[80px]">
                       <p className="text-sm text-gray-300 line-clamp-2">
                         {kb.description || "No description provided."}
                       </p>
