@@ -3,7 +3,7 @@ import { openai } from "@ai-sdk/openai";
 import { createClient } from "./supabase/client";
 import { db } from "../../db/config";
 import { documents } from "../../db/schema";
-import { eq, and, inArray } from "drizzle-orm";
+import { and, inArray } from "drizzle-orm";
 
 const embeddingModel = openai.embedding("text-embedding-3-large");
 
@@ -68,18 +68,11 @@ export const findRelevantContent = async (
 
     // Get document_id from document_name using Drizzle ORM
     let documentIds: { id: number | null }[] = [];
-
     if (selectedDocumentNames && selectedDocumentNames.length > 0) {
       documentIds = await db
         .select({ id: documents.id })
         .from(documents)
-        .where(
-          and(
-            eq(documents.userId, userId),
-            eq(documents.active, true),
-            inArray(documents.title, selectedDocumentNames)
-          )
-        );
+        .where(and(inArray(documents.title, selectedDocumentNames)));
 
       if (documentIds.length === 0) {
         console.log("No matching documents found for the selected names");
@@ -93,9 +86,8 @@ export const findRelevantContent = async (
         : "match_document_chunks",
       {
         query_embedding: questionEmbedding,
-        user_id: userId,
-        match_threshold: 0.1, // Adjust threshold as needed
-        match_count: 1000, // Maximum number of matches to return
+        match_threshold: 0.1,
+        match_count: 1000,
         ...(documentIds &&
           documentIds.length > 0 && {
             document_ids: documentIds.map((d) => d.id),

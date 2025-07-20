@@ -365,7 +365,7 @@ export default function ChatForm({
                 " py-4 md:h-[calc(100dvh-250px)] h-[calc(100dvh-300px)]",
               messages.length > 0 &&
                 isKnowledgeBase &&
-                " py-4 md:h-[calc(100dvh-490px)] h-[calc(100dvh-300px)]"
+                " py-4 md:h-[calc(100dvh-450px)] h-[calc(100dvh-300px)]"
             )}
           >
             {messages.map((message) => {

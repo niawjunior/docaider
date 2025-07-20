@@ -208,17 +208,17 @@ export default function ViewKnowledgeBasePage() {
         </Dialog>
 
         <div className="flex items-center justify-between mb-4">
-          <div className="items-center">
+          <div className="flex flex-col md:flex-row items-center mb-2">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => router.push("/dashboard")}
               className="mr-4"
             >
               <ArrowLeft size={16} className="mr-2" />
-              Back
+              Back to Dashboard
             </Button>
-            <h1 className="md:text-2xl text-xl font-bold">
+            <h1 className="md:text-xl text-lg font-bold">
               {knowledgeBase.name}
             </h1>
           </div>
@@ -261,7 +261,6 @@ export default function ViewKnowledgeBasePage() {
                     <p className="text-sm">{knowledgeBase.description}</p>
                   )}
                   <div className="text-sm text-muted-foreground">
-                    <p>Contains {documents.length} documents</p>
                     <p>
                       Last updated{" "}
                       {formatDistanceToNow(new Date(knowledgeBase.updatedAt))}{" "}

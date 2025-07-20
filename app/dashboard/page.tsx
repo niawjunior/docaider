@@ -57,7 +57,7 @@ export default function DashboardPage() {
   return (
     <MainLayout>
       <div className="px-6">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-2">
           <div className="flex gap-2">
             <TooltipProvider>
               <Tooltip>

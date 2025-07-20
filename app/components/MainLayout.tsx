@@ -177,7 +177,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </header>
       <main className=" py-4 min-h-[calc(100vh-160px)]">{children}</main>
-      <footer className="w-full bg-zinc-900 border-t border-zinc-800 px-6 py-6 text-gray-400 text-sm">
+      <footer className="w-full bg-zinc-900 border-t border-zinc-800 px-6 py-3 text-gray-400 text-sm">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
             <span className="font-bold text-white">✨ DocAider</span> &mdash;

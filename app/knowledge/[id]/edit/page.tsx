@@ -340,9 +340,9 @@ export default function EditKnowledgeBasePage() {
       </Dialog>
       <div className="px-4">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex flex-col md:flex-row items-center mb-6">
+          <div className="flex flex-col md:flex-row items-center mb-2">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => router.push("/dashboard")}
               className="mr-4"
@@ -350,7 +350,9 @@ export default function EditKnowledgeBasePage() {
               <ArrowLeft size={16} className="mr-2" />
               Back to Dashboard
             </Button>
-            <h1 className="md:text-2xl font-bold">Edit Knowledge Base</h1>
+            <h1 className="md:text-xl text-lg font-bold">
+              {knowledgeBase.name}
+            </h1>
           </div>
           <div className="flex gap-2">
             <Button
