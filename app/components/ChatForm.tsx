@@ -112,7 +112,6 @@ export default function ChatForm({
     refetchOnMount: true, // Always refetch on component mount
     refetchOnWindowFocus: false, // Don't
   });
-
   useEffect(() => {
     // Focus on load
     textareaRef.current?.focus();

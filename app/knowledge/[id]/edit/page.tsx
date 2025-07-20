@@ -55,6 +55,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import useSupabaseSession from "@/app/hooks/useSupabaseSession";
 
 // Define the Zod schema for form validation
 const FormSchema = z.object({
@@ -89,6 +90,7 @@ export default function EditKnowledgeBasePage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  const { session } = useSupabaseSession();
 
   // Initialize react-hook-form with Zod validation
   const form = useForm<FormValues>({
@@ -125,13 +127,21 @@ export default function EditKnowledgeBasePage() {
 
   useEffect(() => {
     if (knowledgeBase) {
+      // 🔒 AUTHORIZATION CHECK: Only allow owner to access edit page
+      if (session?.user?.id !== knowledgeBase.userId) {
+        console.error("Unauthorized access attempt to edit knowledge base");
+        toast.error("You don't have permission to edit this knowledge base");
+        router.push("/dashboard");
+        return;
+      }
+      
       form.reset({
         name: knowledgeBase.name,
         description: knowledgeBase.description || "",
         isPublic: knowledgeBase.isPublic,
       });
     }
-  }, [knowledgeBase, form]);
+  }, [knowledgeBase, form, session?.user?.id, router]);
 
   useEffect(() => {
     if (kbError) {
