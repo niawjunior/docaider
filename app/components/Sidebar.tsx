@@ -20,14 +20,16 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
   const sidebarRef = useRef<HTMLUListElement>(null);
   const router = useRouter();
 
-  const getMenuDisplayText = (chat: unknown) => {
-    let text = "";
-    (chat as { messages: unknown[] }).messages.forEach((message: unknown) => {
-      if ((message as { role: string }).role === "user") {
-        text = (message as { content: string }).content;
-      }
-    });
-    return text || "Untitled";
+  const getMenuDisplayText = (chat: {
+    id: string;
+    messages: any[];
+    created_at: string;
+  }) => {
+    const userMessage = chat.messages.findLast(
+      (message: any) => message.role === "user"
+    );
+    const findMessage = userMessage?.parts[userMessage?.parts.length - 1]?.text;
+    return findMessage || "Untitled";
   };
 
   const {
@@ -86,7 +88,7 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
                   chatId === (chat as { id: string }).id ? "bg-zinc-700" : ""
                 )}
               >
-                {getMenuDisplayText(chat as { messages: unknown[] })}
+                {getMenuDisplayText(chat)}
               </button>
             </li>
           ))

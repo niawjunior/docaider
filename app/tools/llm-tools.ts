@@ -19,7 +19,7 @@ export const askQuestionTool = tool({
   - Responses will be formatted using markdown, including headings, bullet points, and chronological order for date/time questions.
   - **Always ask for document names to filter the search**.
   `,
-  parameters: z.object({
+  inputSchema: z.object({
     question: z.string().describe("Question to ask about the documents"),
     language: z
       .string()

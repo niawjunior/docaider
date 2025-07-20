@@ -51,13 +51,11 @@ const KnowledgeSessions = ({
     messages: any[];
     created_at: string;
   }) => {
-    let text = "";
-    chat.messages.forEach((message: any) => {
-      if (message.role === "user") {
-        text = message.content;
-      }
-    });
-    return text || "Untitled";
+    const userMessage = chat.messages.findLast(
+      (message: any) => message.role === "user"
+    );
+    const findMessage = userMessage?.parts[userMessage?.parts.length - 1]?.text;
+    return findMessage || "Untitled";
   };
   return (
     <ul ref={sidebarRef} className="flex-1 overflow-y-auto scroll-hidden ">

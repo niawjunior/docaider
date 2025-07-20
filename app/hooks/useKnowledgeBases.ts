@@ -110,7 +110,6 @@ export const useKnowledgeBases = () => {
         }
 
         const data = await response.json();
-        console.log("data", data);
         return data.knowledgeBases || [];
       } catch (error) {
         console.log("error", error);

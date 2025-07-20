@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { Message, useChat } from "@ai-sdk/react";
+import { UIMessage, useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { TiDelete } from "react-icons/ti";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { IoArrowDownSharp } from "react-icons/io5";
 import dayjs from "dayjs";
@@ -116,35 +117,34 @@ export default function ChatForm({
     // Focus on load
     textareaRef.current?.focus();
   }, []);
-  const {
-    messages,
-    input,
-    handleSubmit,
-    handleInputChange,
-    status,
-    setInput,
-    setMessages,
-  } = useChat({
-    api: "/api/chat",
-    id: chatId,
-    initialMessages: initialMessages || [],
-    sendExtraMessageFields: true,
+  // Manage input state manually (AI SDK 5.0 requirement)
+  const [input, setInput] = useState("");
 
-    body: {
-      chatId,
-      currentTool,
-      isKnowledgeBase,
-      knowledgeBaseId,
-    },
-    async onToolCall({ toolCall }) {},
-    onFinish: async (response) => {
-      const totalCreditCost = response.toolInvocations?.length;
+  const { messages, status, setMessages, sendMessage } = useChat({
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+      body: {
+        chatId,
+        currentTool,
+        isKnowledgeBase,
+        knowledgeBaseId,
+      },
+    }),
+    id: chatId,
+
+    onFinish: async ({ message }) => {
+      // In AI SDK 5.0, check for tool calls in the message parts
+      const toolCalls =
+        message.parts?.filter(
+          (part: any) => part.type === "tool-askQuestion"
+        ) || [];
+      const totalCreditCost = toolCalls.length;
 
       await queryClient.invalidateQueries({ queryKey: ["chats"] });
       await queryClient.invalidateQueries({
         queryKey: ["credit", session?.user?.id],
       });
-      if (totalCreditCost && totalCreditCost > 0) {
+      if (totalCreditCost > 0) {
         toast.success(`Used ${totalCreditCost} credits.`);
       }
 
@@ -152,10 +152,44 @@ export default function ChatForm({
         textareaRef.current?.focus();
       }, 100);
     },
+
     onError: (error) => {
       console.log("onError", error);
     },
   });
+
+  // Create manual submit handler for AI SDK 5.0
+  const handleSubmit = useCallback(
+    (e?: React.FormEvent) => {
+      if (e) {
+        e.preventDefault();
+      }
+      if (!input.trim() || status !== "ready") return;
+
+      sendMessage({ text: input });
+      setInput("");
+    },
+    [input, status, sendMessage]
+  );
+
+  // Create manual input change handler
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setInput(e.target.value);
+    },
+    []
+  );
+
+  // Set initial messages if provided (AI SDK 5.0 approach)
+  useEffect(() => {
+    if (
+      initialMessages &&
+      initialMessages.length > 0 &&
+      messages.length === 0
+    ) {
+      setMessages(initialMessages);
+    }
+  }, [initialMessages, messages.length, setMessages]);
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -222,7 +256,7 @@ export default function ChatForm({
     if (promptToSubmit !== null) {
       setInput(promptToSubmit);
       setTimeout(() => {
-        handleSubmit(new Event("submit"));
+        handleSubmit(); // No event needed for manual call
         setPromptToSubmit(null); // reset
       }, 100);
     }
@@ -367,7 +401,7 @@ export default function ChatForm({
                 " py-4 md:h-[calc(100dvh-450px)] h-[calc(100dvh-300px)]"
             )}
           >
-            {messages.map((message) => {
+            {messages.map((message: any) => {
               const isUser = message.role === "user";
               return (
                 <div
@@ -376,61 +410,50 @@ export default function ChatForm({
                     isUser ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <div
-                    className={clsx(
-                      "text-sm text-left",
-                      message.toolInvocations?.length && "w-full"
-                    )}
-                  >
-                    {message.parts.map((part, index) => {
-                      if (part.type === "text") {
-                        return (
-                          <div key={index} className="">
-                            <Markdown isUser={isUser} text={part.text} />
-                          </div>
-                        );
-                      } else {
-                        if (part.type === "tool-invocation") {
-                          if (part.toolInvocation.toolName === "askQuestion") {
-                            const result = (part.toolInvocation as any)?.result;
-                            if (
-                              !("result" in part.toolInvocation) &&
-                              message.id ===
-                                messages[messages.length - 1]?.id &&
-                              status === "streaming"
-                            ) {
-                              return (
-                                <div
-                                  key={message.id}
-                                  className="flex items-center gap-2"
-                                >
-                                  <p className="text-white text-sm">
-                                    Searching through the document...
-                                  </p>
-                                  <div className="flex items-center justify-center py-4">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return result ? (
-                              <div key={index}>
-                                <Markdown isUser={isUser} text={result} />
-                              </div>
-                            ) : (
+                  <div className="text-sm text-left">
+                    {message.parts?.map((part: any, index: any) => {
+                      switch (part.type) {
+                        case "text":
+                          return (
+                            <div key={index} className="">
+                              <Markdown isUser={isUser} text={part.text} />
+                            </div>
+                          );
+                        case "tool-askQuestion":
+                          if (
+                            message.id === messages[messages.length - 1]?.id &&
+                            status === "streaming"
+                          ) {
+                            return (
                               <div
                                 key={message.id}
                                 className="flex items-center gap-2"
                               >
                                 <p className="text-white text-sm">
-                                  Something went wrong. Please try again.
+                                  Searching through the document...
                                 </p>
-
-                                <FaRegFaceSadCry />
+                                <div className="flex items-center justify-center py-4">
+                                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                                </div>
                               </div>
                             );
                           }
-                        }
+                          return part.output ? (
+                            <div key={index}>
+                              <Markdown isUser={isUser} text={part.output} />
+                            </div>
+                          ) : (
+                            <div
+                              key={message.id}
+                              className="flex items-center gap-2"
+                            >
+                              <p className="text-white text-sm">
+                                Something went wrong. Please try again.
+                              </p>
+
+                              <FaRegFaceSadCry />
+                            </div>
+                          );
                       }
                     })}
                   </div>

@@ -1,4 +1,4 @@
-import { appendResponseMessages, streamText } from "ai";
+import { convertToModelMessages, streamText } from "ai";
 import { openai } from "@ai-sdk/openai";
 
 import { NextRequest } from "next/server";
@@ -126,7 +126,6 @@ export async function POST(req: NextRequest) {
         : currentTool
         ? "required"
         : "auto",
-    maxSteps: 1,
     tools,
     system: `
     You are **DocAider** — a smart, polite, and friendly AI assistant specializing in Knowledge Management and RAG (Retrieval-Augmented Generation). Your primary goal is to help users understand, organize, and extract insights from their documents and knowledge bases.
@@ -260,7 +259,7 @@ export async function POST(req: NextRequest) {
     -   Encourage continued interaction (e.g., "Want to explore more?" or "Need a pie chart for this too?").
     `,
 
-    messages,
+    messages: convertToModelMessages(messages),
     onStepFinish: async (response) => {
       const tools = response.toolResults?.filter(
         (item) => item.type === "tool-result"
@@ -282,12 +281,13 @@ export async function POST(req: NextRequest) {
         }
       }
     },
+  });
 
-    async onFinish({ response }) {
-      const finalMessages = appendResponseMessages({
-        messages,
-        responseMessages: response.messages,
-      });
+  return result.toUIMessageStreamResponse({
+    originalMessages: messages,
+    onFinish: async ({ messages }) => {
+      // In AI SDK 5.0, response.messages contains the complete conversation
+      const finalMessages = messages;
 
       const {
         data: { user },
@@ -322,11 +322,5 @@ export async function POST(req: NextRequest) {
           },
         });
     },
-
-    onError: async (error) => {
-      console.error("Error in streamText:", error);
-    },
   });
-
-  return result.toDataStreamResponse();
 }
