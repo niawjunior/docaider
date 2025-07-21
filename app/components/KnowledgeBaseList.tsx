@@ -101,7 +101,8 @@ export default function KnowledgeBaseList({
                 <h3 className="md:text-lg text-base font-semibold truncate">
                   {kb.name}
                 </h3>
-                {kb.isPublic && <Badge>Public</Badge>}
+                {kb.isPublic && <Badge variant="default">Public</Badge>}
+                {!kb.isPublic && <Badge variant="destructive">Private</Badge>}
               </div>
               <p className="text-muted-foreground text-sm mb-2 line-clamp-2">
                 {kb.description}
