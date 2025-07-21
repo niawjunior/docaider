@@ -186,23 +186,25 @@ export default function ViewKnowledgeBasePage() {
           </div>
           <div className="flex gap-2">
             {canEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push(`/knowledge/${params.id}/edit`)}
-              >
-                <Edit size={16} className="mr-2" />
-                Edit
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push(`/knowledge/${params.id}/edit`)}
+                >
+                  <Edit size={16} className="mr-2" />
+                  Edit
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShareDialogOpen(true)}
+                >
+                  <Share2 size={16} className="mr-2" />
+                  Share
+                </Button>
+              </>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShareDialogOpen(true)}
-            >
-              <Share2 size={16} className="mr-2" />
-              Share
-            </Button>
           </div>
         </div>
 
