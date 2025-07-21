@@ -20,14 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Loader2,
-  Save,
-  ArrowLeft,
-  Trash2,
-  Eye,
-  Share2,
-} from "lucide-react";
+import { Loader2, Save, ArrowLeft, Trash2, Eye, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import DocumentUpload from "@/app/components/DocumentUpload";
 import { useDocuments } from "@/app/hooks/useDocuments";
@@ -338,16 +331,14 @@ export default function EditKnowledgeBasePage() {
               <Eye size={16} className="mr-2" />
               View
             </Button>
-            {knowledgeBase.isPublic && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShareDialogOpen(true)}
-              >
-                <Share2 size={16} className="mr-2" />
-                Share
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShareDialogOpen(true)}
+            >
+              <Share2 size={16} className="mr-2" />
+              Share
+            </Button>
           </div>
         </div>
 

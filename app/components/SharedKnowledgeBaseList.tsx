@@ -1,7 +1,13 @@
 "use client";
 
 import { SharedKnowledgeBase } from "@/app/hooks/useSharedKnowledgeBases";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, Calendar, User } from "lucide-react";
@@ -73,7 +79,7 @@ export default function SharedKnowledgeBaseList({
                 </CardDescription>
               </div>
               {kb.isPublic && (
-                <Badge variant="secondary" className="ml-2 shrink-0">
+                <Badge variant="default" className="ml-2 shrink-0">
                   Public
                 </Badge>
               )}
@@ -91,7 +97,10 @@ export default function SharedKnowledgeBaseList({
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
                 <span>
-                  Shared {formatDistanceToNow(new Date(kb.sharedAt), { addSuffix: true })}
+                  Shared{" "}
+                  {formatDistanceToNow(new Date(kb.sharedAt), {
+                    addSuffix: true,
+                  })}
                 </span>
               </div>
 
