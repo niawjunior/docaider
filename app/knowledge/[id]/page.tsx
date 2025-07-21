@@ -9,20 +9,10 @@ import {
   ArrowLeft,
   Edit,
   Share2,
-  Copy,
   PlusCircle,
   MessageSquarePlus,
   Eye,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
 import GlobalLoader from "@/app/components/GlobalLoader";
@@ -41,6 +31,7 @@ import { useChats } from "@/app/hooks/useChats";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import MainLayout from "@/app/components/MainLayout";
+import ShareKnowledgeBaseDialog from "@/app/components/ShareKnowledgeBaseDialog";
 // Type definitions are inferred from React Query hooks
 
 export default function ViewKnowledgeBasePage() {
@@ -85,7 +76,7 @@ export default function ViewKnowledgeBasePage() {
   } = kbHooks.useKnowledgeBaseById(params.id);
 
   const {
-    data: documents,
+    data: documentsData,
     isLoading: isLoadingDocs,
     error: docsError,
   } = kbHooks.useKnowledgeBaseDocuments(params.id);
@@ -96,7 +87,7 @@ export default function ViewKnowledgeBasePage() {
   });
 
   const knowledgeBaseChatsData = useMemo(() => {
-    return knowledgeBaseChats?.pages.flatMap((page) => page.data) ?? [];
+    return knowledgeBaseChats?.pages.flatMap((page) => page?.data) ?? [];
   }, [knowledgeBaseChats]);
 
   // Handle errors
@@ -151,11 +142,6 @@ export default function ViewKnowledgeBasePage() {
 
   const canEdit = session && session.user.id === knowledgeBase.userId;
 
-  const handleCopyShareLink = () => {
-    navigator.clipboard.writeText(shareUrl);
-    toast("Share link copied to clipboard");
-  };
-
   const handleChatClick = (newChatId: string) => {
     // reset the query cache
     queryClient.resetQueries({
@@ -175,38 +161,14 @@ export default function ViewKnowledgeBasePage() {
 
   return (
     <MainLayout>
+      <ShareKnowledgeBaseDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        knowledgeBaseId={params.id}
+        shareUrl={shareUrl}
+        isPublic={knowledgeBase?.is_public || false}
+      />
       <div className="px-4">
-        <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Share Knowledge Base</DialogTitle>
-              <DialogDescription>
-                Share this link with others to give them access to this
-                knowledge base.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex items-center space-x-2">
-              <div className="grid flex-1 gap-2">
-                <Label htmlFor="share-link">Share Link</Label>
-                <Input
-                  id="share-link"
-                  value={shareUrl}
-                  readOnly
-                  className="w-full"
-                />
-              </div>
-              <Button
-                type="button"
-                size="icon"
-                className="mt-6"
-                onClick={handleCopyShareLink}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
         <div className="flex items-center justify-between mb-4">
           <div className="flex flex-col md:flex-row items-center mb-2">
             <Button
@@ -233,16 +195,14 @@ export default function ViewKnowledgeBasePage() {
                 Edit
               </Button>
             )}
-            {knowledgeBase.isPublic && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShareDialogOpen(true)}
-              >
-                <Share2 size={16} className="mr-2" />
-                Share
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShareDialogOpen(true)}
+            >
+              <Share2 size={16} className="mr-2" />
+              Share
+            </Button>
           </div>
         </div>
 
@@ -269,13 +229,13 @@ export default function ViewKnowledgeBasePage() {
                   </div>
                   <div className="border-t pt-4 max-h-[120px] overflow-y-auto">
                     <h3 className="font-medium mb-2">Documents</h3>
-                    {documents.length === 0 && (
+                    {documentsData.length === 0 && (
                       <p className="text-sm text-muted-foreground">
                         No documents found
                       </p>
                     )}
                     <ul className="space-y-1 text-sm flex gap-2 flex-wrap">
-                      {documents.map((doc: Document) => (
+                      {documentsData.map((doc: Document) => (
                         <li key={doc.id} className="truncate">
                           <Badge variant="outline">
                             <Link
@@ -333,7 +293,7 @@ export default function ViewKnowledgeBasePage() {
                 <CardTitle>Ask Questions</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow flex flex-col ">
-                {knowledgeBaseChatsData.length === 0 && !chatId ? (
+                {knowledgeBaseChatsData?.length === 0 && !chatId ? (
                   <div className="flex flex-col items-center justify-center gap-4 ">
                     <div className="text-center">
                       <h3 className="text-xl font-medium mb-2">

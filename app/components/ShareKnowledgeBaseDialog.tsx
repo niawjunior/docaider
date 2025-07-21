@@ -51,7 +51,6 @@ export default function ShareKnowledgeBaseDialog({
     isRemovingShare,
   } = useKnowledgeBaseShares(knowledgeBaseId);
 
-  console.log(shares);
   const handleCopyShareLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);

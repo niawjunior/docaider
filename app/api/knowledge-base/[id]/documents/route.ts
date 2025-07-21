@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/app/utils/supabase/server";
+import { createClient, createServiceClient } from "@/app/utils/supabase/server";
 import { db } from "@/db/config";
 import { knowledgeBases, documents } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
@@ -10,6 +10,7 @@ export async function GET(
 ) {
   try {
     const supabase = await createClient();
+    const serviceSupabase = createServiceClient();
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -29,10 +30,31 @@ export async function GET(
     }
 
     // Check if user has access to this knowledge base
-    if (
-      !knowledgeBase.isPublic &&
-      (!session || knowledgeBase.userId !== session.user.id)
-    ) {
+    let hasAccess = false;
+
+    // Check if knowledge base is public
+    if (knowledgeBase.isPublic) {
+      hasAccess = true;
+    }
+    // Check if user is the owner
+    else if (session && knowledgeBase.userId === session.user.id) {
+      hasAccess = true;
+    }
+    // Check if knowledge base is shared with the user's email
+    else if (session && session.user.email) {
+      const { data: sharedAccess } = await serviceSupabase
+        .from("knowledge_base_shares")
+        .select("id")
+        .eq("knowledge_base_id", id)
+        .eq("shared_with_email", session.user.email)
+        .single();
+
+      if (sharedAccess) {
+        hasAccess = true;
+      }
+    }
+
+    if (!hasAccess) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -61,7 +83,7 @@ export async function GET(
       .where(inArray(documents.documentId, knowledgeBase.documentIds))
       .orderBy(documents.updatedAt);
 
-    return NextResponse.json({ documents: kbDocuments });
+    return NextResponse.json(kbDocuments);
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || "Failed to fetch knowledge base documents" },

@@ -62,9 +62,10 @@ export async function GET(
 // Add a new share
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     const {
       data: { user },
@@ -74,7 +75,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const knowledgeBaseId = params.id;
+    const knowledgeBaseId = id;
     const { email } = await request.json();
 
     if (!email || !email.includes("@")) {
@@ -141,7 +142,7 @@ export async function POST(
 // Delete a share
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
@@ -153,7 +154,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const knowledgeBaseId = params.id;
+    const { id } = await params;
+    const knowledgeBaseId = id;
     const { searchParams } = new URL(request.url);
     const shareId = searchParams.get("shareId");
 

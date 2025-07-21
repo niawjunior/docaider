@@ -45,7 +45,7 @@ export const useKnowledgeBases = () => {
         }
 
         const data = await response.json();
-        return data.knowledgeBase;
+        return data;
       },
       enabled: !!id,
     });
@@ -59,13 +59,12 @@ export const useKnowledgeBases = () => {
       queryKey: ["knowledgeBaseDocuments", id],
       queryFn: async () => {
         const response = await fetch(`/api/knowledge-base/${id}/documents`);
-
         if (!response.ok) {
           throw new Error("Failed to fetch knowledge base documents");
         }
 
         const data = await response.json();
-        return data.documents || [];
+        return data || [];
       },
       enabled: !!id,
     });

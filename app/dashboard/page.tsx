@@ -15,7 +15,9 @@ import {
 } from "@/components/ui/tooltip";
 import { GoHomeFill } from "react-icons/go";
 import { useKnowledgeBases } from "../hooks/useKnowledgeBases";
+import { useSharedKnowledgeBases } from "../hooks/useSharedKnowledgeBases";
 import GlobalLoader from "../components/GlobalLoader";
+import SharedKnowledgeBaseList from "../components/SharedKnowledgeBaseList";
 import { Badge } from "@/components/ui/badge";
 import { useCredit } from "../hooks/useCredit";
 import MainLayout from "../components/MainLayout";
@@ -35,6 +37,12 @@ export default function DashboardPage() {
   const getKnowledgeBases = kbHooks.getKnowledgeBases;
   const getPublicKnowledgeBases = kbHooks.getPublicKnowledgeBases;
 
+  // Get shared knowledge bases
+  const {
+    data: sharedKnowledgeBasesData,
+    isLoading: sharedKnowledgeBasesLoading,
+  } = useSharedKnowledgeBases(userEmail);
+
   // Set user email when session is available
   useEffect(() => {
     if (session?.user?.email) {
@@ -49,6 +57,7 @@ export default function DashboardPage() {
   if (
     getKnowledgeBases.isLoading ||
     getPublicKnowledgeBases.isLoading ||
+    sharedKnowledgeBasesLoading ||
     creditLoading
   ) {
     return <GlobalLoader />;
@@ -133,6 +142,19 @@ export default function DashboardPage() {
           userId={session.user.id}
           isPublic={false}
           onOpenCreateKnowledgeBaseDialog={() => setIsCreateDialogOpen(true)}
+        />
+
+        {/* Shared With You Section */}
+        <div className="flex justify-between items-center py-4">
+          <h2 className="text-lg font-semibold">Shared With You</h2>
+          <Badge variant="outline" className="text-xs">
+            {sharedKnowledgeBasesData?.sharedKnowledgeBases?.length || 0} shared
+          </Badge>
+        </div>
+
+        <SharedKnowledgeBaseList
+          sharedKnowledgeBases={sharedKnowledgeBasesData?.sharedKnowledgeBases || []}
+          isLoading={sharedKnowledgeBasesLoading}
         />
 
         <h2 className="text-lg font-semibold py-4">Public Knowledge Bases</h2>

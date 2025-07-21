@@ -1,9 +1,10 @@
 import { type NextRequest } from "next/server";
 import { updateSession } from "./app/utils/supabase/middleware";
-import { createClient } from "./app/utils/supabase/server";
+import { createClient, createServiceClient } from "./app/utils/supabase/server";
 
 export async function middleware(request: NextRequest) {
   const supabase = await createClient();
+  const serviceSupabase = createServiceClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -16,7 +17,6 @@ export async function middleware(request: NextRequest) {
   // Handle edit routes (requires ownership)
   if (kbEditMatch) {
     const knowledgeBaseId = kbEditMatch[1];
-
     // Edit requires authentication
     if (!user) {
       const url = request.nextUrl.clone();
@@ -24,13 +24,16 @@ export async function middleware(request: NextRequest) {
       return Response.redirect(url);
     }
 
+    console.log(knowledgeBaseId);
+
     // Check ownership
-    const { data: knowledgeBase } = await supabase
+    const { data: knowledgeBase } = await serviceSupabase
       .from("knowledge_bases")
       .select("user_id")
       .eq("id", knowledgeBaseId)
       .single();
 
+    console.log(knowledgeBase);
     if (!knowledgeBase || knowledgeBase.user_id !== user.id) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
@@ -43,7 +46,7 @@ export async function middleware(request: NextRequest) {
     const knowledgeBaseId = kbViewMatch[1];
 
     // Check if knowledge base exists and get its visibility and ownership
-    const { data: knowledgeBase } = await supabase
+    const { data: knowledgeBase } = await serviceSupabase
       .from("knowledge_bases")
       .select("user_id, is_public")
       .eq("id", knowledgeBaseId)
@@ -67,10 +70,10 @@ export async function middleware(request: NextRequest) {
 
       // Check if user owns the knowledge base
       const isOwner = knowledgeBase.user_id === user.id;
-      
+
       if (!isOwner) {
         // Check if knowledge base is shared with this user's email
-        const { data: sharedAccess } = await supabase
+        const { data: sharedAccess } = await serviceSupabase
           .from("knowledge_base_shares")
           .select("id")
           .eq("knowledge_base_id", knowledgeBaseId)
