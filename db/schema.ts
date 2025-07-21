@@ -342,3 +342,66 @@ export const knowledgeBases = pgTable(
     }),
   ]
 );
+
+export const knowledgeBaseShares = pgTable(
+  "knowledge_base_shares",
+  {
+    id: uuid()
+      .default(sql`uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    knowledgeBaseId: uuid("knowledge_base_id")
+      .notNull()
+      .references(() => knowledgeBases.id, { onDelete: "cascade" }),
+    sharedWithEmail: text("shared_with_email").notNull(),
+    sharedByUserId: uuid("shared_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    }).default(sql`timezone('utc'::text, now())`),
+  },
+  (table) => [
+    unique("unique_kb_email_share").on(
+      table.knowledgeBaseId,
+      table.sharedWithEmail
+    ),
+    pgPolicy("Users can view shares for their knowledge bases", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(
+        EXISTS (
+          SELECT 1 FROM knowledge_bases kb 
+          WHERE kb.id = knowledge_base_id 
+          AND kb.user_id = auth.uid()
+        )
+      )`,
+    }),
+    pgPolicy("Users can create shares for their knowledge bases", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(
+        EXISTS (
+          SELECT 1 FROM knowledge_bases kb 
+          WHERE kb.id = knowledge_base_id 
+          AND kb.user_id = auth.uid()
+        )
+      )`,
+    }),
+    pgPolicy("Users can delete shares for their knowledge bases", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`(
+        EXISTS (
+          SELECT 1 FROM knowledge_bases kb 
+          WHERE kb.id = knowledge_base_id 
+          AND kb.user_id = auth.uid()
+        )
+      )`,
+    }),
+  ]
+);

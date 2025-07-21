@@ -27,7 +27,6 @@ import {
   Trash2,
   Eye,
   Share2,
-  Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 import DocumentUpload from "@/app/components/DocumentUpload";
@@ -47,15 +46,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import MainLayout from "@/app/components/MainLayout";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+
 import useSupabaseSession from "@/app/hooks/useSupabaseSession";
+import ShareKnowledgeBaseDialog from "@/app/components/ShareKnowledgeBaseDialog";
 
 // Define the Zod schema for form validation
 const FormSchema = z.object({
@@ -303,11 +296,6 @@ export default function EditKnowledgeBasePage() {
     });
   };
 
-  const handleCopyShareLink = () => {
-    navigator.clipboard.writeText(shareUrl);
-    toast("Share link copied to clipboard");
-  };
-
   const handleClick = (id: string) => {
     router.push(`/knowledge/${id}`);
     router.refresh();
@@ -318,36 +306,13 @@ export default function EditKnowledgeBasePage() {
 
   return (
     <MainLayout>
-      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Share Knowledge Base</DialogTitle>
-            <DialogDescription>
-              Share this link with others to give them access to this knowledge
-              base.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center space-x-2">
-            <div className="grid flex-1 gap-2">
-              <Label htmlFor="share-link">Share Link</Label>
-              <Input
-                id="share-link"
-                value={shareUrl}
-                readOnly
-                className="w-full"
-              />
-            </div>
-            <Button
-              type="button"
-              size="icon"
-              className="mt-6"
-              onClick={handleCopyShareLink}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ShareKnowledgeBaseDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        knowledgeBaseId={params.id}
+        shareUrl={shareUrl}
+        isPublic={knowledgeBase?.is_public || false}
+      />
       <div className="px-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex flex-col md:flex-row items-center mb-2">

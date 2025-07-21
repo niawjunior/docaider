@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Handle view routes (requires public access or ownership)
+  // Handle view routes (requires public access, ownership, or shared access)
   if (kbViewMatch) {
     const knowledgeBaseId = kbViewMatch[1];
 
@@ -65,11 +65,24 @@ export async function middleware(request: NextRequest) {
         return Response.redirect(url);
       }
 
-      // If user doesn't own the knowledge base, redirect to dashboard
-      if (knowledgeBase.user_id !== user.id) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/dashboard";
-        return Response.redirect(url);
+      // Check if user owns the knowledge base
+      const isOwner = knowledgeBase.user_id === user.id;
+      
+      if (!isOwner) {
+        // Check if knowledge base is shared with this user's email
+        const { data: sharedAccess } = await supabase
+          .from("knowledge_base_shares")
+          .select("id")
+          .eq("knowledge_base_id", knowledgeBaseId)
+          .eq("shared_with_email", user.email)
+          .single();
+
+        // If user doesn't own it and it's not shared with them, redirect to dashboard
+        if (!sharedAccess) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/dashboard";
+          return Response.redirect(url);
+        }
       }
     }
   }
