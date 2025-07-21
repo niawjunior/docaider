@@ -304,7 +304,7 @@ export default function EditKnowledgeBasePage() {
         onOpenChange={setShareDialogOpen}
         knowledgeBaseId={params.id}
         shareUrl={shareUrl}
-        isPublic={knowledgeBase?.is_public || false}
+        isPublic={knowledgeBase?.isPublic || false}
       />
       <div className="px-4">
         <div className="flex items-center justify-between mb-4">
