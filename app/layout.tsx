@@ -1,12 +1,43 @@
 import type { Metadata } from "next";
-import { Prompt } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "./providers/QueryProvider";
-const prompt = Prompt({
-  weight: ["400", "500", "600", "700", "800", "900"],
-  subsets: ["thai"],
+import localFont from "next/font/local";
+
+const MyFont = localFont({
+  src: [
+    {
+      path: "../public/font/Prompt/Prompt-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/font/Prompt/Prompt-Medium.ttf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../public/font/Prompt/Prompt-SemiBold.ttf",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../public/font/Prompt/Prompt-Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../public/font/Prompt/Prompt-ExtraBold.ttf",
+      weight: "800",
+      style: "normal",
+    },
+    {
+      path: "../public/font/Prompt/Prompt-Black.ttf",
+      weight: "900",
+      style: "normal",
+    },
+  ],
   variable: "--font-prompt",
   display: "swap",
   preload: true,
@@ -78,7 +109,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${prompt.className} antialiased bg-zinc-900`}>
+      <body className={`${MyFont.className} antialiased bg-zinc-900`}>
         <QueryProvider>
           <ThemeProvider
             attribute="class"
