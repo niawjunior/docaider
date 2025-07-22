@@ -3,7 +3,7 @@ import { openai } from "@ai-sdk/openai";
 
 import { NextRequest } from "next/server";
 
-import { createClient } from "../../utils/supabase/server";
+import { createClient, createServiceClient } from "../../utils/supabase/server";
 import { askQuestionTool } from "@/app/tools/llm-tools";
 import { db } from "../../../db/config";
 import { credits, documents, chats, knowledgeBases } from "../../../db/schema";
@@ -42,6 +42,8 @@ export async function POST(req: NextRequest) {
   // Get the knowledge base if knowledgeBaseId is provided
   let knowledgeBaseDocumentIds: string[] = [];
   let isPublicKnowledgeBase = false;
+  let hasSharedAccess = false;
+  const serviceSupabase = createServiceClient();
 
   try {
     const [knowledgeBase] = await db
@@ -53,6 +55,20 @@ export async function POST(req: NextRequest) {
     if (knowledgeBase) {
       knowledgeBaseDocumentIds = knowledgeBase.documentIds || [];
       isPublicKnowledgeBase = knowledgeBase.isPublic || false;
+      
+      // Check if knowledge base is shared with the user's email
+      if (!isPublicKnowledgeBase && knowledgeBase.userId !== user.id && user.email) {
+        const { data: sharedAccess } = await serviceSupabase
+          .from("knowledge_base_shares")
+          .select("id")
+          .eq("knowledge_base_id", knowledgeBaseId)
+          .eq("shared_with_email", user.email)
+          .single();
+
+        if (sharedAccess) {
+          hasSharedAccess = true;
+        }
+      }
     } else {
       console.warn(`Knowledge base with ID ${knowledgeBaseId} not found`);
       // If we're in knowledge base mode but the KB doesn't exist, return empty documents
@@ -95,9 +111,11 @@ export async function POST(req: NextRequest) {
           and(
             eq(documents.active, true),
             eq(documents.isKnowledgeBase, true),
-            // For public knowledge bases, don't filter by user ID
-            // For private knowledge bases, only show documents owned by the current user
-            isPublicKnowledgeBase !== true
+            // Access control logic:
+            // 1. For public knowledge bases, don't filter by user ID
+            // 2. For knowledge bases shared with the user's email, don't filter by user ID
+            // 3. For private knowledge bases not shared, only show documents owned by the current user
+            isPublicKnowledgeBase !== true && hasSharedAccess !== true
               ? eq(documents.userId, user.id)
               : undefined,
             knowledgeBaseDocumentIds.length > 0
