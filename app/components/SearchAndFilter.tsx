@@ -152,7 +152,7 @@ export default function SearchAndFilter({
               <div className="flex items-center gap-2">
                 <SortAsc className="h-4 w-4 text-muted-foreground" />
                 <Select value={sortBy} onValueChange={onSortChange}>
-                  <SelectTrigger className="w-[160px]">
+                  <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>
