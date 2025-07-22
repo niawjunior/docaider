@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { KnowledgeBase as ApiKnowledgeBase } from "./useKnowledgeBases";
 import { SharedKnowledgeBase } from "./useSharedKnowledgeBases";
 
 // Component-expected interface format
@@ -21,9 +20,9 @@ export interface SearchAndFilterState {
 }
 
 export interface UseSearchAndFilterProps {
-  knowledgeBases: ApiKnowledgeBase[];
+  knowledgeBases: KnowledgeBase[];
   sharedKnowledgeBases?: SharedKnowledgeBase[];
-  publicKnowledgeBases: ApiKnowledgeBase[];
+  publicKnowledgeBases: KnowledgeBase[];
 }
 
 export interface UseSearchAndFilterReturn {
@@ -60,25 +59,25 @@ export const useSearchAndFilter = ({
   const [filterBy, setFilterBy] = useState("all");
 
   // Helper function to convert API format to component format
-  const convertApiToComponent = (apiKb: ApiKnowledgeBase): KnowledgeBase => {
+  const convertApiToComponent = (apiKb: KnowledgeBase): KnowledgeBase => {
     // Debug: Log the original API data to understand the structure
-    console.log('API Knowledge Base:', apiKb);
-    
+    console.log("API Knowledge Base:", apiKb);
+
     return {
       id: apiKb.id,
       name: apiKb.name,
-      description: apiKb.description || '',
-      isPublic: apiKb.is_public ?? false,
-      createdAt: apiKb.created_at || new Date().toISOString(),
-      updatedAt: apiKb.updated_at || new Date().toISOString(),
-      userId: apiKb.user_id || '',
-      userName: apiKb.user_name || undefined,
+      description: apiKb.description || "",
+      isPublic: apiKb.isPublic ?? false,
+      createdAt: apiKb.createdAt || new Date().toISOString(),
+      updatedAt: apiKb.updatedAt || new Date().toISOString(),
+      userId: apiKb.userId || "",
+      userName: apiKb.userName || undefined,
     };
   };
 
   // Helper function to filter and sort knowledge bases
   const filterKnowledgeBases = useMemo(() => {
-    return (items: ApiKnowledgeBase[]): KnowledgeBase[] => {
+    return (items: KnowledgeBase[]): KnowledgeBase[] => {
       // Convert API format to component format
       const converted = items.map(convertApiToComponent);
       let filtered = [...converted];
