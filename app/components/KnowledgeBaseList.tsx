@@ -47,7 +47,6 @@ export default function KnowledgeBaseList({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const router = useRouter();
   const kbHooks = useKnowledgeBasesHook();
-
   // Use the delete mutation from the hook
   const { mutate: deleteKnowledgeBase, isPending: isDeleting } =
     kbHooks.deleteKnowledgeBase;

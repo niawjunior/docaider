@@ -24,8 +24,6 @@ export async function middleware(request: NextRequest) {
       return Response.redirect(url);
     }
 
-    console.log(knowledgeBaseId);
-
     // Check ownership
     const { data: knowledgeBase } = await serviceSupabase
       .from("knowledge_bases")
@@ -33,7 +31,6 @@ export async function middleware(request: NextRequest) {
       .eq("id", knowledgeBaseId)
       .single();
 
-    console.log(knowledgeBase);
     if (!knowledgeBase || knowledgeBase.user_id !== user.id) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";

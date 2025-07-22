@@ -21,6 +21,8 @@ import SharedKnowledgeBaseList from "../components/SharedKnowledgeBaseList";
 import { Badge } from "@/components/ui/badge";
 import { useCredit } from "../hooks/useCredit";
 import MainLayout from "../components/MainLayout";
+import SearchAndFilter from "../components/SearchAndFilter";
+import { useSearchAndFilter } from "../hooks/useSearchAndFilter";
 
 export default function DashboardPage() {
   const { session } = useSupabaseSession();
@@ -49,6 +51,13 @@ export default function DashboardPage() {
       setUserEmail(session.user.email);
     }
   }, [session]);
+
+  // Search and filter functionality
+  const searchAndFilter = useSearchAndFilter({
+    knowledgeBases: getKnowledgeBases.data || [],
+    sharedKnowledgeBases: sharedKnowledgeBasesData?.sharedKnowledgeBases || [],
+    publicKnowledgeBases: getPublicKnowledgeBases.data || [],
+  });
 
   if (!session) {
     return null; // Don't render anything while redirecting
@@ -133,12 +142,49 @@ export default function DashboardPage() {
             </Badge>
           </div>
         </div>
+
+        {/* Search and Filter Section */}
+        <div className="py-4">
+          <SearchAndFilter
+            searchQuery={searchAndFilter.searchQuery}
+            onSearchChange={searchAndFilter.setSearchQuery}
+            sortBy={searchAndFilter.sortBy}
+            onSortChange={searchAndFilter.setSortBy}
+            filterBy={searchAndFilter.filterBy}
+            onFilterChange={searchAndFilter.setFilterBy}
+            placeholder="Search all knowledge bases..."
+          />
+        </div>
+
+        {/* Results Summary */}
+        {searchAndFilter.hasActiveFilters && (
+          <div className="mb-4 p-3 bg-muted/50 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              Found{" "}
+              <span className="font-medium">
+                {searchAndFilter.totalResults}
+              </span>{" "}
+              knowledge bases
+              {searchAndFilter.searchQuery && (
+                <span>
+                  {" "}
+                  matching &ldquo;{searchAndFilter.searchQuery}&rdquo;
+                </span>
+              )}
+            </p>
+          </div>
+        )}
+
         <div className="flex justify-between items-center py-4">
           <h2 className="text-lg font-semibold">My Knowledge Bases</h2>
+          <Badge variant="outline" className="text-xs">
+            {searchAndFilter.filteredMyKnowledgeBases.length} of{" "}
+            {getKnowledgeBases.data?.length || 0}
+          </Badge>
         </div>
 
         <KnowledgeBaseList
-          knowledgeBases={getKnowledgeBases.data || []}
+          knowledgeBases={searchAndFilter.filteredMyKnowledgeBases}
           userId={session.user.id}
           isPublic={false}
           onOpenCreateKnowledgeBaseDialog={() => setIsCreateDialogOpen(true)}
@@ -148,19 +194,26 @@ export default function DashboardPage() {
         <div className="flex justify-between items-center py-4">
           <h2 className="text-lg font-semibold">Shared With You</h2>
           <Badge variant="outline" className="text-xs">
-            {sharedKnowledgeBasesData?.sharedKnowledgeBases?.length || 0} shared
+            {searchAndFilter.filteredSharedKnowledgeBases.length} of{" "}
+            {sharedKnowledgeBasesData?.sharedKnowledgeBases?.length || 0}
           </Badge>
         </div>
 
         <SharedKnowledgeBaseList
-          sharedKnowledgeBases={sharedKnowledgeBasesData?.sharedKnowledgeBases || []}
+          sharedKnowledgeBases={searchAndFilter.filteredSharedKnowledgeBases}
           isLoading={sharedKnowledgeBasesLoading}
         />
 
-        <h2 className="text-lg font-semibold py-4">Public Knowledge Bases</h2>
+        <div className="flex justify-between items-center py-4">
+          <h2 className="text-lg font-semibold">Public Knowledge Bases</h2>
+          <Badge variant="outline" className="text-xs">
+            {searchAndFilter.filteredPublicKnowledgeBases.length} of{" "}
+            {getPublicKnowledgeBases.data?.length || 0}
+          </Badge>
+        </div>
 
         <KnowledgeBaseList
-          knowledgeBases={getPublicKnowledgeBases.data || []}
+          knowledgeBases={searchAndFilter.filteredPublicKnowledgeBases}
           userId={session.user.id}
           isPublic={true}
           onOpenCreateKnowledgeBaseDialog={() => setIsCreateDialogOpen(true)}
