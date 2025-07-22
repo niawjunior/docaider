@@ -459,14 +459,14 @@ export default function EditKnowledgeBasePage() {
               <TabsContent value="current">
                 <Card>
                   <CardContent>
-                    {kbDocuments?.documents.length === 0 ? (
+                    {kbDocuments?.length === 0 ? (
                       <p className="text-center text-muted-foreground py-8">
                         No documents in this knowledge base yet. Add documents
                         from the &quot;Add Documents&quot; tab.
                       </p>
                     ) : (
                       <div className="space-y-2">
-                        {kbDocuments?.documents.map((doc: Document) => (
+                        {kbDocuments?.map((doc: Document) => (
                           <div
                             key={doc.id}
                             className="flex items-center justify-between p-3 border rounded-md"

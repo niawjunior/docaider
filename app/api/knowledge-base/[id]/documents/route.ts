@@ -61,7 +61,7 @@ export async function GET(
     // Get documents that belong to this knowledge base based on documentIds array
     // Check if knowledgeBase has documentIds
     if (!knowledgeBase.documentIds || knowledgeBase.documentIds.length === 0) {
-      return NextResponse.json({ documents: [] });
+      return NextResponse.json([]);
     }
 
     // The documentIds are stored in the knowledge base
