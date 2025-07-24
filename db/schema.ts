@@ -296,6 +296,7 @@ export const knowledgeBases = pgTable(
     name: text().notNull(),
     description: text(),
     isPublic: boolean("is_public").default(false),
+    // Removed isPinned - now using separate user_pinned_knowledge_bases table
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -402,6 +403,51 @@ export const knowledgeBaseShares = pgTable(
           AND kb.user_id = auth.uid()
         )
       )`,
+    }),
+  ]
+);
+
+// User-specific pinned knowledge bases table
+export const userPinnedKnowledgeBases = pgTable(
+  "user_pinned_knowledge_bases",
+  {
+    id: uuid()
+      .default(sql`uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    knowledgeBaseId: uuid("knowledge_base_id")
+      .notNull()
+      .references(() => knowledgeBases.id, { onDelete: "cascade" }),
+    pinnedAt: timestamp("pinned_at", {
+      withTimezone: true,
+      mode: "string",
+    }).default(sql`timezone('utc'::text, now())`),
+  },
+  (table) => [
+    unique("unique_user_kb_pin").on(
+      table.userId,
+      table.knowledgeBaseId
+    ),
+    pgPolicy("Users can view their own pins", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+    pgPolicy("Users can create their own pins", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(auth.uid() = user_id)`,
+    }),
+    pgPolicy("Users can delete their own pins", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
     }),
   ]
 );

@@ -9,6 +9,7 @@ export interface KnowledgeBase {
   name: string;
   description: string;
   is_public: boolean;
+  is_pinned: boolean;
   document_ids: string[];
   created_at: string;
   updated_at: string;
@@ -326,6 +327,51 @@ export const useKnowledgeBases = () => {
     },
   });
 
+  /**
+   * Toggle the pinned status of a knowledge base
+   */
+  const togglePinKnowledgeBase = useMutation({
+    mutationFn: async (id: string) => {
+      try {
+        const response = await fetch(`/api/knowledge-bases/${id}/pin`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to toggle pin status");
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error("Error toggling pin status:", error);
+        throw error;
+      }
+    },
+    onSuccess: (data) => {
+      // Invalidate relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["knowledgeBases"] });
+      queryClient.invalidateQueries({ queryKey: ["knowledgeBase", data.id] });
+      
+      const action = data.isPinned ? "pinned" : "unpinned";
+      toast(`Knowledge base ${action}`, {
+        duration: 3000,
+      });
+    },
+    onError: (error) => {
+      toast("Error toggling pin status", {
+        duration: 5000,
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to toggle pin status. Please try again.",
+      });
+      console.error("Toggle pin error:", error);
+    },
+  });
+
   return {
     getKnowledgeBases,
     getPublicKnowledgeBases,
@@ -335,5 +381,6 @@ export const useKnowledgeBases = () => {
     useKnowledgeBaseById,
     useKnowledgeBaseDocuments,
     patchKnowledgeBaseDocumentIds,
+    togglePinKnowledgeBase,
   };
 };

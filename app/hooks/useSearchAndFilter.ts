@@ -7,6 +7,8 @@ type KnowledgeBase = {
   name: string;
   description: string;
   isPublic: boolean;
+  isPinned?: boolean;
+  is_pinned?: boolean; // For API responses that use snake_case
   createdAt: string;
   updatedAt: string;
   userId: string;
@@ -61,12 +63,13 @@ export const useSearchAndFilter = ({
   // Helper function to convert API format to component format
   const convertApiToComponent = (apiKb: KnowledgeBase): KnowledgeBase => {
     // Debug: Log the original API data to understand the structure
-
+    console.log(apiKb);
     return {
       id: apiKb.id,
       name: apiKb.name,
       description: apiKb.description || "",
       isPublic: apiKb.isPublic ?? false,
+      isPinned: apiKb.isPinned ?? false,
       createdAt: apiKb.createdAt || new Date().toISOString(),
       updatedAt: apiKb.updatedAt || new Date().toISOString(),
       userId: apiKb.userId || "",

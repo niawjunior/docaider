@@ -121,6 +121,7 @@ export async function PUT(
         description: description?.trim(),
         isPublic: isPublic || false,
         updatedAt: new Date().toISOString(),
+        // Preserve isPinned status
       })
       .where(eq(knowledgeBases.id, id))
       .returning();

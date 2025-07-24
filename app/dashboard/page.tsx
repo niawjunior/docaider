@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Plus, CreditCard, Mail } from "lucide-react";
+import { MessageCircle, Plus, CreditCard, Mail, Star } from "lucide-react";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import KnowledgeBaseList from "../components/KnowledgeBaseList";
 import CreateKnowledgeBaseDialog from "../components/CreateKnowledgeBaseDialog";
@@ -14,15 +14,16 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { GoHomeFill } from "react-icons/go";
-import { useKnowledgeBases } from "../hooks/useKnowledgeBases";
-import { useSharedKnowledgeBases } from "../hooks/useSharedKnowledgeBases";
-import GlobalLoader from "../components/GlobalLoader";
+import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
+import { useSharedKnowledgeBases } from "@/app/hooks/useSharedKnowledgeBases";
+import { useSearchAndFilter } from "@/app/hooks/useSearchAndFilter";
+import { useUserPins } from "@/app/hooks/useUserPins";
 import SharedKnowledgeBaseList from "../components/SharedKnowledgeBaseList";
 import { Badge } from "@/components/ui/badge";
 import { useCredit } from "../hooks/useCredit";
 import MainLayout from "../components/MainLayout";
 import SearchAndFilter from "../components/SearchAndFilter";
-import { useSearchAndFilter } from "../hooks/useSearchAndFilter";
+import GlobalLoader from "../components/GlobalLoader";
 
 export default function DashboardPage() {
   const { session } = useSupabaseSession();
@@ -30,20 +31,20 @@ export default function DashboardPage() {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string>("");
 
-  const kbHooks = useKnowledgeBases();
-
   // Get user credit information
   const { credit, isLoading: creditLoading } = useCredit(
     session?.user.id || ""
   );
-  const getKnowledgeBases = kbHooks.getKnowledgeBases;
-  const getPublicKnowledgeBases = kbHooks.getPublicKnowledgeBases;
-
-  // Get shared knowledge bases
-  const {
-    data: sharedKnowledgeBasesData,
-    isLoading: sharedKnowledgeBasesLoading,
-  } = useSharedKnowledgeBases(userEmail);
+  const kbHooks = useKnowledgeBases();
+  const knowledgeBases = kbHooks.getKnowledgeBases.data || [];
+  const isLoadingKnowledgeBases = kbHooks.getKnowledgeBases.isLoading;
+  const publicKnowledgeBasesData = kbHooks.getPublicKnowledgeBases.data || [];
+  const isLoadingPublic = kbHooks.getPublicKnowledgeBases.isLoading;
+  const { data: sharedKnowledgeBasesData, isLoading: isLoadingShared } =
+    useSharedKnowledgeBases(userEmail);
+  const sharedKnowledgeBases = sharedKnowledgeBasesData?.sharedKnowledgeBases || [];
+  const { data: pinnedKnowledgeBases = [], isLoading: isLoadingPinned } =
+    useUserPins();
 
   // Set user email when session is available
   useEffect(() => {
@@ -52,23 +53,26 @@ export default function DashboardPage() {
     }
   }, [session]);
 
+  // Use public knowledge bases from the hook
+  const publicKnowledgeBases = publicKnowledgeBasesData || [];
+
   // Search and filter functionality
   const searchAndFilter = useSearchAndFilter({
-    knowledgeBases: getKnowledgeBases.data || [],
-    sharedKnowledgeBases: sharedKnowledgeBasesData?.sharedKnowledgeBases || [],
-    publicKnowledgeBases: getPublicKnowledgeBases.data || [],
+    knowledgeBases: knowledgeBases || [],
+    sharedKnowledgeBases: sharedKnowledgeBases || [],
+    publicKnowledgeBases: publicKnowledgeBases || [],
   });
+
+  console.log("Pinned knowledge bases:", pinnedKnowledgeBases);
 
   if (!session) {
     return null; // Don't render anything while redirecting
   }
 
-  if (
-    getKnowledgeBases.isLoading ||
-    getPublicKnowledgeBases.isLoading ||
-    sharedKnowledgeBasesLoading ||
-    creditLoading
-  ) {
+  const isLoading =
+    isLoadingKnowledgeBases || isLoadingShared || isLoadingPinned || isLoadingPublic || creditLoading;
+
+  if (isLoading) {
     return <GlobalLoader />;
   }
 
@@ -174,12 +178,33 @@ export default function DashboardPage() {
             </p>
           </div>
         )}
+        
+        {/* Pinned Knowledge Bases Section */}
+        {pinnedKnowledgeBases.length > 0 && (
+          <>
+            <div className="flex justify-between items-center py-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                Pinned Knowledge Bases
+              </h2>
+              <Badge variant="outline" className="text-xs">
+                {pinnedKnowledgeBases.length}
+              </Badge>
+            </div>
+            <KnowledgeBaseList
+              knowledgeBases={pinnedKnowledgeBases}
+              userId={session.user.id}
+              isPublic={false}
+              onOpenCreateKnowledgeBaseDialog={() => setIsCreateDialogOpen(true)}
+            />
+          </>
+        )}
 
         <div className="flex justify-between items-center py-4">
           <h2 className="text-lg font-semibold">My Knowledge Bases</h2>
           <Badge variant="outline" className="text-xs">
             {searchAndFilter.filteredMyKnowledgeBases.length} of{" "}
-            {getKnowledgeBases.data?.length || 0}
+            {knowledgeBases.length || 0}
           </Badge>
         </div>
 
@@ -195,20 +220,20 @@ export default function DashboardPage() {
           <h2 className="text-lg font-semibold">Shared With You</h2>
           <Badge variant="outline" className="text-xs">
             {searchAndFilter.filteredSharedKnowledgeBases.length} of{" "}
-            {sharedKnowledgeBasesData?.sharedKnowledgeBases?.length || 0}
+            {sharedKnowledgeBases.length || 0}
           </Badge>
         </div>
 
         <SharedKnowledgeBaseList
           sharedKnowledgeBases={searchAndFilter.filteredSharedKnowledgeBases}
-          isLoading={sharedKnowledgeBasesLoading}
+          isLoading={isLoadingShared}
         />
 
         <div className="flex justify-between items-center py-4">
           <h2 className="text-lg font-semibold">Public Knowledge Bases</h2>
           <Badge variant="outline" className="text-xs">
             {searchAndFilter.filteredPublicKnowledgeBases.length} of{" "}
-            {getPublicKnowledgeBases.data?.length || 0}
+            {publicKnowledgeBases.length || 0}
           </Badge>
         </div>
 

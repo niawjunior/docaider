@@ -3,10 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { formatDistanceToNow } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,9 +14,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useKnowledgeBases as useKnowledgeBasesHook } from "@/app/hooks/useKnowledgeBases";
+import { Edit, Trash2, Eye, Plus, Star, StarOff } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { useRouter } from "next/navigation";
+import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
+import { useTogglePin, useIsPinned } from "@/app/hooks/useUserPins";
 
-// Using the type from the hook to ensure consistency
+// Convert API format to component format
 type KnowledgeBase = {
   id: string;
   name: string;
@@ -31,10 +32,55 @@ type KnowledgeBase = {
   userName?: string;
 };
 
+// Convert API format to component format
+const convertApiToComponentFormat = (kb: any): KnowledgeBase => {
+  return {
+    id: kb.id,
+    name: kb.name,
+    description: kb.description || "",
+    isPublic: kb.isPublic ?? false,
+    createdAt: kb.createdAt || new Date().toISOString(),
+    updatedAt: kb.updatedAt || new Date().toISOString(),
+    userId: kb.userId || "",
+    userName: kb.userName || undefined,
+  };
+};
+
+// Pin indicator component
+function PinIndicator({ knowledgeBaseId }: { knowledgeBaseId: string }) {
+  const isPinned = useIsPinned(knowledgeBaseId);
+  
+  if (!isPinned) return null;
+  
+  return <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />;
+}
+
+// Pin button component
+function PinButton({ knowledgeBaseId, disabled }: { knowledgeBaseId: string; disabled: boolean }) {
+  const isPinned = useIsPinned(knowledgeBaseId);
+  const { togglePin } = useTogglePin();
+  
+  return (
+    <Button
+      variant="outline"
+      size="icon"
+      onClick={() => togglePin(knowledgeBaseId, isPinned)}
+      disabled={disabled}
+      title={isPinned ? "Unpin" : "Pin"}
+    >
+      {isPinned ? (
+        <StarOff size={16} />
+      ) : (
+        <Star size={16} />
+      )}
+    </Button>
+  );
+}
+
 interface KnowledgeBaseListProps {
   userId?: string;
   isPublic: boolean;
-  knowledgeBases: KnowledgeBase[];
+  knowledgeBases: any[]; // Use any to avoid type conflicts between different KnowledgeBase definitions
   onOpenCreateKnowledgeBaseDialog: () => void;
 }
 
@@ -44,15 +90,14 @@ export default function KnowledgeBaseList({
   knowledgeBases,
   onOpenCreateKnowledgeBaseDialog,
 }: KnowledgeBaseListProps) {
-  const [deleteId, setDeleteId] = useState<string | null>(null);
   const router = useRouter();
-  const kbHooks = useKnowledgeBasesHook();
-  // Use the delete mutation from the hook
-  const { mutate: deleteKnowledgeBase, isPending: isDeleting } =
-    kbHooks.deleteKnowledgeBase;
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const { deleteKnowledgeBase } = useKnowledgeBases();
+  const { isPending: isDeleting } = deleteKnowledgeBase;
+  const { togglePin, isPending: isTogglingPin } = useTogglePin();
 
   const handleDelete = async (id: string) => {
-    deleteKnowledgeBase(id, {
+    deleteKnowledgeBase.mutate(id, {
       onSuccess: () => {
         setDeleteId(null);
       },
@@ -97,11 +142,16 @@ export default function KnowledgeBaseList({
           <Card key={kb.id} className="overflow-hidden bg-zinc-900 p-0">
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-2">
-                <h3 className="md:text-lg text-base font-semibold truncate">
-                  {kb.name}
-                </h3>
-                {kb.isPublic && <Badge variant="default">Public</Badge>}
-                {!kb.isPublic && <Badge variant="destructive">Private</Badge>}
+                <div className="flex items-center gap-2">
+                  <h3 className="md:text-lg text-base font-semibold truncate">
+                    {kb.name}
+                  </h3>
+                  <PinIndicator knowledgeBaseId={kb.id} />
+                </div>
+                <div className="flex gap-1">
+                  {kb.isPublic && <Badge variant="default">Public</Badge>}
+                  {!kb.isPublic && <Badge variant="destructive">Private</Badge>}
+                </div>
               </div>
               <p className="text-muted-foreground text-sm mb-2 line-clamp-2">
                 {kb.description}
@@ -112,7 +162,10 @@ export default function KnowledgeBaseList({
                 </span>
               </div>
               {isPublic && (
-                <p className="text-xs mt-2">Created by {kb.userName}</p>
+                <div className="flex justify-between items-center mt-2">
+                  <p className="text-xs">Created by {kb.userName}</p>
+              
+                </div>
               )}
             </CardContent>
             <CardFooter className="flex  p-6 pt-0">
@@ -142,6 +195,7 @@ export default function KnowledgeBaseList({
                 >
                   <Eye size={16} />
                 </Button>
+                    <PinButton knowledgeBaseId={kb.id} disabled={isTogglingPin} />
               </div>
             </CardFooter>
           </Card>
