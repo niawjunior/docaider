@@ -184,7 +184,7 @@ export default function DashboardPage() {
           <>
             <div className="flex justify-between items-center py-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
-                <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                <Star className="h-4 w-4 text-blue-300 fill-blue-300" />
                 Pinned Knowledge Bases
               </h2>
               <Badge variant="outline" className="text-xs">

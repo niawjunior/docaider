@@ -28,7 +28,7 @@ function PinIndicator({ knowledgeBaseId }: { knowledgeBaseId: string }) {
   
   if (!isPinned) return null;
   
-  return <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />;
+  return <Star className="h-4 w-4 text-blue-300 fill-blue-300" />;
 }
 
 // Pin button component

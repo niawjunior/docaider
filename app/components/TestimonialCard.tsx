@@ -34,7 +34,7 @@ export function TestimonialCard({
         </div>
       </div>
       <p className="text-gray-300 flex-grow">&quot;{content}&quot;</p>
-      <div className="mt-4 flex text-yellow-400">
+      <div className="mt-4 flex text-blue-300">
         {[...Array(5)].map((_, i) => (
           <svg
             key={i}
