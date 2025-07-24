@@ -27,7 +27,6 @@ import { useDocuments } from "@/app/hooks/useDocuments";
 import GlobalLoader from "@/app/components/GlobalLoader";
 import Link from "next/link";
 import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -71,12 +70,12 @@ export default function EditKnowledgeBasePage() {
   const router = useRouter();
   const { deleteDocument } = useDocuments();
   const kbHooks = useKnowledgeBases();
-  const queryClient = useQueryClient();
   const [currentTab, setCurrentTab] = useState("current");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const { session } = useSupabaseSession();
+  const [documentId, setDocumentId] = useState<string | null>(null);
 
   // Initialize react-hook-form with Zod validation
   const form = useForm<FormValues>({
@@ -97,12 +96,14 @@ export default function EditKnowledgeBasePage() {
     data: knowledgeBase,
     isLoading: isLoadingKB,
     error: kbError,
+    refetch: refetchKB,
   } = kbHooks.useKnowledgeBaseById(params.id);
 
   const {
     data: kbDocuments,
     isLoading: isLoadingDocs,
     error: docsError,
+    refetch: refetchDocs,
   } = kbHooks.useKnowledgeBaseDocuments(params.id);
   // Generate share URL when component mounts
   useEffect(() => {
@@ -166,43 +167,10 @@ export default function EditKnowledgeBasePage() {
     }
   }
 
-  /**
-   * Update the knowledge base's document IDs
-   * @param documentIds The updated array of document IDs
-   * @returns Promise that resolves when the update is complete
-   */
-  const updateKnowledgeBaseDocumentIds = async (documentIds: string[]) => {
-    try {
-      const response = await fetch(`/api/knowledge-base/${params.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ documentIds }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update knowledge base");
-      }
-
-      // Refetch knowledge base data and documents after update
-      kbHooks.getKnowledgeBases.refetch();
-      kbHooks.getPublicKnowledgeBases.refetch();
-
-      // Invalidate the knowledge base documents query to trigger a refetch
-      queryClient.invalidateQueries({
-        queryKey: ["knowledgeBaseDocuments", params.id],
-      });
-
-      return response.json();
-    } catch (error) {
-      console.error("Error updating knowledge base document IDs:", error);
-      throw error;
-    }
-  };
-
   const handleDeleteDocument = async (doc: Document) => {
     // Call the deleteDocument mutation from the useDocuments hook
+    setDocumentId(doc.id);
+    refetchKB();
     deleteDocument.mutate(
       {
         documentId: doc.documentId,
@@ -210,15 +178,31 @@ export default function EditKnowledgeBasePage() {
       },
       {
         onSuccess: async () => {
+          refetchKB();
           try {
-            // Filter out the deleted document ID
-            const currentDocIds = knowledgeBase?.document_ids || [];
+            const response = await fetch(`/api/knowledge-base/${params.id}`);
+            if (!response.ok) {
+              throw new Error("Failed to fetch current knowledge base data");
+            }
+
+            const knowledgeBase = await response.json();
+
+            const currentDocIds = knowledgeBase?.documentIds || [];
             const updatedDocIds = currentDocIds.filter(
               (id: string) => id !== doc.documentId
             );
 
             // Update the knowledge base with the filtered documentIds
-            await updateKnowledgeBaseDocumentIds(updatedDocIds);
+
+            kbHooks.patchKnowledgeBaseDocumentIds.mutate({
+              knowledgeBaseId: params.id,
+              documentIds: updatedDocIds,
+            });
+            // // Refetch knowledge base data and documents after update
+
+            setTimeout(() => {
+              refetchDocs();
+            }, 1000);
           } catch (error) {
             console.error("Error updating knowledge base documentIds:", error);
             toast("Document was deleted but failed to update knowledge base");
@@ -234,48 +218,6 @@ export default function EditKnowledgeBasePage() {
     );
   };
 
-  const handleFinishUpload = async (documentId: string) => {
-    try {
-      // Fetch the latest knowledge base data to ensure we have the current documentIds
-      const response = await fetch(`/api/knowledge-base/${params.id}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch current knowledge base data");
-      }
-
-      const { knowledgeBase: latestKB } = await response.json();
-
-      // Prepare the updated document_ids array
-      // Use documentIds from the latest knowledge base data
-      const currentDocIds = latestKB?.documentIds || [];
-
-      // Check if the document ID already exists to avoid duplicates
-      if (!currentDocIds.includes(documentId)) {
-        const updatedDocIds = [...currentDocIds, documentId];
-
-        // Update the knowledge base with the new document_ids
-        await updateKnowledgeBaseDocumentIds(updatedDocIds);
-
-        toast("Document added to knowledge base successfully");
-      } else {
-        toast("Document was already in this knowledge base");
-      }
-
-      setIsUploading(false);
-
-      // Refetch knowledge base lists in dashboard
-      kbHooks.getKnowledgeBases.refetch();
-      kbHooks.getPublicKnowledgeBases.refetch();
-      // The refetchDocuments() call is already in updateKnowledgeBaseDocumentIds
-      setCurrentTab("current");
-    } catch (error) {
-      console.error("Error updating knowledge base:", error);
-      toast("Error adding document to knowledge base", {
-        description:
-          "Please try again or contact support if the issue persists.",
-      });
-    }
-  };
-
   const handleDelete = async (id: string) => {
     deleteKnowledgeBase(id, {
       onSuccess: () => {
@@ -288,6 +230,11 @@ export default function EditKnowledgeBasePage() {
     });
   };
 
+  const handleUploadSuccess = () => {
+    setCurrentTab("current");
+    refetchDocs();
+    refetchKB();
+  };
   const handleClick = (id: string) => {
     router.push(`/knowledge/${id}`);
     router.refresh();
@@ -494,7 +441,12 @@ export default function EditKnowledgeBasePage() {
                                 onClick={() => handleDeleteDocument(doc)}
                                 disabled={deleteDocument.isPending}
                               >
-                                <Trash2 size={16} />
+                                {deleteDocument.isPending &&
+                                documentId === doc.id ? (
+                                  <Loader2 className="animate-spin" />
+                                ) : (
+                                  <Trash2 size={16} />
+                                )}
                               </Button>
                             </div>
                           </div>
@@ -506,8 +458,9 @@ export default function EditKnowledgeBasePage() {
               </TabsContent>
               <TabsContent value="upload">
                 <DocumentUpload
-                  onFinish={handleFinishUpload}
+                  knowledgeBaseId={params.id}
                   onUpload={(isUploading) => setIsUploading(isUploading)}
+                  onFileUploaded={handleUploadSuccess}
                   isKnowledgeBase={true}
                 />
               </TabsContent>

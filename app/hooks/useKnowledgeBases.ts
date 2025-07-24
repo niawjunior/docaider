@@ -275,6 +275,57 @@ export const useKnowledgeBases = () => {
     },
   });
 
+  /**
+   * Update the knowledge base's document IDs
+   * @param documentIds The updated array of document IDs
+   * @returns Promise that resolves when the update is complete
+   */
+
+  const patchKnowledgeBaseDocumentIds = useMutation({
+    mutationFn: async ({
+      knowledgeBaseId,
+      documentIds,
+    }: {
+      knowledgeBaseId: string;
+      documentIds: string[];
+    }) => {
+      try {
+        const response = await fetch(`/api/knowledge-base/${knowledgeBaseId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ documentIds }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to update knowledge base document IDs");
+        }
+
+        return response.json();
+      } catch (error) {
+        console.error("Error updating knowledge base document IDs:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      // Invalidate relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["knowledgeBases"] });
+      queryClient.invalidateQueries({ queryKey: ["publicKnowledgeBases"] });
+      queryClient.invalidateQueries({ queryKey: ["knowledgeBaseDocuments"] });
+    },
+    onError: (error) => {
+      toast("Error updating knowledge base document IDs", {
+        duration: 5000,
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to update knowledge base document IDs. Please try again.",
+      });
+      console.error("Patch error:", error);
+    },
+  });
+
   return {
     getKnowledgeBases,
     getPublicKnowledgeBases,
@@ -283,5 +334,6 @@ export const useKnowledgeBases = () => {
     updateKnowledgeBase,
     useKnowledgeBaseById,
     useKnowledgeBaseDocuments,
+    patchKnowledgeBaseDocumentIds,
   };
 };

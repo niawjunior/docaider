@@ -9,6 +9,7 @@ import { Loader2, Upload } from "lucide-react";
 import DocumentsList from "./DocumentList";
 import { formatBytes } from "../utils/formatBytes";
 import { useDocumentUpload } from "../hooks/useDocumentUpload";
+import { useKnowledgeBases } from "../hooks/useKnowledgeBases";
 
 export interface DocumentUploadProps {
   onClose?: () => void;
@@ -23,8 +24,8 @@ export interface DocumentUploadProps {
       updatedAt: string;
     }[]
   ) => void;
-  onFinish?: (documentId: string) => void;
   onUpload?: (isUploading: boolean) => void;
+  onFileUploaded?: () => void;
   selectedDocuments?: {
     title: string;
     url: string;
@@ -36,14 +37,16 @@ export interface DocumentUploadProps {
   }[];
   isShowDocumentList?: boolean;
   isKnowledgeBase?: boolean;
+  knowledgeBaseId?: string;
 }
 
 export default function DocumentUpload({
   onClose,
-  onFinish,
   onUpload,
+  onFileUploaded,
   isShowDocumentList,
   isKnowledgeBase,
+  knowledgeBaseId,
 }: DocumentUploadProps) {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -53,6 +56,9 @@ export default function DocumentUpload({
 
   // Use the document upload hook
   const { uploadDocument, isUploading } = useDocumentUpload();
+
+  const kbHooks = useKnowledgeBases();
+  const { refetch } = kbHooks.useKnowledgeBaseById(knowledgeBaseId!);
 
   // Clear the file input when file is set to null
   useEffect(() => {
@@ -85,20 +91,40 @@ export default function DocumentUpload({
         isKnowledgeBase: isKnowledgeBase || false,
       },
       {
-        onSuccess: (result) => {
-          // Reset form
-          setTitle("");
-          setFile(null);
+        onSuccess: async (result) => {
+          // get current document_ids
+          if (knowledgeBaseId) {
+            const { data: refreshedKB } = await refetch();
+            if (refreshedKB) {
+              // Get current document IDs
+              const currentDocIds = refreshedKB.documentIds || [];
 
-          // Handle callbacks
-          if (onClose) {
-            onClose();
-          }
-          if (onFinish) {
-            onFinish(result.documentId);
-          }
-          if (onUpload) {
-            onUpload(false);
+              // Add the new document ID if it doesn't already exist
+              if (!currentDocIds.includes(result.documentId)) {
+                const updatedDocIds = [...currentDocIds, result.documentId];
+
+                // Update the knowledge base with the new document IDs
+                kbHooks.patchKnowledgeBaseDocumentIds.mutate({
+                  knowledgeBaseId: knowledgeBaseId,
+                  documentIds: updatedDocIds,
+                });
+
+                // // Reset form
+                setTitle("");
+                setFile(null);
+
+                // Handle callbacks
+                if (onClose) {
+                  onClose();
+                }
+                if (onUpload) {
+                  onUpload(false);
+                }
+                if (onFileUploaded) {
+                  onFileUploaded();
+                }
+              }
+            }
           }
         },
         onError: (error: any) => {
