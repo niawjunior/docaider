@@ -20,31 +20,7 @@ import { useRouter } from "next/navigation";
 import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
 import { useTogglePin, useIsPinned } from "@/app/hooks/useUserPins";
 
-// Convert API format to component format
-type KnowledgeBase = {
-  id: string;
-  name: string;
-  description: string;
-  isPublic: boolean;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-  userName?: string;
-};
 
-// Convert API format to component format
-const convertApiToComponentFormat = (kb: any): KnowledgeBase => {
-  return {
-    id: kb.id,
-    name: kb.name,
-    description: kb.description || "",
-    isPublic: kb.isPublic ?? false,
-    createdAt: kb.createdAt || new Date().toISOString(),
-    updatedAt: kb.updatedAt || new Date().toISOString(),
-    userId: kb.userId || "",
-    userName: kb.userName || undefined,
-  };
-};
 
 // Pin indicator component
 function PinIndicator({ knowledgeBaseId }: { knowledgeBaseId: string }) {
@@ -94,7 +70,7 @@ export default function KnowledgeBaseList({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const { deleteKnowledgeBase } = useKnowledgeBases();
   const { isPending: isDeleting } = deleteKnowledgeBase;
-  const { togglePin, isPending: isTogglingPin } = useTogglePin();
+  const { isPending: isTogglingPin } = useTogglePin();
 
   const handleDelete = async (id: string) => {
     deleteKnowledgeBase.mutate(id, {
