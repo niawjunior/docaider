@@ -197,12 +197,13 @@ export default function EditKnowledgeBasePage() {
             kbHooks.patchKnowledgeBaseDocumentIds.mutate({
               knowledgeBaseId: params.id,
               documentIds: updatedDocIds,
-            });
+            }, {
+              onSuccess: () => {
+                refetchDocs();
+              },
+            })
             // // Refetch knowledge base data and documents after update
 
-            setTimeout(() => {
-              refetchDocs();
-            }, 1000);
           } catch (error) {
             console.error("Error updating knowledge base documentIds:", error);
             toast("Document was deleted but failed to update knowledge base");
