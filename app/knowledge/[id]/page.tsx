@@ -10,7 +10,6 @@ import {
   Edit,
   Share2,
   PlusCircle,
-  MessageSquarePlus,
   Eye,
 } from "lucide-react";
 import { toast } from "sonner";
