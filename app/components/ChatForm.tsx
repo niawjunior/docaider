@@ -454,9 +454,9 @@ export default function ChatForm({
           </div>
           <div className="flex flex-col">
             <div className="sticky bottom-0 flex-col w-full py-2 px-2 flex gap-3">
-              {isShowTool && (
                 <div className="flex justify-between items-center pt-2">
                   <div className="flex gap-2">
+              {isShowTool && (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
@@ -477,6 +477,7 @@ export default function ChatForm({
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
+              )}
 
                     <DropdownMenu>
                       <DropdownMenuTrigger className="outline-none">
@@ -537,7 +538,6 @@ export default function ChatForm({
                     )}
                   </div>
                 </div>
-              )}
 
               {!isAtBottom && (
                 <button
