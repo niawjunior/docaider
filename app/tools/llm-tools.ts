@@ -6,10 +6,10 @@ import { openai } from "@ai-sdk/openai";
 import { createClient } from "../utils/supabase/server";
 import { findRelevantContent } from "../utils/embedding";
 export const askQuestionTool = tool({
-  description: `Use this tool to **answer questions based on the user's uploaded documents**, acting as your intelligent knowledge base.
+  description: `Use this tool to **answer questions based on current documents**, acting as your intelligent knowledge base.
 
   ✅ **Required for**:
-  - Any question related to the content of uploaded documents.
+  - Any question related to the content of current documents.
   - Retrieving specific information from your knowledge base.
 
   - If current document count is more than 1, you **MUST** Ask user to specify the document name to filter the search.
@@ -70,7 +70,7 @@ export const askQuestionTool = tool({
             ),
         }),
         prompt,
-        system: `You are a helpful assistant that can answer questions based on uploaded documents. Format your responses clearly and professionally:
+        system: `You are a helpful assistant that can answer questions based on current documents. Format your responses clearly and professionally:
 
       Please:
         - Must return the article in ${language} language.

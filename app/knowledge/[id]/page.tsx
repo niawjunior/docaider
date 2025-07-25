@@ -169,7 +169,7 @@ export default function ViewKnowledgeBasePage() {
         isPublic={knowledgeBase?.isPublic || false}
       />
       <div className="px-4">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between">
           <div className="flex flex-col md:flex-row items-center mb-2">
             <Button
               variant="outline"
@@ -180,7 +180,7 @@ export default function ViewKnowledgeBasePage() {
               <ArrowLeft size={16} className="mr-2" />
               Back to Dashboard
             </Button>
-            <h1 className="md:text-xl text-lg font-bold">
+            <h1 className="md:text-lg text-md font-bold">
               {knowledgeBase.name}
             </h1>
           </div>

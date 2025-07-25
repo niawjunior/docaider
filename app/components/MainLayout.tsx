@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import { signOut } from "../login/action";
-import { Menu, Mail, CreditCard } from "lucide-react";
+import { Menu, Mail, CreditCard, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useCredit } from "../hooks/useCredit";
 import {
@@ -20,7 +20,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const { session } = useSupabaseSession();
   const [isOpen, setIsOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string>("");
-  const { credit } = useCredit(session?.user?.id || "");
+  const { credit, isLoading } = useCredit(session?.user?.id || "");
 
   // Set user email when session is available
   useEffect(() => {
@@ -60,7 +60,12 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 className="flex items-center gap-2 px-3 py-1 mx-4"
               >
                 <CreditCard size={16} />
-                <span>{credit?.balance || 0} credits</span>
+                {isLoading ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : (
+                  <span>{credit?.balance || 0} </span>
+                )}
+                credits
               </Badge>
             )}
             <Button
@@ -176,7 +181,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
           </Sheet>
         </div>
       </header>
-      <main className=" py-4 min-h-[calc(100vh-160px)]">{children}</main>
+      <main className=" py-2 min-h-[calc(100vh-160px)]">{children}</main>
       <footer className="w-full bg-zinc-900 border-t border-zinc-800 px-6 py-3 text-gray-400 text-sm">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
