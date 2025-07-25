@@ -19,6 +19,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
 import { useTogglePin, useIsPinned } from "@/app/hooks/useUserPins";
+import { useTranslations } from "next-intl";
 
 
 
@@ -35,6 +36,7 @@ function PinIndicator({ knowledgeBaseId }: { knowledgeBaseId: string }) {
 function PinButton({ knowledgeBaseId, disabled }: { knowledgeBaseId: string; disabled: boolean }) {
   const isPinned = useIsPinned(knowledgeBaseId);
   const { togglePin } = useTogglePin();
+  const t = useTranslations('knowledgeBase');
   
   return (
     <Button
@@ -42,7 +44,7 @@ function PinButton({ knowledgeBaseId, disabled }: { knowledgeBaseId: string; dis
       size="icon"
       onClick={() => togglePin(knowledgeBaseId, isPinned)}
       disabled={disabled}
-      title={isPinned ? "Unpin" : "Pin"}
+      title={isPinned ? t('unpin') : t('pin')}
     >
       {isPinned ? (
         <StarOff size={16} />
@@ -71,6 +73,8 @@ export default function KnowledgeBaseList({
   const { deleteKnowledgeBase } = useKnowledgeBases();
   const { isPending: isDeleting } = deleteKnowledgeBase;
   const { isPending: isTogglingPin } = useTogglePin();
+  const t = useTranslations('knowledgeBase');
+  const tDashboard = useTranslations('dashboard');
 
   const handleDelete = async (id: string) => {
     deleteKnowledgeBase.mutate(id, {
@@ -88,8 +92,8 @@ export default function KnowledgeBaseList({
       <Card className="p-6 text-center">
         <p className="text-muted-foreground mb-4">
           {isPublic
-            ? "No public knowledge bases available yet."
-            : "You haven't created any knowledge bases yet."}
+            ? tDashboard('noPublicKnowledgeBases')
+            : tDashboard('noKnowledgeBases')}
         </p>
         {!isPublic && (
           <Button
@@ -99,7 +103,7 @@ export default function KnowledgeBaseList({
             className="mx-auto"
           >
             <Plus className="mr-2 h-4 w-4" />
-            Create Knowledge Base
+            {tDashboard('createKnowledgeBase')}
           </Button>
         )}
       </Card>
@@ -125,8 +129,8 @@ export default function KnowledgeBaseList({
                   <PinIndicator knowledgeBaseId={kb.id} />
                 </div>
                 <div className="flex gap-1">
-                  {kb.isPublic && <Badge variant="default">Public</Badge>}
-                  {!kb.isPublic && <Badge variant="destructive">Private</Badge>}
+                  {kb.isPublic && <Badge variant="default">{t('public')}</Badge>}
+                  {!kb.isPublic && <Badge variant="destructive">{t('private')}</Badge>}
                 </div>
               </div>
               <p className="text-muted-foreground text-sm mb-2 line-clamp-2">
@@ -134,12 +138,12 @@ export default function KnowledgeBaseList({
               </p>
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>
-                  Updated {formatDistanceToNow(new Date(kb.updatedAt))} ago
+                  {t('updatedAgo', { time: formatDistanceToNow(new Date(kb.updatedAt)) })}
                 </span>
               </div>
               {isPublic && (
                 <div className="flex justify-between items-center mt-2">
-                  <p className="text-xs">Created by {kb.userName}</p>
+                  <p className="text-xs">{t('createdBy')} {kb.userName}</p>
               
                 </div>
               )}
@@ -181,20 +185,18 @@ export default function KnowledgeBaseList({
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this knowledge base and all
-              associated documents. This action cannot be undone.
+              {t('deleteConfirmDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteId && handleDelete(deleteId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={isDeleting}
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting ? t('deleting') : t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,0 +1,345 @@
+{
+  "common": {
+    "appName": "DocAider",
+    "tagline": "AI-Powered Document & Data Platform",
+    "credits": "credits",
+    "pricing": "Pricing",
+    "dashboard": "Dashboard",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "toggleMenu": "Toggle menu",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "contact": "Contact",
+    "allRightsReserved": "All rights reserved",
+    "copyright": "© {year} DocAider. All rights reserved.",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Info",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit"
+  },
+  "navigation": {
+    "home": "Home",
+    "chat": "Chat",
+    "dashboard": "Dashboard",
+    "knowledge": "Knowledge",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "pinnedKnowledgeBases": "Pinned Knowledge Bases",
+    "myKnowledgeBases": "My Knowledge Bases",
+    "sharedWithYou": "Shared With You",
+    "publicKnowledgeBases": "Public Knowledge Bases",
+    "createKnowledgeBase": "Create Knowledge Base",
+    "searchPlaceholder": "Search all knowledge bases...",
+    "noKnowledgeBases": "You haven't created any knowledge bases yet.",
+    "noPublicKnowledgeBases": "No public knowledge bases available yet.",
+    "noSharedKnowledgeBases": "No shared knowledge bases",
+    "sharedKnowledgeBasesWillAppearHere": "Knowledge bases shared with you will appear here",
+    "credits": "Credits",
+    "goToHome": "Go to home",
+    "goToChat": "Go to chat"
+  },
+  "knowledgeBase": {
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "view": "View",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "pinned": "Pinned",
+    "public": "Public",
+    "private": "Private",
+    "name": "Name",
+    "description": "Description",
+    "documents": "Documents",
+    "createdBy": "Created by",
+    "updatedAgo": "Updated {time} ago",
+    "createdAgo": "Created {time} ago",
+    "sharedBy": "Shared by",
+    "sharedAgo": "Shared {time} ago",
+    "noDescriptionAvailable": "No description available",
+    "deleteConfirmTitle": "Are you sure?",
+    "viewPage": {
+      "backToDashboard": "Back to Dashboard",
+      "aboutThisKnowledgeBase": "About this Knowledge Base",
+      "lastUpdated": "Last updated {time} ago",
+      "noDocumentsFound": "No documents found",
+      "knowledgeSessions": "Knowledge Sessions",
+      "createNewChat": "Create new chat",
+      "askQuestions": "Ask Questions",
+      "noChats": "No chat sessions yet",
+      "startNewChatDescription": "Start a new chat to ask questions about this knowledge base",
+      "startNewChat": "Start New Chat",
+      "failedToFetchKnowledgeBase": "Failed to fetch knowledge base",
+      "knowledgeBaseNotFound": "Knowledge base not found",
+      "unauthorized": "Unauthorized",
+      "failedToFetchDocuments": "Failed to fetch knowledge base documents",
+      "suggestedPrompts": {
+        "tellMeAbout": "Tell me about this knowledge base",
+        "whoIsAuthor": "Who is the author of this knowledge base?",
+        "whatIsTitle": "What is the title of this knowledge base?",
+        "summarize": "Summarize this knowledge base"
+      }
+    },
+    "deleteConfirmDescription": "This will permanently delete this knowledge base and all associated documents. This action cannot be undone.",
+    "cancel": "Cancel",
+    "backToDashboard": "Back to Dashboard",
+    "share": "Share",
+    "details": "Knowledge Base Details",
+    "namePlaceholder": "Enter knowledge base name",
+    "descriptionPlaceholder": "Describe what this knowledge base is about",
+    "makePublic": "Make Public",
+    "publicDescription": "Public knowledge bases can be viewed by anyone",
+    "saveChanges": "Save Changes",
+    "deleteKnowledgeBase": "Delete Knowledge Base",
+    "currentDocuments": "Current Documents",
+    "uploadNewDocument": "Upload New Document",
+    "noDocuments": "No documents in this knowledge base yet. Add documents from the \"Add Documents\" tab.",
+    "addedOn": "Added on {date}"
+  },
+  "search": {
+    "searchQuery": "Search...",
+    "sortBy": "Sort by",
+    "filterBy": "Filter by",
+    "recentlyUpdated": "Recently Updated",
+    "oldestFirst": "Oldest First",
+    "nameAZ": "Name A-Z",
+    "nameZA": "Name Z-A",
+    "recentlyCreated": "Recently Created",
+    "oldestCreated": "Oldest Created",
+    "all": "All",
+    "active": "Active",
+    "hasDocuments": "Has Documents",
+    "empty": "Empty",
+    "clearAll": "Clear All",
+    "clearFilters": "Clear Filters",
+    "found": "Found",
+    "matching": "matching",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort"
+  },
+  "chat": {
+    "title": "Chat",
+    "placeholder": "Ask me anything about your documents...",
+    "send": "Send",
+    "thinking": "Thinking...",
+    "noMessages": "No messages yet. Start a conversation!",
+    "selectKnowledgeBase": "Select Knowledge Base",
+    "allKnowledgeBases": "All Knowledge Bases"
+  },
+  "documents": {
+    "yourKnowledgeBase": "Your Knowledge Base",
+    "emptyKnowledgeBase": "Your knowledge base is empty. Upload documents to start building your knowledge repository.",
+    "added": "Added",
+    "documentDeletedSuccess": "Document deleted successfully",
+    "errorDeletingDocument": "Error deleting document",
+    "failedToDeleteDocument": "Failed to delete your document. Please try again.",
+    "upload": "Upload",
+    "uploadDocuments": "Upload Documents",
+    "uploadDocument": "Upload Document",
+    "dragAndDrop": "Drag and drop files here, or click to select files",
+    "supportedFormats": "Supported formats: PDF, DOCX, TXT, MD",
+    "uploading": "Uploading...",
+    "processing": "Processing...",
+    "delete": "Delete",
+    "view": "View",
+    "documentTitle": "Document Title",
+    "enterDocumentTitle": "Enter document title",
+    "selectedFile": "Selected file: {name} ({size})",
+    "supportedFileTypes": "Supported file types: PDF, CSV, DOC, DOCX",
+    "maximumFileSize": "Maximum file size: 2MB. Documents will be processed for knowledge retrieval.",
+    "fileSizeExceeded": "File size exceeds the limit of {limit}. Current size: {size}",
+    "duplicateTitleError": "A document with this title already exists. Please use a different title."
+  },
+  "misc": {
+    "reset": "Reset"
+  },
+  "login": {
+    "title": "Sign in to your account",
+    "signInWithGoogle": "Sign in with Google",
+    "bySigningIn": "By signing in, you agree to our",
+    "termsOfService": "Terms of Service",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "pricing": {
+    "title": "AI-Powered",
+    "plansForEveryTeam": "Plans for Every Team",
+    "startWithFreeCredits": "Start with 50 free credits. No credit card required.",
+    "mostPopular": "Most Popular",
+    "creditsIncluded": "credits included",
+    "perMonth": "/mo",
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "description": "Perfect for trying out our platform",
+        "price": "Free",
+        "credits": "50",
+        "features": [
+          "50 AI Credits",
+          "All Basic Features",
+          "Standard Support",
+          "Community Access"
+        ],
+        "cta": "Get Started"
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "For professionals and small teams",
+        "price": "$9",
+        "credits": "500",
+        "features": [
+          "500 AI Credits",
+          "All Pro Features",
+          "Priority Support",
+          "API Access",
+          "Team Collaboration"
+        ],
+        "cta": "Coming Soon"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "For large organizations",
+        "price": "Custom",
+        "credits": "Unlimited",
+        "features": [
+          "Unlimited Credits",
+          "All Enterprise Features",
+          "24/7 Support",
+          "Dedicated Account Manager",
+          "Custom Integrations",
+          "SLA & Security Review"
+        ],
+        "cta": "Coming Soon"
+      }
+    }
+  },
+  "actions": {
+    "createKnowledgeBase": "Create Knowledge Base",
+    "uploadDocuments": "Upload Documents",
+    "shareKnowledgeBase": "Share Knowledge Base",
+    "deleteKnowledgeBase": "Delete Knowledge Base",
+    "editKnowledgeBase": "Edit Knowledge Base"
+  },
+  "messages": {
+    "knowledgeBaseCreated": "Knowledge base created successfully",
+    "knowledgeBaseUpdated": "Knowledge base updated successfully",
+    "knowledgeBaseDeleteError": "Knowledge base delete error",
+    "knowledgeBaseDeletedSuccess": "Knowledge base deleted successfully",
+    "knowledgeBasePinned": "Knowledge base pinned successfully",
+    "knowledgeBaseUnpinned": "Knowledge base unpinned successfully",
+    "documentUploaded": "Document uploaded successfully",
+    "documentDeleted": "Document deleted successfully",
+    "errorOccurred": "An error occurred",
+    "unauthorized": "Unauthorized access",
+    "notFound": "Not found"
+  },
+  "dialogs": {
+    "deleteConfirmation": {
+      "title": "Are you sure?",
+      "description": "This will permanently delete this knowledge base and all associated documents. This action cannot be undone.",
+      "delete": "Delete",
+      "cancel": "Cancel"
+    }
+  },
+  "home": {
+    "title": "AI-Powered Document Assistant for Knowledge Management",
+    "subtitle": "Upload your documents and chat with them using advanced AI. Get insights, summaries, and answers from your knowledge base.",
+    "featuresTitle": "Key Features",
+    "features": {
+      "documentIntelligence": {
+        "title": "Document Intelligence",
+        "description": "Process and analyze documents with AI",
+        "feature1": "Document Q&A",
+        "feature2": "Text extraction",
+        "feature3": "Content analysis"
+      },
+      "knowledgeBase": {
+        "title": "Knowledge Base Creation",
+        "description": "Create intelligent knowledge bases from your documents",
+        "feature1": "Automatic indexing",
+        "feature2": "Semantic search",
+        "feature3": "Knowledge extraction"
+      },
+      "rag": {
+        "title": "Retrieval-Augmented Generation",
+        "description": "Enhance AI responses with your knowledge base",
+        "feature1": "Contextual responses",
+        "feature2": "Source attribution",
+        "feature3": "Fact verification"
+      },
+      "multiChat": {
+        "title": "Multi-Chat with Memory",
+        "description": "Create and manage multiple chat sessions with persistent memory",
+        "feature1": "Concurrent multiple chats",
+        "feature2": "Session-based memory",
+        "feature3": "Contextual responses"
+      },
+      "vectorDB": {
+        "title": "Vector Database Integration",
+        "description": "Store and retrieve knowledge using advanced vector embeddings",
+        "feature1": "Semantic similarity search",
+        "feature2": "Efficient knowledge retrieval",
+        "feature3": "Scalable document storage"
+      },
+      "analytics": {
+        "title": "Knowledge Analytics",
+        "description": "Get insights into your knowledge base usage and performance",
+        "feature1": "Usage pattern analysis",
+        "feature2": "Knowledge gap identification",
+        "feature3": "Relevance metrics"
+      }
+    },
+    "publicKnowledgeBases": {
+      "title": "Public Knowledge Bases",
+      "subtitle": "Explore public knowledge bases created by our community",
+      "noDescription": "No description available",
+      "createdBy": "Created by {name}",
+      "updatedAgo": "Updated {time} ago",
+      "explore": "Explore",
+      "noKnowledgeBases": "No public knowledge bases yet",
+      "beFirst": "Be the first to create and share a knowledge base!",
+      "goToDashboard": "Go to Dashboard",
+      "viewAll": "View all public knowledge bases"
+    },
+    "testimonials": {
+      "title": "What Our Users Say",
+      "items": [
+        {
+          "quote": "DocAider has transformed how we manage our documentation. The AI chat feature saves us hours of searching through documents.",
+          "author": "Sarah J., Product Manager"
+        },
+        {
+          "quote": "The ability to create separate knowledge bases for different projects has been a game-changer for our team's organization.",
+          "author": "Michael T., Team Lead"
+        },
+        {
+          "quote": "I love how easy it is to share specific knowledge bases with clients while keeping other documents private.",
+          "author": "Lisa R., Consultant"
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ready to Get Started?",
+      "subtitle": "Create your first knowledge base or explore existing public resources.",
+      "createButton": "Create Knowledge Base",
+      "exploreButton": "Explore Public Resources"
+    }
+  }
+}

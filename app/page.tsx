@@ -16,6 +16,7 @@ import { Loader2, ArrowRight, Database } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { useKnowledgeBases } from "./hooks/useKnowledgeBases";
+import { useTranslations } from "next-intl";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -41,6 +42,7 @@ const itemVariants = {
 
 export default function Home() {
   const kbHooks = useKnowledgeBases();
+  const t = useTranslations('home');
 
   const getPublicKnowledgeBases = kbHooks.getPublicKnowledgeBases;
   const router = useRouter();
@@ -70,13 +72,13 @@ export default function Home() {
               containIntrinsicSize: "auto 300px",
             }}
           >
-            AI-Powered Knowledge Management Platform
+            {t('title')}
           </motion.h1>
           <motion.p
             variants={itemVariants}
             className="text-xl text-gray-300 font-medium leading-relaxed max-w-3xl mx-auto"
           >
-            Transform your documents into intelligent knowledge bases with AI
+            {t('subtitle')}
           </motion.p>
           <section className="relative z-10">
             <motion.div
@@ -90,70 +92,70 @@ export default function Home() {
                 id="features"
                 className="text-2xl md:text-4xl font-bold text-white text-center mb-8"
               >
-                Powerful Features for Knowledge Management
+                {t('featuresTitle')}
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
                 <FeatureCard
                   icon="document"
-                  title="Document Intelligence"
-                  description="Process and analyze documents with AI."
+                  title={t('features.documentIntelligence.title')}
+                  description={t('features.documentIntelligence.description')}
                   features={[
-                    "Document Q&A",
-                    "Text Extraction",
-                    "Content Analysis",
+                    t('features.documentIntelligence.feature1'),
+                    t('features.documentIntelligence.feature2'),
+                    t('features.documentIntelligence.feature3'),
                   ]}
                 />
 
                 <FeatureCard
                   icon="knowledge"
-                  title="Knowledge Base Creation"
-                  description="Build intelligent knowledge bases from your documents."
+                  title={t('features.knowledgeBase.title')}
+                  description={t('features.knowledgeBase.description')}
                   features={[
-                    "Automatic Indexing",
-                    "Semantic Search",
-                    "Knowledge Extraction",
+                    t('features.knowledgeBase.feature1'),
+                    t('features.knowledgeBase.feature2'),
+                    t('features.knowledgeBase.feature3'),
                   ]}
                 />
 
                 <FeatureCard
                   icon="rag"
-                  title="Retrieval-Augmented Generation"
-                  description="Enhance AI responses with your own knowledge base."
+                  title={t('features.rag.title')}
+                  description={t('features.rag.description')}
                   features={[
-                    "Context-Aware Responses",
-                    "Source Attribution",
-                    "Factual Grounding",
+                    t('features.rag.feature1'),
+                    t('features.rag.feature2'),
+                    t('features.rag.feature3'),
                   ]}
                 />
                 <FeatureCard
                   icon="chat"
-                  title="Multi-Chat with Memory"
-                  description="Create and manage multiple chat sessions with persistent memory."
+                  title={t('features.multiChat.title')}
+                  description={t('features.multiChat.description')}
                   features={[
-                    "Multiple Concurrent Chats",
-                    "Session-Based Memory",
-                    "Context-Aware Responses",
+                    t('features.multiChat.feature1'),
+                    t('features.multiChat.feature2'),
+                    t('features.multiChat.feature3'),
                   ]}
                 />
                 <FeatureCard
                   icon="vector"
-                  title="Vector Database Integration"
-                  description="Store and retrieve knowledge using advanced vector embeddings."
+                  title={t('features.vectorDB.title')}
+                  description={t('features.vectorDB.description')}
                   features={[
-                    "Semantic Similarity Search",
-                    "Efficient Knowledge Retrieval",
-                    "Scalable Document Storage",
+                    t('features.vectorDB.feature1'),
+                    t('features.vectorDB.feature2'),
+                    t('features.vectorDB.feature3'),
                   ]}
                 />
                 <FeatureCard
                   icon="analytics"
-                  title="Knowledge Analytics"
-                  description="Gain insights from your knowledge base usage and performance."
+                  title={t('features.analytics.title')}
+                  description={t('features.analytics.description')}
                   features={[
-                    "Usage Patterns Analysis",
-                    "Knowledge Gap Identification",
-                    "Relevance Metrics",
+                    t('features.analytics.feature1'),
+                    t('features.analytics.feature2'),
+                    t('features.analytics.feature3'),
                   ]}
                 />
               </div>
@@ -164,10 +166,10 @@ export default function Home() {
         <section className="relative z-10 py-8">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
-              Public Knowledge Bases
+              {t('publicKnowledgeBases.title')}
             </h2>
             <p className="text-xl text-gray-400 text-center mb-8 max-w-2xl mx-auto">
-              Explore public knowledge bases created by our community.
+              {t('publicKnowledgeBases.subtitle')}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -190,18 +192,17 @@ export default function Home() {
                     </CardHeader>
                     <CardContent className="min-h-[80px]">
                       <p className="text-sm text-gray-300 line-clamp-2">
-                        {kb.description || "No description provided."}
+                        {kb.description || t('publicKnowledgeBases.noDescription')}
                       </p>
                       {kb.isPublic && (
                         <p className="text-xs mt-2 text-gray-400">
-                          Created by {kb.userName}
+                          {t('publicKnowledgeBases.createdBy', { name: kb.userName })}
                         </p>
                       )}
                     </CardContent>
                     <CardFooter className="flex justify-between items-center pt-2 border-t border-gray-800">
                       <div className="text-xs text-gray-400">
-                        Updated {formatDistanceToNow(new Date(kb.updatedAt))}{" "}
-                        ago
+                        {t('publicKnowledgeBases.updatedAgo', { time: formatDistanceToNow(new Date(kb.updatedAt)) })}
                       </div>
 
                       <Button
@@ -209,7 +210,7 @@ export default function Home() {
                         size="sm"
                         onClick={() => router.push(`/knowledge/${kb.id}`)}
                       >
-                        Explore <ArrowRight className="ml-2 h-4 w-4" />
+                        {t('publicKnowledgeBases.explore')} <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </CardFooter>
                   </Card>
@@ -218,13 +219,13 @@ export default function Home() {
                 <div className="col-span-full text-center py-12 border border-dashed border-gray-700 rounded-lg">
                   <Database className="h-12 w-12 mx-auto text-gray-600 mb-4" />
                   <h3 className="text-xl font-medium text-gray-300 mb-2">
-                    No public knowledge bases yet
+                    {t('publicKnowledgeBases.noKnowledgeBases')}
                   </h3>
                   <p className="text-gray-400 mb-4">
-                    Be the first to create and share a knowledge base!
+                    {t('publicKnowledgeBases.beFirst')}
                   </p>
                   <Button onClick={() => router.push("/dashboard")}>
-                    Go to Dashboard
+                    {t('publicKnowledgeBases.goToDashboard')}
                   </Button>
                 </div>
               )}
@@ -238,17 +239,16 @@ export default function Home() {
                     variant="outline"
                     onClick={() => router.push("/dashboard?tab=public")}
                   >
-                    View All Public Knowledge Bases
+                    {t('publicKnowledgeBases.viewAll')}
                   </Button>
                 </div>
               )}
 
             <h2 className="text-3xl md:text-4xl font-bold text-white text-center mt-16 mb-4">
-              Trusted by Professionals
+              {t('testimonials.title')}
             </h2>
             <p className="text-xl text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-              See what our users are saying about their experience with our
-              platform.
+              {t('testimonials.subtitle')}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

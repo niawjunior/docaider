@@ -11,55 +11,50 @@ import {
 } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import MainLayout from "../components/MainLayout";
+import { useTranslations } from "next-intl";
 
-const pricingPlans = [
+interface PricingPlan {
+  name: string;
+  description: string;
+  price: string;
+  credits: string;
+  features: string[];
+  cta: string;
+  href: string;
+  featured: boolean;
+  disabled: boolean;
+}
+
+const getPricingPlans = (t: ReturnType<typeof useTranslations>): PricingPlan[] => [
   {
-    name: "Starter",
-    description: "Perfect for trying out our platform",
-    price: "Free",
-    credits: "50",
-    features: [
-      "50 AI Credits",
-      "All Basic Features",
-      "Standard Support",
-      "Community Access",
-    ],
-    cta: "Get Started",
+    name: t("plans.starter.name"),
+    description: t("plans.starter.description"),
+    price: t("plans.starter.price"),
+    credits: t("plans.starter.credits"),
+    features: t.raw("plans.starter.features") as string[],
+    cta: t("plans.starter.cta"),
     href: "/chat",
     featured: false,
     disabled: false,
   },
   {
-    name: "Pro",
-    description: "For professionals and small teams",
-    price: "$9",
-    credits: "500",
-    features: [
-      "500 AI Credits",
-      "All Pro Features",
-      "Priority Support",
-      "API Access",
-      "Team Collaboration",
-    ],
-    cta: "Coming Soon",
+    name: t("plans.pro.name"),
+    description: t("plans.pro.description"),
+    price: t("plans.pro.price"),
+    credits: t("plans.pro.credits"),
+    features: t.raw("plans.pro.features") as string[],
+    cta: t("plans.pro.cta"),
     href: "#",
     featured: true,
     disabled: true,
   },
   {
-    name: "Enterprise",
-    description: "For large organizations",
-    price: "Custom",
-    credits: "Unlimited",
-    features: [
-      "Unlimited Credits",
-      "All Enterprise Features",
-      "24/7 Support",
-      "Dedicated Account Manager",
-      "Custom Integrations",
-      "SLA & Security Review",
-    ],
-    cta: "Coming Soon",
+    name: t("plans.enterprise.name"),
+    description: t("plans.enterprise.description"),
+    price: t("plans.enterprise.price"),
+    credits: t("plans.enterprise.credits"),
+    features: t.raw("plans.enterprise.features") as string[],
+    cta: t("plans.enterprise.cta"),
     href: "/contact",
     featured: false,
     disabled: true,
@@ -68,6 +63,8 @@ const pricingPlans = [
 
 export default function PricingPage() {
   const router = useRouter();
+  const t = useTranslations("pricing");
+  const pricingPlans = getPricingPlans(t);
 
   return (
     <MainLayout>
@@ -75,12 +72,12 @@ export default function PricingPage() {
         <div className="text-center mb-10">
           <h1 className="text-4xl font-extrabold text-white  sm:tracking-tight lg:text-4xl">
             <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-              AI-Powered
+              {t("title")}
             </span>{" "}
-            Plans for Every Team
+            {t("plansForEveryTeam")}
           </h1>
           <p className="mt-5 max-w-xl mx-auto text-xl text-gray-400">
-            Start with 50 free credits. No credit card required.
+            {t("startWithFreeCredits")}
           </p>
         </div>
 
@@ -98,7 +95,7 @@ export default function PricingPage() {
               {plan.featured && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <span className="bg-orange-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                    Most Popular
+                    {t("mostPopular")}
                   </span>
                 </div>
               )}
@@ -117,18 +114,18 @@ export default function PricingPage() {
                   <p className="text-4xl font-bold text-white">
                     {plan.price}
                     <span className="text-base font-normal text-gray-400">
-                      {plan.price !== "Free" &&
-                        plan.price !== "Custom" &&
-                        "/mo"}
+                      {plan.price !== t("plans.starter.price") &&
+                        plan.price !== t("plans.enterprise.price") &&
+                        t("perMonth")}
                     </span>
                   </p>
                   <p className="mt-1 text-sm text-gray-400">
-                    {plan.credits} credits included
+                    {plan.credits} {t("creditsIncluded")}
                   </p>
                 </div>
 
                 <ul className="space-y-2">
-                  {plan.features.map((feature) => (
+                  {plan.features.map((feature: string) => (
                     <li key={feature} className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                       <span className="ml-3 text-gray-300">{feature}</span>

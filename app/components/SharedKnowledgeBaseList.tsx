@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, Calendar, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
+import { useTranslations } from "next-intl";
 
 interface SharedKnowledgeBaseListProps {
   sharedKnowledgeBases: SharedKnowledgeBase[];
@@ -24,6 +25,8 @@ export default function SharedKnowledgeBaseList({
   isLoading = false,
 }: SharedKnowledgeBaseListProps) {
   const router = useRouter();
+  const t = useTranslations('knowledgeBase');
+  const tDashboard = useTranslations('dashboard');
 
   const handleViewKnowledgeBase = (id: string) => {
     router.push(`/knowledge/${id}`);
@@ -56,9 +59,9 @@ export default function SharedKnowledgeBaseList({
         <div className="flex flex-col items-center gap-4">
           <User className="h-12 w-12 text-muted-foreground" />
           <div>
-            <h3 className="text-lg font-semibold">No shared knowledge bases</h3>
+            <h3 className="text-lg font-semibold">{tDashboard('noSharedKnowledgeBases')}</h3>
             <p className="text-muted-foreground">
-              Knowledge bases shared with you will appear here
+              {tDashboard('sharedKnowledgeBasesWillAppearHere')}
             </p>
           </div>
         </div>
@@ -75,12 +78,12 @@ export default function SharedKnowledgeBaseList({
               <div className="flex-1 min-w-0">
                 <CardTitle className="text-lg truncate">{kb.title}</CardTitle>
                 <CardDescription className="line-clamp-2 mt-1">
-                  {kb.description || "No description available"}
+                  {kb.description || t('noDescriptionAvailable')}
                 </CardDescription>
               </div>
               {kb.isPublic && (
                 <Badge variant="default" className="ml-2 shrink-0">
-                  Public
+                  {t('public')}
                 </Badge>
               )}
             </div>
@@ -90,16 +93,15 @@ export default function SharedKnowledgeBaseList({
               {/* Shared by info */}
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <User className="h-4 w-4" />
-                <span>Shared by {kb.sharedByEmail}</span>
+                <span>{t('sharedBy')} {kb.sharedByEmail}</span>
               </div>
 
               {/* Shared date */}
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
                 <span>
-                  Shared{" "}
-                  {formatDistanceToNow(new Date(kb.sharedAt), {
-                    addSuffix: true,
+                  {t('sharedAgo', {
+                    time: formatDistanceToNow(new Date(kb.sharedAt))
                   })}
                 </span>
               </div>
@@ -110,10 +112,9 @@ export default function SharedKnowledgeBaseList({
                   variant="default"
                   size="sm"
                   onClick={() => handleViewKnowledgeBase(kb.id)}
-                  className="flex-1"
+                  className="w-full"
                 >
-                  <Eye className="h-4 w-4 mr-2" />
-                  View
+                  <Eye className="mr-2 h-4 w-4" /> {t('view')}
                 </Button>
               </div>
             </div>

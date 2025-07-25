@@ -24,12 +24,15 @@ import { useCredit } from "../hooks/useCredit";
 import MainLayout from "../components/MainLayout";
 import SearchAndFilter from "../components/SearchAndFilter";
 import GlobalLoader from "../components/GlobalLoader";
+import { useTranslations } from 'next-intl';
 
 export default function DashboardPage() {
   const { session } = useSupabaseSession();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const user = session?.user;
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string>("");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const t = useTranslations('dashboard');
 
   // Get user credit information
   const { credit, isLoading: creditLoading } = useCredit(
@@ -93,7 +96,7 @@ export default function DashboardPage() {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Go to home</p>
+                  <p>{t('goToHome')}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -109,7 +112,7 @@ export default function DashboardPage() {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Go to chat</p>
+                  <p>{t('goToChat')}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -125,7 +128,7 @@ export default function DashboardPage() {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Create knowledge base</p>
+                  <p>{t('createKnowledgeBase')}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -133,6 +136,7 @@ export default function DashboardPage() {
 
           {/* User info and credits section - visible only on desktop */}
           <div className="hidden md:flex items-center gap-4">
+    
             <div className="flex items-center gap-2">
               <Mail size={16} className="text-muted-foreground" />
               <span className="text-sm text-muted-foreground">{userEmail}</span>
@@ -142,9 +146,10 @@ export default function DashboardPage() {
               className="flex items-center gap-2 px-3 py-1"
             >
               <CreditCard size={16} />
-              <span>{credit?.balance || 0} credits</span>
+              <span>{credit?.balance || 0} {t('credits')}</span>
             </Badge>
           </div>
+      
         </div>
 
         {/* Search and Filter Section */}
@@ -156,7 +161,7 @@ export default function DashboardPage() {
             onSortChange={searchAndFilter.setSortBy}
             filterBy={searchAndFilter.filterBy}
             onFilterChange={searchAndFilter.setFilterBy}
-            placeholder="Search all knowledge bases..."
+            placeholder={t('searchPlaceholder')}
           />
         </div>
 
@@ -184,8 +189,8 @@ export default function DashboardPage() {
           <>
             <div className="flex justify-between items-center py-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
-                <Star className="h-4 w-4 text-blue-300 fill-blue-300" />
-                Pinned Knowledge Bases
+                <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                {t('pinnedKnowledgeBases')}
               </h2>
               <Badge variant="outline" className="text-xs">
                 {pinnedKnowledgeBases.length}
@@ -201,7 +206,7 @@ export default function DashboardPage() {
         )}
 
         <div className="flex justify-between items-center py-4">
-          <h2 className="text-lg font-semibold">My Knowledge Bases</h2>
+          <h2 className="text-lg font-semibold">{t('myKnowledgeBases')}</h2>
           <Badge variant="outline" className="text-xs">
             {searchAndFilter.filteredMyKnowledgeBases.length} of{" "}
             {knowledgeBases.length || 0}
@@ -217,7 +222,7 @@ export default function DashboardPage() {
 
         {/* Shared With You Section */}
         <div className="flex justify-between items-center py-4">
-          <h2 className="text-lg font-semibold">Shared With You</h2>
+          <h2 className="text-lg font-semibold">{t('sharedWithYou')}</h2>
           <Badge variant="outline" className="text-xs">
             {searchAndFilter.filteredSharedKnowledgeBases.length} of{" "}
             {sharedKnowledgeBases.length || 0}
@@ -230,7 +235,7 @@ export default function DashboardPage() {
         />
 
         <div className="flex justify-between items-center py-4">
-          <h2 className="text-lg font-semibold">Public Knowledge Bases</h2>
+          <h2 className="text-lg font-semibold">{t('publicKnowledgeBases')}</h2>
           <Badge variant="outline" className="text-xs">
             {searchAndFilter.filteredPublicKnowledgeBases.length} of{" "}
             {publicKnowledgeBases.length || 0}

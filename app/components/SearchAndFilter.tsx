@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Search, X, Filter, SortAsc } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export interface SearchAndFilterProps {
   searchQuery: string;
@@ -38,20 +39,20 @@ export interface SortOption {
   label: string;
 }
 
-const defaultSortOptions: SortOption[] = [
-  { value: "updated_desc", label: "Recently Updated" },
-  { value: "updated_asc", label: "Oldest First" },
-  { value: "name_asc", label: "Name A-Z" },
-  { value: "name_desc", label: "Name Z-A" },
-  { value: "created_desc", label: "Recently Created" },
-  { value: "created_asc", label: "Oldest Created" },
+const getSortOptions = (t: ReturnType<typeof useTranslations>): SortOption[] => [
+  { value: "updated_desc", label: t("recentlyUpdated") },
+  { value: "updated_asc", label: t("oldestFirst") },
+  { value: "name_asc", label: t("nameAZ") },
+  { value: "name_desc", label: t("nameZA") },
+  { value: "created_desc", label: t("recentlyCreated") },
+  { value: "created_asc", label: t("oldestCreated") },
 ];
 
-const defaultFilterOptions: FilterOption[] = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "has_documents", label: "Has Documents" },
-  { value: "no_documents", label: "Empty" },
+const getFilterOptions = (t: ReturnType<typeof useTranslations>): FilterOption[] => [
+  { value: "all", label: t("all") },
+  { value: "active", label: t("active") },
+  { value: "has_documents", label: t("hasDocuments") },
+  { value: "no_documents", label: t("empty") },
 ];
 
 export default function SearchAndFilter({
@@ -62,10 +63,14 @@ export default function SearchAndFilter({
   filterBy,
   onFilterChange,
   className,
-  placeholder = "Search knowledge bases...",
+  placeholder,
   showFilters = true,
   showSort = true,
 }: SearchAndFilterProps) {
+  const t = useTranslations("search");
+  const defaultSortOptions = getSortOptions(t);
+  const defaultFilterOptions = getFilterOptions(t);
+  placeholder = placeholder || t("searchQuery");
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
 
   // Debounce search input
@@ -130,7 +135,7 @@ export default function SearchAndFilter({
                 <Filter className="h-4 w-4 text-muted-foreground" />
                 <Select value={filterBy} onValueChange={onFilterChange}>
                   <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="Filter by" />
+                    <SelectValue placeholder={t("filterBy")} />
                   </SelectTrigger>
                   <SelectContent>
                     {defaultFilterOptions.map((option) => (
@@ -153,7 +158,7 @@ export default function SearchAndFilter({
                 <SortAsc className="h-4 w-4 text-muted-foreground" />
                 <Select value={sortBy} onValueChange={onSortChange}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Sort by" />
+                    <SelectValue placeholder={t("sortBy")} />
                   </SelectTrigger>
                   <SelectContent>
                     {defaultSortOptions.map((option) => (
@@ -173,12 +178,12 @@ export default function SearchAndFilter({
               <div className="flex flex-wrap gap-1">
                 {searchQuery && (
                   <Badge variant="secondary" className="text-xs">
-                    Search: &ldquo;{searchQuery}&rdquo;
+                    {t("search")}: &ldquo;{searchQuery}&rdquo;
                   </Badge>
                 )}
                 {filterBy !== "all" && (
                   <Badge variant="secondary" className="text-xs">
-                    Filter:{" "}
+                    {t("filter")}:{" "}
                     {
                       defaultFilterOptions.find((f) => f.value === filterBy)
                         ?.label
@@ -187,7 +192,7 @@ export default function SearchAndFilter({
                 )}
                 {sortBy !== "updated_desc" && (
                   <Badge variant="secondary" className="text-xs">
-                    Sort:{" "}
+                    {t("sort")}:{" "}
                     {defaultSortOptions.find((s) => s.value === sortBy)?.label}
                   </Badge>
                 )}
@@ -198,7 +203,7 @@ export default function SearchAndFilter({
                 onClick={clearAllFilters}
                 className="text-xs"
               >
-                Clear All
+                {t("clearAll")}
               </Button>
             </div>
           )}

@@ -5,10 +5,12 @@ import { FcGoogle } from "react-icons/fc";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 const LoginComponent = () => {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callback_url") || "/dashboard";
+  const t = useTranslations("login");
   return (
     <div className="h-[calc(100dvh-250px)] flex items-center justify-center  text-white overflow-hidden ">
       {/* Login Box */}
@@ -16,7 +18,7 @@ const LoginComponent = () => {
         <div className="text-center mb-6">
           <span className="text-orange-500 font-bold text-3xl">DocAider</span>
           <h1 className="text-2xl font-semibold mt-2">
-            Sign in to your account
+            {t("title")}
           </h1>
         </div>
 
@@ -27,18 +29,18 @@ const LoginComponent = () => {
             className="w-full h-12"
           >
             <FcGoogle className="text-xl" />
-            Sign in with Google
+            {t("signInWithGoogle")}
           </Button>
         </form>
 
         <p className="text-sm text-zinc-400 mt-6 text-center">
-          By signing in, you agree to our{" "}
+          {t("bySigningIn")}{" "}
           <Link href="/terms" className="text-orange-500 hover:underline">
-            Terms of Service
+            {t("termsOfService")}
           </Link>{" "}
-          and{" "}
+          {t("and")}{" "}
           <Link href="/privacy" className="text-orange-500 hover:underline">
-            Privacy Policy
+            {t("privacyPolicy")}
           </Link>
         </p>
       </div>

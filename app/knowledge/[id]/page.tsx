@@ -32,9 +32,16 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import MainLayout from "@/app/components/MainLayout";
 import ShareKnowledgeBaseDialog from "@/app/components/ShareKnowledgeBaseDialog";
+import { useTranslations } from "next-intl";
+
 // Type definitions are inferred from React Query hooks
 
 export default function ViewKnowledgeBasePage() {
+  const t = useTranslations("knowledgeBase.viewPage");
+  const kbT = useTranslations("knowledgeBase");
+  const commonT = useTranslations("common");
+  const messagesT = useTranslations("messages");
+  
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const { session } = useSupabaseSession();
@@ -43,20 +50,20 @@ export default function ViewKnowledgeBasePage() {
   const kbHooks = useKnowledgeBases();
   const [chatId, setChatId] = useState<string>("");
   const queryClient = useQueryClient();
-  const suggestedPrompts = [
+  const suggestedPrompts = useMemo(() => [
     {
-      title: "Tell me about the document",
+      title: t("suggestedPrompts.tellMeAbout"),
     },
     {
-      title: "What is the author of the document?",
+      title: t("suggestedPrompts.whoIsAuthor"),
     },
     {
-      title: "What is the title of the document?",
+      title: t("suggestedPrompts.whatIsTitle"),
     },
     {
-      title: "Summarize the document",
+      title: t("suggestedPrompts.summarize"),
     },
-  ];
+  ], [t]);
 
   interface Document {
     id: number;
@@ -94,20 +101,20 @@ export default function ViewKnowledgeBasePage() {
   useEffect(() => {
     if (kbError) {
       console.error("Error fetching knowledge base:", kbError);
-      toast("Failed to fetch knowledge base");
+      toast(t("failedToFetchKnowledgeBase"));
 
       // Check if the error is due to 404 or 401
       if (kbError instanceof Error) {
         if (kbError.message.includes("404")) {
-          toast("Knowledge base not found");
+          toast(t("knowledgeBaseNotFound"));
           router.push("/dashboard");
         } else if (kbError.message.includes("401")) {
-          toast("Unauthorized");
+          toast(t("unauthorized"));
           router.push("/dashboard");
         }
       }
     }
-  }, [kbError, router]);
+  }, [kbError, router, t]);
 
   useEffect(() => {
     // set chatId to the first chat id
@@ -119,9 +126,9 @@ export default function ViewKnowledgeBasePage() {
   useEffect(() => {
     if (docsError) {
       console.error("Error fetching knowledge base documents:", docsError);
-      toast("Failed to fetch knowledge base documents");
+      toast(t("failedToFetchDocuments"));
     }
-  }, [docsError]);
+  }, [docsError, t]);
 
   // Generate share URL when component mounts
   useEffect(() => {
@@ -178,7 +185,7 @@ export default function ViewKnowledgeBasePage() {
               className="mr-4"
             >
               <ArrowLeft size={16} className="mr-2" />
-              Back to Dashboard
+              {t("backToDashboard")}
             </Button>
             <h1 className="md:text-lg text-md font-bold">
               {knowledgeBase.name}
@@ -193,7 +200,7 @@ export default function ViewKnowledgeBasePage() {
                   onClick={() => router.push(`/knowledge/${params.id}/edit`)}
                 >
                   <Edit size={16} className="mr-2" />
-                  Edit
+                  {kbT("edit")}
                 </Button>
                 <Button
                   variant="outline"
@@ -201,7 +208,7 @@ export default function ViewKnowledgeBasePage() {
                   onClick={() => setShareDialogOpen(true)}
                 >
                   <Share2 size={16} className="mr-2" />
-                  Share
+                  {commonT("share")}
                 </Button>
               </>
             )}
@@ -212,9 +219,9 @@ export default function ViewKnowledgeBasePage() {
           <div className="lg:col-span-1 flex flex-col gap-2">
             <Card>
               <CardHeader className="flex items-center justify-between">
-                <CardTitle>About this Knowledge Base</CardTitle>
+                <CardTitle>{t("aboutThisKnowledgeBase")}</CardTitle>
                 {knowledgeBase.isPublic && (
-                  <Badge className="ml-2">Public</Badge>
+                  <Badge className="ml-2">{kbT("public")}</Badge>
                 )}
               </CardHeader>
               <CardContent>
@@ -224,16 +231,14 @@ export default function ViewKnowledgeBasePage() {
                   )}
                   <div className="text-sm text-muted-foreground">
                     <p>
-                      Last updated{" "}
-                      {formatDistanceToNow(new Date(knowledgeBase.updatedAt))}{" "}
-                      ago
+                      {t("lastUpdated", { time: formatDistanceToNow(new Date(knowledgeBase.updatedAt)) })}
                     </p>
                   </div>
                   <div className="border-t pt-4 max-h-[120px] overflow-y-auto">
-                    <h3 className="font-medium mb-2">Documents</h3>
+                    <h3 className="font-medium mb-2">{kbT("documents")}</h3>
                     {documentsData.length === 0 && (
                       <p className="text-sm text-muted-foreground">
-                        No documents found
+                        {t("noDocumentsFound")}
                       </p>
                     )}
                     <ul className="space-y-1 text-sm flex gap-2 flex-wrap">
@@ -258,7 +263,7 @@ export default function ViewKnowledgeBasePage() {
             </Card>
             <Card>
               <CardContent className="flex items-center justify-between">
-                <CardTitle>Knowledge Sessions</CardTitle>
+                <CardTitle>{t("knowledgeSessions")}</CardTitle>
                 <CardTitle>
                   <TooltipProvider>
                     <Tooltip>
@@ -273,7 +278,7 @@ export default function ViewKnowledgeBasePage() {
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Create new chat</p>
+                        <p>{t("createNewChat")}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -292,39 +297,15 @@ export default function ViewKnowledgeBasePage() {
           <div className="lg:col-span-2">
             <Card className="h-full flex flex-col">
               <CardHeader>
-                <CardTitle>Ask Questions</CardTitle>
+                <CardTitle>{t("askQuestions")}</CardTitle>
               </CardHeader>
-              <CardContent className="flex-grow flex flex-col ">
-                {knowledgeBaseChatsData?.length === 0 && !chatId ? (
-                  <div className="flex flex-col items-center justify-center gap-4 ">
-                    <div className="text-center">
-                      <h3 className="text-xl font-medium mb-2">
-                        No chat sessions yet
-                      </h3>
-                      <p className="text-muted-foreground mb-4">
-                        Start a new chat to ask questions about this knowledge
-                        base
-                      </p>
-                    </div>
-                    <Button
-                      onClick={createNewChat}
-                      className="flex items-center gap-2"
-                      size="lg"
-                    >
-                      <MessageSquarePlus className="h-5 w-5" />
-                      Start New Chat
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-end gap-2">
-                    <ChatForm
-                      isKnowledgeBase={true}
-                      knowledgeBaseId={params.id}
-                      suggestedPrompts={suggestedPrompts}
-                      chatId={chatId}
-                    />
-                  </div>
-                )}
+              <CardContent>
+                <ChatForm
+                  isKnowledgeBase={true}
+                  knowledgeBaseId={params.id}
+                  suggestedPrompts={suggestedPrompts}
+                  chatId={chatId}
+                />
               </CardContent>
             </Card>
           </div>

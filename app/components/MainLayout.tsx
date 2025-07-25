@@ -14,6 +14,8 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
+import LocaleSwitcher from "./LocaleSwitcher";
+import { useTranslations } from "next-intl";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
@@ -21,6 +23,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string>("");
   const { credit, isLoading } = useCredit(session?.user?.id || "");
+  const t = useTranslations("common");
 
   // Set user email when session is available
   useEffect(() => {
@@ -47,7 +50,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="flex gap-2 items-center">
             <Link href="/">
               <span className="text-white lg:text-xl text-md font-bold">
-                ✨ DocAider
+                ✨ {t("appName")}
               </span>
             </Link>
           </div>
@@ -65,7 +68,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 ) : (
                   <span>{credit?.balance || 0} </span>
                 )}
-                credits
+                {t("credits")}
               </Badge>
             )}
             <Button
@@ -73,7 +76,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               onClick={() => router.push("/pricing")}
               className="text-sm"
             >
-              Pricing
+              {t("pricing")}
             </Button>
             {session ? (
               <>
@@ -82,14 +85,14 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                   onClick={() => router.push("/dashboard")}
                   className="text-sm"
                 >
-                  Dashboard
+                  {t("dashboard")}
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={handleSignOut}
                   className="text-sm"
                 >
-                  Sign Out
+                  {t("signOut")}
                 </Button>
               </>
             ) : (
@@ -98,9 +101,11 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 onClick={() => router.push("/login")}
                 className="text-sm"
               >
-                Sign In
+                {t("signIn")}
               </Button>
             )}
+                    <LocaleSwitcher />
+
           </nav>
 
           {/* Mobile Navigation */}
@@ -108,7 +113,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon">
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
+                <span className="sr-only">{t("toggleMenu")}</span>
               </Button>
             </SheetTrigger>
             <SheetContent
@@ -129,7 +134,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                     className="flex items-center gap-2 px-3 py-1 mx-4"
                   >
                     <CreditCard size={16} />
-                    <span>{credit?.balance || 0} credits</span>
+                    <span>{credit?.balance || 0} {t("credits")}</span>
                   </Badge>
                 </div>
               )}
@@ -141,7 +146,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                     onClick={() => handleNavigation("/pricing")}
                     className="justify-start"
                   >
-                    Pricing
+                    {t("pricing")}
                   </Button>
                 </SheetClose>
                 {session ? (
@@ -152,7 +157,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                         onClick={() => handleNavigation("/dashboard")}
                         className="justify-start"
                       >
-                        Dashboard
+                        {t("dashboard")}
                       </Button>
                     </SheetClose>
                     <SheetClose asChild>
@@ -161,7 +166,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                         onClick={handleSignOut}
                         className="justify-start"
                       >
-                        Sign Out
+                        {t("signOut")}
                       </Button>
                     </SheetClose>
                   </>
@@ -172,10 +177,13 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                       onClick={() => handleNavigation("/login")}
                       className="justify-start"
                     >
-                      Sign In
+                      {t("signIn")}
                     </Button>
                   </SheetClose>
                 )}
+                <SheetClose asChild>
+                  <LocaleSwitcher />
+                </SheetClose>
               </div>
             </SheetContent>
           </Sheet>
@@ -185,26 +193,26 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       <footer className="w-full bg-zinc-900 border-t border-zinc-800 px-6 py-3 text-gray-400 text-sm">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
-            <span className="font-bold text-white">✨ DocAider</span> &mdash;
-            AI-Powered Document & Data Platform
+            <span className="font-bold text-white">✨ {t("appName")}</span> &mdash;
+            {t("tagline")}
           </div>
 
           <div className="flex flex-wrap gap-4 justify-center md:justify-end text-gray-400">
             <Link href="/privacy" className="hover:text-white transition">
-              Privacy
+              {t("privacy")}
             </Link>
             <Link href="/terms" className="hover:text-white transition">
-              Terms
+              {t("terms")}
             </Link>
 
             <Link href="/contact" className="hover:text-white transition">
-              Contact
+              {t("contact")}
             </Link>
           </div>
         </div>
 
         <div className="mt-2 text-center text-xs text-gray-400">
-          © {new Date().getFullYear()} DocAider. All rights reserved.
+          {t("copyright", { year: new Date().getFullYear() })}
         </div>
       </footer>
     </>

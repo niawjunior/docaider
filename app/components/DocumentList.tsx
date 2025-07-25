@@ -3,11 +3,14 @@ import { Trash2 } from "lucide-react";
 import { FaEye } from "react-icons/fa";
 import { useDocuments } from "../hooks/useDocuments";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 const DocumentsList = () => {
   const { useGetDocuments } = useDocuments();
   const { data: documents = [] } = useGetDocuments({ isKnowledgeBase: false });
   const { deleteDocument } = useDocuments();
+  const t = useTranslations('documents');
+  const tCommon = useTranslations('common');
   const handleDelete = async (doc: {
     title: string;
     url: string;
@@ -25,15 +28,15 @@ const DocumentsList = () => {
         },
         {
           onSuccess: () => {
-            toast("Document deleted successfully", {
+            toast(t('documentDeletedSuccess'), {
               duration: 3000,
             });
           },
           onError: (error) => {
             console.error("Error deleting document:", error);
-            toast("Error deleting document", {
+            toast(t('errorDeletingDocument'), {
               duration: 5000,
-              description: "Failed to delete your document. Please try again.",
+              description: t('failedToDeleteDocument'),
             });
           },
         }
@@ -45,12 +48,11 @@ const DocumentsList = () => {
 
   return (
     <div className="mt-4">
-      <h3 className="text-sm font-medium mb-2">Your Knowledge Base</h3>
+      <h3 className="text-sm font-medium mb-2">{t('yourKnowledgeBase')}</h3>
       <div className="space-y-2 overflow-y-auto max-h-[200px]">
         {documents?.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            Your knowledge base is empty. Upload documents to start building
-            your knowledge repository.
+            {t('emptyKnowledgeBase')}
           </p>
         ) : (
           documents?.map((doc) => {
@@ -63,7 +65,7 @@ const DocumentsList = () => {
                   <div>
                     <p className="text-sm font-medium">{doc.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      Added: {new Date(doc.created_at).toLocaleDateString()}
+                      {t('added')}: {new Date(doc.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>

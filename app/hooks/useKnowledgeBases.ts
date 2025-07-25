@@ -23,6 +23,7 @@ export interface KnowledgeBase {
 export const useKnowledgeBases = () => {
   const queryClient = useQueryClient();
   const supabase = createClient();
+  
 
   /**
    * Fetch a single knowledge base by ID

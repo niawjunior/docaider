@@ -41,16 +41,21 @@ import MainLayout from "@/app/components/MainLayout";
 
 import useSupabaseSession from "@/app/hooks/useSupabaseSession";
 import ShareKnowledgeBaseDialog from "@/app/components/ShareKnowledgeBaseDialog";
+import { useTranslations } from "next-intl";
 
 // Define the Zod schema for form validation
-const FormSchema = z.object({
-  name: z.string().min(1, { message: "Knowledge base name is required" }),
+const getFormSchema = (t: ReturnType<typeof useTranslations>) => z.object({
+  name: z.string().min(1, { message: t("name") + " " + t("common:isRequired") }),
   description: z.string().optional(),
   isPublic: z.boolean(),
 });
 
 // Define the form values type
-type FormValues = z.infer<typeof FormSchema>;
+type FormValues = {
+  name: string;
+  description?: string;
+  isPublic: boolean;
+};
 
 interface Document {
   title: string;
@@ -63,6 +68,9 @@ interface Document {
 }
 
 export default function EditKnowledgeBasePage() {
+  const t = useTranslations("knowledgeBase");
+  const commonT = useTranslations("common");
+  const messagesT = useTranslations("messages");
   const params = useParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -76,8 +84,9 @@ export default function EditKnowledgeBasePage() {
   const [shareUrl, setShareUrl] = useState("");
   const { session } = useSupabaseSession();
   const [documentId, setDocumentId] = useState<string | null>(null);
-
+  
   // Initialize react-hook-form with Zod validation
+  const FormSchema = getFormSchema(t);
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -116,7 +125,7 @@ export default function EditKnowledgeBasePage() {
       // 🔒 AUTHORIZATION CHECK: Only allow owner to access edit page
       if (session?.user?.id !== knowledgeBase.userId) {
         console.error("Unauthorized access attempt to edit knowledge base");
-        toast.error("You don't have permission to edit this knowledge base");
+        toast.error(t("unauthorizedEdit"));
         router.push("/dashboard");
         return;
       }
@@ -132,13 +141,13 @@ export default function EditKnowledgeBasePage() {
   useEffect(() => {
     if (kbError) {
       console.error("Error fetching knowledge base:", kbError);
-      toast("Failed to fetch knowledge base");
+      toast(t("fetchError"));
       router.push("/dashboard");
     }
 
     if (docsError) {
       console.error("Error fetching knowledge base documents:", docsError);
-      toast("Failed to fetch knowledge base documents");
+      toast(t("documentsFetchError"));
     }
   }, [kbError, docsError, router]);
 
@@ -206,13 +215,13 @@ export default function EditKnowledgeBasePage() {
 
           } catch (error) {
             console.error("Error updating knowledge base documentIds:", error);
-            toast("Document was deleted but failed to update knowledge base");
+            toast(t("documentDeletedButUpdateFailed"));
           }
         },
         onError: () => {
-          toast("Error deleting document", {
+          toast(t("documents:errorDeletingDocument"), {
             duration: 5000,
-            description: "Failed to delete your document. Please try again.",
+            description: t("documents:failedToDeleteDocument"),
           });
         },
       }
@@ -222,11 +231,11 @@ export default function EditKnowledgeBasePage() {
   const handleDelete = async (id: string) => {
     deleteKnowledgeBase(id, {
       onSuccess: () => {
-        toast("Knowledge base deleted successfully");
+        toast(messagesT("knowledgeBaseDeleted"));
         router.push("/dashboard");
       },
       onError: () => {
-        toast("Failed to delete knowledge base");
+        toast(messagesT("knowledgeBaseDeleteError"));
       },
     });
   };
@@ -263,7 +272,7 @@ export default function EditKnowledgeBasePage() {
               className="mr-4"
             >
               <ArrowLeft size={16} className="mr-2" />
-              Back to Dashboard
+              {t("backToDashboard")}
             </Button>
             <h1 className="md:text-lg text-md font-bold">
               {knowledgeBase.name}
@@ -276,7 +285,7 @@ export default function EditKnowledgeBasePage() {
               onClick={() => handleClick(params.id)}
             >
               <Eye size={16} className="mr-2" />
-              View
+              {t("view")}
             </Button>
             <Button
               variant="outline"
@@ -284,7 +293,7 @@ export default function EditKnowledgeBasePage() {
               onClick={() => setShareDialogOpen(true)}
             >
               <Share2 size={16} className="mr-2" />
-              Share
+              {t("share")}
             </Button>
           </div>
         </div>
@@ -293,7 +302,7 @@ export default function EditKnowledgeBasePage() {
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle>Knowledge Base Details</CardTitle>
+                <CardTitle>{t("details")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Form {...form}>
@@ -306,10 +315,10 @@ export default function EditKnowledgeBasePage() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Name</FormLabel>
+                          <FormLabel>{t("name")}</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="Enter knowledge base name"
+                              placeholder={t("namePlaceholder")}
                               {...field}
                             />
                           </FormControl>
@@ -323,10 +332,10 @@ export default function EditKnowledgeBasePage() {
                       name="description"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Description</FormLabel>
+                          <FormLabel>{t("description")}</FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="Describe what this knowledge base is about"
+                              placeholder={t("descriptionPlaceholder")}
                               rows={3}
                               {...field}
                             />
@@ -342,9 +351,9 @@ export default function EditKnowledgeBasePage() {
                       render={({ field }) => (
                         <FormItem className="flex items-center justify-between">
                           <div className="space-y-0.5">
-                            <FormLabel>Make Public</FormLabel>
+                            <FormLabel>{t("makePublic")}</FormLabel>
                             <FormDescription>
-                              Public knowledge bases can be viewed by anyone
+                              {t("publicDescription")}
                             </FormDescription>
                           </div>
                           <FormControl>
@@ -366,20 +375,23 @@ export default function EditKnowledgeBasePage() {
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       )}
                       {!isSaving && <Save size={16} className="mr-2" />}
-                      Save Changes
+                      {t("saveChanges")}
                     </Button>
 
                     <Button
                       variant="destructive"
                       className="w-full"
-                      onClick={() => setDeleteId(params.id)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setDeleteId(params.id);
+                      }}
                       disabled={isDeleting}
                     >
                       {isDeleting && (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       )}
                       {!isDeleting && <Trash2 size={16} className="mr-2" />}
-                      Delete Knowledge Base
+                      {t("deleteKnowledgeBase")}
                     </Button>
                   </form>
                 </Form>
@@ -394,13 +406,13 @@ export default function EditKnowledgeBasePage() {
                   disabled={deleteDocument.isPending || isUploading}
                   value="current"
                 >
-                  Current Documents
+                  {t("currentDocuments")}
                 </TabsTrigger>
                 <TabsTrigger
                   disabled={deleteDocument.isPending || isUploading}
                   value="upload"
                 >
-                  Upload New Document
+                  {t("uploadNewDocument")}
                 </TabsTrigger>
               </TabsList>
 
@@ -409,8 +421,7 @@ export default function EditKnowledgeBasePage() {
                   <CardContent>
                     {kbDocuments?.length === 0 ? (
                       <p className="text-center text-muted-foreground py-8">
-                        No documents in this knowledge base yet. Add documents
-                        from the &quot;Add Documents&quot; tab.
+                        {t("noDocuments")}
                       </p>
                     ) : (
                       <div className="space-y-2">
@@ -422,8 +433,7 @@ export default function EditKnowledgeBasePage() {
                             <div>
                               <p className="font-medium">{doc.title}</p>
                               <p className="text-xs text-muted-foreground">
-                                {doc.documentId} • Added on{" "}
-                                {new Date(doc.updatedAt).toLocaleDateString()}
+                                {doc.documentId} • {t("addedOn", { date: new Date(doc.updatedAt).toLocaleDateString() })}
                               </p>
                             </div>
                             <div className="flex items-center gap-2">
@@ -473,20 +483,19 @@ export default function EditKnowledgeBasePage() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteConfirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this knowledge base and all
-              associated documents. This action cannot be undone.
+              {t("deleteConfirmDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteId && handleDelete(deleteId)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={isDeleting}
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting ? t("deleting") : t("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
