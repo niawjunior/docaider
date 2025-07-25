@@ -10,7 +10,6 @@ const DocumentsList = () => {
   const { data: documents = [] } = useGetDocuments({ isKnowledgeBase: false });
   const { deleteDocument } = useDocuments();
   const t = useTranslations('documents');
-  const tCommon = useTranslations('common');
   const handleDelete = async (doc: {
     title: string;
     url: string;

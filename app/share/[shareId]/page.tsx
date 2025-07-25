@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import GlobalLoader from "@/app/components/GlobalLoader";
 import { Button } from "@/components/ui/button";

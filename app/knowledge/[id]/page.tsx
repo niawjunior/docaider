@@ -40,7 +40,6 @@ export default function ViewKnowledgeBasePage() {
   const t = useTranslations("knowledgeBase.viewPage");
   const kbT = useTranslations("knowledgeBase");
   const commonT = useTranslations("common");
-  const messagesT = useTranslations("messages");
   
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");

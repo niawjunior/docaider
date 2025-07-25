@@ -28,7 +28,6 @@ import { useTranslations } from 'next-intl';
 
 export default function DashboardPage() {
   const { session } = useSupabaseSession();
-  const user = session?.user;
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string>("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);

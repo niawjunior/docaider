@@ -69,7 +69,6 @@ interface Document {
 
 export default function EditKnowledgeBasePage() {
   const t = useTranslations("knowledgeBase");
-  const commonT = useTranslations("common");
   const messagesT = useTranslations("messages");
   const params = useParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(true);
