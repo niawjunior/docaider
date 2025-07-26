@@ -84,8 +84,8 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
             ></div>
           </div>
         ) : (
-          chats?.map((chat) => (
-            <li key={(chat as { id: string }).id} className="py-1">
+          chats?.map((chat, index) => (
+            <li key={index} className="py-1">
               <button
                 onClick={() => handleChatClick((chat as { id: string }).id)}
                 className={clsx(

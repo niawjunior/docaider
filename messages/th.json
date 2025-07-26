@@ -30,7 +30,8 @@
     "previous": "ก่อนหน้า",
     "submit": "ส่ง",
     "isRequired": "จำเป็น",
-    "share": "แชร์"
+    "share": "แชร์",
+    "failedToCopy": "ไม่สามารถคัดลอกลิงก์ได้"
   },
   "navigation": {
     "home": "หน้าแรก",
@@ -43,6 +44,37 @@
     "goToHome": "ไปที่หน้าแรก",
     "toggleSidebar": "เปิด/ปิดแถบข้าง",
     "createNewChat": "สร้างแชทใหม่"
+  },
+  "chat": {
+    "title": "แชท",
+    "placeholder": "ถามคำถามเกี่ยวกับเอกสารของคุณ...",
+    "send": "ส่ง",
+    "thinking": "กำลังคิด...",
+    "noMessages": "ยังไม่มีข้อความ เริ่มการสนทนาเลย!",
+    "selectKnowledgeBase": "เลือกฐานความรู้",
+    "allKnowledgeBases": "ฐานความรู้ทั้งหมด",
+    "greeting": "สวัสดีครับ!",
+    "helpPrompt": "วันนี้ให้ช่วยอะไรดีครับ?",
+    "shareChat": "แชร์การสนทนา",
+    "manageDocuments": "จัดการเอกสาร",
+    "availableTools": "เครื่องมือที่ใช้ได้",
+    "scrollToBottom": "เลื่อนไปด้านล่าง",
+    "askAnything": "ถามอะไรก็ได้...",
+    "disclaimer": "Docaider อาจทำผิดพลาดได้ โปรดตรวจสอบข้อมูลที่สำคัญ",
+    "searchingDocument": "กำลังค้นหาในเอกสาร...",
+    "errorMessage": "เกิดข้อผิดพลาด โปรดลองอีกครั้ง",
+    "manageKnowledgeBase": "จัดการฐานความรู้",
+    "shareDialogTitle": "แชร์ลิงก์สาธารณะไปยังการสนทนา",
+    "copyLink": "คัดลอกลิงก์",
+    "updating": "กำลังอัปเดต...",
+    "updateShareLink": "อัปเดตลิงก์แชร์",
+    "shareDescription": "แชร์ลิงก์นี้กับทุกคนเพื่อให้พวกเขาดูการสนทนาของคุณในโหมดอ่านอย่างเดียว",
+    "generating": "กำลังสร้าง...",
+    "generateShareLink": "สร้างลิงก์แชร์",
+    "askQuestionDescription": "ถามคำถามเกี่ยวกับเอกสารที่อัปโหลด",
+    "shareLinkCreated": "สร้างลิงก์แชร์แล้ว",
+    "failedToCreateShareLink": "ไม่สามารถสร้างลิงก์แชร์ได้",
+    "linkCopied": "คัดลอกลิงก์ไปยังคลิปบอร์ดแล้ว"
   },
   "sidebar": {
     "knowledgeSessions": "แชททั้งหมด",
@@ -169,15 +201,7 @@
     "filter": "กรอง",
     "sort": "เรียง"
   },
-  "chat": {
-    "title": "แชท",
-    "placeholder": "ถามอะไรก็ได้เกี่ยวกับเอกสารของคุณ...",
-    "send": "ส่ง",
-    "thinking": "กำลังคิด...",
-    "noMessages": "ยังไม่มีข้อความ เริ่มสนทนากันเลย!",
-    "selectKnowledgeBase": "เลือกคลังความรู้",
-    "allKnowledgeBases": "คลังความรู้ทั้งหมด"
-  },
+
   "documents": {
     "yourKnowledgeBase": "คลังความรู้ของคุณ",
     "emptyKnowledgeBase": "คลังความรู้ของคุณว่างเปล่า อัปโหลดเอกสารเพื่อเริ่มสร้างคลังความรู้ของคุณ",

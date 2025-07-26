@@ -1,8 +1,6 @@
 "use client";
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
-import Image from "next/image";
 import { FaCopy } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
@@ -21,21 +19,10 @@ function extractTextFromChildren(children: any): string {
 interface MarkdownProps {
   isUser: boolean;
   text: string;
-  images?: string[];
-  banner?: string;
 }
-const Markdown = ({ isUser, text, images, banner }: MarkdownProps) => {
+const Markdown = ({ isUser, text }: MarkdownProps) => {
   return (
     <>
-      {banner && (
-        <Image
-          src={banner}
-          width={500}
-          height={500}
-          alt="banner"
-          className="w-full h-48 object-cover"
-        />
-      )}
       <ReactMarkdown
         rehypePlugins={[rehypeHighlight]}
         components={{
@@ -79,7 +66,7 @@ const Markdown = ({ isUser, text, images, banner }: MarkdownProps) => {
             <em className="italic text-white">{children}</em>
           ),
           // ✅ Inline code
-          code({ node, className, children, ...props }) {
+          code({ className, children, ...props }) {
             const language = className?.replace("language-", "") ?? "";
             const codeString = extractTextFromChildren(children);
 
@@ -112,36 +99,6 @@ const Markdown = ({ isUser, text, images, banner }: MarkdownProps) => {
       >
         {text}
       </ReactMarkdown>
-      {images && images.length > 0 && (
-        <>
-          <h2 className="px-4 py-2 text-lg font-semibold text-white">
-            {" "}
-            Images{" "}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-4">
-            {images?.map((image, index) => (
-              <div
-                key={index}
-                className="relative group rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
-              >
-                <Image
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = "none"; // Hide broken image
-                    // OR
-                    // target.src = '/fallback-image.jpg';  // Show fallback image
-                  }}
-                  width={200}
-                  height={200}
-                  src={image}
-                  className="w-full h-full object-cover"
-                  alt={`Image ${index}`}
-                />
-              </div>
-            ))}
-          </div>
-        </>
-      )}
     </>
   );
 };

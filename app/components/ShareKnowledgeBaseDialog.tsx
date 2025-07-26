@@ -63,7 +63,7 @@ export default function ShareKnowledgeBaseDialog({
       setTimeout(() => setLinkCopied(false), 2000);
     } catch (error) {
       console.error("Failed to copy link:", error);
-      toast.error("Failed to copy link");
+      toast.error(t("failedToCopy", { ns: "common" }));
     }
   };
 
@@ -114,9 +114,7 @@ export default function ShareKnowledgeBaseDialog({
               {t("title")}
             </DialogTitle>
             <DialogDescription>
-              {isPublic
-                ? t("publicDescription")
-                : t("privateDescription")}
+              {isPublic ? t("publicDescription") : t("privateDescription")}
             </DialogDescription>
           </DialogHeader>
 
@@ -200,59 +198,57 @@ export default function ShareKnowledgeBaseDialog({
                   </div>
 
                   {/* Shared Users List */}
-                    <div className="text-xs text-muted-foreground">
-                      {t("sharedWith")}
-                    </div>
+                  <div className="text-xs text-muted-foreground">
+                    {t("sharedWith")}
+                  </div>
                   <div className="rounded-md border overflow-hidden">
                     {isLoading ? (
                       <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        Loading...
+                        {t("loading", { ns: "common" })}
                       </div>
                     ) : shares.length > 0 ? (
                       <>
-                    
-
-                      <div className="max-h-48 overflow-y-auto">
-                        {shares.map((share) => (
-                          <div
-                            key={share.id}
-                            className={cn(
-                              "flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-muted/50",
-                              pendingRemoval === share.id &&
-                                "opacity-50 bg-muted/50"
-                            )}
-                          >
-                            <span className="text-sm truncate flex-1">
-                              {share.sharedWithEmail}
-                            </span>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  type="button"
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() => handleRemoveShare(share.id)}
-                                  disabled={
-                                    isRemovingShare ||
-                                    pendingRemoval === share.id
-                                  }
-                                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                >
-                                  {pendingRemoval === share.id ? (
-                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                  ) : (
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  )}
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent side="left">
-                                {t("remove")}
-                              </TooltipContent>
-                            </Tooltip>
-                          </div>
-                        ))}
-                      </div>
+                        <div className="max-h-48 overflow-y-auto">
+                          {shares.map((share) => (
+                            <div
+                              key={share.id}
+                              className={cn(
+                                "flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-muted/50",
+                                pendingRemoval === share.id &&
+                                  "opacity-50 bg-muted/50"
+                              )}
+                            >
+                              <span className="text-sm truncate flex-1">
+                                {share.sharedWithEmail}
+                              </span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    type="button"
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => handleRemoveShare(share.id)}
+                                    disabled={
+                                      isRemovingShare ||
+                                      pendingRemoval === share.id
+                                    }
+                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                  >
+                                    {pendingRemoval === share.id ? (
+                                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    ) : (
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="left">
+                                  {t("remove")}
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                          ))}
+                        </div>
                       </>
                     ) : (
                       <div className="text-sm text-muted-foreground text-center py-4">
@@ -260,8 +256,6 @@ export default function ShareKnowledgeBaseDialog({
                       </div>
                     )}
                   </div>
-
-               
                 </div>
               </>
             )}

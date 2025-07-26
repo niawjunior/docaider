@@ -30,7 +30,8 @@
     "previous": "Previous",
     "submit": "Submit",
     "isRequired": "Required",
-    "share": "Share"
+    "share": "Share",
+    "failedToCopy": "Failed to copy link"
   },
   "navigation": {
     "home": "Home",
@@ -43,6 +44,37 @@
     "goToHome": "Go to home",
     "toggleSidebar": "Toggle sidebar",
     "createNewChat": "Create new chat"
+  },
+  "chat": {
+    "title": "Chat",
+    "placeholder": "Ask me anything about your documents...",
+    "send": "Send",
+    "thinking": "Thinking...",
+    "noMessages": "No messages yet. Start a conversation!",
+    "selectKnowledgeBase": "Select Knowledge Base",
+    "greeting": "Hello there!",
+    "helpPrompt": "How can I help you today?",
+    "shareChat": "Share your chat",
+    "manageDocuments": "Manage documents",
+    "availableTools": "Available tools",
+    "scrollToBottom": "Scroll to bottom",
+    "askAnything": "Ask anything...",
+    "disclaimer": "Docaider can make mistakes. Check important info.",
+    "searchingDocument": "Searching through the document...",
+    "errorMessage": "Something went wrong. Please try again.",
+    "manageKnowledgeBase": "Manage Knowledge Base",
+    "shareDialogTitle": "Share public link to chat",
+    "copyLink": "Copy Link",
+    "updating": "Updating...",
+    "updateShareLink": "Update Share Link",
+    "shareDescription": "Share this link with anyone to let them view your chat in read-only mode.",
+    "generating": "Generating...",
+    "generateShareLink": "Generate Share Link",
+    "askQuestionDescription": "Ask a question about the uploaded documents",
+    "shareLinkCreated": "Share link created",
+    "failedToCreateShareLink": "Failed to create share link",
+    "linkCopied": "Link copied to clipboard",
+    "allKnowledgeBases": "All Knowledge Bases"
   },
   "sidebar": {
     "knowledgeSessions": "Knowledge Sessions",
@@ -170,15 +202,7 @@
     "filter": "Filter",
     "sort": "Sort"
   },
-  "chat": {
-    "title": "Chat",
-    "placeholder": "Ask me anything about your documents...",
-    "send": "Send",
-    "thinking": "Thinking...",
-    "noMessages": "No messages yet. Start a conversation!",
-    "selectKnowledgeBase": "Select Knowledge Base",
-    "allKnowledgeBases": "All Knowledge Bases"
-  },
+
   "documents": {
     "yourKnowledgeBase": "Your Knowledge Base",
     "emptyKnowledgeBase": "Your knowledge base is empty. Upload documents to start building your knowledge repository.",

@@ -163,6 +163,23 @@ export default function DashboardPage() {
               <Tooltip>
                 <TooltipTrigger>
                   <Button
+                    variant="default"
+                    onClick={() => setIsCreateDialogOpen(true)}
+                    className="rounded-lg"
+                  >
+                    <Plus />
+                    {t("createKnowledgeBase")}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t("createKnowledgeBase")}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
                     variant="ghost"
                     onClick={() => router.push("/chat")}
                     className="rounded-lg"
@@ -173,24 +190,6 @@ export default function DashboardPage() {
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{t("goToChat")}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    variant="ghost"
-                    onClick={() => setIsCreateDialogOpen(true)}
-                    className="rounded-lg"
-                  >
-                    <Plus />
-                    {t("createKnowledgeBase")}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t("createKnowledgeBase")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

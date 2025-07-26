@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useChat } from "@ai-sdk/react";
@@ -50,6 +49,7 @@ import {
 import Markdown from "./Markdown";
 import { useDocuments } from "../hooks/useDocuments";
 import GlobalLoader from "./GlobalLoader";
+import { useTranslations } from "next-intl";
 
 const toolIcons = {
   askQuestion: <FaQuestion />,
@@ -70,6 +70,7 @@ export default function ChatForm({
   isKnowledgeBase = false,
   knowledgeBaseId,
 }: ChatFormProps) {
+  const t = useTranslations("chat");
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCreateShareLoading, setIsCreateShareLoading] = useState(false);
@@ -88,7 +89,7 @@ export default function ChatForm({
   const tools = [
     {
       name: "askQuestion",
-      description: "Ask a question about the uploaded documents",
+      description: t("askQuestionDescription"),
     },
   ];
   const {
@@ -273,13 +274,13 @@ export default function ChatForm({
         throw new Error(data.error);
       }
 
-      toast.success("Share link created");
+      toast.success(t("shareLinkCreated"));
       // Invalidate and refetch the share URL query
       queryClient.invalidateQueries({ queryKey: ["shareUrl", chatId] });
       setIsShareModalOpen(true);
     } catch (error) {
       console.error("Error sharing chat:", error);
-      toast.error("Failed to create share link");
+      toast.error(t("failedToCreateShareLink"));
     } finally {
       setIsCreateShareLoading(false);
     }
@@ -312,6 +313,7 @@ export default function ChatForm({
   if (isLoading || isFetching) {
     return <GlobalLoader />;
   }
+
   return (
     <>
       <form
@@ -325,8 +327,8 @@ export default function ChatForm({
         {messages?.length === 0 && (
           <>
             <div className="md:mt-0 mt-[100px] ">
-              <p className="text-2xl font-bold">Hello there!</p>
-              <p className="text-zinc-300">How can I help you today?</p>
+              <p className="text-2xl font-bold">{t("greeting")}</p>
+              <p className="text-zinc-300">{t("helpPrompt")}</p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full md:max-h-[calc(100dvh-350px)] max-h-[calc(100dvh-550px)] overflow-y-auto scroll-hidden px-2">
               {suggestedPrompts?.map((prompt, idx) => (
@@ -370,7 +372,7 @@ export default function ChatForm({
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Share your chat</p>
+                      <p>{t("shareChat")}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -390,11 +392,11 @@ export default function ChatForm({
                 " py-4 md:h-[calc(100dvh-480px)] h-[calc(100dvh-300px)]"
             )}
           >
-            {messages.map((message: any) => {
+            {messages.map((message: any, index: any) => {
               const isUser = message.role === "user";
               return (
                 <div
-                  key={message.id}
+                  key={index}
                   className={`flex py-2 ${
                     isUser ? "justify-end" : "justify-start"
                   }`}
@@ -419,7 +421,7 @@ export default function ChatForm({
                                 className="flex items-center gap-2"
                               >
                                 <p className="text-white text-sm">
-                                  Searching through the document...
+                                  {t("searchingDocument")}
                                 </p>
                                 <div className="flex items-center justify-center py-4">
                                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
@@ -437,7 +439,7 @@ export default function ChatForm({
                               className="flex items-center gap-2"
                             >
                               <p className="text-white text-sm">
-                                Something went wrong. Please try again.
+                                {t("errorMessage")}
                               </p>
 
                               <FaRegFaceSadCry />
@@ -454,9 +456,9 @@ export default function ChatForm({
           </div>
           <div className="flex flex-col">
             <div className="sticky bottom-0 flex-col w-full py-2 px-2 flex gap-3">
-                <div className="flex justify-between items-center pt-2">
-                  <div className="flex gap-2">
-              {isShowTool && (
+              <div className="flex justify-between items-center pt-2">
+                <div className="flex gap-2">
+                  {isShowTool && (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
@@ -473,71 +475,71 @@ export default function ChatForm({
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Manage documents</p>
+                          <p>{t("manageDocuments")}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-              )}
+                  )}
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="outline-none">
-                        <Button
-                          variant="outline"
-                          className="ml-2 relative"
-                          size="icon"
-                        >
-                          <FaHammer className="h-8 w-8" />
-                          <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                            {tools.length}
-                          </div>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        className="h-[300px] max-w-[300px]"
-                        align="start"
-                        side="top"
-                        sideOffset={10}
-                        alignOffset={-25}
-                      >
-                        <DropdownMenuLabel>Available tools</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {tools.map((tool) => (
-                          <DropdownMenuCheckboxItem
-                            key={tool.name}
-                            className="flex items-center gap-2 px-2 cursor-pointer"
-                            checked={currentTool === tool.name}
-                            onCheckedChange={(checked) =>
-                              setCurrentTool(tool.name)
-                            }
-                          >
-                            <div className="h-8 w-8 flex items-center justify-center">
-                              {toolIcons[tool.name as keyof typeof toolIcons]}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-medium leading-none truncate">
-                                {tool.name}
-                              </h3>
-                              <p className="text-xs text-muted-foreground mt-2 ">
-                                {tool.description}
-                              </p>
-                            </div>
-                          </DropdownMenuCheckboxItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    {currentTool && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="outline-none">
                       <Button
-                        onClick={() => setCurrentTool("")}
                         variant="outline"
-                        className="ml-1 text-xs cursor-pointer border hover:text-white"
+                        className="ml-2 relative"
+                        size="icon"
                       >
-                        {currentTool}
-                        <TiDelete className="ml-1" />
+                        <FaHammer className="h-8 w-8" />
+                        <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
+                          {tools.length}
+                        </div>
                       </Button>
-                    )}
-                  </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      className="h-[300px] max-w-[300px]"
+                      align="start"
+                      side="top"
+                      sideOffset={10}
+                      alignOffset={-25}
+                    >
+                      <DropdownMenuLabel>
+                        {t("availableTools")}
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {tools.map((tool) => (
+                        <DropdownMenuCheckboxItem
+                          key={tool.name}
+                          className="flex items-center gap-2 px-2 cursor-pointer"
+                          checked={currentTool === tool.name}
+                          onCheckedChange={() => setCurrentTool(tool.name)}
+                        >
+                          <div className="h-8 w-8 flex items-center justify-center">
+                            {toolIcons[tool.name as keyof typeof toolIcons]}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium leading-none truncate">
+                              {tool.name}
+                            </h3>
+                            <p className="text-xs text-muted-foreground mt-2 ">
+                              {tool.description}
+                            </p>
+                          </div>
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {currentTool && (
+                    <Button
+                      onClick={() => setCurrentTool("")}
+                      variant="outline"
+                      className="ml-1 text-xs cursor-pointer border hover:text-white"
+                    >
+                      {currentTool}
+                      <TiDelete className="ml-1" />
+                    </Button>
+                  )}
                 </div>
+              </div>
 
               {!isAtBottom && (
                 <button
@@ -556,7 +558,7 @@ export default function ChatForm({
                   ref={textareaRef}
                   onChange={handleInputChange}
                   placeholder={
-                    status !== "ready" ? "Thinking..." : "Ask anything..."
+                    status !== "ready" ? t("thinking") : t("askAnything")
                   }
                   disabled={status !== "ready"}
                   onKeyDown={handleKeyDown}
@@ -576,14 +578,14 @@ export default function ChatForm({
                 </Button>
               </div>
               <div className=" text-muted-foreground text-sm">
-                Docaider can make mistakes. Check important info.
+                {t("disclaimer")}
               </div>
             </div>
 
             <Dialog open={isPdfModalOpen} onOpenChange={setIsPdfModalOpen}>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Manage Knowledge Base </DialogTitle>
+                  <DialogTitle>{t("manageKnowledgeBase")}</DialogTitle>
                 </DialogHeader>
                 <DocumentUpload
                   onClose={() => {
@@ -597,7 +599,7 @@ export default function ChatForm({
             <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Share public link to chat</DialogTitle>
+                  <DialogTitle>{t("shareDialogTitle")}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 flex flex-col items-center">
                   {shareData?.shareUrl ? (
@@ -618,10 +620,10 @@ export default function ChatForm({
                           variant="outline"
                           onClick={() => {
                             navigator.clipboard.writeText(shareData.shareUrl);
-                            toast.success("Link copied to clipboard");
+                            toast.success(t("linkCopied"));
                           }}
                         >
-                          Copy Link
+                          {t("copyLink")}
                         </Button>
                       </div>
                       <Button
@@ -630,15 +632,14 @@ export default function ChatForm({
                         onClick={handleShare}
                       >
                         {isCreateShareLoading
-                          ? "Updating..."
-                          : "Update Share Link"}
+                          ? t("updating")
+                          : t("updateShareLink")}
                         {isCreateShareLoading && (
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         )}
                       </Button>
                       <p className="text-sm text-gray-400">
-                        Share this link with anyone to let them view your chat
-                        in read-only mode.
+                        {t("shareDescription")}
                       </p>
                     </>
                   ) : (
@@ -648,8 +649,8 @@ export default function ChatForm({
                       onClick={handleShare}
                     >
                       {isCreateShareLoading
-                        ? "Generating..."
-                        : "Generate Share Link"}
+                        ? t("generating")
+                        : t("generateShareLink")}
                       {isCreateShareLoading && (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       )}
