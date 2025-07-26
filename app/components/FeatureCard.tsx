@@ -1,10 +1,11 @@
 "use client";
 import { motion } from "framer-motion";
-import { VolumeIcon } from "lucide-react";
 import { FaCheck, FaFile } from "react-icons/fa";
-import { FaCloud, FaChartBar } from "react-icons/fa6";
-import { TbWorld } from "react-icons/tb";
-import { IoIosChatbubbles } from "react-icons/io";
+import { LuBrain } from "react-icons/lu";
+import { CiChat1 } from "react-icons/ci";
+import { CiShare2 } from "react-icons/ci";
+import { IoLanguageOutline } from "react-icons/io5";
+import { LuLayoutDashboard } from "react-icons/lu";
 
 interface FeatureCardProps {
   icon: string;
@@ -26,12 +27,12 @@ export function FeatureCard({
     >
       <div className="text-md font-bold flex justify-center  items-center text-white gap-2 mb-2 ">
         <div className=" font-bold  flex items-center gap-2">
-          {icon === "data" && <FaChartBar />}
+          {icon === "knowledge" && <LuBrain />}
           {icon === "document" && <FaFile />}
-          {icon === "web" && <TbWorld />}
-          {icon === "tts" && <VolumeIcon />}
-          {icon === "weather" && <FaCloud />}
-          {icon === "chat" && <IoIosChatbubbles />}
+          {icon === "chat" && <CiChat1 />}
+          {icon === "share" && <CiShare2 />}
+          {icon === "language" && <IoLanguageOutline />}
+          {icon === "dashboard" && <LuLayoutDashboard />}
           {title}
         </div>
       </div>

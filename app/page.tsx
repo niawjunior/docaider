@@ -97,65 +97,65 @@ export default function Home() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
                 <FeatureCard
-                  icon="document"
-                  title={t('features.documentIntelligence.title')}
-                  description={t('features.documentIntelligence.description')}
-                  features={[
-                    t('features.documentIntelligence.feature1'),
-                    t('features.documentIntelligence.feature2'),
-                    t('features.documentIntelligence.feature3'),
-                  ]}
-                />
-
-                <FeatureCard
                   icon="knowledge"
-                  title={t('features.knowledgeBase.title')}
-                  description={t('features.knowledgeBase.description')}
+                  title={t('features.knowledgeManagement.title')}
+                  description={t('features.knowledgeManagement.description')}
                   features={[
-                    t('features.knowledgeBase.feature1'),
-                    t('features.knowledgeBase.feature2'),
-                    t('features.knowledgeBase.feature3'),
+                    t('features.knowledgeManagement.feature1'),
+                    t('features.knowledgeManagement.feature2'),
+                    t('features.knowledgeManagement.feature3'),
                   ]}
                 />
 
                 <FeatureCard
-                  icon="rag"
-                  title={t('features.rag.title')}
-                  description={t('features.rag.description')}
+                  icon="document"
+                  title={t('features.documentProcessing.title')}
+                  description={t('features.documentProcessing.description')}
                   features={[
-                    t('features.rag.feature1'),
-                    t('features.rag.feature2'),
-                    t('features.rag.feature3'),
+                    t('features.documentProcessing.feature1'),
+                    t('features.documentProcessing.feature2'),
+                    t('features.documentProcessing.feature3'),
                   ]}
                 />
+
                 <FeatureCard
                   icon="chat"
-                  title={t('features.multiChat.title')}
-                  description={t('features.multiChat.description')}
+                  title={t('features.aiChat.title')}
+                  description={t('features.aiChat.description')}
                   features={[
-                    t('features.multiChat.feature1'),
-                    t('features.multiChat.feature2'),
-                    t('features.multiChat.feature3'),
+                    t('features.aiChat.feature1'),
+                    t('features.aiChat.feature2'),
+                    t('features.aiChat.feature3'),
                   ]}
                 />
                 <FeatureCard
-                  icon="vector"
-                  title={t('features.vectorDB.title')}
-                  description={t('features.vectorDB.description')}
+                  icon="share"
+                  title={t('features.sharing.title')}
+                  description={t('features.sharing.description')}
                   features={[
-                    t('features.vectorDB.feature1'),
-                    t('features.vectorDB.feature2'),
-                    t('features.vectorDB.feature3'),
+                    t('features.sharing.feature1'),
+                    t('features.sharing.feature2'),
+                    t('features.sharing.feature3'),
                   ]}
                 />
                 <FeatureCard
-                  icon="analytics"
-                  title={t('features.analytics.title')}
-                  description={t('features.analytics.description')}
+                  icon="language"
+                  title={t('features.multiLanguage.title')}
+                  description={t('features.multiLanguage.description')}
                   features={[
-                    t('features.analytics.feature1'),
-                    t('features.analytics.feature2'),
-                    t('features.analytics.feature3'),
+                    t('features.multiLanguage.feature1'),
+                    t('features.multiLanguage.feature2'),
+                    t('features.multiLanguage.feature3'),
+                  ]}
+                />
+                <FeatureCard
+                  icon="dashboard"
+                  title={t('features.userDashboard.title')}
+                  description={t('features.userDashboard.description')}
+                  features={[
+                    t('features.userDashboard.feature1'),
+                    t('features.userDashboard.feature2'),
+                    t('features.userDashboard.feature3'),
                   ]}
                 />
               </div>

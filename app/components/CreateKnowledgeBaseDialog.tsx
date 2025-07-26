@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -30,13 +31,13 @@ import {
 } from "@/components/ui/form";
 
 // Define the Zod schema for form validation
-const FormSchema = z.object({
-  name: z.string().min(1, { message: "Knowledge base name is required" }),
+const getFormSchema = (t: any) => z.object({
+  name: z.string().min(1, { message: t('knowledgeBase.nameRequired') }),
   description: z.string().optional(),
   isPublic: z.boolean(),
 });
 
-type FormValues = z.infer<typeof FormSchema>;
+type FormValues = z.infer<ReturnType<typeof getFormSchema>>;
 
 interface CreateKnowledgeBaseDialogProps {
   open: boolean;
@@ -49,12 +50,14 @@ export default function CreateKnowledgeBaseDialog({
   onOpenChange,
   userId,
 }: CreateKnowledgeBaseDialogProps) {
+  const t = useTranslations();
   const [isLoading, setIsLoading] = useState(false);
 
   // Import the useKnowledgeBases hook
   const kbHooks = useKnowledgeBases();
 
   // Initialize react-hook-form with Zod validation
+  const FormSchema = getFormSchema(t);
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -83,10 +86,10 @@ export default function CreateKnowledgeBaseDialog({
       // Close dialog
       onOpenChange(false);
 
-      toast.success("Knowledge base created successfully");
+      toast.success(t('knowledgeBase.createdSuccess'));
     } catch (error: any) {
       console.error("Error creating knowledge base:", error);
-      toast.error(error.message || "Failed to create knowledge base");
+      toast.error(error.message || t('knowledgeBase.createError'));
     } finally {
       setIsLoading(false);
     }
@@ -96,10 +99,9 @@ export default function CreateKnowledgeBaseDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create Knowledge Base</DialogTitle>
+          <DialogTitle>{t('knowledgeBase.createTitle')}</DialogTitle>
           <DialogDescription>
-            Create a new knowledge base to organize your documents and share
-            knowledge.
+            {t('knowledgeBase.createDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -113,10 +115,10 @@ export default function CreateKnowledgeBaseDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t('knowledgeBase.name')}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Enter knowledge base name"
+                      placeholder={t('knowledgeBase.namePlaceholder')}
                       disabled={isLoading}
                       {...field}
                     />
@@ -131,18 +133,17 @@ export default function CreateKnowledgeBaseDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t('knowledgeBase.description')}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe what this knowledge base is about"
+                      placeholder={t('knowledgeBase.descriptionPlaceholder')}
                       disabled={isLoading}
                       rows={3}
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    Provide details about the purpose and content of this
-                    knowledge base.
+                    {t('knowledgeBase.descriptionHelp')}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -155,9 +156,9 @@ export default function CreateKnowledgeBaseDialog({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel>Make Public</FormLabel>
+                    <FormLabel>{t('knowledgeBase.makePublic')}</FormLabel>
                     <FormDescription>
-                      Public knowledge bases can be viewed by anyone
+                      {t('knowledgeBase.publicDescription')}
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -178,11 +179,11 @@ export default function CreateKnowledgeBaseDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isLoading}
               >
-                Cancel
+{t('common.cancel')}
               </Button>
               <Button type="submit" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create
+{t('knowledgeBase.create')}
               </Button>
             </DialogFooter>
           </form>

@@ -103,6 +103,7 @@
     "details": "Knowledge Base Details",
     "namePlaceholder": "Enter knowledge base name",
     "descriptionPlaceholder": "Describe what this knowledge base is about",
+    "descriptionHelp": "Provide details about the purpose and content of this knowledge base.",
     "makePublic": "Make Public",
     "publicDescription": "Public knowledge bases can be viewed by anyone",
     "saveChanges": "Save Changes",
@@ -110,7 +111,12 @@
     "currentDocuments": "Current Documents",
     "uploadNewDocument": "Upload New Document",
     "noDocuments": "No documents in this knowledge base yet. Add documents from the \"Add Documents\" tab.",
-    "addedOn": "Added on {date}"
+    "addedOn": "Added on {date}",
+    "nameRequired": "Knowledge base name is required",
+    "createTitle": "Create Knowledge Base",
+    "createDescription": "Create a new knowledge base to organize your documents and share knowledge.",
+    "createdSuccess": "Knowledge base created successfully",
+    "createError": "Failed to create knowledge base"
   },
   "search": {
     "searchQuery": "Search...",
@@ -263,47 +269,47 @@
     "subtitle": "Upload your documents and chat with them using advanced AI. Get insights, summaries, and answers from your knowledge base.",
     "featuresTitle": "Key Features",
     "features": {
-      "documentIntelligence": {
-        "title": "Document Intelligence",
-        "description": "Process and analyze documents with AI",
-        "feature1": "Document Q&A",
-        "feature2": "Text extraction",
-        "feature3": "Content analysis"
+      "knowledgeManagement": {
+        "title": "Knowledge Base Management",
+        "description": "Create and organize knowledge bases from your documents",
+        "feature1": "Create public or private knowledge bases",
+        "feature2": "Pin favorite knowledge bases",
+        "feature3": "Search and filter functionality"
       },
-      "knowledgeBase": {
-        "title": "Knowledge Base Creation",
-        "description": "Create intelligent knowledge bases from your documents",
-        "feature1": "Automatic indexing",
-        "feature2": "Semantic search",
-        "feature3": "Knowledge extraction"
+      "documentProcessing": {
+        "title": "Document Processing",
+        "description": "Upload and process documents with advanced AI",
+        "feature1": "Multiple document format support",
+        "feature2": "Automatic chunking and embedding",
+        "feature3": "Document title validation"
       },
-      "rag": {
-        "title": "Retrieval-Augmented Generation",
-        "description": "Enhance AI responses with your knowledge base",
-        "feature1": "Contextual responses",
-        "feature2": "Source attribution",
-        "feature3": "Fact verification"
+      "aiChat": {
+        "title": "AI-Powered Chat",
+        "description": "Interact with your documents through natural language",
+        "feature1": "Multiple chat sessions per knowledge base",
+        "feature2": "Suggested prompts for quick questions",
+        "feature3": "Context-aware responses from your documents"
       },
-      "multiChat": {
-        "title": "Multi-Chat with Memory",
-        "description": "Create and manage multiple chat sessions with persistent memory",
-        "feature1": "Concurrent multiple chats",
-        "feature2": "Session-based memory",
-        "feature3": "Contextual responses"
+      "sharing": {
+        "title": "Collaboration & Sharing",
+        "description": "Share your knowledge with team members or the public",
+        "feature1": "Email-based sharing with specific users",
+        "feature2": "Public knowledge base publishing",
+        "feature3": "Access control for shared resources"
       },
-      "vectorDB": {
-        "title": "Vector Database Integration",
-        "description": "Store and retrieve knowledge using advanced vector embeddings",
-        "feature1": "Semantic similarity search",
-        "feature2": "Efficient knowledge retrieval",
-        "feature3": "Scalable document storage"
+      "multiLanguage": {
+        "title": "Multi-Language Support",
+        "description": "Use the application in your preferred language",
+        "feature1": "English and Thai language support",
+        "feature2": "Easy language switching",
+        "feature3": "Consistent localized experience"
       },
-      "analytics": {
-        "title": "Knowledge Analytics",
-        "description": "Get insights into your knowledge base usage and performance",
-        "feature1": "Usage pattern analysis",
-        "feature2": "Knowledge gap identification",
-        "feature3": "Relevance metrics"
+      "userDashboard": {
+        "title": "Intuitive Dashboard",
+        "description": "Manage all your knowledge resources in one place",
+        "feature1": "Categorized views (My Knowledge Bases, Shared, Public)",
+        "feature2": "Advanced search and filtering options",
+        "feature3": "Quick access to recent knowledge bases"
       }
     },
     "publicKnowledgeBases": {
