@@ -2,8 +2,10 @@
 
 import { motion } from "framer-motion";
 import MainLayout from "../components/MainLayout";
+import { useTranslations } from "next-intl";
 
 export default function ContactPage() {
+  const t = useTranslations("contact");
   return (
     <MainLayout>
       <div className="px-4">
@@ -13,28 +15,24 @@ export default function ContactPage() {
           transition={{ duration: 0.5 }}
         >
           <h1 className="text-4xl font-bold mb-8 text-orange-500">
-            Contact Us
+            {t("title")}
           </h1>
 
           <div className="prose prose-invert max-w-none">
-            <p className="mb-8">
-              We&apos;d love to hear from you! Whether you have questions,
-              feedback, or need support, please use the form below to get in
-              touch.
-            </p>
+            <p className="mb-8">{t("description")}</p>
 
             <div className="mt-12">
               <p>
-                Email:{" "}
+                {t("email")}{" "}
                 <a
                   href="mailto:pasupolworks@gmail.com"
                   className="text-orange-500 hover:underline"
                 >
-                  pasupolworks@gmail.com
+                  {t("emailAddress")}
                 </a>
               </p>
               <p>
-                Website:{" "}
+                {t("website")}{" "}
                 <a
                   href="https://docaider.com"
                   className="text-orange-500 hover:underline"

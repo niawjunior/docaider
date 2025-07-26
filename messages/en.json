@@ -323,6 +323,63 @@
       "cancel": "Cancel"
     }
   },
+  "contact": {
+    "title": "Contact Us",
+    "description": "We'd love to hear from you! Whether you have questions, feedback, or need support, please use the form below to get in touch.",
+    "email": "Email:",
+    "emailAddress": "pasupolworks@gmail.com",
+    "website": "Website:"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "informationCollect": {
+      "title": "1. Information We Collect",
+      "description": "We collect certain information when you use DocAider, including:",
+      "items": [
+        "Personal information (name, email) when you sign up",
+        "Chat history and interactions",
+        "Document processing data",
+        "Usage statistics and analytics"
+      ]
+    },
+    "informationUse": {
+      "title": "2. How We Use Your Information",
+      "description": "We use your information to:",
+      "items": [
+        "Provide and improve our services",
+        "Process your documents and generate insights",
+        "Respond to your inquiries and support requests",
+        "Analyze usage patterns to enhance our platform"
+      ]
+    },
+    "dataSecurity": {
+      "title": "3. Data Security",
+      "description": "We implement security measures to protect your information from unauthorized access, disclosure, or alteration. Your chat history and document content are encrypted and stored securely."
+    },
+    "yourRights": {
+      "title": "4. Your Rights",
+      "description": "You have the right to:",
+      "items": [
+        "Access your personal information",
+        "Request corrections or updates",
+        "Delete your account and data",
+        "Opt-out of certain communications"
+      ]
+    },
+    "thirdParty": {
+      "title": "5. Third-Party Services",
+      "description": "We may use third-party services (like OpenAI, Google AI, and Supabase) to provide our services. These services have their own privacy policies and terms of service."
+    },
+    "changes": {
+      "title": "6. Changes to Privacy Policy",
+      "description": "We may update this privacy policy from time to time. Any changes will be posted here and take effect immediately."
+    },
+    "contact": {
+      "title": "7. Contact Us",
+      "description": "If you have any questions about our privacy practices, please contact us at",
+      "email": "pasupolworks@gmail.com"
+    }
+  },
   "home": {
     "title": "AI-Powered Document Assistant for Knowledge Management",
     "subtitle": "Upload your documents and chat with them using advanced AI. Get insights, summaries, and answers from your knowledge base.",
