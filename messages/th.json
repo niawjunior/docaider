@@ -39,9 +39,21 @@
     "knowledge": "คลังความรู้",
     "settings": "การตั้งค่า"
   },
+  "layout": {
+    "goToHome": "ไปที่หน้าแรก",
+    "toggleSidebar": "เปิด/ปิดแถบข้าง",
+    "createNewChat": "สร้างแชทใหม่"
+  },
+  "sidebar": {
+    "knowledgeSessions": "แชททั้งหมด",
+    "untitled": "ไม่มีชื่อ",
+    "loading": "กำลังโหลด...",
+    "credits": "เครดิต:",
+    "loggedInAs": "เข้าสู่ระบบด้วย"
+  },
   "dashboard": {
     "title": "แดชบอร์ด",
-    "pinnedKnowledgeBases": "คลังความรู้ที่ปักหมุด",
+    "pinnedKnowledgeBases": "คลังความรู้ที่ปักหมุดไว้",
     "myKnowledgeBases": "คลังความรู้ของฉัน",
     "sharedWithYou": "แชร์ให้คุณ",
     "publicKnowledgeBases": "คลังความรู้สาธารณะ",

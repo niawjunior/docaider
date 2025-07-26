@@ -39,6 +39,18 @@
     "knowledge": "Knowledge",
     "settings": "Settings"
   },
+  "layout": {
+    "goToHome": "Go to home",
+    "toggleSidebar": "Toggle sidebar",
+    "createNewChat": "Create new chat"
+  },
+  "sidebar": {
+    "knowledgeSessions": "Knowledge Sessions",
+    "untitled": "Untitled",
+    "loading": "Loading...",
+    "credits": "Credits:",
+    "loggedInAs": "Logged in as"
+  },
   "dashboard": {
     "title": "Dashboard",
     "pinnedKnowledgeBases": "Pinned Knowledge Bases",

@@ -6,6 +6,7 @@ import clsx from "clsx";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import { useCredit } from "../hooks/useCredit";
 import { useChats } from "../hooks/useChats";
+import { useTranslations } from "next-intl";
 
 interface SidebarProps {
   chatId?: string;
@@ -19,6 +20,7 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
   );
   const sidebarRef = useRef<HTMLUListElement>(null);
   const router = useRouter();
+  const t = useTranslations("sidebar");
 
   const getMenuDisplayText = (chat: {
     id: string;
@@ -29,7 +31,7 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
       (message: any) => message.role === "user"
     );
     const findMessage = userMessage?.parts[userMessage?.parts.length - 1]?.text;
-    return findMessage || "Untitled";
+    return findMessage || t("untitled");
   };
 
   const {
@@ -71,12 +73,15 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
   return (
     <aside className="bg-zinc-900 p-4 flex flex-col gap-4 h-full w-72 min-w-72 border-r border-zinc-800 z-50">
       <div className="text-sm text-zinc-400 font-semibold mt-[55px] px-1">
-        Knowledge Sessions
+        {t("knowledgeSessions")}
       </div>
       <ul ref={sidebarRef} className="flex-1 overflow-y-auto scroll-hidden ">
         {isLoading || creditLoading || isChatsLoading ? (
           <div className="flex items-center justify-center py-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+            <div
+              className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"
+              aria-label={t("loading")}
+            ></div>
           </div>
         ) : (
           chats?.map((chat) => (
@@ -95,22 +100,30 @@ const Sidebar = ({ chatId, isLoading = false }: SidebarProps) => {
         )}
         {isFetchingNextPage && (
           <div className="py-2 text-xs text-center text-zinc-500 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+            <div
+              className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"
+              aria-label={t("loading")}
+            ></div>
           </div>
         )}
       </ul>
 
       <div className="text-xs border-t border-zinc-700 pt-4 mt-4">
         <div className="flex items-center gap-2">
-          <span className="text-sm">Credits:</span>
+          <span className="text-sm">{t("credits")}</span>
           {creditLoading ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
+            <div
+              className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"
+              aria-label={t("loading")}
+            ></div>
           ) : (
             <span className="text-sm">{credit?.balance.toFixed(2) || 0}</span>
           )}
         </div>
         <div className="text-zinc-500">
-          <p>Logged in as {session?.user.email}</p>
+          <p>
+            {t("loggedInAs")} {session?.user.email}
+          </p>
         </div>
       </div>
     </aside>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Plus, CreditCard, Mail, Star } from "lucide-react";
+import { MessageCircle, Plus, Mail, Star } from "lucide-react";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import KnowledgeBaseList from "../components/KnowledgeBaseList";
 import CreateKnowledgeBaseDialog from "../components/CreateKnowledgeBaseDialog";
@@ -20,7 +20,6 @@ import { useSearchAndFilter } from "@/app/hooks/useSearchAndFilter";
 import { useUserPins } from "@/app/hooks/useUserPins";
 import SharedKnowledgeBaseList from "../components/SharedKnowledgeBaseList";
 import { Badge } from "@/components/ui/badge";
-import { useCredit } from "../hooks/useCredit";
 import MainLayout from "../components/MainLayout";
 import SearchAndFilter from "../components/SearchAndFilter";
 import GlobalLoader from "../components/GlobalLoader";
@@ -34,10 +33,6 @@ export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const chat = useTranslations("chat");
 
-  // Get user credit information
-  const { credit, isLoading: creditLoading } = useCredit(
-    session?.user.id || ""
-  );
   const kbHooks = useKnowledgeBases();
   const knowledgeBases = kbHooks.getKnowledgeBases.data || [];
   const isLoadingKnowledgeBases = kbHooks.getKnowledgeBases.isLoading;
@@ -77,8 +72,7 @@ export default function DashboardPage() {
     isLoadingKnowledgeBases ||
     isLoadingShared ||
     isLoadingPinned ||
-    isLoadingPublic ||
-    creditLoading;
+    isLoadingPublic;
 
   if (isLoading) {
     return <GlobalLoader />;
@@ -87,26 +81,45 @@ export default function DashboardPage() {
   return (
     <MainLayout>
       <div className="px-6">
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center">
           <div className="flex justify-between items-center w-full">
             <div className="flex gap-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Button
-                      size="icon"
-                      onClick={() => router.push("/")}
-                      className="text-[20px] rounded-lg"
-                    >
-                      <GoHomeFill />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{t("goToHome")}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <div className="hidden md:flex items-center gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        variant="ghost"
+                        onClick={() => router.push("/")}
+                        className="rounded-lg"
+                      >
+                        <GoHomeFill />
+                        {t("goToHome")}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{t("goToHome")}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <div className="md:hidden flex items-center gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        size="icon"
+                        onClick={() => router.push("/")}
+                        className="text-[20px] rounded-lg"
+                      >
+                        <GoHomeFill />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{t("goToHome")}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
@@ -183,23 +196,14 @@ export default function DashboardPage() {
             </TooltipProvider>
 
             <div className="flex items-center gap-2">
-              <Mail size={16} className="text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">{userEmail}</span>
+              <Mail size={16} />
+              <span className="text-sm">{userEmail}</span>
             </div>
-            <Badge
-              variant="outline"
-              className="flex items-center gap-2 px-3 py-1"
-            >
-              <CreditCard size={16} />
-              <span>
-                {credit?.balance || 0} {t("credits")}
-              </span>
-            </Badge>
           </div>
         </div>
 
         {/* Search and Filter Section */}
-        <div className="py-4">
+        <div className="py-2">
           <SearchAndFilter
             searchQuery={searchAndFilter.searchQuery}
             onSearchChange={searchAndFilter.setSearchQuery}

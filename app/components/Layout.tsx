@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GoHomeFill } from "react-icons/go";
 import { IoMdOpen } from "react-icons/io";
+import { useTranslations } from "next-intl";
 
 import {
   TbLayoutSidebarLeftCollapseFilled,
@@ -29,6 +30,7 @@ const ChatLayout = ({
   chatId?: string;
 }) => {
   const router = useRouter();
+  const t = useTranslations("layout");
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     if (typeof window !== "undefined") {
       return window.innerWidth >= 768; // Open by default on md+ screens
@@ -69,7 +71,7 @@ const ChatLayout = ({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Go to home</p>
+                    <p>{t("goToHome")}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -89,7 +91,7 @@ const ChatLayout = ({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Toggle sidebar</p>
+                    <p>{t("toggleSidebar")}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -106,7 +108,7 @@ const ChatLayout = ({
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Create new chat</p>
+                      <p>{t("createNewChat")}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -126,7 +128,7 @@ const ChatLayout = ({
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Create new chat</p>
+                      <p>{t("createNewChat")}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
