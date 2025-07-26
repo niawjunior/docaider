@@ -85,6 +85,7 @@
   },
   "dashboard": {
     "title": "แดชบอร์ด",
+    "create": "สร้าง",
     "pinnedKnowledgeBases": "คลังความรู้ที่ปักหมุดไว้",
     "myKnowledgeBases": "คลังความรู้ของฉัน",
     "sharedWithYou": "แชร์ให้คุณ",

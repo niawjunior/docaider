@@ -85,6 +85,7 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "create": "Create",
     "pinnedKnowledgeBases": "Pinned Knowledge Bases",
     "myKnowledgeBases": "My Knowledge Bases",
     "sharedWithYou": "Shared With You",
