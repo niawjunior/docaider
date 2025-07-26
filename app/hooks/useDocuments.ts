@@ -2,6 +2,7 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createClient } from "../utils/supabase/client";
+import { useTranslations } from "next-intl";
 
 /**
  * Custom hook for document operations
@@ -9,6 +10,7 @@ import { createClient } from "../utils/supabase/client";
  */
 export const useDocuments = () => {
   const queryClient = useQueryClient();
+  const messageT = useTranslations("messages");
 
   /**
    * Delete a document by its document ID
@@ -49,12 +51,12 @@ export const useDocuments = () => {
     onSuccess: () => {
       // Invalidate relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["documents"] });
-      toast("Document deleted successfully", {
+      toast(messageT("documentDeleted"), {
         duration: 3000,
       });
     },
     onError: (error) => {
-      toast("Error deleting document", {
+      toast(messageT("documentDeleteError"), {
         duration: 5000,
         description: "Failed to delete document. Please try again.",
       });
@@ -72,7 +74,7 @@ export const useDocuments = () => {
         try {
           const supabase = await createClient();
           const { data: user } = await supabase.auth.getUser();
-          
+
           if (!user?.user?.id) {
             throw new Error("User not authenticated");
           }
@@ -91,7 +93,9 @@ export const useDocuments = () => {
         } catch (error) {
           console.error("Error fetching documents:", error);
           throw new Error(
-            `Failed to fetch documents: ${error instanceof Error ? error.message : "Unknown error"}`
+            `Failed to fetch documents: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`
           );
         }
       },

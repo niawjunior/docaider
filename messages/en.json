@@ -299,13 +299,17 @@
   },
   "messages": {
     "knowledgeBaseCreated": "Knowledge base created successfully",
+    "knowledgeBaseCreateError": "Knowledge base create error",
     "knowledgeBaseUpdated": "Knowledge base updated successfully",
+    "knowledgeBaseUpdateError": "Knowledge base update error",
     "knowledgeBaseDeleteError": "Knowledge base delete error",
     "knowledgeBaseDeletedSuccess": "Knowledge base deleted successfully",
     "knowledgeBasePinned": "Knowledge base pinned successfully",
     "knowledgeBaseUnpinned": "Knowledge base unpinned successfully",
+    "knowledgeBasePinError": "Knowledge base pin error",
     "documentUploaded": "Document uploaded successfully",
     "documentDeleted": "Document deleted successfully",
+    "documentDeleteError": "Error deleting document",
     "errorOccurred": "An error occurred",
     "unauthorized": "Unauthorized access",
     "notFound": "Not found"

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 // Interface for pinned knowledge base
@@ -18,12 +19,13 @@ interface PinnedKnowledgeBase {
 
 // Hook to get user's pinned knowledge bases
 export const useUserPins = () => {
+  const messageT = useTranslations("messages");
   return useQuery({
     queryKey: ["userPins"],
     queryFn: async (): Promise<PinnedKnowledgeBase[]> => {
       const response = await fetch("/api/user-pins");
       if (!response.ok) {
-        throw new Error("Failed to fetch pinned knowledge bases");
+        throw new Error(messageT("knowledgeBasePinError"));
       }
       const data = await response.json();
       return data.pinnedKnowledgeBases || [];
@@ -34,12 +36,13 @@ export const useUserPins = () => {
 // Hook to check if a specific knowledge base is pinned
 export const useIsPinned = (knowledgeBaseId: string) => {
   const { data: pinnedKnowledgeBases = [] } = useUserPins();
-  return pinnedKnowledgeBases.some(kb => kb.id === knowledgeBaseId);
+  return pinnedKnowledgeBases.some((kb) => kb.id === knowledgeBaseId);
 };
 
 // Hook to pin/unpin knowledge bases
 export const useTogglePin = () => {
   const queryClient = useQueryClient();
+  const messageT = useTranslations("messages");
 
   const pinMutation = useMutation({
     mutationFn: async (knowledgeBaseId: string) => {
@@ -52,8 +55,7 @@ export const useTogglePin = () => {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to pin knowledge base");
+        throw new Error(messageT("knowledgeBasePinError"));
       }
 
       return response.json();
@@ -62,10 +64,10 @@ export const useTogglePin = () => {
       queryClient.invalidateQueries({ queryKey: ["userPins"] });
       queryClient.invalidateQueries({ queryKey: ["knowledgeBases"] });
       queryClient.invalidateQueries({ queryKey: ["sharedKnowledgeBases"] });
-      toast.success("Knowledge base pinned successfully");
+      toast.success(messageT("knowledgeBasePinned"));
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to pin knowledge base");
+    onError: () => {
+      toast.error(messageT("knowledgeBasePinError"));
     },
   });
 
@@ -76,8 +78,7 @@ export const useTogglePin = () => {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to unpin knowledge base");
+        throw new Error(messageT("knowledgeBaseUnpinError"));
       }
 
       return response.json();
@@ -86,10 +87,10 @@ export const useTogglePin = () => {
       queryClient.invalidateQueries({ queryKey: ["userPins"] });
       queryClient.invalidateQueries({ queryKey: ["knowledgeBases"] });
       queryClient.invalidateQueries({ queryKey: ["sharedKnowledgeBases"] });
-      toast.success("Knowledge base unpinned successfully");
+      toast.success(messageT("knowledgeBaseUnpinned"));
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to unpin knowledge base");
+    onError: () => {
+      toast.error(messageT("knowledgeBaseUnpinError"));
     },
   });
 

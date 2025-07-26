@@ -148,7 +148,7 @@ export default function DashboardPage() {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{t("createKnowledgeBase")}</p>
+                      <p>{t("create")}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

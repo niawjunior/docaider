@@ -6,7 +6,9 @@
 body {
   font-family: var(--font-prompt);
 }
-
+.toaster {
+  font-family: var(--font-prompt) !important;
+}
 .scroll-hidden::-webkit-scrollbar {
   display: none;
 }

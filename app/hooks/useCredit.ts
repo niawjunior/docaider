@@ -14,7 +14,7 @@ export function useCredit(userId: string) {
       try {
         // Call the API endpoint to get credit information
         const response = await fetch(`/api/credits`);
-        
+
         if (!response.ok) {
           if (response.status === 404) {
             // No credit found for this user
@@ -22,7 +22,7 @@ export function useCredit(userId: string) {
           }
           throw new Error(`Error fetching credit: ${response.statusText}`);
         }
-        
+
         // Return the credit data
         return await response.json();
       } catch (err) {
@@ -40,17 +40,17 @@ export function useCredit(userId: string) {
       try {
         // Call the API endpoint to update credit balance
         const response = await fetch(`/api/credits/update`, {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ newBalance }),
         });
-        
+
         if (!response.ok) {
           throw new Error(`Error updating credit: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
         return data.balance;
       } catch (err) {

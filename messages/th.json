@@ -298,13 +298,17 @@
   },
   "messages": {
     "knowledgeBaseCreated": "สร้างคลังความรู้สำเร็จแล้ว",
+    "knowledgeBaseCreateError": "เกิดข้อผิดพลาดในการสร้างคลังความรู้",
     "knowledgeBaseUpdated": "อัปเดตคลังความรู้สำเร็จแล้ว",
+    "knowledgeBaseUpdateError": "เกิดข้อผิดพลาดในการอัปเดตคลังความรู้",
     "knowledgeBaseDeleteError": "เกิดข้อผิดพลาดในการลบคลังความรู้",
     "knowledgeBaseDeletedSuccess": "ลบคลังความรู้สำเร็จแล้ว",
     "knowledgeBasePinned": "ปักหมุดคลังความรู้สำเร็จแล้ว",
     "knowledgeBaseUnpinned": "ยกเลิกปักหมุดคลังความรู้สำเร็จแล้ว",
+    "knowledgeBasePinError": "เกิดข้อผิดพลาดในการปักหมุดคลังความรู้",
     "documentUploaded": "อัปโหลดเอกสารสำเร็จแล้ว",
     "documentDeleted": "ลบเอกสารสำเร็จแล้ว",
+    "documentDeleteError": "เกิดข้อผิดพลาดในการลบเอกสาร",
     "errorOccurred": "เกิดข้อผิดพลาด",
     "unauthorized": "ไม่ได้รับอนุญาต",
     "notFound": "ไม่พบ"

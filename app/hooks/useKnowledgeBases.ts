@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "../utils/supabase/client";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 // This interface is used for type checking in the API responses
 export interface KnowledgeBase {
@@ -23,7 +24,7 @@ export interface KnowledgeBase {
 export const useKnowledgeBases = () => {
   const queryClient = useQueryClient();
   const supabase = createClient();
-  
+  const messageT = useTranslations("messages");
 
   /**
    * Fetch a single knowledge base by ID
@@ -162,12 +163,12 @@ export const useKnowledgeBases = () => {
       // Invalidate relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["knowledgeBases"] });
       queryClient.invalidateQueries({ queryKey: ["knowledgeBase"] });
-      toast("Knowledge base updated successfully", {
+      toast(messageT("knowledgeBaseUpdated"), {
         duration: 3000,
       });
     },
     onError: (error) => {
-      toast("Error updating knowledge base", {
+      toast(messageT("knowledgeBaseUpdateError"), {
         duration: 5000,
         description:
           error instanceof Error
@@ -216,12 +217,12 @@ export const useKnowledgeBases = () => {
     onSuccess: () => {
       // Invalidate relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["knowledgeBases"] });
-      toast("Knowledge base created successfully", {
+      toast(messageT("knowledgeBaseCreated"), {
         duration: 3000,
       });
     },
     onError: (error) => {
-      toast("Error creating knowledge base", {
+      toast(messageT("knowledgeBaseCreateError"), {
         duration: 5000,
         description:
           error instanceof Error
@@ -261,12 +262,12 @@ export const useKnowledgeBases = () => {
       // Invalidate relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["knowledgeBases"] });
       queryClient.invalidateQueries({ queryKey: ["publicKnowledgeBases"] });
-      toast("Knowledge base deleted successfully", {
+      toast(messageT("knowledgeBaseDeletedSuccess"), {
         duration: 3000,
       });
     },
     onError: (error) => {
-      toast("Error deleting knowledge base", {
+      toast(messageT("knowledgeBaseDeleteError"), {
         duration: 5000,
         description:
           error instanceof Error
@@ -328,51 +329,6 @@ export const useKnowledgeBases = () => {
     },
   });
 
-  /**
-   * Toggle the pinned status of a knowledge base
-   */
-  const togglePinKnowledgeBase = useMutation({
-    mutationFn: async (id: string) => {
-      try {
-        const response = await fetch(`/api/knowledge-bases/${id}/pin`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to toggle pin status");
-        }
-
-        return await response.json();
-      } catch (error) {
-        console.error("Error toggling pin status:", error);
-        throw error;
-      }
-    },
-    onSuccess: (data) => {
-      // Invalidate relevant queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ["knowledgeBases"] });
-      queryClient.invalidateQueries({ queryKey: ["knowledgeBase", data.id] });
-      
-      const action = data.isPinned ? "pinned" : "unpinned";
-      toast(`Knowledge base ${action}`, {
-        duration: 3000,
-      });
-    },
-    onError: (error) => {
-      toast("Error toggling pin status", {
-        duration: 5000,
-        description:
-          error instanceof Error
-            ? error.message
-            : "Failed to toggle pin status. Please try again.",
-      });
-      console.error("Toggle pin error:", error);
-    },
-  });
-
   return {
     getKnowledgeBases,
     getPublicKnowledgeBases,
@@ -382,6 +338,5 @@ export const useKnowledgeBases = () => {
     useKnowledgeBaseById,
     useKnowledgeBaseDocuments,
     patchKnowledgeBaseDocumentIds,
-    togglePinKnowledgeBase,
   };
 };

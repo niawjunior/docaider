@@ -1,5 +1,6 @@
 // hooks/useDocumentUpload.ts
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 /**
@@ -8,6 +9,7 @@ import { toast } from "sonner";
  */
 export const useDocumentUpload = () => {
   const queryClient = useQueryClient();
+  const messageT = useTranslations("messages");
 
   /**
    * Upload a document with the given file and title
@@ -54,12 +56,12 @@ export const useDocumentUpload = () => {
       queryClient.invalidateQueries({ queryKey: ["knowledgeBases"] });
       queryClient.invalidateQueries({ queryKey: ["knowledgeBaseDocuments"] });
 
-      toast("Document uploaded successfully", {
+      toast(messageT("documentUploaded"), {
         duration: 3000,
       });
     },
     onError: (error) => {
-      toast("Error uploading document", {
+      toast(messageT("documentUploadError"), {
         duration: 5000,
         description:
           error instanceof Error

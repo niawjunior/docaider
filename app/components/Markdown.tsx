@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
+import { useTranslations } from "next-intl";
 import { FaCopy } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
@@ -21,6 +22,7 @@ interface MarkdownProps {
   text: string;
 }
 const Markdown = ({ isUser, text }: MarkdownProps) => {
+  const messageT = useTranslations("chat");
   return (
     <>
       <ReactMarkdown
@@ -72,7 +74,7 @@ const Markdown = ({ isUser, text }: MarkdownProps) => {
 
             const handleCopy = () => {
               navigator.clipboard.writeText(codeString);
-              toast("Copied to clipboard", {
+              toast(messageT("linkCopied"), {
                 duration: 1500,
               });
             };
