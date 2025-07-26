@@ -28,7 +28,9 @@
     "back": "Back",
     "next": "Next",
     "previous": "Previous",
-    "submit": "Submit"
+    "submit": "Submit",
+    "isRequired": "Required",
+    "share": "Share"
   },
   "navigation": {
     "home": "Home",
@@ -74,6 +76,25 @@
     "sharedAgo": "Shared {time} ago",
     "noDescriptionAvailable": "No description available",
     "deleteConfirmTitle": "Are you sure?",
+    "deleteConfirmDescription": "This action will permanently delete this knowledge base and all associated documents. This action cannot be undone.",
+    "cancel": "Cancel",
+    "backToDashboard": "Back to Dashboard",
+    "share": "Share",
+    "shareDialog": {
+      "title": "Share Knowledge Base",
+      "publicDescription": "This knowledge base is public. Anyone with the link can access it.",
+      "privateDescription": "This knowledge base is private. Only you and invited users can access it.",
+      "shareLink": "Share Link",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "inviteByEmail": "Invite by Email",
+      "enterEmail": "Enter email address",
+      "alreadyShared": "This email is already shared",
+      "add": "Add",
+      "sharedWith": "Shared with",
+      "noShares": "No shares yet",
+      "remove": "Remove"
+    },
     "viewPage": {
       "backToDashboard": "Back to Dashboard",
       "aboutThisKnowledgeBase": "About this Knowledge Base",
@@ -96,10 +117,7 @@
         "summarize": "Summarize this knowledge base"
       }
     },
-    "deleteConfirmDescription": "This will permanently delete this knowledge base and all associated documents. This action cannot be undone.",
-    "cancel": "Cancel",
-    "backToDashboard": "Back to Dashboard",
-    "share": "Share",
+
     "details": "Knowledge Base Details",
     "namePlaceholder": "Enter knowledge base name",
     "descriptionPlaceholder": "Describe what this knowledge base is about",
@@ -339,7 +357,8 @@
           "quote": "I love how easy it is to share specific knowledge bases with clients while keeping other documents private.",
           "author": "Lisa R., Consultant"
         }
-      ]
+      ],
+      "subtitle": "See what our users are saying about their experience with our platform."
     },
     "cta": {
       "title": "Ready to Get Started?",

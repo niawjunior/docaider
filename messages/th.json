@@ -29,7 +29,257 @@
     "next": "ถัดไป",
     "previous": "ก่อนหน้า",
     "submit": "ส่ง",
+    "isRequired": "จำเป็น",
     "share": "แชร์"
+  },
+  "navigation": {
+    "home": "หน้าแรก",
+    "chat": "แชท",
+    "dashboard": "แดชบอร์ด",
+    "knowledge": "คลังความรู้",
+    "settings": "การตั้งค่า"
+  },
+  "dashboard": {
+    "title": "แดชบอร์ด",
+    "pinnedKnowledgeBases": "คลังความรู้ที่ปักหมุด",
+    "myKnowledgeBases": "คลังความรู้ของฉัน",
+    "sharedWithYou": "แชร์ให้คุณ",
+    "publicKnowledgeBases": "คลังความรู้สาธารณะ",
+    "createKnowledgeBase": "สร้างคลังความรู้",
+    "searchPlaceholder": "ค้นหาคลังความรู้ทั้งหมด...",
+    "noKnowledgeBases": "คุณยังไม่ได้สร้างคลังความรู้",
+    "noPublicKnowledgeBases": "ยังไม่มีคลังความรู้สาธารณะ",
+    "noSharedKnowledgeBases": "ไม่มีคลังความรู้ที่แชร์ให้คุณ",
+    "sharedKnowledgeBasesWillAppearHere": "คลังความรู้ที่แชร์ให้คุณจะปรากฏที่นี่",
+    "credits": "เครดิต",
+    "goToHome": "ไปหน้าแรก",
+    "goToChat": "ไปยังหน้าสำหรับแชท"
+  },
+  "knowledgeBase": {
+    "create": "สร้าง",
+    "edit": "แก้ไข",
+    "delete": "ลบ",
+    "deleting": "กำลังลบ...",
+    "view": "ดู",
+    "pin": "ปักหมุด",
+    "unpin": "เลิกปักหมุด",
+    "pinned": "ปักหมุดแล้ว",
+    "public": "สาธารณะ",
+    "private": "ส่วนตัว",
+    "name": "ชื่อ",
+    "description": "คำอธิบาย",
+    "documents": "เอกสาร",
+    "createdBy": "สร้างโดย",
+    "updatedAgo": "อัปเดตเมื่อ {time} ที่ผ่านมา",
+    "createdAgo": "สร้างเมื่อ {time} ที่ผ่านมา",
+    "sharedBy": "แชร์โดย",
+    "sharedAgo": "แชร์เมื่อ {time} ที่ผ่านมา",
+    "noDescriptionAvailable": "ไม่มีคำอธิบาย",
+    "deleteConfirmTitle": "คุณแน่ใจหรือไม่?",
+    "deleteConfirmDescription": "การกระทำนี้จะลบคลังความรู้นี้และเอกสารที่เกี่ยวข้องทั้งหมดอย่างถาวร การกระทำนี้ไม่สามารถยกเลิกได้",
+    "cancel": "ยกเลิก",
+    "backToDashboard": "กลับไปที่แดชบอร์ด",
+    "share": "แชร์",
+    "shareDialog": {
+      "title": "แชร์คลังความรู้",
+      "publicDescription": "คลังความรู้นี้เป็นสาธารณะ ทุกคนที่มีลิงก์สามารถเข้าถึงได้",
+      "privateDescription": "คลังความรู้นี้เป็นส่วนตัว เฉพาะคุณและผู้ใช้ที่ได้รับเชิญเท่านั้นที่สามารถเข้าถึงได้",
+      "shareLink": "แชร์ลิงก์",
+      "copy": "คัดลอก",
+      "copied": "คัดลอกแล้ว!",
+      "inviteByEmail": "เชิญด้วยอีเมล",
+      "enterEmail": "ป้อนที่อยู่อีเมล",
+      "alreadyShared": "อีเมลนี้ถูกแชร์ไปแล้ว",
+      "add": "เพิ่ม",
+      "sharedWith": "แชร์กับ",
+      "noShares": "ยังไม่มีการแชร์",
+      "remove": "ลบ"
+    },
+    "viewPage": {
+      "backToDashboard": "กลับไปที่แดชบอร์ด",
+      "aboutThisKnowledgeBase": "เกี่ยวกับคลังความรู้นี้",
+      "lastUpdated": "อัปเดตล่าสุดเมื่อ {time} ที่แล้ว",
+      "noDocumentsFound": "ไม่พบเอกสาร",
+      "knowledgeSessions": "แชททั้งหมด",
+      "createNewChat": "สร้างห้องแชทใหม่",
+      "askQuestions": "ถามคำถาม",
+      "noChats": "ยังไม่มีห้องแชท",
+      "startNewChatDescription": "เริ่มแชทใหม่เพื่อถามเกี่ยวกับคลังความรู้นี้",
+      "startNewChat": "เริ่มแชทใหม่",
+      "failedToFetchKnowledgeBase": "ดึงข้อมูลคลังความรู้ไม่สำเร็จ",
+      "knowledgeBaseNotFound": "ไม่พบคลังความรู้",
+      "unauthorized": "ไม่มีสิทธิ์เข้าถึง",
+      "failedToFetchDocuments": "ดึงเอกสารจากคลังความรู้ไม่สำเร็จ",
+      "suggestedPrompts": {
+        "tellMeAbout": "เล่าให้ฟังเกี่ยวกับคลังความรู้นี้หน่อย",
+        "whoIsAuthor": "ใครเป็นเจ้าของคลังความรู้นี้?",
+        "whatIsTitle": "ชื่อของคลังความรู้นี้คืออะไร?",
+        "summarize": "ช่วยสรุปคลังความรู้นี้ให้หน่อย"
+      }
+    },
+    "details": "รายละเอียดคลังความรู้",
+    "namePlaceholder": "ใส่ชื่อคลังความรู้",
+    "descriptionPlaceholder": "อธิบายว่าคลังความรู้นี้เกี่ยวกับอะไร",
+    "descriptionHelp": "แนะนำให้ใส่ข้อมูลเกี่ยวกับจุดประสงค์และเนื้อหาของคลังความรู้นี้",
+    "makePublic": "เปิดเป็นสาธารณะ",
+    "publicDescription": "คลังความรู้สาธารณะสามารถให้ใครก็เข้าดูได้",
+    "saveChanges": "บันทึกการเปลี่ยนแปลง",
+    "deleteKnowledgeBase": "ลบคลังความรู้",
+    "currentDocuments": "เอกสารปัจจุบัน",
+    "uploadNewDocument": "อัปโหลดเอกสารใหม่",
+    "noDocuments": "ยังไม่มีเอกสารในคลังความรู้นี้ เพิ่มเอกสารได้จากแท็บ “เพิ่มเอกสาร”",
+    "addedOn": "เพิ่มเมื่อ {date}",
+    "nameRequired": "จำเป็นต้องใส่ชื่อคลังความรู้",
+    "createTitle": "สร้างคลังความรู้",
+    "createDescription": "สร้างคลังความรู้ใหม่เพื่อจัดระเบียบเอกสารและแบ่งปันความรู้",
+    "createdSuccess": "สร้างคลังความรู้เรียบร้อยแล้ว",
+    "createError": "สร้างคลังความรู้ไม่สำเร็จ"
+  },
+  "search": {
+    "searchQuery": "ค้นหา...",
+    "sortBy": "เรียงตาม",
+    "filterBy": "กรองตาม",
+    "recentlyUpdated": "อัปเดตล่าสุด",
+    "oldestFirst": "เก่าสุดก่อน",
+    "nameAZ": "ชื่อ A-Z",
+    "nameZA": "ชื่อ Z-A",
+    "recentlyCreated": "สร้างล่าสุด",
+    "oldestCreated": "สร้างนานที่สุด",
+    "all": "ทั้งหมด",
+    "active": "ใช้งานอยู่",
+    "hasDocuments": "มีเอกสาร",
+    "empty": "ว่าง",
+    "clearAll": "ล้างทั้งหมด",
+    "clearFilters": "ล้างตัวกรอง",
+    "found": "พบ",
+    "matching": "ตรงกับ",
+    "search": "ค้นหา",
+    "filter": "กรอง",
+    "sort": "เรียง"
+  },
+  "chat": {
+    "title": "แชท",
+    "placeholder": "ถามอะไรก็ได้เกี่ยวกับเอกสารของคุณ...",
+    "send": "ส่ง",
+    "thinking": "กำลังคิด...",
+    "noMessages": "ยังไม่มีข้อความ เริ่มสนทนากันเลย!",
+    "selectKnowledgeBase": "เลือกคลังความรู้",
+    "allKnowledgeBases": "คลังความรู้ทั้งหมด"
+  },
+  "documents": {
+    "yourKnowledgeBase": "คลังความรู้ของคุณ",
+    "emptyKnowledgeBase": "คลังความรู้ของคุณว่างเปล่า อัปโหลดเอกสารเพื่อเริ่มสร้างคลังความรู้ของคุณ",
+    "added": "เพิ่มเมื่อ",
+    "documentDeletedSuccess": "ลบเอกสารสำเร็จแล้ว",
+    "errorDeletingDocument": "เกิดข้อผิดพลาดในการลบเอกสาร",
+    "failedToDeleteDocument": "ไม่สามารถลบเอกสารของคุณได้ โปรดลองอีกครั้ง",
+    "upload": "อัปโหลด",
+    "uploadDocuments": "อัปโหลดเอกสาร",
+    "uploadDocument": "อัปโหลดเอกสาร",
+    "dragAndDrop": "ลากและวางไฟล์ที่นี่ หรือคลิกเพื่อเลือกไฟล์",
+    "supportedFormats": "รูปแบบที่รองรับ: PDF, DOCX, TXT, MD",
+    "uploading": "กำลังอัปโหลด...",
+    "processing": "กำลังประมวลผล...",
+    "delete": "ลบ",
+    "view": "ดู",
+    "documentTitle": "ชื่อเอกสาร",
+    "enterDocumentTitle": "ป้อนชื่อเอกสาร",
+    "selectedFile": "ไฟล์ที่เลือก: {name} ({size})",
+    "supportedFileTypes": "รูปแบบไฟล์ที่รองรับ: PDF, CSV, DOC, DOCX",
+    "maximumFileSize": "ขนาดไฟล์สูงสุด: 2MB เอกสารจะถูกประมวลผลสำหรับการค้นคืนความรู้",
+    "fileSizeExceeded": "ขนาดไฟล์เกินขีดจำกัด {limit} ขนาดปัจจุบัน: {size}",
+    "duplicateTitleError": "มีเอกสารที่ใช้ชื่อนี้อยู่แล้ว โปรดใช้ชื่ออื่น"
+  },
+  "misc": {
+    "reset": "รีเซ็ต"
+  },
+  "login": {
+    "title": "เข้าสู่ระบบบัญชีของคุณ",
+    "signInWithGoogle": "เข้าสู่ระบบด้วย Google",
+    "bySigningIn": "การเข้าสู่ระบบถือว่าคุณยอมรับ",
+    "termsOfService": "ข้อกำหนดการใช้บริการ",
+    "and": "และ",
+    "privacyPolicy": "นโยบายความเป็นส่วนตัว"
+  },
+  "pricing": {
+    "title": "พลัง AI",
+    "plansForEveryTeam": "แผนสำหรับทุกทีม",
+    "startWithFreeCredits": "เริ่มต้นด้วยเครดิตฟรี 50 เครดิต ไม่ต้องใช้บัตรเครดิต",
+    "mostPopular": "ยอดนิยม",
+    "creditsIncluded": "เครดิตรวมอยู่",
+    "perMonth": "/เดือน",
+    "plans": {
+      "starter": {
+        "name": "เริ่มต้น",
+        "description": "เหมาะสำหรับการทดลองใช้แพลตฟอร์มของเรา",
+        "price": "ฟรี",
+        "credits": "50",
+        "features": [
+          "50 เครดิต AI",
+          "คุณสมบัติพื้นคลังทั้งหมด",
+          "การสนับสนุนมาตรคลัง",
+          "การเข้าถึงชุมชน"
+        ],
+        "cta": "เริ่มต้นใช้งาน"
+      },
+      "pro": {
+        "name": "โปร",
+        "description": "สำหรับมืออาชีพและทีมขนาดเล็ก",
+        "price": "$9",
+        "credits": "500",
+        "features": [
+          "500 เครดิต AI",
+          "คุณสมบัติโปรทั้งหมด",
+          "การสนับสนุนแบบพิเศษ",
+          "การเข้าถึง API",
+          "การทำงานร่วมกันเป็นทีม"
+        ],
+        "cta": "เร็วๆ นี้"
+      },
+      "enterprise": {
+        "name": "องค์กร",
+        "description": "สำหรับองค์กรขนาดใหญ่",
+        "price": "กำหนดเอง",
+        "credits": "ไม่จำกัด",
+        "features": [
+          "เครดิตไม่จำกัด",
+          "คุณสมบัติสำหรับองค์กรทั้งหมด",
+          "การสนับสนุน 24/7",
+          "ผู้จัดการบัญชีโดยเฉพาะ",
+          "การผสานรวมแบบกำหนดเอง",
+          "ข้อตกลงระดับการให้บริการและการตรวจสอบความปลอดภัย"
+        ],
+        "cta": "เร็วๆ นี้"
+      }
+    }
+  },
+  "actions": {
+    "createKnowledgeBase": "สร้างคลังความรู้",
+    "uploadDocuments": "อัปโหลดเอกสาร",
+    "shareKnowledgeBase": "แชร์คลังความรู้",
+    "deleteKnowledgeBase": "ลบคลังความรู้",
+    "editKnowledgeBase": "แก้ไขคลังความรู้"
+  },
+  "messages": {
+    "knowledgeBaseCreated": "สร้างคลังความรู้สำเร็จแล้ว",
+    "knowledgeBaseUpdated": "อัปเดตคลังความรู้สำเร็จแล้ว",
+    "knowledgeBaseDeleteError": "เกิดข้อผิดพลาดในการลบคลังความรู้",
+    "knowledgeBaseDeletedSuccess": "ลบคลังความรู้สำเร็จแล้ว",
+    "knowledgeBasePinned": "ปักหมุดคลังความรู้สำเร็จแล้ว",
+    "knowledgeBaseUnpinned": "ยกเลิกปักหมุดคลังความรู้สำเร็จแล้ว",
+    "documentUploaded": "อัปโหลดเอกสารสำเร็จแล้ว",
+    "documentDeleted": "ลบเอกสารสำเร็จแล้ว",
+    "errorOccurred": "เกิดข้อผิดพลาด",
+    "unauthorized": "ไม่ได้รับอนุญาต",
+    "notFound": "ไม่พบ"
+  },
+  "dialogs": {
+    "deleteConfirmation": {
+      "title": "คุณแน่ใจหรือไม่?",
+      "description": "การกระทำนี้จะลบคลังความรู้และเอกสารที่เกี่ยวข้องทั้งหมดอย่างถาวร ไม่สามารถยกเลิกได้",
+      "delete": "ลบ",
+      "cancel": "ยกเลิก"
+    }
   },
   "home": {
     "title": "แพลตฟอร์มจัดการความรู้ด้วย AI",
@@ -80,257 +330,41 @@
       }
     },
     "publicKnowledgeBases": {
-      "title": "ฐานความรู้สาธารณะ",
-      "subtitle": "สำรวจฐานความรู้สาธารณะที่สร้างโดยชุมชนของเรา",
+      "title": "คลังความรู้สาธารณะ",
+      "subtitle": "สำรวจคลังความรู้สาธารณะที่สร้างโดยชุมชนของเรา",
       "noDescription": "ไม่มีคำอธิบาย",
       "createdBy": "สร้างโดย {name}",
       "updatedAgo": "อัปเดต {time} ที่แล้ว",
       "explore": "สำรวจ",
-      "noKnowledgeBases": "ยังไม่มีฐานความรู้สาธารณะ",
-      "beFirst": "เป็นคนแรกที่สร้างและแชร์ฐานความรู้!",
+      "noKnowledgeBases": "ยังไม่มีคลังความรู้สาธารณะ",
+      "beFirst": "เป็นคนแรกที่สร้างและแชร์คลังความรู้!",
       "goToDashboard": "ไปที่แดชบอร์ด",
-      "viewAll": "ดูฐานความรู้สาธารณะทั้งหมด"
+      "viewAll": "ดูคลังความรู้สาธารณะทั้งหมด"
     },
     "testimonials": {
       "title": "ได้รับความไว้วางใจจากมืออาชีพ",
+
+      "items": [
+        {
+          "quote": "DocAider ได้เปลี่ยนวิธีการจัดการเอกสารของเราอย่างสิ้นเชิง คุณสมบัติ AI chat ช่วยให้เราประหยัดเวลาค้นหาเอกสารไปได้หลายชั่วโมง",
+          "author": "Sarah J., ผู้จัดการผลิตภัณฑ์"
+        },
+        {
+          "quote": "ความสามารถในการสร้างคลังความรู้แยกต่างหากสำหรับแต่ละโปรเจกต์เป็นสิ่งที่พลิกเกมสำหรับการจัดระเบียบทีมของเรา",
+          "author": "Michael T., หัวหน้าทีม"
+        },
+        {
+          "quote": "ฉันชอบความง่ายในการแชร์คลังความรู้เฉพาะกับลูกค้า ในขณะที่เก็บเอกสารอื่น ๆ ไว้เป็นส่วนตัว",
+          "author": "Lisa R., ที่ปรึกษา"
+        }
+      ],
       "subtitle": "ดูว่าผู้ใช้ของเรากำลังพูดถึงประสบการณ์กับแพลตฟอร์มของเรา"
+    },
+    "cta": {
+      "title": "พร้อมที่จะเริ่มต้นหรือยัง?",
+      "subtitle": "สร้างคลังความรู้แรกของคุณ หรือสำรวจแหล่งข้อมูลสาธารณะที่มีอยู่",
+      "createButton": "สร้างคลังความรู้",
+      "exploreButton": "สำรวจแหล่งข้อมูลสาธารณะ"
     }
-  },
-  "navigation": {
-    "home": "หน้าแรก",
-    "chat": "แชท",
-    "dashboard": "แดชบอร์ด",
-    "knowledge": "ฐานความรู้",
-    "settings": "การตั้งค่า"
-  },
-  "dashboard": {
-    "title": "แดชบอร์ด",
-    "pinnedKnowledgeBases": "ฐานความรู้ที่ปักหมุด",
-    "myKnowledgeBases": "ฐานความรู้ของฉัน",
-    "sharedWithYou": "แชร์ให้คุณ",
-    "publicKnowledgeBases": "ฐานความรู้สาธารณะ",
-    "createKnowledgeBase": "สร้างฐานความรู้",
-    "searchPlaceholder": "ค้นหาฐานความรู้ทั้งหมด...",
-    "noKnowledgeBases": "คุณยังไม่ได้สร้างฐานความรู้",
-    "noPublicKnowledgeBases": "ยังไม่มีฐานความรู้สาธารณะ",
-    "noSharedKnowledgeBases": "ไม่มีฐานความรู้ที่แชร์ให้คุณ",
-    "sharedKnowledgeBasesWillAppearHere": "ฐานความรู้ที่แชร์ให้คุณจะปรากฏที่นี่",
-    "credits": "เครดิต",
-    "goToHome": "ไปหน้าแรก",
-    "goToChat": "ไปยังหน้าสำหรับแชท"
-  },
-    "knowledgeBase": {
-      "create": "สร้าง",
-      "edit": "แก้ไข",
-      "delete": "ลบ",
-      "deleting": "กำลังลบ...",
-      "view": "ดู",
-      "pin": "ปักหมุด",
-      "unpin": "ยกเลิกหมุด",
-      "pinned": "ปักหมุดแล้ว",
-      "public": "สาธารณะ",
-      "private": "ส่วนตัว",
-      "name": "ชื่อ",
-      "description": "คำอธิบาย",
-      "documents": "เอกสาร",
-      "createdBy": "สร้างโดย",
-      "updatedAgo": "อัปเดตเมื่อ {time} ที่แล้ว",
-      "createdAgo": "สร้างเมื่อ {time} ที่แล้ว",
-      "sharedBy": "แชร์โดย",
-      "sharedAgo": "แชร์เมื่อ {time} ที่แล้ว",
-      "noDescriptionAvailable": "ยังไม่มีคำอธิบาย",
-      "deleteConfirmTitle": "แน่ใจนะ?",
-      "viewPage": {
-        "backToDashboard": "กลับไปหน้าแดชบอร์ด",
-        "aboutThisKnowledgeBase": "เกี่ยวกับคลังความรู้นี้",
-        "lastUpdated": "อัปเดตล่าสุดเมื่อ {time} ที่แล้ว",
-        "noDocumentsFound": "ไม่พบเอกสาร",
-        "knowledgeSessions": "เซสชันความรู้",
-        "createNewChat": "สร้างห้องแชทใหม่",
-        "askQuestions": "ถามคำถาม",
-        "noChats": "ยังไม่มีห้องแชท",
-        "startNewChatDescription": "เริ่มแชทใหม่เพื่อถามเกี่ยวกับคลังความรู้นี้",
-        "startNewChat": "เริ่มแชทใหม่",
-        "failedToFetchKnowledgeBase": "ดึงข้อมูลคลังความรู้ไม่สำเร็จ",
-        "knowledgeBaseNotFound": "ไม่พบคลังความรู้",
-        "unauthorized": "ไม่มีสิทธิ์เข้าถึง",
-        "failedToFetchDocuments": "ดึงเอกสารจากคลังความรู้ไม่สำเร็จ",
-        "suggestedPrompts": {
-          "tellMeAbout": "เล่าให้ฟังเกี่ยวกับคลังความรู้นี้หน่อย",
-          "whoIsAuthor": "ใครเป็นเจ้าของคลังความรู้นี้?",
-          "whatIsTitle": "ชื่อของคลังความรู้นี้คืออะไร?",
-          "summarize": "ช่วยสรุปคลังความรู้นี้ให้หน่อย"
-        }
-      },
-      "deleteConfirmDescription": "การลบนี้จะลบคลังความรู้และเอกสารทั้งหมดถาวร ไม่สามารถกู้คืนได้",
-      "cancel": "ยกเลิก",
-      "backToDashboard": "กลับไปหน้าแดชบอร์ด",
-      "share": "แชร์",
-      "details": "รายละเอียดคลังความรู้",
-      "namePlaceholder": "ใส่ชื่อคลังความรู้",
-      "descriptionPlaceholder": "อธิบายว่าคลังความรู้นี้เกี่ยวกับอะไร",
-      "descriptionHelp": "แนะนำให้ใส่ข้อมูลเกี่ยวกับจุดประสงค์และเนื้อหาของคลังความรู้นี้",
-      "makePublic": "เปิดเป็นสาธารณะ",
-      "publicDescription": "คลังความรู้สาธารณะสามารถให้ใครก็เข้าดูได้",
-      "saveChanges": "บันทึกการเปลี่ยนแปลง",
-      "deleteKnowledgeBase": "ลบคลังความรู้",
-      "currentDocuments": "เอกสารปัจจุบัน",
-      "uploadNewDocument": "อัปโหลดเอกสารใหม่",
-      "noDocuments": "ยังไม่มีเอกสารในคลังความรู้นี้ เพิ่มเอกสารได้จากแท็บ “เพิ่มเอกสาร”",
-      "addedOn": "เพิ่มเมื่อ {date}",
-      "nameRequired": "จำเป็นต้องใส่ชื่อคลังความรู้",
-      "createTitle": "สร้างคลังความรู้",
-      "createDescription": "สร้างคลังความรู้ใหม่เพื่อจัดระเบียบเอกสารและแบ่งปันความรู้",
-      "createdSuccess": "สร้างคลังความรู้เรียบร้อยแล้ว",
-      "createError": "สร้างคลังความรู้ไม่สำเร็จ"
-    },
-  
-    "search": {
-      "searchQuery": "ค้นหา...",
-      "sortBy": "เรียงตาม",
-      "filterBy": "กรองตาม",
-      "recentlyUpdated": "อัปเดตล่าสุด",
-      "oldestFirst": "เก่าสุดก่อน",
-      "nameAZ": "ชื่อ A-Z",
-      "nameZA": "ชื่อ Z-A",
-      "recentlyCreated": "สร้างล่าสุด",
-      "oldestCreated": "สร้างนานที่สุด",
-      "all": "ทั้งหมด",
-      "active": "ใช้งานอยู่",
-      "hasDocuments": "มีเอกสาร",
-      "empty": "ว่าง",
-      "clearAll": "ล้างทั้งหมด",
-      "clearFilters": "ล้างตัวกรอง",
-      "found": "พบ",
-      "matching": "ตรงกับ",
-      "search": "ค้นหา",
-      "filter": "กรอง",
-      "sort": "เรียง"
-    },
-    "chat": {
-      "title": "แชท",
-      "placeholder": "ถามอะไรก็ได้เกี่ยวกับเอกสารของคุณ...",
-      "send": "ส่ง",
-      "thinking": "กำลังคิด...",
-      "noMessages": "ยังไม่มีข้อความ เริ่มสนทนากันเลย!",
-      "selectKnowledgeBase": "เลือกฐานความรู้",
-      "allKnowledgeBases": "ฐานความรู้ทั้งหมด"
-    },
-    "documents": {
-      "yourKnowledgeBase": "ฐานความรู้ของคุณ",
-      "emptyKnowledgeBase": "ฐานความรู้ของคุณว่างเปล่า อัปโหลดเอกสารเพื่อเริ่มสร้างคลังความรู้ของคุณ",
-      "added": "เพิ่มเมื่อ",
-      "documentDeletedSuccess": "ลบเอกสารสำเร็จแล้ว",
-      "errorDeletingDocument": "เกิดข้อผิดพลาดในการลบเอกสาร",
-      "failedToDeleteDocument": "ไม่สามารถลบเอกสารของคุณได้ โปรดลองอีกครั้ง",
-      "upload": "อัปโหลด",
-      "uploadDocuments": "อัปโหลดเอกสาร",
-      "uploadDocument": "อัปโหลดเอกสาร",
-      "dragAndDrop": "ลากและวางไฟล์ที่นี่ หรือคลิกเพื่อเลือกไฟล์",
-      "supportedFormats": "รูปแบบที่รองรับ: PDF, DOCX, TXT, MD",
-      "uploading": "กำลังอัปโหลด...",
-      "processing": "กำลังประมวลผล...",
-      "delete": "ลบ",
-      "view": "ดู",
-      "documentTitle": "ชื่อเอกสาร",
-      "enterDocumentTitle": "ป้อนชื่อเอกสาร",
-      "selectedFile": "ไฟล์ที่เลือก: {name} ({size})",
-      "supportedFileTypes": "รูปแบบไฟล์ที่รองรับ: PDF, CSV, DOC, DOCX",
-      "maximumFileSize": "ขนาดไฟล์สูงสุด: 2MB เอกสารจะถูกประมวลผลสำหรับการค้นคืนความรู้",
-      "fileSizeExceeded": "ขนาดไฟล์เกินขีดจำกัด {limit} ขนาดปัจจุบัน: {size}",
-      "duplicateTitleError": "มีเอกสารที่ใช้ชื่อนี้อยู่แล้ว โปรดใช้ชื่ออื่น"
-    },
-    "misc": {
-      "reset": "รีเซ็ต",
-      "previous": "ก่อนหน้า",
-      "submit": "ส่ง"
-    },
-    "login": {
-      "title": "เข้าสู่ระบบบัญชีของคุณ",
-      "signInWithGoogle": "เข้าสู่ระบบด้วย Google",
-      "bySigningIn": "การเข้าสู่ระบบถือว่าคุณยอมรับ",
-      "termsOfService": "ข้อกำหนดการใช้บริการ",
-      "and": "และ",
-      "privacyPolicy": "นโยบายความเป็นส่วนตัว"
-    },
-    "pricing": {
-      "title": "พลัง AI",
-      "plansForEveryTeam": "แผนสำหรับทุกทีม",
-      "startWithFreeCredits": "เริ่มต้นด้วยเครดิตฟรี 50 เครดิต ไม่ต้องใช้บัตรเครดิต",
-      "mostPopular": "ยอดนิยม",
-      "creditsIncluded": "เครดิตรวมอยู่",
-      "perMonth": "/เดือน",
-      "plans": {
-        "starter": {
-          "name": "เริ่มต้น",
-          "description": "เหมาะสำหรับการทดลองใช้แพลตฟอร์มของเรา",
-          "price": "ฟรี",
-          "credits": "50",
-          "features": [
-            "50 เครดิต AI",
-            "คุณสมบัติพื้นฐานทั้งหมด",
-            "การสนับสนุนมาตรฐาน",
-            "การเข้าถึงชุมชน"
-          ],
-          "cta": "เริ่มต้นใช้งาน"
-        },
-        "pro": {
-          "name": "โปร",
-          "description": "สำหรับมืออาชีพและทีมขนาดเล็ก",
-          "price": "$9",
-          "credits": "500",
-          "features": [
-            "500 เครดิต AI",
-            "คุณสมบัติโปรทั้งหมด",
-            "การสนับสนุนแบบพิเศษ",
-            "การเข้าถึง API",
-            "การทำงานร่วมกันเป็นทีม"
-          ],
-          "cta": "เร็วๆ นี้"
-        },
-        "enterprise": {
-          "name": "องค์กร",
-          "description": "สำหรับองค์กรขนาดใหญ่",
-          "price": "กำหนดเอง",
-          "credits": "ไม่จำกัด",
-          "features": [
-            "เครดิตไม่จำกัด",
-            "คุณสมบัติสำหรับองค์กรทั้งหมด",
-            "การสนับสนุน 24/7",
-            "ผู้จัดการบัญชีโดยเฉพาะ",
-            "การผสานรวมแบบกำหนดเอง",
-            "ข้อตกลงระดับการให้บริการและการตรวจสอบความปลอดภัย"
-          ],
-          "cta": "เร็วๆ นี้"
-        }
-      }
-    },
-    "messages": {
-      "knowledgeBaseCreated": "สร้างฐานความรู้สำเร็จแล้ว",
-      "knowledgeBaseUpdated": "อัปเดตฐานความรู้สำเร็จแล้ว",
-      "knowledgeBaseDeleteError": "เกิดข้อผิดพลาดในการลบฐานความรู้",
-      "knowledgeBaseDeletedSuccess": "ลบฐานความรู้สำเร็จแล้ว",
-      "knowledgeBasePinned": "ปักหมุดฐานความรู้สำเร็จแล้ว",
-      "knowledgeBaseUnpinned": "ยกเลิกปักหมุดฐานความรู้สำเร็จแล้ว",
-      "documentUploaded": "อัปโหลดเอกสารสำเร็จแล้ว",
-      "documentDeleted": "ลบเอกสารสำเร็จแล้ว",
-      "errorOccurred": "เกิดข้อผิดพลาด",
-      "unauthorized": "ไม่ได้รับอนุญาต",
-      "notFound": "ไม่พบ"
-    },
-    "actions": {
-      "createKnowledgeBase": "สร้างฐานความรู้",
-      "uploadDocuments": "อัปโหลดเอกสาร",
-      "shareKnowledgeBase": "แชร์ฐานความรู้",
-      "deleteKnowledgeBase": "ลบฐานความรู้",
-      "editKnowledgeBase": "แก้ไขฐานความรู้"
-    },
-    "dialogs": {
-      "deleteConfirmation": {
-        "title": "คุณแน่ใจหรือไม่?",
-        "description": "การกระทำนี้จะลบฐานความรู้และเอกสารที่เกี่ยวข้องทั้งหมดอย่างถาวร ไม่สามารถยกเลิกได้",
-        "delete": "ลบ",
-        "cancel": "ยกเลิก"
-      }
-    }
+  }
 }

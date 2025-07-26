@@ -5,13 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  ArrowLeft,
-  Edit,
-  Share2,
-  PlusCircle,
-  Eye,
-} from "lucide-react";
+import { ArrowLeft, Edit, Share2, PlusCircle, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
 import GlobalLoader from "@/app/components/GlobalLoader";
@@ -39,7 +33,7 @@ export default function ViewKnowledgeBasePage() {
   const t = useTranslations("knowledgeBase.viewPage");
   const kbT = useTranslations("knowledgeBase");
   const commonT = useTranslations("common");
-  
+
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const { session } = useSupabaseSession();
@@ -48,20 +42,23 @@ export default function ViewKnowledgeBasePage() {
   const kbHooks = useKnowledgeBases();
   const [chatId, setChatId] = useState<string>("");
   const queryClient = useQueryClient();
-  const suggestedPrompts = useMemo(() => [
-    {
-      title: t("suggestedPrompts.tellMeAbout"),
-    },
-    {
-      title: t("suggestedPrompts.whoIsAuthor"),
-    },
-    {
-      title: t("suggestedPrompts.whatIsTitle"),
-    },
-    {
-      title: t("suggestedPrompts.summarize"),
-    },
-  ], [t]);
+  const suggestedPrompts = useMemo(
+    () => [
+      {
+        title: t("suggestedPrompts.tellMeAbout"),
+      },
+      {
+        title: t("suggestedPrompts.whoIsAuthor"),
+      },
+      {
+        title: t("suggestedPrompts.whatIsTitle"),
+      },
+      {
+        title: t("suggestedPrompts.summarize"),
+      },
+    ],
+    [t]
+  );
 
   interface Document {
     id: number;
@@ -229,7 +226,11 @@ export default function ViewKnowledgeBasePage() {
                   )}
                   <div className="text-sm text-muted-foreground">
                     <p>
-                      {t("lastUpdated", { time: formatDistanceToNow(new Date(knowledgeBase.updatedAt)) })}
+                      {t("lastUpdated", {
+                        time: formatDistanceToNow(
+                          new Date(knowledgeBase.updatedAt)
+                        ),
+                      })}
                     </p>
                   </div>
                   <div className="border-t pt-4 max-h-[120px] overflow-y-auto">

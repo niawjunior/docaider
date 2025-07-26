@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface ShareKnowledgeBaseDialogProps {
   open: boolean;
@@ -39,6 +40,7 @@ export default function ShareKnowledgeBaseDialog({
   shareUrl,
   isPublic,
 }: ShareKnowledgeBaseDialogProps) {
+  const t = useTranslations("knowledgeBase.shareDialog");
   const [newEmail, setNewEmail] = useState("");
   const [linkCopied, setLinkCopied] = useState(false);
   const [pendingRemoval, setPendingRemoval] = useState<string | null>(null);
@@ -55,7 +57,7 @@ export default function ShareKnowledgeBaseDialog({
     try {
       await navigator.clipboard.writeText(shareUrl);
       setLinkCopied(true);
-      toast.success("Link copied to clipboard!");
+      toast.success(t("copied"));
 
       // Reset the copied state after 2 seconds
       setTimeout(() => setLinkCopied(false), 2000);
@@ -67,12 +69,12 @@ export default function ShareKnowledgeBaseDialog({
 
   const handleAddEmail = () => {
     if (!newEmail.trim()) {
-      toast.error("Please enter an email address");
+      toast.error(t("enterEmail"));
       return;
     }
 
     if (!newEmail.includes("@")) {
-      toast.error("Please enter a valid email address");
+      toast.error(t("enterEmail"));
       return;
     }
 
@@ -83,7 +85,7 @@ export default function ShareKnowledgeBaseDialog({
     );
 
     if (isAlreadyShared) {
-      toast.error("This email already has access");
+      toast.error(t("alreadyShared"));
       return;
     }
 
@@ -109,19 +111,19 @@ export default function ShareKnowledgeBaseDialog({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Share Knowledge Base
+              {t("title")}
             </DialogTitle>
             <DialogDescription>
               {isPublic
-                ? "This knowledge base is public. Anyone with the link can access it."
-                : "This knowledge base is private. Only you and invited users can access it."}
+                ? t("publicDescription")
+                : t("privateDescription")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             {/* Share Link Section */}
             <div className="space-y-2">
-              <Label htmlFor="share-link">Share Link</Label>
+              <Label htmlFor="share-link">{t("shareLink")}</Label>
               <div className="flex items-center space-x-2">
                 <Input
                   id="share-link"
@@ -152,7 +154,7 @@ export default function ShareKnowledgeBaseDialog({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="top">
-                    {linkCopied ? "Copied!" : "Copy link"}
+                    {linkCopied ? t("copied") : t("copy")}
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -166,20 +168,20 @@ export default function ShareKnowledgeBaseDialog({
                   <div className="flex items-center justify-between">
                     <Label className="flex items-center gap-1.5">
                       <Mail className="h-4 w-4 text-muted-foreground" />
-                      Team Access
+                      {t("inviteByEmail")}
                     </Label>
                     <Badge variant="secondary" className="text-xs">
-                      {shares.length} {shares.length === 1 ? "user" : "users"}
+                      {shares.length}
                     </Badge>
                   </div>
 
                   {/* Add Email Input */}
                   <div className="flex items-center space-x-2">
                     <Input
-                      placeholder="Enter email address..."
+                      placeholder={t("enterEmail")}
                       value={newEmail}
                       onChange={(e) => setNewEmail(e.target.value)}
-                      onKeyPress={handleKeyPress}
+                      onKeyDown={handleKeyPress}
                       className="flex-1"
                       disabled={isAddingShare}
                     />
@@ -198,13 +200,19 @@ export default function ShareKnowledgeBaseDialog({
                   </div>
 
                   {/* Shared Users List */}
+                    <div className="text-xs text-muted-foreground">
+                      {t("sharedWith")}
+                    </div>
                   <div className="rounded-md border overflow-hidden">
                     {isLoading ? (
                       <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        Loading shared users...
+                        Loading...
                       </div>
                     ) : shares.length > 0 ? (
+                      <>
+                    
+
                       <div className="max-h-48 overflow-y-auto">
                         {shares.map((share) => (
                           <div
@@ -239,23 +247,21 @@ export default function ShareKnowledgeBaseDialog({
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="left">
-                                Remove user
+                                {t("remove")}
                               </TooltipContent>
                             </Tooltip>
                           </div>
                         ))}
                       </div>
+                      </>
                     ) : (
                       <div className="text-sm text-muted-foreground text-center py-4">
-                        No users have been added yet
+                        {t("noShares")}
                       </div>
                     )}
                   </div>
 
-                  <div className="text-xs text-muted-foreground">
-                    Users with these email addresses can access this knowledge
-                    base when they sign in.
-                  </div>
+               
                 </div>
               </>
             )}

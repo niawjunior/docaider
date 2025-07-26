@@ -44,11 +44,17 @@ import ShareKnowledgeBaseDialog from "@/app/components/ShareKnowledgeBaseDialog"
 import { useTranslations } from "next-intl";
 
 // Define the Zod schema for form validation
-const getFormSchema = (t: ReturnType<typeof useTranslations>) => z.object({
-  name: z.string().min(1, { message: t("name") + " " + t("common:isRequired") }),
-  description: z.string().optional(),
-  isPublic: z.boolean(),
-});
+const getFormSchema = (
+  t: ReturnType<typeof useTranslations>,
+  commonT: ReturnType<typeof useTranslations>
+) =>
+  z.object({
+    name: z
+      .string()
+      .min(1, { message: t("name") + " " + commonT("isRequired") }),
+    description: z.string().optional(),
+    isPublic: z.boolean(),
+  });
 
 // Define the form values type
 type FormValues = {
@@ -83,9 +89,10 @@ export default function EditKnowledgeBasePage() {
   const [shareUrl, setShareUrl] = useState("");
   const { session } = useSupabaseSession();
   const [documentId, setDocumentId] = useState<string | null>(null);
-  
+
   // Initialize react-hook-form with Zod validation
-  const FormSchema = getFormSchema(t);
+  const commonT = useTranslations("common");
+  const FormSchema = getFormSchema(t, commonT);
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -202,16 +209,18 @@ export default function EditKnowledgeBasePage() {
 
             // Update the knowledge base with the filtered documentIds
 
-            kbHooks.patchKnowledgeBaseDocumentIds.mutate({
-              knowledgeBaseId: params.id,
-              documentIds: updatedDocIds,
-            }, {
-              onSuccess: () => {
-                refetchDocs();
+            kbHooks.patchKnowledgeBaseDocumentIds.mutate(
+              {
+                knowledgeBaseId: params.id,
+                documentIds: updatedDocIds,
               },
-            })
+              {
+                onSuccess: () => {
+                  refetchDocs();
+                },
+              }
+            );
             // // Refetch knowledge base data and documents after update
-
           } catch (error) {
             console.error("Error updating knowledge base documentIds:", error);
             toast(t("documentDeletedButUpdateFailed"));
@@ -427,12 +436,17 @@ export default function EditKnowledgeBasePage() {
                         {kbDocuments?.map((doc: Document) => (
                           <div
                             key={doc.id}
-                            className="flex items-center justify-between p-3 border rounded-md"
+                            className="flex items-center justify-between"
                           >
                             <div>
                               <p className="font-medium">{doc.title}</p>
                               <p className="text-xs text-muted-foreground">
-                                {doc.documentId} • {t("addedOn", { date: new Date(doc.updatedAt).toLocaleDateString() })}
+                                {doc.documentId} •{" "}
+                                {t("addedOn", {
+                                  date: new Date(
+                                    doc.updatedAt
+                                  ).toLocaleDateString(),
+                                })}
                               </p>
                             </div>
                             <div className="flex items-center gap-2">

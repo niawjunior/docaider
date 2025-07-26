@@ -24,14 +24,15 @@ import { useCredit } from "../hooks/useCredit";
 import MainLayout from "../components/MainLayout";
 import SearchAndFilter from "../components/SearchAndFilter";
 import GlobalLoader from "../components/GlobalLoader";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 export default function DashboardPage() {
   const { session } = useSupabaseSession();
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string>("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const t = useTranslations('dashboard');
+  const t = useTranslations("dashboard");
+  const chat = useTranslations("chat");
 
   // Get user credit information
   const { credit, isLoading: creditLoading } = useCredit(
@@ -44,7 +45,8 @@ export default function DashboardPage() {
   const isLoadingPublic = kbHooks.getPublicKnowledgeBases.isLoading;
   const { data: sharedKnowledgeBasesData, isLoading: isLoadingShared } =
     useSharedKnowledgeBases(userEmail);
-  const sharedKnowledgeBases = sharedKnowledgeBasesData?.sharedKnowledgeBases || [];
+  const sharedKnowledgeBases =
+    sharedKnowledgeBasesData?.sharedKnowledgeBases || [];
   const { data: pinnedKnowledgeBases = [], isLoading: isLoadingPinned } =
     useUserPins();
 
@@ -72,7 +74,11 @@ export default function DashboardPage() {
   }
 
   const isLoading =
-    isLoadingKnowledgeBases || isLoadingShared || isLoadingPinned || isLoadingPublic || creditLoading;
+    isLoadingKnowledgeBases ||
+    isLoadingShared ||
+    isLoadingPinned ||
+    isLoadingPublic ||
+    creditLoading;
 
   if (isLoading) {
     return <GlobalLoader />;
@@ -82,60 +88,100 @@ export default function DashboardPage() {
     <MainLayout>
       <div className="px-6">
         <div className="flex justify-between items-center mb-2">
-          <div className="flex gap-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    size="icon"
-                    onClick={() => router.push("/")}
-                    className="text-[20px] rounded-lg"
-                  >
-                    <GoHomeFill />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t('goToHome')}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    size="icon"
-                    onClick={() => router.push("/chat")}
-                    className="text-[20px] rounded-lg"
-                  >
-                    <MessageCircle />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t('goToChat')}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    size="icon"
-                    onClick={() => setIsCreateDialogOpen(true)}
-                    className="text-[20px] rounded-lg"
-                  >
-                    <Plus />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t('createKnowledgeBase')}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <div className="flex justify-between items-center w-full">
+            <div className="flex gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button
+                      size="icon"
+                      onClick={() => router.push("/")}
+                      className="text-[20px] rounded-lg"
+                    >
+                      <GoHomeFill />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t("goToHome")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <div className="md:hidden flex items-center gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        size="icon"
+                        onClick={() => router.push("/chat")}
+                        className="text-[20px] rounded-lg"
+                      >
+                        <MessageCircle />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{t("goToChat")}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        size="icon"
+                        onClick={() => setIsCreateDialogOpen(true)}
+                        className="text-[20px] rounded-lg"
+                      >
+                        <Plus />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{t("createKnowledgeBase")}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
+            <div></div>
           </div>
 
           {/* User info and credits section - visible only on desktop */}
           <div className="hidden md:flex items-center gap-4">
-    
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant="ghost"
+                    onClick={() => router.push("/chat")}
+                    className="rounded-lg"
+                  >
+                    <MessageCircle />
+                    {chat("title")}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t("goToChat")}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsCreateDialogOpen(true)}
+                    className="rounded-lg"
+                  >
+                    <Plus />
+                    {t("createKnowledgeBase")}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t("createKnowledgeBase")}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
             <div className="flex items-center gap-2">
               <Mail size={16} className="text-muted-foreground" />
               <span className="text-sm text-muted-foreground">{userEmail}</span>
@@ -145,10 +191,11 @@ export default function DashboardPage() {
               className="flex items-center gap-2 px-3 py-1"
             >
               <CreditCard size={16} />
-              <span>{credit?.balance || 0} {t('credits')}</span>
+              <span>
+                {credit?.balance || 0} {t("credits")}
+              </span>
             </Badge>
           </div>
-      
         </div>
 
         {/* Search and Filter Section */}
@@ -160,7 +207,7 @@ export default function DashboardPage() {
             onSortChange={searchAndFilter.setSortBy}
             filterBy={searchAndFilter.filterBy}
             onFilterChange={searchAndFilter.setFilterBy}
-            placeholder={t('searchPlaceholder')}
+            placeholder={t("searchPlaceholder")}
           />
         </div>
 
@@ -182,14 +229,14 @@ export default function DashboardPage() {
             </p>
           </div>
         )}
-        
+
         {/* Pinned Knowledge Bases Section */}
         {pinnedKnowledgeBases.length > 0 && (
           <>
             <div className="flex justify-between items-center py-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                {t('pinnedKnowledgeBases')}
+                {t("pinnedKnowledgeBases")}
               </h2>
               <Badge variant="outline" className="text-xs">
                 {pinnedKnowledgeBases.length}
@@ -199,13 +246,15 @@ export default function DashboardPage() {
               knowledgeBases={pinnedKnowledgeBases}
               userId={session.user.id}
               isPublic={false}
-              onOpenCreateKnowledgeBaseDialog={() => setIsCreateDialogOpen(true)}
+              onOpenCreateKnowledgeBaseDialog={() =>
+                setIsCreateDialogOpen(true)
+              }
             />
           </>
         )}
 
         <div className="flex justify-between items-center py-4">
-          <h2 className="text-lg font-semibold">{t('myKnowledgeBases')}</h2>
+          <h2 className="text-lg font-semibold">{t("myKnowledgeBases")}</h2>
           <Badge variant="outline" className="text-xs">
             {searchAndFilter.filteredMyKnowledgeBases.length} of{" "}
             {knowledgeBases.length || 0}
@@ -221,7 +270,7 @@ export default function DashboardPage() {
 
         {/* Shared With You Section */}
         <div className="flex justify-between items-center py-4">
-          <h2 className="text-lg font-semibold">{t('sharedWithYou')}</h2>
+          <h2 className="text-lg font-semibold">{t("sharedWithYou")}</h2>
           <Badge variant="outline" className="text-xs">
             {searchAndFilter.filteredSharedKnowledgeBases.length} of{" "}
             {sharedKnowledgeBases.length || 0}
@@ -234,7 +283,7 @@ export default function DashboardPage() {
         />
 
         <div className="flex justify-between items-center py-4">
-          <h2 className="text-lg font-semibold">{t('publicKnowledgeBases')}</h2>
+          <h2 className="text-lg font-semibold">{t("publicKnowledgeBases")}</h2>
           <Badge variant="outline" className="text-xs">
             {searchAndFilter.filteredPublicKnowledgeBases.length} of{" "}
             {publicKnowledgeBases.length || 0}
