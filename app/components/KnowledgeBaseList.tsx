@@ -20,38 +20,53 @@ import { useRouter } from "next/navigation";
 import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
 import { useTogglePin, useIsPinned } from "@/app/hooks/useUserPins";
 import { useTranslations } from "next-intl";
-
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Pin indicator component
 function PinIndicator({ knowledgeBaseId }: { knowledgeBaseId: string }) {
   const isPinned = useIsPinned(knowledgeBaseId);
-  
+
   if (!isPinned) return null;
-  
+
   return <Star className="h-4 w-4 text-blue-300 fill-blue-300" />;
 }
 
 // Pin button component
-function PinButton({ knowledgeBaseId, disabled }: { knowledgeBaseId: string; disabled: boolean }) {
+function PinButton({
+  knowledgeBaseId,
+  disabled,
+}: {
+  knowledgeBaseId: string;
+  disabled: boolean;
+}) {
   const isPinned = useIsPinned(knowledgeBaseId);
   const { togglePin } = useTogglePin();
-  const t = useTranslations('knowledgeBase');
-  
+  const t = useTranslations("knowledgeBase");
+
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      onClick={() => togglePin(knowledgeBaseId, isPinned)}
-      disabled={disabled}
-      title={isPinned ? t('unpin') : t('pin')}
-    >
-      {isPinned ? (
-        <StarOff size={16} />
-      ) : (
-        <Star size={16} />
-      )}
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => togglePin(knowledgeBaseId, isPinned)}
+            disabled={disabled}
+            title={isPinned ? t("unpin") : t("pin")}
+          >
+            {isPinned ? <StarOff size={16} /> : <Star size={16} />}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{isPinned ? t("unpin") : t("pin")}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
@@ -73,8 +88,9 @@ export default function KnowledgeBaseList({
   const { deleteKnowledgeBase } = useKnowledgeBases();
   const { isPending: isDeleting } = deleteKnowledgeBase;
   const { isPending: isTogglingPin } = useTogglePin();
-  const t = useTranslations('knowledgeBase');
-  const tDashboard = useTranslations('dashboard');
+  const t = useTranslations("knowledgeBase");
+  const tDashboard = useTranslations("dashboard");
+  const tAction = useTranslations("actions");
 
   const handleDelete = async (id: string) => {
     deleteKnowledgeBase.mutate(id, {
@@ -92,8 +108,8 @@ export default function KnowledgeBaseList({
       <Card className="p-6 text-center">
         <p className="text-muted-foreground mb-4">
           {isPublic
-            ? tDashboard('noPublicKnowledgeBases')
-            : tDashboard('noKnowledgeBases')}
+            ? tDashboard("noPublicKnowledgeBases")
+            : tDashboard("noKnowledgeBases")}
         </p>
         {!isPublic && (
           <Button
@@ -103,7 +119,7 @@ export default function KnowledgeBaseList({
             className="mx-auto"
           >
             <Plus className="mr-2 h-4 w-4" />
-            {tDashboard('createKnowledgeBase')}
+            {tDashboard("createKnowledgeBase")}
           </Button>
         )}
       </Card>
@@ -129,8 +145,12 @@ export default function KnowledgeBaseList({
                   <PinIndicator knowledgeBaseId={kb.id} />
                 </div>
                 <div className="flex gap-1">
-                  {kb.isPublic && <Badge variant="default">{t('public')}</Badge>}
-                  {!kb.isPublic && <Badge variant="destructive">{t('private')}</Badge>}
+                  {kb.isPublic && (
+                    <Badge variant="default">{t("public")}</Badge>
+                  )}
+                  {!kb.isPublic && (
+                    <Badge variant="destructive">{t("private")}</Badge>
+                  )}
                 </div>
               </div>
               <p className="text-muted-foreground text-sm mb-2 line-clamp-2">
@@ -138,13 +158,16 @@ export default function KnowledgeBaseList({
               </p>
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>
-                  {t('updatedAgo', { time: formatDistanceToNow(new Date(kb.updatedAt)) })}
+                  {t("updatedAgo", {
+                    time: formatDistanceToNow(new Date(kb.updatedAt)),
+                  })}
                 </span>
               </div>
               {isPublic && (
                 <div className="flex justify-between items-center mt-2">
-                  <p className="text-xs">{t('createdBy')} {kb.userName}</p>
-              
+                  <p className="text-xs">
+                    {t("createdBy")} {kb.userName}
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -152,30 +175,64 @@ export default function KnowledgeBaseList({
               <div className="flex gap-2">
                 {!isPublic && userId === kb.userId && (
                   <>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => router.push(`/knowledge/${kb.id}/edit`)}
-                    >
-                      <Edit size={16} />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setDeleteId(kb.id)}
-                    >
-                      <Trash2 size={16} />
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() =>
+                              router.push(`/knowledge/${kb.id}/edit`)
+                            }
+                          >
+                            <Edit size={16} />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{tAction("editKnowledgeBase")}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </>
                 )}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleClick(kb.id)}
-                >
-                  <Eye size={16} />
-                </Button>
-                    <PinButton knowledgeBaseId={kb.id} disabled={isTogglingPin} />
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleClick(kb.id)}
+                      >
+                        <Eye size={16} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{t("view")}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <PinButton knowledgeBaseId={kb.id} disabled={isTogglingPin} />
+
+                {!isPublic && userId === kb.userId && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setDeleteId(kb.id)}
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{tAction("deleteKnowledgeBase")}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
               </div>
             </CardFooter>
           </Card>
@@ -185,18 +242,18 @@ export default function KnowledgeBaseList({
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('deleteConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteConfirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('deleteConfirmDescription')}
+              {t("deleteConfirmDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteId && handleDelete(deleteId)}
               disabled={isDeleting}
             >
-              {isDeleting ? t('deleting') : t('delete')}
+              {isDeleting ? t("deleting") : t("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

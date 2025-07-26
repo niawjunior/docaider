@@ -164,11 +164,12 @@ export default function DashboardPage() {
                 <TooltipTrigger>
                   <Button
                     variant="default"
+                    size="sm"
                     onClick={() => setIsCreateDialogOpen(true)}
                     className="rounded-lg"
                   >
                     <Plus />
-                    {t("createKnowledgeBase")}
+                    {t("create")}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>

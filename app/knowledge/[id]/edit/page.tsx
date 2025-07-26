@@ -20,7 +20,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Save, ArrowLeft, Trash2, Eye, Share2 } from "lucide-react";
+import {
+  Loader2,
+  Save,
+  ArrowLeft,
+  Trash2,
+  Eye,
+  Share2,
+  FileText,
+} from "lucide-react";
+
 import { toast } from "sonner";
 import DocumentUpload from "@/app/components/DocumentUpload";
 import { useDocuments } from "@/app/hooks/useDocuments";
@@ -456,7 +465,7 @@ export default function EditKnowledgeBasePage() {
                                 className="cursor-pointer"
                               >
                                 <Button variant="ghost" size="icon">
-                                  <Eye size={16} />
+                                  <FileText size={16} />
                                 </Button>
                               </Link>
                               <Button
