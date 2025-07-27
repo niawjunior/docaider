@@ -188,21 +188,6 @@ export default function ChatForm({
   const { data: documents = [] } = useGetDocuments({ isKnowledgeBase });
 
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const handleScroll = () => {
-      const threshold = 50; // pixels from bottom
-      const isBottom =
-        el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
-      setIsAtBottom(isBottom);
-    };
-
-    el.addEventListener("scroll", handleScroll);
-    return () => el.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
@@ -214,6 +199,20 @@ export default function ChatForm({
 
         textareaRef.current?.focus();
       }, 100);
+
+      const el = containerRef.current;
+      if (!el) return;
+
+      const handleScroll = () => {
+        const threshold = 50; // pixels from bottom
+        const isBottom =
+          el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+        setIsAtBottom(isBottom);
+      };
+
+      el.addEventListener("scroll", handleScroll);
+
+      return () => el.removeEventListener("scroll", handleScroll);
     }
   }, [initialMessages, setMessages]);
 
@@ -453,7 +452,6 @@ export default function ChatForm({
                 </div>
               );
             })}
-
             <div ref={bottomRef} />
           </div>
           <div className="flex flex-col">
@@ -543,18 +541,6 @@ export default function ChatForm({
                   )}
                 </div>
               </div>
-
-              {!isAtBottom && (
-                <button
-                  onClick={() =>
-                    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-                  }
-                  className="w-10 h-10 bottom-36 fixed self-center  flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
-                  aria-label="Scroll to bottom"
-                >
-                  <IoArrowDownSharp />
-                </button>
-              )}
               <div className="flex items-center flex-col gap-3 w-full relative">
                 <Textarea
                   value={input}
@@ -571,7 +557,6 @@ export default function ChatForm({
                 <Button
                   onClick={() => {
                     handleSubmit();
-                    // clear images
                   }}
                   variant="outline"
                   disabled={status !== "ready" || !input.trim()}
@@ -579,21 +564,39 @@ export default function ChatForm({
                 >
                   <FaArrowUp />
                 </Button>
+
+                {!isAtBottom && (
+                  <button
+                    onClick={() =>
+                      bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+                    }
+                    className={clsx(
+                      "w-10 h-10 absolute self-center   flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition",
+                      !isShowTool && "bottom-[80px]",
+                      isShowTool && "bottom-[80px]"
+                    )}
+                    aria-label="Scroll to bottom"
+                  >
+                    <IoArrowDownSharp />
+                  </button>
+                )}
               </div>
               <div className="flex justify-between items-center flex-wrap gap-2">
                 <div className=" text-muted-foreground text-sm">
                   {t("disclaimer")}
                 </div>
 
-                <div className="flex items-center space-x-2 ">
-                  <Switch
-                    checked={isRequiredDocument}
-                    onCheckedChange={setIsRequiredDocument}
-                  />{" "}
-                  <Label htmlFor="airplane-mode">
-                    {t("alwaysSearchDocument")}
-                  </Label>
-                </div>
+                {!isShowTool && (
+                  <div className="flex items-center space-x-2 ">
+                    <Switch
+                      checked={isRequiredDocument}
+                      onCheckedChange={setIsRequiredDocument}
+                    />{" "}
+                    <Label htmlFor="airplane-mode">
+                      {t("alwaysSearchDocument")}
+                    </Label>
+                  </div>
+                )}
               </div>
             </div>
 
