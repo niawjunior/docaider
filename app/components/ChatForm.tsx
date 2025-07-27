@@ -50,6 +50,8 @@ import Markdown from "./Markdown";
 import { useDocuments } from "../hooks/useDocuments";
 import GlobalLoader from "./GlobalLoader";
 import { useTranslations } from "next-intl";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const toolIcons = {
   askQuestion: <FaQuestion />,
@@ -85,7 +87,7 @@ export default function ChatForm({
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
   const { session } = useSupabaseSession();
   const { useGetDocuments } = useDocuments();
-
+  const [isRequiredDocument, setIsRequiredDocument] = useState(false);
   const tools = [
     {
       name: "askQuestion",
@@ -127,7 +129,7 @@ export default function ChatForm({
       api: "/api/chat",
       body: {
         chatId,
-        currentTool,
+        currentTool: isRequiredDocument ? "askQuestion" : currentTool,
         isKnowledgeBase,
         knowledgeBaseId,
       },
@@ -459,84 +461,85 @@ export default function ChatForm({
               <div className="flex justify-between items-center pt-2">
                 <div className="flex gap-2">
                   {isShowTool && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
+                    <>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Button
+                              variant="outline"
+                              className="ml-2 relative"
+                              size="icon"
+                              onClick={() => setIsPdfModalOpen(true)}
+                            >
+                              <FaFilePdf className="h-8 w-8" />
+                              <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
+                                {documents?.length}
+                              </div>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{t("manageDocuments")}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="outline-none">
                           <Button
                             variant="outline"
                             className="ml-2 relative"
                             size="icon"
-                            onClick={() => setIsPdfModalOpen(true)}
                           >
-                            <FaFilePdf className="h-8 w-8" />
+                            <FaHammer className="h-8 w-8" />
                             <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                              {documents?.length}
+                              {tools.length}
                             </div>
                           </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{t("manageDocuments")}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger className="outline-none">
-                      <Button
-                        variant="outline"
-                        className="ml-2 relative"
-                        size="icon"
-                      >
-                        <FaHammer className="h-8 w-8" />
-                        <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                          {tools.length}
-                        </div>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="h-[300px] max-w-[300px]"
-                      align="start"
-                      side="top"
-                      sideOffset={10}
-                      alignOffset={-25}
-                    >
-                      <DropdownMenuLabel>
-                        {t("availableTools")}
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {tools.map((tool) => (
-                        <DropdownMenuCheckboxItem
-                          key={tool.name}
-                          className="flex items-center gap-2 px-2 cursor-pointer"
-                          checked={currentTool === tool.name}
-                          onCheckedChange={() => setCurrentTool(tool.name)}
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          className="h-[300px] max-w-[300px]"
+                          align="start"
+                          side="top"
+                          sideOffset={10}
+                          alignOffset={-25}
                         >
-                          <div className="h-8 w-8 flex items-center justify-center">
-                            {toolIcons[tool.name as keyof typeof toolIcons]}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-medium leading-none truncate">
-                              {tool.name}
-                            </h3>
-                            <p className="text-xs text-muted-foreground mt-2 ">
-                              {tool.description}
-                            </p>
-                          </div>
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                          <DropdownMenuLabel>
+                            {t("availableTools")}
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {tools.map((tool) => (
+                            <DropdownMenuCheckboxItem
+                              key={tool.name}
+                              className="flex items-center gap-2 px-2 cursor-pointer"
+                              checked={currentTool === tool.name}
+                              onCheckedChange={() => setCurrentTool(tool.name)}
+                            >
+                              <div className="h-8 w-8 flex items-center justify-center">
+                                {toolIcons[tool.name as keyof typeof toolIcons]}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-medium leading-none truncate">
+                                  {tool.name}
+                                </h3>
+                                <p className="text-xs text-muted-foreground mt-2 ">
+                                  {tool.description}
+                                </p>
+                              </div>
+                            </DropdownMenuCheckboxItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
 
-                  {currentTool && (
-                    <Button
-                      onClick={() => setCurrentTool("")}
-                      variant="outline"
-                      className="ml-1 text-xs cursor-pointer border hover:text-white"
-                    >
-                      {currentTool}
-                      <TiDelete className="ml-1" />
-                    </Button>
+                      {currentTool && (
+                        <Button
+                          onClick={() => setCurrentTool("")}
+                          variant="outline"
+                          className="ml-1 text-xs cursor-pointer border hover:text-white"
+                        >
+                          {currentTool}
+                          <TiDelete className="ml-1" />
+                        </Button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -577,8 +580,20 @@ export default function ChatForm({
                   <FaArrowUp />
                 </Button>
               </div>
-              <div className=" text-muted-foreground text-sm">
-                {t("disclaimer")}
+              <div className="flex justify-between items-center flex-wrap gap-2">
+                <div className=" text-muted-foreground text-sm">
+                  {t("disclaimer")}
+                </div>
+
+                <div className="flex items-center space-x-2 ">
+                  <Switch
+                    checked={isRequiredDocument}
+                    onCheckedChange={setIsRequiredDocument}
+                  />{" "}
+                  <Label htmlFor="airplane-mode">
+                    {t("alwaysSearchDocument")}
+                  </Label>
+                </div>
               </div>
             </div>
 

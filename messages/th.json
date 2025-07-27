@@ -74,7 +74,8 @@
     "askQuestionDescription": "ถามคำถามเกี่ยวกับเอกสารที่อัปโหลด",
     "shareLinkCreated": "สร้างลิงก์แชร์แล้ว",
     "failedToCreateShareLink": "ไม่สามารถสร้างลิงก์แชร์ได้",
-    "linkCopied": "คัดลอกลิงก์ไปยังคลิปบอร์ดแล้ว"
+    "linkCopied": "คัดลอกลิงก์ไปยังคลิปบอร์ดแล้ว",
+    "alwaysSearchDocument": "ค้นหาจากในเอกสารเท่านั้น"
   },
   "sidebar": {
     "knowledgeSessions": "แชททั้งหมด",

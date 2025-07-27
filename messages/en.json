@@ -74,7 +74,8 @@
     "shareLinkCreated": "Share link created",
     "failedToCreateShareLink": "Failed to create share link",
     "linkCopied": "Link copied to clipboard",
-    "allKnowledgeBases": "All Knowledge Bases"
+    "allKnowledgeBases": "All Knowledge Bases",
+    "alwaysSearchDocument": "Always search through the documents"
   },
   "sidebar": {
     "knowledgeSessions": "Knowledge Sessions",
