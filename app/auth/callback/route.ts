@@ -15,8 +15,10 @@ export async function GET(request: Request) {
     if (!error) {
       // Initialize user after successful authentication
       try {
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        
+        const {
+          data: { user: authUser },
+        } = await supabase.auth.getUser();
+
         if (authUser) {
           // Create a service role client to bypass RLS for user initialization
           const serviceSupabase = createServiceClient(
@@ -38,7 +40,8 @@ export async function GET(request: Request) {
               .insert({
                 id: authUser.id,
                 email: authUser.email,
-                display_name: authUser.user_metadata?.full_name || authUser.email || "",
+                display_name:
+                  authUser.user_metadata?.full_name || authUser.email || "",
               });
 
             if (userError) {
@@ -63,14 +66,6 @@ export async function GET(request: Request) {
                 id: authUser.id,
                 language_preference: "th",
                 theme_preference: "dark",
-                notification_settings: {
-                  email: true,
-                  push: true,
-                },
-                chat_settings: {
-                  temperature: 0.7,
-                  max_tokens: 2000,
-                },
               });
 
             if (configError) {

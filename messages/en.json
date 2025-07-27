@@ -31,7 +31,9 @@
     "submit": "Submit",
     "isRequired": "Required",
     "share": "Share",
-    "failedToCopy": "Failed to copy link"
+    "failedToCopy": "Failed to copy link",
+    "settings": "Settings",
+    "backToDashboard": "Back to Dashboard"
   },
   "navigation": {
     "home": "Home",
@@ -323,6 +325,40 @@
       "delete": "Delete",
       "cancel": "Cancel"
     }
+  },
+  "settings": {
+    "title": "Account Settings",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "saveSuccess": "Settings saved successfully!",
+    "saveError": "Failed to save settings. Please try again.",
+    "fetchError": "Failed to load settings. Please refresh the page.",
+
+    "displaySettings": "Display Settings",
+    "language": "Language",
+    "selectLanguage": "Select language",
+    "theme": "Theme",
+    "selectTheme": "Select theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "timezone": "Timezone",
+    "currency": "Currency",
+    "selectCurrency": "Select currency",
+
+    "notificationSettings": "Notification Settings",
+    "emailNotifications": "Email Notifications",
+    "emailNotificationsDesc": "Receive email notifications about important updates",
+    "pushNotifications": "Push Notifications",
+    "pushNotificationsDesc": "Receive browser notifications for new messages",
+
+    "chatSettings": "Chat Settings",
+    "defaultModel": "Default Model",
+    "selectModel": "Select model",
+    "temperature": "Creativity",
+    "precise": "Precise",
+    "balanced": "Balanced",
+    "creative": "Creative"
   },
   "contact": {
     "title": "Contact Us",

@@ -89,6 +89,13 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 </Button>
                 <Button
                   variant="ghost"
+                  onClick={() => router.push("/settings")}
+                  className="text-sm"
+                >
+                  {t("settings")}
+                </Button>
+                <Button
+                  variant="ghost"
                   onClick={handleSignOut}
                   className="text-sm"
                 >
@@ -159,6 +166,15 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                         className="justify-start"
                       >
                         {t("dashboard")}
+                      </Button>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleNavigation("/settings")}
+                        className="justify-start"
+                      >
+                        {t("settings")}
                       </Button>
                     </SheetClose>
                     <SheetClose asChild>

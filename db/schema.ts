@@ -89,10 +89,6 @@ export const userConfig = pgTable(
       .notNull(),
     languagePreference: text("language_preference").default("en"),
     themePreference: text("theme_preference").default("dark"),
-    notificationSettings: jsonb("notification_settings").default({}),
-    chatSettings: jsonb("chat_settings").default({}),
-    defaultCurrency: text("default_currency").default("THB"),
-    timezone: text().default("Asia/Bangkok"),
   },
   (table) => [
     foreignKey({
@@ -427,10 +423,7 @@ export const userPinnedKnowledgeBases = pgTable(
     }).default(sql`timezone('utc'::text, now())`),
   },
   (table) => [
-    unique("unique_user_kb_pin").on(
-      table.userId,
-      table.knowledgeBaseId
-    ),
+    unique("unique_user_kb_pin").on(table.userId, table.knowledgeBaseId),
     pgPolicy("Users can view their own pins", {
       as: "permissive",
       for: "select",

@@ -31,7 +31,9 @@
     "submit": "ส่ง",
     "isRequired": "จำเป็น",
     "share": "แชร์",
-    "failedToCopy": "ไม่สามารถคัดลอกลิงก์ได้"
+    "failedToCopy": "ไม่สามารถคัดลอกลิงก์ได้",
+    "settings": "ตั้งค่า",
+    "backToDashboard": "กลับไปที่แดชบอร์ด"
   },
   "navigation": {
     "home": "หน้าแรก",
@@ -323,6 +325,40 @@
       "cancel": "ยกเลิก"
     }
   },
+  "settings": {
+    "title": "ตั้งค่าบัญชี",
+    "saveChanges": "บันทึกการเปลี่ยนแปลง",
+    "saving": "กำลังบันทึก...",
+    "saveSuccess": "บันทึกการตั้งค่าสำเร็จ!",
+    "saveError": "ไม่สามารถบันทึกการตั้งค่าได้ กรุณาลองใหม่อีกครั้ง",
+    "fetchError": "ไม่สามารถโหลดการตั้งค่าได้ กรุณารีเฟรชหน้าเว็บ",
+
+    "displaySettings": "การตั้งค่าการแสดงผล",
+    "language": "ภาษา",
+    "selectLanguage": "เลือกภาษา",
+    "theme": "ธีม",
+    "selectTheme": "เลือกธีม",
+    "light": "สว่าง",
+    "dark": "มืด",
+    "system": "ตามระบบ",
+    "timezone": "เขตเวลา",
+    "currency": "สกุลเงิน",
+    "selectCurrency": "เลือกสกุลเงิน",
+
+    "notificationSettings": "การแจ้งเตือน",
+    "emailNotifications": "การแจ้งเตือนทางอีเมล",
+    "emailNotificationsDesc": "รับการแจ้งเตือนทางอีเมลเกี่ยวกับการอัปเดตที่สำคัญ",
+    "pushNotifications": "การแจ้งเตือนแบบพุช",
+    "pushNotificationsDesc": "รับการแจ้งเตือนในเบราว์เซอร์เมื่อมีข้อความใหม่",
+
+    "chatSettings": "การตั้งค่าการแชท",
+    "defaultModel": "โมเดลเริ่มต้น",
+    "selectModel": "เลือกโมเดล",
+    "temperature": "ความสร้างสรรค์",
+    "precise": "แม่นยำ",
+    "balanced": "สมดุล",
+    "creative": "สร้างสรรค์"
+  },
   "contact": {
     "title": "ติดต่อเรา",
     "description": "เรายินดีที่จะได้ยินจากคุณ! ไม่ว่าคุณจะมีคำถาม ข้อเสนอแนะ หรือต้องการความช่วยเหลือ โปรดใช้แบบฟอร์มด้านล่างเพื่อติดต่อเรา",
@@ -435,6 +471,7 @@
       "createdBy": "สร้างโดย {name}",
       "updatedAgo": "อัปเดต {time} ที่แล้ว",
       "explore": "สำรวจ",
+      "exploreButton": "สำรวจแหล่งข้อมูลสาธารณะ",
       "noKnowledgeBases": "ยังไม่มีคลังความรู้สาธารณะ",
       "beFirst": "เป็นคนแรกที่สร้างและแชร์คลังความรู้!",
       "goToDashboard": "ไปที่แดชบอร์ด",
