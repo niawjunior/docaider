@@ -565,7 +565,7 @@ export default function ChatForm({
                   <FaArrowUp />
                 </Button>
 
-                {!isAtBottom && (
+                {!isAtBottom && messages.length > 0 && (
                   <button
                     onClick={() =>
                       bottomRef.current?.scrollIntoView({ behavior: "smooth" })
