@@ -66,12 +66,12 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
-    
+
     // Validate request body
     let body: UserConfigData;
     try {
       body = await request.json();
-      
+
       // Validate required fields
       if (!body.language_preference || !body.theme_preference) {
         return NextResponse.json(
@@ -80,6 +80,7 @@ export async function POST(request: Request) {
         );
       }
     } catch (e) {
+      console.error("Error in POST /api/user/config:", e);
       return NextResponse.json(
         { error: "Invalid request body" },
         { status: 400 }
@@ -103,7 +104,7 @@ export async function POST(request: Request) {
       .limit(1);
 
     let result;
-    
+
     if (existingConfig && existingConfig.length > 0) {
       // Update existing config
       result = await db

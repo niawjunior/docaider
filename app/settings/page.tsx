@@ -39,13 +39,12 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { register, handleSubmit, reset, setValue, watch } =
-    useForm<UserConfig>({
-      defaultValues: {
-        language_preference: "en",
-        theme_preference: "dark",
-      },
-    });
+  const { handleSubmit, reset, setValue, watch } = useForm<UserConfig>({
+    defaultValues: {
+      language_preference: "en",
+      theme_preference: "dark",
+    },
+  });
 
   useEffect(() => {
     if (!loading && !user) {

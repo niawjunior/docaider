@@ -2,60 +2,30 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { TiDelete } from "react-icons/ti";
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import { IoArrowDownSharp } from "react-icons/io5";
-import dayjs from "dayjs";
-import DocumentUpload from "./DocumentUpload";
-import "highlight.js/styles/github-dark.css"; // or choose another theme
-import { FaRegFaceSadCry } from "react-icons/fa6";
-import {
-  FaArrowUp,
-  FaFilePdf,
-  FaHammer,
-  FaQuestion,
-  FaShare,
-} from "react-icons/fa";
-
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useSupabaseSession from "../hooks/useSupabaseSession";
+import { useDocuments } from "../hooks/useDocuments";
+import GlobalLoader from "./GlobalLoader";
+import { useTranslations } from "next-intl";
+
+// Import our new subcomponents
+import ChatMessages from "./chat/ChatMessages";
+import ChatInput from "./chat/ChatInput";
+import ChatToolbar from "./chat/ChatToolbar";
+import ShareDialog from "./chat/ShareDialog";
+import DocumentUploadDialog from "./chat/DocumentUploadDialog";
+import EmptyStatePrompts from "./chat/EmptyStatePrompts";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useShareUrl } from "../hooks/useShareUrl";
-import { Loader2 } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import Markdown from "./Markdown";
-import { useDocuments } from "../hooks/useDocuments";
-import GlobalLoader from "./GlobalLoader";
-import { useTranslations } from "next-intl";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-
-const toolIcons = {
-  askQuestion: <FaQuestion />,
-};
+import { Button } from "@/components/ui/button";
+import { FaShare } from "react-icons/fa";
 
 interface ChatFormProps {
   chatId?: string;
@@ -75,25 +45,16 @@ export default function ChatForm({
   const t = useTranslations("chat");
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isCreateShareLoading, setIsCreateShareLoading] = useState(false);
-  // Using the deleteDocument mutation from useDocuments hook for loading state
-  const { shareData, error: shareError } = useShareUrl(chatId!);
   const queryClient = useQueryClient();
-  const [isDesktop, setIsDesktop] = useState(false);
   const [currentTool, setCurrentTool] = useState<string>("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [isAtBottom, setIsAtBottom] = useState(true);
+  // isAtBottom state is now handled in ChatMessages
   const containerRef = useRef<HTMLDivElement>(null);
   const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
   const { session } = useSupabaseSession();
   const { useGetDocuments } = useDocuments();
   const [isRequiredDocument, setIsRequiredDocument] = useState(false);
-  const tools = [
-    {
-      name: "askQuestion",
-      description: t("askQuestionDescription"),
-    },
-  ];
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
   const {
     data: initialMessages,
     isLoading,
@@ -102,7 +63,7 @@ export default function ChatForm({
     queryKey: ["chat", chatId],
     queryFn: async () => {
       if (!chatId) {
-        return []; // Return empty array if no chatId
+        return [];
       }
       const response = await fetch(
         `/api/chats/${chatId}?isKnowledgeBase=${isKnowledgeBase}`
@@ -112,16 +73,12 @@ export default function ChatForm({
       }
       return response.json();
     },
-    enabled: !!chatId, // Only run the query when chatId exists
-    staleTime: 0, // Consider data stale immediately
-    refetchOnMount: true, // Always refetch on component mount
-    refetchOnWindowFocus: false, // Don't
+    enabled: !!chatId,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
-  useEffect(() => {
-    // Focus on load
-    textareaRef.current?.focus();
-  }, []);
-  // Manage input state manually (AI SDK 5.0 requirement)
+
   const [input, setInput] = useState("");
 
   const { messages, status, sendMessage, setMessages } = useChat({
@@ -136,7 +93,6 @@ export default function ChatForm({
     }),
     id: chatId,
     onFinish: async ({ message }) => {
-      // In AI SDK 5.0, check for tool calls in the message parts
       const toolCalls =
         message.parts?.filter(
           (part: any) => part.type === "tool-askQuestion"
@@ -150,40 +106,17 @@ export default function ChatForm({
       if (totalCreditCost > 0) {
         toast.success(`Used ${totalCreditCost} credits.`);
       }
-
-      setTimeout(() => {
-        textareaRef.current?.focus();
-      }, 100);
     },
-
     onError: (error) => {
       console.log("onError", error);
     },
   });
 
-  // Create manual submit handler for AI SDK 5.0
-  const handleSubmit = useCallback(
-    (e?: React.FormEvent) => {
-      if (e) {
-        e.preventDefault();
-      }
-      if (!input.trim() || status !== "ready") return;
-
-      sendMessage({ text: input });
-      setInput("");
-    },
-    [input, status, sendMessage]
-  );
-
-  // Create manual input change handler
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setInput(e.target.value);
-    },
-    []
-  );
-
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const handleSubmit = useCallback(() => {
+    if (!input.trim() || status !== "ready") return;
+    sendMessage({ text: input });
+    setInput("");
+  }, [input, status, sendMessage]);
 
   const { data: documents = [] } = useGetDocuments({ isKnowledgeBase });
 
@@ -196,120 +129,25 @@ export default function ChatForm({
       setMessages(initialMessages);
       setTimeout(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-
-        textareaRef.current?.focus();
       }, 100);
-
-      const el = containerRef.current;
-      if (!el) return;
-
-      const handleScroll = () => {
-        const threshold = 50; // pixels from bottom
-        const isBottom =
-          el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
-        setIsAtBottom(isBottom);
-      };
-
-      el.addEventListener("scroll", handleScroll);
-
-      return () => el.removeEventListener("scroll", handleScroll);
     }
   }, [initialMessages, setMessages]);
 
-  useEffect(() => {
-    const handleGlobalKeydown = (e: KeyboardEvent) => {
-      const active = document.activeElement;
-
-      // If already typing in an input/textarea or using a shortcut, do nothing
-      if (
-        active instanceof HTMLInputElement ||
-        active instanceof HTMLTextAreaElement ||
-        e.metaKey ||
-        e.ctrlKey ||
-        e.altKey
-      ) {
-        return;
-      }
-
-      // Ignore if non-character keys (e.g., Shift, Tab, etc.)
-      if (e.key.length === 1) {
-        textareaRef.current?.focus();
-      }
-    };
-
-    window.addEventListener("keydown", handleGlobalKeydown);
-    return () => {
-      window.removeEventListener("keydown", handleGlobalKeydown);
-    };
-  }, []);
+  // Scroll event listener is now handled in ChatMessages
 
   useEffect(() => {
     if (promptToSubmit !== null) {
       setInput(promptToSubmit);
       setTimeout(() => {
-        handleSubmit(); // No event needed for manual call
-        setPromptToSubmit(null); // reset
+        handleSubmit();
+        setPromptToSubmit(null);
       }, 100);
     }
-  }, [promptToSubmit, handleSubmit, setInput]);
+  }, [promptToSubmit, handleSubmit]);
 
-  const handlePromptClick = (e: React.MouseEvent, text: string) => {
-    e.preventDefault();
-    textareaRef.current?.focus();
+  const handlePromptClick = (text: string) => {
     setPromptToSubmit(text);
   };
-
-  const handleShare = async () => {
-    try {
-      setIsCreateShareLoading(true);
-      const response = await fetch(`/api/share`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ chatId }),
-      });
-
-      const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      toast.success(t("shareLinkCreated"));
-      // Invalidate and refetch the share URL query
-      queryClient.invalidateQueries({ queryKey: ["shareUrl", chatId] });
-      setIsShareModalOpen(true);
-    } catch (error) {
-      console.error("Error sharing chat:", error);
-      toast.error(t("failedToCreateShareLink"));
-    } finally {
-      setIsCreateShareLoading(false);
-    }
-  };
-
-  const handleOpenShareModal = () => {
-    setIsShareModalOpen(true);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      if (isDesktop) {
-        e.preventDefault();
-
-        handleSubmit(e as unknown as React.FormEvent);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 768);
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   if (isLoading || isFetching) {
     return <GlobalLoader />;
@@ -322,366 +160,92 @@ export default function ChatForm({
           e.preventDefault();
         }}
         className={clsx(
-          "flex flex-col items-center gap-4  w-full  overflow-y-auto scroll-hidden"
+          "flex flex-col items-center gap-4 w-full overflow-y-auto scroll-hidden md:mt-0 mt-4"
         )}
       >
         {messages?.length === 0 && (
-          <>
-            <div className="md:mt-0 mt-[100px] ">
-              <p className="text-2xl font-bold">{t("greeting")}</p>
-              <p className="text-zinc-300">{t("helpPrompt")}</p>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full md:max-h-[calc(100dvh-350px)] max-h-[calc(100dvh-550px)] overflow-y-auto scroll-hidden px-2">
-              {suggestedPrompts?.map((prompt, idx) => (
-                <Button
-                  variant="outline"
-                  key={idx}
-                  onClick={(e) => {
-                    handlePromptClick(
-                      e,
-                      `${prompt.title} ${prompt.subtitle || ""}`
-                    );
-                  }}
-                  className=" flex flex-col justify-center items-center gap-2 h-[70px]"
-                >
-                  <p className="text-sm font-semibold text-wrap">
-                    {prompt.title}
-                  </p>
-                  <p className="text-xs text-zinc-400 text-wrap">
-                    {prompt.subtitle}
-                  </p>
-                </Button>
-              ))}
-            </div>
-          </>
+          <EmptyStatePrompts
+            suggestedPrompts={suggestedPrompts}
+            onPromptClick={handlePromptClick}
+          />
         )}
 
         <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-[10px] relative">
-          {!isKnowledgeBase && (
-            <div className="flex justify-end ">
-              {messages.length > 0 && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="ml-2"
-                        onClick={() => handleOpenShareModal()}
-                      >
-                        <FaShare className="text-lg" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{t("shareChat")}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-            </div>
-          )}
+          <div className="flex justify-end">
+            {!isKnowledgeBase && messages.length > 0 && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="mr-2"
+                      onClick={() => setIsShareModalOpen(true)}
+                    >
+                      <FaShare className="text-lg" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t("shareChat")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
           <div
             ref={containerRef}
             className={clsx(
               "overflow-auto scroll-hidden px-2",
-
               messages.length > 0 &&
                 !isKnowledgeBase &&
-                " py-4 md:h-[calc(100dvh-250px)] h-[calc(100dvh-300px)]",
+                "py-4 md:h-[calc(100dvh-250px)] h-[calc(100dvh-300px)]",
               messages.length > 0 &&
                 isKnowledgeBase &&
-                " py-4 md:h-[calc(100dvh-480px)] h-[calc(100dvh-300px)]"
+                "py-4 md:h-[calc(100dvh-480px)] h-[calc(100dvh-300px)]"
             )}
           >
-            {messages.map((message: any, index: any) => {
-              const isUser = message.role === "user";
-              return (
-                <div
-                  key={index}
-                  className={`flex py-2 ${
-                    isUser ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div className="text-sm text-left">
-                    {message.parts?.map((part: any, index: any) => {
-                      switch (part.type) {
-                        case "text":
-                          return (
-                            <div key={index} className="">
-                              <Markdown isUser={isUser} text={part.text} />
-                            </div>
-                          );
-                        case "tool-askQuestion":
-                          if (
-                            message.id === messages[messages.length - 1]?.id &&
-                            status === "streaming"
-                          ) {
-                            return (
-                              <div
-                                key={message.id}
-                                className="flex items-center gap-2"
-                              >
-                                <p className="text-white text-sm">
-                                  {t("searchingDocument")}
-                                </p>
-                                <div className="flex items-center justify-center py-4">
-                                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                                </div>
-                              </div>
-                            );
-                          }
-                          return part.output ? (
-                            <div key={index}>
-                              <Markdown isUser={isUser} text={part.output} />
-                            </div>
-                          ) : (
-                            <div
-                              key={message.id}
-                              className="flex items-center gap-2"
-                            >
-                              <p className="text-white text-sm">
-                                {t("errorMessage")}
-                              </p>
-
-                              <FaRegFaceSadCry />
-                            </div>
-                          );
-                      }
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-            <div ref={bottomRef} />
+            <ChatMessages
+              messages={messages}
+              status={status}
+              bottomRef={bottomRef}
+            />
           </div>
+
           <div className="flex flex-col">
             <div className="sticky bottom-0 flex-col w-full py-2 px-2 flex gap-3">
-              <div className="flex justify-between items-center pt-2">
-                <div className="flex gap-2">
-                  {isShowTool && (
-                    <>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <Button
-                              variant="outline"
-                              className="ml-2 relative"
-                              size="icon"
-                              onClick={() => setIsPdfModalOpen(true)}
-                            >
-                              <FaFilePdf className="h-8 w-8" />
-                              <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                                {documents?.length}
-                              </div>
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{t("manageDocuments")}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger className="outline-none">
-                          <Button
-                            variant="outline"
-                            className="ml-2 relative"
-                            size="icon"
-                          >
-                            <FaHammer className="h-8 w-8" />
-                            <div className="absolute text-[10px] top-[-10px] right-[-10px] w-5 h-5 flex items-center justify-center bg-orange-500 rounded-full">
-                              {tools.length}
-                            </div>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          className="h-[300px] max-w-[300px]"
-                          align="start"
-                          side="top"
-                          sideOffset={10}
-                          alignOffset={-25}
-                        >
-                          <DropdownMenuLabel>
-                            {t("availableTools")}
-                          </DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          {tools.map((tool) => (
-                            <DropdownMenuCheckboxItem
-                              key={tool.name}
-                              className="flex items-center gap-2 px-2 cursor-pointer"
-                              checked={currentTool === tool.name}
-                              onCheckedChange={() => setCurrentTool(tool.name)}
-                            >
-                              <div className="h-8 w-8 flex items-center justify-center">
-                                {toolIcons[tool.name as keyof typeof toolIcons]}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-medium leading-none truncate">
-                                  {tool.name}
-                                </h3>
-                                <p className="text-xs text-muted-foreground mt-2 ">
-                                  {tool.description}
-                                </p>
-                              </div>
-                            </DropdownMenuCheckboxItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-
-                      {currentTool && (
-                        <Button
-                          onClick={() => setCurrentTool("")}
-                          variant="outline"
-                          className="ml-1 text-xs cursor-pointer border hover:text-white"
-                        >
-                          {currentTool}
-                          <TiDelete className="ml-1" />
-                        </Button>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center flex-col gap-3 w-full relative">
-                <Textarea
-                  value={input}
-                  ref={textareaRef}
-                  onChange={handleInputChange}
-                  placeholder={
-                    status !== "ready" ? t("thinking") : t("askAnything")
-                  }
-                  disabled={status !== "ready"}
-                  onKeyDown={handleKeyDown}
-                  className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
-                ></Textarea>
-
-                <Button
-                  onClick={() => {
-                    handleSubmit();
-                  }}
-                  variant="outline"
-                  disabled={status !== "ready" || !input.trim()}
-                  className="h-10 w-10 rounded-full border bg-white border-zinc-400 absolute right-2 bottom-[12px]"
-                >
-                  <FaArrowUp />
-                </Button>
-
-                {!isAtBottom && messages.length > 0 && (
-                  <button
-                    onClick={() =>
-                      bottomRef.current?.scrollIntoView({ behavior: "smooth" })
-                    }
-                    className={clsx(
-                      "w-10 h-10 absolute self-center   flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition",
-                      !isShowTool && "bottom-[80px]",
-                      isShowTool && "bottom-[80px]"
-                    )}
-                    aria-label="Scroll to bottom"
-                  >
-                    <IoArrowDownSharp />
-                  </button>
-                )}
-              </div>
-              <div className="flex justify-between items-center flex-wrap gap-2">
-                <div className=" text-muted-foreground text-sm">
-                  {t("disclaimer")}
-                </div>
-
-                {!isShowTool && (
-                  <div className="flex items-center space-x-2 ">
-                    <Switch
-                      checked={isRequiredDocument}
-                      onCheckedChange={setIsRequiredDocument}
-                    />{" "}
-                    <Label htmlFor="airplane-mode">
-                      {t("alwaysSearchDocument")}
-                    </Label>
-                  </div>
-                )}
-              </div>
+              <ChatToolbar
+                isShowTool={isShowTool}
+                messages={messages}
+                documents={documents}
+                currentTool={currentTool}
+                setCurrentTool={setCurrentTool}
+                onOpenPdfModal={() => setIsPdfModalOpen(true)}
+                onOpenShareModal={() => setIsShareModalOpen(true)}
+                isKnowledgeBase={isKnowledgeBase}
+              />
+              <ChatInput
+                input={input}
+                setInput={setInput}
+                handleSubmit={handleSubmit}
+                status={status}
+                isShowTool={isShowTool}
+                isRequiredDocument={isRequiredDocument}
+                setIsRequiredDocument={setIsRequiredDocument}
+              />
             </div>
 
-            <Dialog open={isPdfModalOpen} onOpenChange={setIsPdfModalOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t("manageKnowledgeBase")}</DialogTitle>
-                </DialogHeader>
-                <DocumentUpload
-                  onClose={() => {
-                    setIsPdfModalOpen(false);
-                  }}
-                  isShowDocumentList={true}
-                />
-              </DialogContent>
-            </Dialog>
+            <DocumentUploadDialog
+              isOpen={isPdfModalOpen}
+              onOpenChange={setIsPdfModalOpen}
+            />
 
-            <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t("shareDialogTitle")}</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 flex flex-col items-center">
-                  {shareData?.shareUrl ? (
-                    <>
-                      <p className="text-sm self-start text-muted-foreground">
-                        {dayjs(shareData.createdAt).format(
-                          "DD/MM/YYYY HH:mm:ss"
-                        )}
-                      </p>
-                      <div className="flex items-center gap-2 justify-between w-full">
-                        <input
-                          type="text"
-                          value={shareData.shareUrl}
-                          readOnly
-                          className="flex-1 bg-zinc-800 text-white px-4 py-2 rounded-lg"
-                        />
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            navigator.clipboard.writeText(shareData.shareUrl);
-                            toast.success(t("linkCopied"));
-                          }}
-                        >
-                          {t("copyLink")}
-                        </Button>
-                      </div>
-                      <Button
-                        disabled={isCreateShareLoading}
-                        className="w-full"
-                        onClick={handleShare}
-                      >
-                        {isCreateShareLoading
-                          ? t("updating")
-                          : t("updateShareLink")}
-                        {isCreateShareLoading && (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                      </Button>
-                      <p className="text-sm text-gray-400">
-                        {t("shareDescription")}
-                      </p>
-                    </>
-                  ) : (
-                    <Button
-                      disabled={isCreateShareLoading}
-                      className="w-full"
-                      onClick={handleShare}
-                    >
-                      {isCreateShareLoading
-                        ? t("generating")
-                        : t("generateShareLink")}
-                      {isCreateShareLoading && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      )}
-                    </Button>
-                  )}
-                  {shareError && (
-                    <p className="text-sm text-red-400 mt-2">
-                      {shareError.message}
-                    </p>
-                  )}
-                </div>
-              </DialogContent>
-            </Dialog>
+            {chatId && (
+              <ShareDialog
+                chatId={chatId}
+                isOpen={isShareModalOpen}
+                onOpenChange={setIsShareModalOpen}
+              />
+            )}
           </div>
         </div>
       </form>

@@ -10,14 +10,18 @@ export interface UserConfig {
   updatedAt: string;
   languagePreference: string | null;
   themePreference: string | null;
-  notificationSettings: {
-    email?: boolean;
-    push?: boolean;
-  } | unknown;
-  chatSettings: {
-    temperature?: number;
-    max_tokens?: number;
-  } | unknown;
+  notificationSettings:
+    | {
+        email?: boolean;
+        push?: boolean;
+      }
+    | unknown;
+  chatSettings:
+    | {
+        temperature?: number;
+        max_tokens?: number;
+      }
+    | unknown;
   defaultCurrency: string | null;
   timezone: string | null;
 }
@@ -32,7 +36,7 @@ export default function useUserConfig(userId: string) {
       // Use server action instead of API route
       const data = await getUserConfig(userId);
       if (data) {
-        setConfig(data);
+        setConfig(data as UserConfig);
       }
     } catch (err) {
       console.error("Error fetching user config:", err);
@@ -48,10 +52,10 @@ export default function useUserConfig(userId: string) {
     try {
       // Use server action instead of API route
       const updatedConfig = await updateUserConfig(userId, updates);
-      
+
       // Update state with the returned config
       if (updatedConfig) {
-        setConfig(updatedConfig);
+        setConfig(updatedConfig as UserConfig);
       } else {
         // Optimistically update state if no config returned
         setConfig((prev) => (prev ? { ...prev, ...updates } : null));
