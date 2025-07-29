@@ -123,17 +123,46 @@ export const userConfig = pgTable(
   ]
 );
 
-export const chats = pgTable("chats", {
-  id: text().primaryKey().notNull(),
-  createdAt: timestamp("created_at", {
-    withTimezone: true,
-    mode: "string",
-  }).default(sql`timezone('utc'::text, now())`),
-  messages: jsonb(),
-  userId: uuid("user_id").default(sql`auth.uid()`),
-  isKnowledgeBase: boolean("is_knowledge_base").default(false),
-  knowledgeBaseId: uuid("knowledge_base_id"),
-});
+export const chats = pgTable(
+  "chats",
+  {
+    id: text().primaryKey().notNull(),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    }).default(sql`timezone('utc'::text, now())`),
+    messages: jsonb(),
+    userId: uuid("user_id").default(sql`auth.uid()`),
+    isKnowledgeBase: boolean("is_knowledge_base").default(false),
+    knowledgeBaseId: uuid("knowledge_base_id"),
+  },
+  () => [
+    pgPolicy("Users can read their own chats", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+    pgPolicy("Users can insert their own chats", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+    pgPolicy("Users can update their own chats", {
+      as: "permissive",
+      for: "update",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+    pgPolicy("Users can delete their own chats", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+  ]
+);
 
 // Main documents table - stores unique document metadata
 export const documents = pgTable("documents", {
