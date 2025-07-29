@@ -20,7 +20,6 @@ const KnowledgeSessions = ({
       knowledgeBaseId,
     });
   const handleChatClick = (newChatId: string) => {
-    if (newChatId === chatId) return; // Don't navigate if already on the same chat
     onChatClick(newChatId);
   };
 
@@ -73,6 +72,7 @@ const KnowledgeSessions = ({
                   "w-full text-left text-sm py-2 px-2 rounded hover:bg-zinc-800 truncate",
                   chatId === chat.id ? "bg-zinc-700" : ""
                 )}
+                data-active={chatId === chat.id ? "true" : "false"}
               >
                 {getMenuDisplayText(chat)}
               </button>

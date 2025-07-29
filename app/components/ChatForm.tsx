@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import { useDocuments } from "../hooks/useDocuments";
-import GlobalLoader from "./GlobalLoader";
 import { useTranslations } from "next-intl";
 
 // Import our new subcomponents
@@ -33,6 +32,7 @@ interface ChatFormProps {
   isShowTool?: boolean;
   isKnowledgeBase?: boolean;
   knowledgeBaseId?: string;
+  onFinished?: () => void;
 }
 
 export default function ChatForm({
@@ -41,6 +41,7 @@ export default function ChatForm({
   isShowTool,
   isKnowledgeBase = false,
   knowledgeBaseId,
+  onFinished,
 }: ChatFormProps) {
   const t = useTranslations("chat");
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
@@ -55,11 +56,7 @@ export default function ChatForm({
   const [isRequiredDocument, setIsRequiredDocument] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  const {
-    data: initialMessages,
-    isLoading,
-    isFetching,
-  } = useQuery({
+  const { data: initialMessages } = useQuery({
     queryKey: ["chat", chatId],
     queryFn: async () => {
       if (!chatId) {
@@ -98,8 +95,7 @@ export default function ChatForm({
           (part: any) => part.type === "tool-askQuestion"
         ) || [];
       const totalCreditCost = toolCalls.length;
-
-      await queryClient.invalidateQueries({ queryKey: ["chats"] });
+      onFinished?.();
       await queryClient.invalidateQueries({
         queryKey: ["credit", session?.user?.id],
       });
@@ -149,10 +145,6 @@ export default function ChatForm({
     setPromptToSubmit(text);
   };
 
-  if (isLoading || isFetching) {
-    return <GlobalLoader />;
-  }
-
   return (
     <>
       <form
@@ -160,7 +152,7 @@ export default function ChatForm({
           e.preventDefault();
         }}
         className={clsx(
-          "flex flex-col items-center gap-4 w-full overflow-y-auto scroll-hidden md:mt-0 mt-4"
+          "flex flex-col items-center gap-4 w-full overflow-y-auto scroll-hidden bottom-[20px]"
         )}
       >
         {messages?.length === 0 && (
@@ -170,7 +162,7 @@ export default function ChatForm({
           />
         )}
 
-        <div className="w-full bg-zinc-800 p-2 rounded-xl md:mt-0 mt-[10px] relative">
+        <div className="w-full md:bg-zinc-800 bg-transparent p-2 rounded-xl ">
           <div className="flex justify-end">
             {!isKnowledgeBase && messages.length > 0 && (
               <TooltipProvider>
@@ -194,20 +186,13 @@ export default function ChatForm({
           </div>
           <div
             ref={containerRef}
-            className={clsx(
-              "overflow-auto scroll-hidden px-2",
-              messages.length > 0 &&
-                !isKnowledgeBase &&
-                "py-4 md:h-[calc(100dvh-250px)] h-[calc(100dvh-300px)]",
-              messages.length > 0 &&
-                isKnowledgeBase &&
-                "py-4 md:h-[calc(100dvh-480px)] h-[calc(100dvh-300px)]"
-            )}
+            className={clsx("overflow-auto scroll-hidden md:px-2 px-0")}
           >
             <ChatMessages
               messages={messages}
               status={status}
               bottomRef={bottomRef}
+              isKnowledgeBase={isKnowledgeBase}
             />
           </div>
 

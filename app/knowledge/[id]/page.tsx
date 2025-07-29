@@ -83,7 +83,7 @@ export default function ViewKnowledgeBasePage() {
     error: docsError,
   } = kbHooks.useKnowledgeBaseDocuments(params.id);
 
-  const { data: knowledgeBaseChats, isLoading: isLoadingChats } = useChats({
+  const { data: knowledgeBaseChats } = useChats({
     isKnowledgeBase: true,
     knowledgeBaseId: params.id,
   });
@@ -112,11 +112,12 @@ export default function ViewKnowledgeBasePage() {
   }, [kbError, router, t]);
 
   useEffect(() => {
-    // set chatId to the first chat id
-    if (knowledgeBaseChatsData.length > 0) {
+    // set chatId to the first chat id only if chatId is not already set
+    if (knowledgeBaseChatsData.length > 0 && !chatId) {
+      console.log("Setting initial chatId to:", knowledgeBaseChatsData[0].id);
       setChatId(knowledgeBaseChatsData[0].id);
     }
-  }, [knowledgeBaseChatsData]);
+  }, [knowledgeBaseChatsData, chatId]);
 
   useEffect(() => {
     if (docsError) {
@@ -132,7 +133,7 @@ export default function ViewKnowledgeBasePage() {
   }, [params.id]);
 
   // Determine if we're still loading
-  const isLoading = isLoadingKB || isLoadingDocs || isLoadingChats;
+  const isLoading = isLoadingKB || isLoadingDocs;
 
   if (isLoading) {
     return <GlobalLoader />;
@@ -153,12 +154,44 @@ export default function ViewKnowledgeBasePage() {
     queryClient.refetchQueries({
       queryKey: ["chat", chatId],
     });
+    console.log("newChatId", newChatId);
     setChatId(newChatId);
   };
 
   const createNewChat = async () => {
     const id = await createChat();
     setChatId(id);
+  };
+
+  const handleChatFinished = async () => {
+    console.log("handleChatFinished - Current chatId:", chatId);
+
+    // Store the current chat ID before any operations
+    const currentChatId = chatId;
+
+    // reset the query cache
+    queryClient.resetQueries({
+      queryKey: ["chat", currentChatId],
+    });
+
+    // refetch the query
+    await queryClient.refetchQueries({
+      queryKey: ["chat", currentChatId],
+    });
+
+    // reset chats
+    queryClient.resetQueries({
+      queryKey: ["chats"],
+    });
+
+    // refetch chats and wait for completion
+    await queryClient.refetchQueries({
+      queryKey: ["chats"],
+    });
+
+    // Set the chat ID after refetching is complete to ensure it's maintained
+    console.log("handleChatFinished - Setting chatId to:", currentChatId);
+    setChatId(currentChatId);
   };
 
   return (
@@ -304,6 +337,7 @@ export default function ViewKnowledgeBasePage() {
                   knowledgeBaseId={params.id}
                   suggestedPrompts={suggestedPrompts}
                   chatId={chatId}
+                  onFinished={handleChatFinished}
                 />
               </CardContent>
             </Card>

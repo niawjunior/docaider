@@ -11,12 +11,14 @@ interface ChatMessagesProps {
   messages: any[];
   status: string;
   bottomRef?: React.RefObject<HTMLDivElement | null>;
+  isKnowledgeBase?: boolean;
 }
 
 export default function ChatMessages({
   messages,
   status,
   bottomRef: externalBottomRef,
+  isKnowledgeBase,
 }: ChatMessagesProps) {
   const t = useTranslations("chat");
   const internalBottomRef = useRef<HTMLDivElement>(null);
@@ -42,13 +44,7 @@ export default function ChatMessages({
       const threshold = 50;
       const isBottom =
         el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
-      console.log("Scroll detected:", {
-        scrollHeight: el.scrollHeight,
-        scrollTop: el.scrollTop,
-        clientHeight: el.clientHeight,
-        diff: el.scrollHeight - el.scrollTop - el.clientHeight,
-        isBottom,
-      });
+
       setIsAtBottom(isBottom);
     };
 
@@ -71,9 +67,13 @@ export default function ChatMessages({
       <div
         ref={containerRef}
         className={clsx(
-          "overflow-auto scroll-hidden px-2",
+          "overflow-auto scroll-hidden md:px-2 px-0",
           messages.length > 0 &&
-            "py-4 md:h-[calc(100dvh-250px)] h-[calc(100dvh-300px)]"
+            !isKnowledgeBase &&
+            "md:h-[calc(100dvh-300px)] h-[calc(100dvh-300px)]",
+          isKnowledgeBase &&
+            messages.length > 0 &&
+            "md:h-[calc(100dvh-480px)] h-[calc(100dvh-500px)]"
         )}
       >
         {messages.map((message: any, index: any) => {
