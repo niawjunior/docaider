@@ -70,8 +70,8 @@ const KnowledgeSessions = ({
               <button
                 onClick={() => handleChatClick(chat.id)}
                 className={clsx(
-                  "w-full text-left text-sm py-2 px-2 rounded hover:bg-zinc-800 truncate",
-                  chatId === chat.id ? "bg-zinc-700" : ""
+                  "w-full text-left text-sm py-2 px-2 rounded hover:bg-accent truncate",
+                  chatId === chat.id ? "bg-accent/50" : ""
                 )}
                 data-active={chatId === chat.id ? "true" : "false"}
               >
@@ -82,8 +82,8 @@ const KnowledgeSessions = ({
         )
       )}
       {isFetchingNextPage && (
-        <div className="py-2 text-xs text-center text-zinc-500 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+        <div className="py-2 text-xs text-center text-muted-foreground flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       )}
     </ul>

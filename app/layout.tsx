@@ -4,7 +4,7 @@ import { ThemeProvider } from "./providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "./providers/QueryProvider";
 import localFont from "next/font/local";
-import {getLocale} from 'next-intl/server';
+import { getLocale } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 
 const MyFont = localFont({
@@ -112,23 +112,20 @@ export default async function RootLayout({
   const locale = await getLocale();
 
   // Load messages for the current locale
-  
+
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${MyFont.className} antialiased bg-zinc-900`}>
-        <QueryProvider>
-          <NextIntlClientProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem
-              disableTransitionOnChange
-            >
+      <body
+        className={`${MyFont.className} antialiased bg-background text-foreground`}
+      >
+        <ThemeProvider>
+          <QueryProvider>
+            <NextIntlClientProvider>
               {children}
               <Toaster />
-            </ThemeProvider>
-          </NextIntlClientProvider>
-        </QueryProvider>
+            </NextIntlClientProvider>
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

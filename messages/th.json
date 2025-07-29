@@ -33,7 +33,12 @@
     "share": "แชร์",
     "failedToCopy": "ไม่สามารถคัดลอกลิงก์ได้",
     "settings": "ตั้งค่า",
-    "backToDashboard": "กลับไปที่แดชบอร์ด"
+    "backToDashboard": "กลับไปที่แดชบอร์ด",
+    "theme": "ธีม",
+    "selectTheme": "เลือกธีม",
+    "light": "สว่าง",
+    "dark": "มืด",
+    "system": "ระบบ"
   },
   "navigation": {
     "home": "หน้าแรก",

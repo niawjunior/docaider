@@ -295,7 +295,7 @@ export default function EditKnowledgeBasePage() {
               {knowledgeBase.name}
             </h1>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 mb-2">
             <Button
               variant="outline"
               size="sm"

@@ -16,6 +16,9 @@ import {
 } from "@/components/ui/sheet";
 import LocaleSwitcher from "./LocaleSwitcher";
 import { useTranslations } from "next-intl";
+import { ModeToggle } from "./ThemeSwitcher";
+import { useTheme } from "next-themes";
+import { setUserLocale } from "../utils/locale";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
@@ -24,6 +27,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [userEmail, setUserEmail] = useState<string>("");
   const { credit, isLoading } = useCredit(session?.user?.id || "");
   const t = useTranslations("common");
+  const { setTheme } = useTheme();
 
   // Set user email when session is available
   useEffect(() => {
@@ -43,20 +47,42 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
+  useEffect(() => {
+    fetchUserConfig();
+  }, [session]);
+
+  const fetchUserConfig = async () => {
+    if (session?.user?.id) {
+      try {
+        const response = await fetch("/api/user/config");
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.theme_preference) {
+            setTheme(data.theme_preference);
+          }
+          if (data && data.language_preference) {
+            setUserLocale(data.language_preference);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user config:", error);
+      }
+    }
+  };
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-zinc-800 bg-zinc-900">
+      <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
         <div className="px-6 flex h-16 items-center justify-between">
           <div className="flex gap-2 items-center">
             <Link href="/">
-              <span className="text-white lg:text-xl text-md font-bold">
+              <span className="text-foreground lg:text-xl text-md font-bold">
                 ✨ {t("appName")}
               </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-2 text-sm text-gray-300">
+          <nav className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
             {session && (
               <Badge
                 variant="secondary"
@@ -112,6 +138,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               </Button>
             )}
             <LocaleSwitcher />
+            <ModeToggle />
           </nav>
 
           {/* Mobile Navigation */}
@@ -124,11 +151,11 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-[250px] bg-zinc-900 border-zinc-800"
+              className="w-[250px] bg-background border-border"
             >
               {/* User info and credits section - mobile only */}
               {session && (
-                <div className="border-b border-zinc-800 pb-4 mb-4">
+                <div className="border-b border-border pb-4 mb-4">
                   <div className="flex items-center gap-2 mb-3 px-4 py-2">
                     <Mail size={16} className="text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">
@@ -201,35 +228,39 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 <SheetClose asChild>
                   <LocaleSwitcher />
                 </SheetClose>
+                <SheetClose asChild>
+                  <ModeToggle />
+                </SheetClose>
               </div>
             </SheetContent>
           </Sheet>
         </div>
       </header>
+
       <main className=" py-2 min-h-[calc(100vh-160px)]">{children}</main>
-      <footer className="w-full bg-zinc-900 border-t border-zinc-800 px-6 py-3 text-gray-400 text-sm">
+      <footer className="w-full bg-background border-t border-border px-6 py-3 text-muted-foreground text-sm">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
-            <span className="font-bold text-white">✨ {t("appName")}</span>{" "}
+            <span className="font-bold text-foreground">✨ {t("appName")}</span>{" "}
             &mdash;
             {t("tagline")}
           </div>
 
-          <div className="flex flex-wrap gap-4 justify-center md:justify-end text-gray-400">
-            <Link href="/privacy" className="hover:text-white transition">
+          <div className="flex flex-wrap gap-4 justify-center md:justify-end text-muted-foreground">
+            <Link href="/privacy" className="hover:text-foreground transition">
               {t("privacy")}
             </Link>
-            <Link href="/terms" className="hover:text-white transition">
+            <Link href="/terms" className="hover:text-foreground transition">
               {t("terms")}
             </Link>
 
-            <Link href="/contact" className="hover:text-white transition">
+            <Link href="/contact" className="hover:text-foreground transition">
               {t("contact")}
             </Link>
           </div>
         </div>
 
-        <div className="mt-2 text-center text-xs text-gray-400">
+        <div className="mt-2 text-center text-xs text-muted-foreground">
           {t("copyright", { year: new Date().getFullYear() })}
         </div>
       </footer>

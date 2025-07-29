@@ -98,14 +98,14 @@ export default function ChatInput({
           }
           disabled={status !== "ready"}
           onKeyDown={handleKeyDown}
-          className="flex-1 bg-zinc-900 text-white px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+          className="flex-1 bg-card text-card-foreground px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
         />
 
         <Button
           onClick={handleSubmit}
           variant="outline"
           disabled={status !== "ready" || !input.trim()}
-          className="h-10 w-10 rounded-full border bg-white border-zinc-400 absolute right-2 bottom-[12px]"
+          className="h-10 w-10 rounded-full border bg-background text-foreground border-border absolute right-2 bottom-[12px]"
         >
           <FaArrowUp />
         </Button>

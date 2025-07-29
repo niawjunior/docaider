@@ -25,7 +25,9 @@ interface PricingPlan {
   disabled: boolean;
 }
 
-const getPricingPlans = (t: ReturnType<typeof useTranslations>): PricingPlan[] => [
+const getPricingPlans = (
+  t: ReturnType<typeof useTranslations>
+): PricingPlan[] => [
   {
     name: t("plans.starter.name"),
     description: t("plans.starter.description"),
@@ -70,13 +72,13 @@ export default function PricingPage() {
     <MainLayout>
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-extrabold text-white  sm:tracking-tight lg:text-4xl">
+          <h1 className="text-4xl font-extrabold text-foreground  sm:tracking-tight lg:text-4xl">
             <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
               {t("title")}
             </span>{" "}
             {t("plansForEveryTeam")}
           </h1>
-          <p className="mt-5 max-w-xl mx-auto text-xl text-gray-400">
+          <p className="mt-5 max-w-xl mx-auto text-xl text-muted-foreground">
             {t("startWithFreeCredits")}
           </p>
         </div>
@@ -87,7 +89,7 @@ export default function PricingPage() {
               key={plan.name}
               className={`
               relative h-full flex flex-col
-              ${plan.featured ? "border-orange-500" : "border-zinc-700"}
+              ${plan.featured ? "border-orange-500" : "border-border"}
               ${plan.disabled ? "opacity-60" : ""}
               transition-all duration-200 hover:border-orange-500/50
             `}
@@ -101,25 +103,25 @@ export default function PricingPage() {
               )}
 
               <CardHeader>
-                <CardTitle className="text-2xl text-white">
+                <CardTitle className="text-2xl text-foreground">
                   {plan.name}
                 </CardTitle>
-                <CardDescription className="text-gray-400">
+                <CardDescription className="text-muted-foreground">
                   {plan.description}
                 </CardDescription>
               </CardHeader>
 
               <CardContent className="flex-1">
                 <div className="mb-4">
-                  <p className="text-4xl font-bold text-white">
+                  <p className="text-4xl font-bold text-foreground">
                     {plan.price}
-                    <span className="text-base font-normal text-gray-400">
+                    <span className="text-base font-normal text-muted-foreground">
                       {plan.price !== t("plans.starter.price") &&
                         plan.price !== t("plans.enterprise.price") &&
                         t("perMonth")}
                     </span>
                   </p>
-                  <p className="mt-1 text-sm text-gray-400">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {plan.credits} {t("creditsIncluded")}
                   </p>
                 </div>
@@ -128,7 +130,9 @@ export default function PricingPage() {
                   {plan.features.map((feature: string) => (
                     <li key={feature} className="flex items-start">
                       <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="ml-3 text-gray-300">{feature}</span>
+                      <span className="ml-3 text-muted-foreground">
+                        {feature}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -144,7 +148,7 @@ export default function PricingPage() {
                   ${
                     plan.featured
                       ? "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-                      : "bg-zinc-500"
+                      : "bg-muted"
                   }
                   ${plan.disabled ? "cursor-not-allowed" : "cursor-pointer"}
                 `}

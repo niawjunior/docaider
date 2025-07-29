@@ -23,9 +23,9 @@ export function FeatureCard({
   return (
     <motion.div
       whileHover={{ y: -5 }}
-      className="bg-zinc-800/50 p-4 rounded-2xl backdrop-blur-sm border border-zinc-700 hover:border-orange-500/50 transition-colors h-full flex flex-col"
+      className="bg-card/50 p-4 rounded-2xl backdrop-blur-sm border border-border hover:border-orange-500/50 transition-colors h-full flex flex-col"
     >
-      <div className="text-md font-bold flex justify-center  items-center text-white gap-2 mb-2 ">
+      <div className="text-md font-bold flex justify-center items-center text-foreground gap-2 mb-2">
         <div className=" font-bold  flex items-center gap-2">
           {icon === "knowledge" && <LuBrain />}
           {icon === "document" && <FaFile />}
@@ -36,10 +36,10 @@ export function FeatureCard({
           {title}
         </div>
       </div>
-      <p className="text-gray-400 mb-2 text-sm flex-grow">{description}</p>
+      <p className="text-muted-foreground mb-2 text-sm flex-grow">{description}</p>
       <ul className="space-y-2 mt-2">
         {features.map((feature, index) => (
-          <li key={index} className="flex items-center text-gray-400 text-sm">
+          <li key={index} className="flex items-center text-muted-foreground text-sm">
             <span className="text-orange-500 mr-2">
               <FaCheck />
             </span>

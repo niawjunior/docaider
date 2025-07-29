@@ -42,7 +42,7 @@ const itemVariants = {
 
 export default function Home() {
   const kbHooks = useKnowledgeBases();
-  const t = useTranslations('home');
+  const t = useTranslations("home");
 
   const getPublicKnowledgeBases = kbHooks.getPublicKnowledgeBases;
   const router = useRouter();
@@ -72,13 +72,13 @@ export default function Home() {
               containIntrinsicSize: "auto 300px",
             }}
           >
-            {t('title')}
+            {t("title")}
           </motion.h1>
           <motion.p
             variants={itemVariants}
-            className="text-xl text-gray-300 font-medium leading-relaxed max-w-3xl mx-auto"
+            className="text-xl text-muted-foreground font-medium leading-relaxed max-w-3xl mx-auto"
           >
-            {t('subtitle')}
+            {t("subtitle")}
           </motion.p>
           <section className="relative z-10">
             <motion.div
@@ -90,72 +90,72 @@ export default function Home() {
             >
               <h2
                 id="features"
-                className="text-2xl md:text-4xl font-bold text-white text-center mb-8"
+                className="text-2xl md:text-4xl font-bold text-foreground text-center mb-8"
               >
-                {t('featuresTitle')}
+                {t("featuresTitle")}
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
                 <FeatureCard
                   icon="knowledge"
-                  title={t('features.knowledgeManagement.title')}
-                  description={t('features.knowledgeManagement.description')}
+                  title={t("features.knowledgeManagement.title")}
+                  description={t("features.knowledgeManagement.description")}
                   features={[
-                    t('features.knowledgeManagement.feature1'),
-                    t('features.knowledgeManagement.feature2'),
-                    t('features.knowledgeManagement.feature3'),
+                    t("features.knowledgeManagement.feature1"),
+                    t("features.knowledgeManagement.feature2"),
+                    t("features.knowledgeManagement.feature3"),
                   ]}
                 />
 
                 <FeatureCard
                   icon="document"
-                  title={t('features.documentProcessing.title')}
-                  description={t('features.documentProcessing.description')}
+                  title={t("features.documentProcessing.title")}
+                  description={t("features.documentProcessing.description")}
                   features={[
-                    t('features.documentProcessing.feature1'),
-                    t('features.documentProcessing.feature2'),
-                    t('features.documentProcessing.feature3'),
+                    t("features.documentProcessing.feature1"),
+                    t("features.documentProcessing.feature2"),
+                    t("features.documentProcessing.feature3"),
                   ]}
                 />
 
                 <FeatureCard
                   icon="chat"
-                  title={t('features.aiChat.title')}
-                  description={t('features.aiChat.description')}
+                  title={t("features.aiChat.title")}
+                  description={t("features.aiChat.description")}
                   features={[
-                    t('features.aiChat.feature1'),
-                    t('features.aiChat.feature2'),
-                    t('features.aiChat.feature3'),
+                    t("features.aiChat.feature1"),
+                    t("features.aiChat.feature2"),
+                    t("features.aiChat.feature3"),
                   ]}
                 />
                 <FeatureCard
                   icon="share"
-                  title={t('features.sharing.title')}
-                  description={t('features.sharing.description')}
+                  title={t("features.sharing.title")}
+                  description={t("features.sharing.description")}
                   features={[
-                    t('features.sharing.feature1'),
-                    t('features.sharing.feature2'),
-                    t('features.sharing.feature3'),
+                    t("features.sharing.feature1"),
+                    t("features.sharing.feature2"),
+                    t("features.sharing.feature3"),
                   ]}
                 />
                 <FeatureCard
                   icon="language"
-                  title={t('features.multiLanguage.title')}
-                  description={t('features.multiLanguage.description')}
+                  title={t("features.multiLanguage.title")}
+                  description={t("features.multiLanguage.description")}
                   features={[
-                    t('features.multiLanguage.feature1'),
-                    t('features.multiLanguage.feature2'),
-                    t('features.multiLanguage.feature3'),
+                    t("features.multiLanguage.feature1"),
+                    t("features.multiLanguage.feature2"),
+                    t("features.multiLanguage.feature3"),
                   ]}
                 />
                 <FeatureCard
                   icon="dashboard"
-                  title={t('features.userDashboard.title')}
-                  description={t('features.userDashboard.description')}
+                  title={t("features.userDashboard.title")}
+                  description={t("features.userDashboard.description")}
                   features={[
-                    t('features.userDashboard.feature1'),
-                    t('features.userDashboard.feature2'),
-                    t('features.userDashboard.feature3'),
+                    t("features.userDashboard.feature1"),
+                    t("features.userDashboard.feature2"),
+                    t("features.userDashboard.feature3"),
                   ]}
                 />
               </div>
@@ -165,11 +165,11 @@ export default function Home() {
 
         <section className="relative z-10 py-8">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
-              {t('publicKnowledgeBases.title')}
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-4">
+              {t("publicKnowledgeBases.title")}
             </h2>
-            <p className="text-xl text-gray-400 text-center mb-8 max-w-2xl mx-auto">
-              {t('publicKnowledgeBases.subtitle')}
+            <p className="text-xl text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
+              {t("publicKnowledgeBases.subtitle")}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -183,7 +183,7 @@ export default function Home() {
                 getPublicKnowledgeBases.data.slice(0, 6).map((kb: any) => (
                   <Card
                     key={kb.id}
-                    className="overflow-hidden border-gray-800 bg-gray-950/50 backdrop-blur-sm hover:bg-gray-900/50 transition-colors"
+                    className="overflow-hidden border-border bg-card/50 backdrop-blur-sm hover:bg-accent/10 transition-colors"
                   >
                     <CardHeader className="pb-3">
                       <CardTitle className="text-xl font-bold truncate">
@@ -191,18 +191,23 @@ export default function Home() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="min-h-[80px]">
-                      <p className="text-sm text-gray-300 line-clamp-2">
-                        {kb.description || t('publicKnowledgeBases.noDescription')}
+                      <p className="text-sm text-foreground line-clamp-2">
+                        {kb.description ||
+                          t("publicKnowledgeBases.noDescription")}
                       </p>
                       {kb.isPublic && (
-                        <p className="text-xs mt-2 text-gray-400">
-                          {t('publicKnowledgeBases.createdBy', { name: kb.userName })}
+                        <p className="text-xs mt-2 text-muted-foreground">
+                          {t("publicKnowledgeBases.createdBy", {
+                            name: kb.userName,
+                          })}
                         </p>
                       )}
                     </CardContent>
-                    <CardFooter className="flex justify-between items-center pt-2 border-t border-gray-800">
-                      <div className="text-xs text-gray-400">
-                        {t('publicKnowledgeBases.updatedAgo', { time: formatDistanceToNow(new Date(kb.updatedAt)) })}
+                    <CardFooter className="flex justify-between items-center pt-2 border-t border-border">
+                      <div className="text-xs text-muted-foreground">
+                        {t("publicKnowledgeBases.updatedAgo", {
+                          time: formatDistanceToNow(new Date(kb.updatedAt)),
+                        })}
                       </div>
 
                       <Button
@@ -210,22 +215,23 @@ export default function Home() {
                         size="sm"
                         onClick={() => router.push(`/knowledge/${kb.id}`)}
                       >
-                        {t('publicKnowledgeBases.explore')} <ArrowRight className="ml-2 h-4 w-4" />
+                        {t("publicKnowledgeBases.explore")}{" "}
+                        <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </CardFooter>
                   </Card>
                 ))
               ) : (
-                <div className="col-span-full text-center py-12 border border-dashed border-gray-700 rounded-lg">
-                  <Database className="h-12 w-12 mx-auto text-gray-600 mb-4" />
-                  <h3 className="text-xl font-medium text-gray-300 mb-2">
-                    {t('publicKnowledgeBases.noKnowledgeBases')}
+                <div className="col-span-full text-center py-12 border border-dashed border-border rounded-lg">
+                  <Database className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-medium text-foreground mb-2">
+                    {t("publicKnowledgeBases.noKnowledgeBases")}
                   </h3>
-                  <p className="text-gray-400 mb-4">
-                    {t('publicKnowledgeBases.beFirst')}
+                  <p className="text-muted-foreground mb-4">
+                    {t("publicKnowledgeBases.beFirst")}
                   </p>
                   <Button onClick={() => router.push("/dashboard")}>
-                    {t('publicKnowledgeBases.goToDashboard')}
+                    {t("publicKnowledgeBases.goToDashboard")}
                   </Button>
                 </div>
               )}
@@ -239,16 +245,16 @@ export default function Home() {
                     variant="outline"
                     onClick={() => router.push("/dashboard?tab=public")}
                   >
-                    {t('publicKnowledgeBases.viewAll')}
+                    {t("publicKnowledgeBases.viewAll")}
                   </Button>
                 </div>
               )}
 
-            <h2 className="text-3xl md:text-4xl font-bold text-white text-center mt-16 mb-4">
-              {t('testimonials.title')}
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mt-16 mb-4">
+              {t("testimonials.title")}
             </h2>
-            <p className="text-xl text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-              {t('testimonials.subtitle')}
+            <p className="text-xl text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+              {t("testimonials.subtitle")}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

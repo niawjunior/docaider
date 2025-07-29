@@ -33,7 +33,7 @@ function PinIndicator({ knowledgeBaseId }: { knowledgeBaseId: string }) {
 
   if (!isPinned) return null;
 
-  return <Star className="h-4 w-4 text-blue-300 fill-blue-300" />;
+  return <Star className="h-4 w-4 text-primary fill-primary" />;
 }
 
 // Pin button component
@@ -135,7 +135,7 @@ export default function KnowledgeBaseList({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {knowledgeBases.map((kb) => (
-          <Card key={kb.id} className="overflow-hidden bg-zinc-900 p-0">
+          <Card key={kb.id} className="overflow-hidden bg-card p-0">
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-2">

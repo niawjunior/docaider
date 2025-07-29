@@ -12,9 +12,9 @@ const LoginComponent = () => {
   const callbackUrl = searchParams.get("callback_url") || "/dashboard";
   const t = useTranslations("login");
   return (
-    <div className="h-[calc(100dvh-250px)] flex items-center justify-center  text-white overflow-hidden ">
+    <div className="h-[calc(100dvh-250px)] flex items-center justify-center text-foreground overflow-hidden">
       {/* Login Box */}
-      <div className="relative z-10 bg-zinc-800/80 backdrop-blur-lg shadow-xl rounded-2xl p-10 w-full max-w-md border border-zinc-700">
+      <div className="relative z-10 bg-card/80 backdrop-blur-lg shadow-xl rounded-2xl p-10 w-full max-w-md border border-border">
         <div className="text-center mb-6">
           <span className="text-orange-500 font-bold text-3xl">DocAider</span>
           <h1 className="text-2xl font-semibold mt-2">
@@ -33,7 +33,7 @@ const LoginComponent = () => {
           </Button>
         </form>
 
-        <p className="text-sm text-zinc-400 mt-6 text-center">
+        <p className="text-sm text-muted-foreground mt-6 text-center">
           {t("bySigningIn")}{" "}
           <Link href="/terms" className="text-orange-500 hover:underline">
             {t("termsOfService")}

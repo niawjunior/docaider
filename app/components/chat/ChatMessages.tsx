@@ -109,7 +109,7 @@ export default function ChatMessages({
                             key={message.id}
                             className="flex items-center gap-2"
                           >
-                            <p className="text-white text-sm">
+                            <p className="text-foreground text-sm">
                               {t("searchingDocument")}
                             </p>
                             <div className="flex items-center justify-center py-4">
@@ -127,7 +127,7 @@ export default function ChatMessages({
                           key={message.id}
                           className="flex items-center gap-2"
                         >
-                          <p className="text-white text-sm">
+                          <p className="text-foreground text-sm">
                             {t("errorMessage")}
                           </p>
                           <FaRegFaceSadCry />
@@ -146,7 +146,7 @@ export default function ChatMessages({
         <div className="absolute bottom-[20px] left-0 right-0 flex justify-center w-full">
           <button
             onClick={scrollToBottom}
-            className="w-10 h-10 flex items-center justify-center z-10 bg-zinc-900 text-white border border-zinc-400 rounded-full p-2 hover:bg-zinc-800 transition"
+            className="w-10 h-10 flex items-center justify-center z-10 bg-background text-foreground border border-border rounded-full p-2 hover:bg-accent transition"
             aria-label="Scroll to bottom"
           >
             <IoArrowDownSharp />

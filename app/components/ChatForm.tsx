@@ -157,7 +157,7 @@ export default function ChatForm({
           "flex flex-col items-center gap-4 w-full overflow-y-auto scroll-hidden bottom-[20px]"
         )}
       >
-        <div className="w-full md:bg-zinc-800 bg-transparent p-2 rounded-xl ">
+        <div className="w-full dark:md:bg-zinc-800 bg-transparent p-2 rounded-xl ">
           <div className="flex justify-end">
             {!isKnowledgeBase && messages.length > 0 && (
               <TooltipProvider>

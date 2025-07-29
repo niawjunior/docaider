@@ -33,7 +33,12 @@
     "share": "Share",
     "failedToCopy": "Failed to copy link",
     "settings": "Settings",
-    "backToDashboard": "Back to Dashboard"
+    "backToDashboard": "Back to Dashboard",
+    "theme": "Theme",
+    "selectTheme": "Select theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   },
   "navigation": {
     "home": "Home",

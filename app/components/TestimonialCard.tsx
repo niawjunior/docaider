@@ -20,26 +20,26 @@ export function TestimonialCard({
   return (
     <motion.div
       whileHover={{ y: -5 }}
-      className="bg-zinc-800/50 p-6 rounded-2xl backdrop-blur-sm border border-zinc-700 hover:border-orange-500/30 transition-colors h-full flex flex-col"
+      className="bg-card/50 p-6 rounded-2xl backdrop-blur-sm border border-border hover:border-orange-500/30 transition-colors h-full flex flex-col"
     >
       <div className="flex items-center mb-4">
-        <div className="w-12 h-12 rounded-full bg-zinc-700 flex items-center justify-center text-xl font-bold text-orange-500 mr-4">
+        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-xl font-bold text-orange-500 mr-4">
           {avatar}
         </div>
         <div>
-          <h3 className="font-semibold text-white text-base">{name}</h3>
-          <p className="text-sm text-gray-400">
+          <h3 className="font-semibold text-foreground text-base">{name}</h3>
+          <p className="text-sm text-muted-foreground">
             {role} at {company}
           </p>
         </div>
       </div>
-      <p className="text-gray-300 flex-grow">&quot;{content}&quot;</p>
+      <p className="text-foreground flex-grow">&quot;{content}&quot;</p>
       <div className="mt-4 flex text-yellow-300">
         {[...Array(5)].map((_, i) => (
           <svg
             key={i}
             className={`w-5 h-5 ${
-              i < rating ? "fill-current" : "fill-gray-700"
+              i < rating ? "fill-current" : "fill-muted"
             }`}
             viewBox="0 0 20 20"
           >

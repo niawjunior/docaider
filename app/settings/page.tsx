@@ -22,6 +22,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 import MainLayout from "../components/MainLayout";
 import GlobalLoader from "../components/GlobalLoader";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
@@ -38,6 +39,7 @@ export default function SettingsPage() {
   const tCommon = useTranslations("common");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const { setTheme } = useTheme();
 
   const { handleSubmit, reset, setValue, watch } = useForm<UserConfig>({
     defaultValues: {
@@ -90,6 +92,10 @@ export default function SettingsPage() {
       });
 
       if (!response.ok) throw new Error("Failed to update settings");
+
+      // Apply
+      // theme immediately
+      setTheme(data.theme_preference);
 
       toast.success(t("saveSuccess"));
     } catch (error) {
@@ -155,9 +161,10 @@ export default function SettingsPage() {
                   <Label>{t("theme")}</Label>
                   <Select
                     value={watch("theme_preference")}
-                    onValueChange={(value) =>
-                      setValue("theme_preference", value)
-                    }
+                    onValueChange={(value) => {
+                      setValue("theme_preference", value);
+                      setTheme(value);
+                    }}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder={t("selectTheme")} />

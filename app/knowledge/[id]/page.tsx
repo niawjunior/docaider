@@ -201,7 +201,7 @@ export default function ViewKnowledgeBasePage() {
               {knowledgeBase.name}
             </h1>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 mb-2">
             {canEdit && (
               <>
                 <Button
