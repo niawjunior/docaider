@@ -61,8 +61,6 @@ export default function DashboardPage() {
     publicKnowledgeBases: publicKnowledgeBases || [],
   });
 
-  console.log("Pinned knowledge bases:", pinnedKnowledgeBases);
-
   if (!session) {
     return null; // Don't render anything while redirecting
   }

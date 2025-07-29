@@ -62,8 +62,6 @@ export const useSearchAndFilter = ({
 
   // Helper function to convert API format to component format
   const convertApiToComponent = (apiKb: KnowledgeBase): KnowledgeBase => {
-    // Debug: Log the original API data to understand the structure
-    console.log(apiKb);
     return {
       id: apiKb.id,
       name: apiKb.name,
