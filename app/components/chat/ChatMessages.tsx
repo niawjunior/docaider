@@ -77,7 +77,7 @@ export default function ChatMessages({
         )}
       >
         {loading && (
-          <div className="absolute z-100  bottom-0 flex items-center justify-center w-full">
+          <div className="absolute z-100 inset-0 flex items-center justify-center w-full h-full">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         )}
