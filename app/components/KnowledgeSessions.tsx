@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useMemo } from "react";
 import { useChats } from "../hooks/useChats";
 import clsx from "clsx";
+import { Loader2 } from "lucide-react";
 
 interface KnowledgeSessionsProps {
   chatId?: string;
@@ -60,7 +61,7 @@ const KnowledgeSessions = ({
     <ul ref={sidebarRef} className="flex-1 overflow-y-auto scroll-hidden ">
       {isLoading ? (
         <div className="flex items-center justify-center py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       ) : (
         chats?.map(

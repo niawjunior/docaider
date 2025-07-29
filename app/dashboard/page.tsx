@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Plus, Mail, Star } from "lucide-react";
+import { Plus, Mail, Star } from "lucide-react";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import KnowledgeBaseList from "../components/KnowledgeBaseList";
 import CreateKnowledgeBaseDialog from "../components/CreateKnowledgeBaseDialog";
@@ -31,7 +31,6 @@ export default function DashboardPage() {
   const [userEmail, setUserEmail] = useState<string>("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const t = useTranslations("dashboard");
-  const chat = useTranslations("chat");
 
   const kbHooks = useKnowledgeBases();
   const knowledgeBases = kbHooks.getKnowledgeBases.data || [];
@@ -120,22 +119,7 @@ export default function DashboardPage() {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Button
-                        size="icon"
-                        onClick={() => router.push("/chat")}
-                        className="text-[20px] rounded-lg"
-                      >
-                        <MessageCircle />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{t("goToChat")}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
@@ -174,23 +158,6 @@ export default function DashboardPage() {
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>{t("createKnowledgeBase")}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    variant="ghost"
-                    onClick={() => router.push("/chat")}
-                    className="rounded-lg"
-                  >
-                    <MessageCircle />
-                    {chat("title")}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t("goToChat")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

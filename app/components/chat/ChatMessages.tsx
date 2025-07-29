@@ -6,12 +6,14 @@ import { FaRegFaceSadCry } from "react-icons/fa6";
 import { IoArrowDownSharp } from "react-icons/io5";
 import clsx from "clsx";
 import Markdown from "../Markdown";
+import { Loader2 } from "lucide-react";
 
 interface ChatMessagesProps {
   messages: any[];
   status: string;
   bottomRef?: React.RefObject<HTMLDivElement | null>;
   isKnowledgeBase?: boolean;
+  loading?: boolean;
 }
 
 export default function ChatMessages({
@@ -19,6 +21,7 @@ export default function ChatMessages({
   status,
   bottomRef: externalBottomRef,
   isKnowledgeBase,
+  loading,
 }: ChatMessagesProps) {
   const t = useTranslations("chat");
   const internalBottomRef = useRef<HTMLDivElement>(null);
@@ -67,12 +70,17 @@ export default function ChatMessages({
       <div
         ref={containerRef}
         className={clsx(
-          "overflow-auto scroll-hidden md:px-2 px-0",
+          "overflow-auto scroll-hidden md:px-2 px-0 relative",
           !isKnowledgeBase &&
             "md:h-[calc(100dvh-300px)] h-[calc(100dvh-300px)]",
           isKnowledgeBase && "md:h-[calc(100dvh-480px)] h-[calc(100dvh-500px)]"
         )}
       >
+        {loading && (
+          <div className="absolute z-100  bottom-0 flex items-center justify-center w-full">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        )}
         {messages.map((message: any, index: any) => {
           const isUser = message.role === "user";
           return (

@@ -91,6 +91,7 @@ export default function ChatForm({
       },
     }),
     id: chatId,
+
     onFinish: async ({ message }) => {
       const toolCalls =
         message.parts?.filter(
@@ -115,6 +116,8 @@ export default function ChatForm({
       console.log("onError", error);
     },
   });
+
+  console.log("status", status);
 
   const handleSubmit = useCallback(() => {
     if (!input.trim() || status !== "ready") return;
@@ -185,6 +188,7 @@ export default function ChatForm({
               status={status}
               bottomRef={bottomRef}
               isKnowledgeBase={isKnowledgeBase}
+              loading={isFetching || isLoading}
             />
           </div>
 
