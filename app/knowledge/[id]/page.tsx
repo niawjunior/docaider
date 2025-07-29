@@ -42,24 +42,6 @@ export default function ViewKnowledgeBasePage() {
   const kbHooks = useKnowledgeBases();
   const [chatId, setChatId] = useState<string>("");
   const queryClient = useQueryClient();
-  const suggestedPrompts = useMemo(
-    () => [
-      {
-        title: t("suggestedPrompts.tellMeAbout"),
-      },
-      {
-        title: t("suggestedPrompts.whoIsAuthor"),
-      },
-      {
-        title: t("suggestedPrompts.whatIsTitle"),
-      },
-      {
-        title: t("suggestedPrompts.summarize"),
-      },
-    ],
-    [t]
-  );
-
   interface Document {
     id: number;
     title: string;
@@ -266,7 +248,7 @@ export default function ViewKnowledgeBasePage() {
                       })}
                     </p>
                   </div>
-                  <div className="border-t pt-4 max-h-[120px] overflow-y-auto">
+                  <div className="border-t pt-4 max-h-[120px] overflow-y-auto scroll-hidden">
                     <h3 className="font-medium mb-2">{kbT("documents")}</h3>
                     {documentsData.length === 0 && (
                       <p className="text-sm text-muted-foreground">
@@ -335,7 +317,6 @@ export default function ViewKnowledgeBasePage() {
                 <ChatForm
                   isKnowledgeBase={true}
                   knowledgeBaseId={params.id}
-                  suggestedPrompts={suggestedPrompts}
                   chatId={chatId}
                   onFinished={handleChatFinished}
                 />

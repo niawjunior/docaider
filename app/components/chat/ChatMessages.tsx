@@ -12,7 +12,6 @@ interface ChatMessagesProps {
   status: string;
   bottomRef?: React.RefObject<HTMLDivElement | null>;
   isKnowledgeBase?: boolean;
-  isEmpty?: boolean;
 }
 
 export default function ChatMessages({
@@ -20,7 +19,6 @@ export default function ChatMessages({
   status,
   bottomRef: externalBottomRef,
   isKnowledgeBase,
-  isEmpty,
 }: ChatMessagesProps) {
   const t = useTranslations("chat");
   const internalBottomRef = useRef<HTMLDivElement>(null);
@@ -70,12 +68,9 @@ export default function ChatMessages({
         ref={containerRef}
         className={clsx(
           "overflow-auto scroll-hidden md:px-2 px-0",
-          !isEmpty &&
-            !isKnowledgeBase &&
+          !isKnowledgeBase &&
             "md:h-[calc(100dvh-300px)] h-[calc(100dvh-300px)]",
-          !isEmpty &&
-            isKnowledgeBase &&
-            "md:h-[calc(100dvh-480px)] h-[calc(100dvh-500px)]"
+          isKnowledgeBase && "md:h-[calc(100dvh-480px)] h-[calc(100dvh-500px)]"
         )}
       >
         {messages.map((message: any, index: any) => {

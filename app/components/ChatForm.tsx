@@ -17,7 +17,6 @@ import ChatInput from "./chat/ChatInput";
 import ChatToolbar from "./chat/ChatToolbar";
 import ShareDialog from "./chat/ShareDialog";
 import DocumentUploadDialog from "./chat/DocumentUploadDialog";
-import EmptyStatePrompts from "./chat/EmptyStatePrompts";
 import {
   Tooltip,
   TooltipContent,
@@ -38,7 +37,6 @@ interface ChatFormProps {
 
 export default function ChatForm({
   chatId,
-  suggestedPrompts,
   isShowTool,
   isKnowledgeBase = false,
   knowledgeBaseId,
@@ -51,7 +49,6 @@ export default function ChatForm({
   const [currentTool, setCurrentTool] = useState<string>("");
   // isAtBottom state is now handled in ChatMessages
   const containerRef = useRef<HTMLDivElement>(null);
-  const [promptToSubmit, setPromptToSubmit] = useState<string | null>(null);
   const { session } = useSupabaseSession();
   const { useGetDocuments } = useDocuments();
   const [isRequiredDocument, setIsRequiredDocument] = useState(false);
@@ -142,21 +139,8 @@ export default function ChatForm({
 
   // Scroll event listener is now handled in ChatMessages
 
-  useEffect(() => {
-    if (promptToSubmit !== null) {
-      setInput(promptToSubmit);
-      setTimeout(() => {
-        handleSubmit();
-        setPromptToSubmit(null);
-      }, 100);
-    }
-  }, [promptToSubmit, handleSubmit]);
-
-  const handlePromptClick = (text: string) => {
-    setPromptToSubmit(text);
-  };
-
-  if ((isLoading || isFetching) && !isKnowledgeBase) {
+  // Only show the global loader for non-knowledge base chats when loading initial data
+  if ((isLoading || isFetching) && !isKnowledgeBase && !messages.length) {
     return <GlobalLoader />;
   }
 
@@ -170,13 +154,6 @@ export default function ChatForm({
           "flex flex-col items-center gap-4 w-full overflow-y-auto scroll-hidden bottom-[20px]"
         )}
       >
-        {messages?.length === 0 && !isLoading && (
-          <EmptyStatePrompts
-            suggestedPrompts={suggestedPrompts}
-            onPromptClick={handlePromptClick}
-          />
-        )}
-
         <div className="w-full md:bg-zinc-800 bg-transparent p-2 rounded-xl ">
           <div className="flex justify-end">
             {!isKnowledgeBase && messages.length > 0 && (
@@ -208,7 +185,6 @@ export default function ChatForm({
               status={status}
               bottomRef={bottomRef}
               isKnowledgeBase={isKnowledgeBase}
-              isEmpty={messages.length === 0 && !isLoading}
             />
           </div>
 
