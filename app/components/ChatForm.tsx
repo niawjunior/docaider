@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import { useDocuments } from "../hooks/useDocuments";
+import GlobalLoader from "./GlobalLoader";
 import { useTranslations } from "next-intl";
 
 // Import our new subcomponents
@@ -56,7 +57,11 @@ export default function ChatForm({
   const [isRequiredDocument, setIsRequiredDocument] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  const { data: initialMessages } = useQuery({
+  const {
+    data: initialMessages,
+    isLoading,
+    isFetching,
+  } = useQuery({
     queryKey: ["chat", chatId],
     queryFn: async () => {
       if (!chatId) {
@@ -99,6 +104,12 @@ export default function ChatForm({
       await queryClient.invalidateQueries({
         queryKey: ["credit", session?.user?.id],
       });
+
+      if (!isKnowledgeBase) {
+        await queryClient.invalidateQueries({
+          queryKey: ["chats"],
+        });
+      }
       if (totalCreditCost > 0) {
         toast.success(`Used ${totalCreditCost} credits.`);
       }
@@ -144,6 +155,10 @@ export default function ChatForm({
   const handlePromptClick = (text: string) => {
     setPromptToSubmit(text);
   };
+
+  if ((isLoading || isFetching) && !isKnowledgeBase) {
+    return <GlobalLoader />;
+  }
 
   return (
     <>
