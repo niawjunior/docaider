@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useTranslations } from "next-intl";
+import { Locale, useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,11 +11,37 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import useSupabaseSession from "../hooks/useSupabaseSession";
+import { toast } from "sonner";
 
 export function ModeToggle() {
   const { setTheme } = useTheme();
   const t = useTranslations("common");
+  const settingsT = useTranslations("settings");
+  const { session } = useSupabaseSession();
+  const locale = useLocale() as Locale;
+  const handleThemeChange = async (theme: string) => {
+    setTheme(theme);
+    if (session?.user) {
+      const response = await fetch("/api/user/config", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          theme_preference: theme,
+          language_preference: locale,
+        }),
+      });
 
+      if (!response.ok) throw new Error("Failed to update settings");
+
+      // Apply theme immediately
+      setTheme(theme);
+
+      toast.success(settingsT("saveSuccess"));
+    }
+  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -26,13 +52,13 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("light")}>
           {t("light")}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("dark")}>
           {t("dark")}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("system")}>
           {t("system")}
         </DropdownMenuItem>
       </DropdownMenuContent>
