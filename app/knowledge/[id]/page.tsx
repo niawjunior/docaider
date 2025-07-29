@@ -316,7 +316,7 @@ export default function ViewKnowledgeBasePage() {
                   </TooltipProvider>
                 </CardTitle>
               </CardContent>
-              <CardContent className="max-h-[110px] overflow-y-auto">
+              <CardContent className="max-h-[110px] overflow-y-auto scroll-hidden">
                 <KnowledgeSessions
                   chatId={chatId}
                   knowledgeBaseId={params.id}

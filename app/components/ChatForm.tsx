@@ -170,7 +170,7 @@ export default function ChatForm({
           "flex flex-col items-center gap-4 w-full overflow-y-auto scroll-hidden bottom-[20px]"
         )}
       >
-        {messages?.length === 0 && (
+        {messages?.length === 0 && !isLoading && (
           <EmptyStatePrompts
             suggestedPrompts={suggestedPrompts}
             onPromptClick={handlePromptClick}
@@ -208,6 +208,7 @@ export default function ChatForm({
               status={status}
               bottomRef={bottomRef}
               isKnowledgeBase={isKnowledgeBase}
+              isEmpty={messages.length === 0 && !isLoading}
             />
           </div>
 
