@@ -65,7 +65,14 @@ export default function ViewKnowledgeBasePage() {
     error: docsError,
   } = kbHooks.useKnowledgeBaseDocuments(params.id);
 
-  const { data: knowledgeBaseChats } = useChats({
+  const {
+    data: knowledgeBaseChats,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isLoadingChats,
+    refetch,
+  } = useChats({
     isKnowledgeBase: true,
     knowledgeBaseId: params.id,
   });
@@ -146,34 +153,10 @@ export default function ViewKnowledgeBasePage() {
   };
 
   const handleChatFinished = async () => {
-    console.log("handleChatFinished - Current chatId:", chatId);
-
     // Store the current chat ID before any operations
     const currentChatId = chatId;
-
-    // reset the query cache
-    queryClient.resetQueries({
-      queryKey: ["chat", currentChatId],
-    });
-
-    // refetch the query
-    await queryClient.refetchQueries({
-      queryKey: ["chat", currentChatId],
-    });
-
-    // reset chats
-    queryClient.resetQueries({
-      queryKey: ["chats"],
-    });
-
-    // refetch chats and wait for completion
-    await queryClient.refetchQueries({
-      queryKey: ["chats"],
-    });
-
-    // Set the chat ID after refetching is complete to ensure it's maintained
-    console.log("handleChatFinished - Setting chatId to:", currentChatId);
     setChatId(currentChatId);
+    refetch();
   };
 
   return (
@@ -301,8 +284,12 @@ export default function ViewKnowledgeBasePage() {
               <CardContent className="max-h-[110px] overflow-y-auto scroll-hidden">
                 <KnowledgeSessions
                   chatId={chatId}
-                  knowledgeBaseId={params.id}
+                  chats={knowledgeBaseChatsData}
                   onChatClick={handleChatClick}
+                  isLoading={isLoadingChats}
+                  isFetchingNextPage={isFetchingNextPage}
+                  hasNextPage={hasNextPage}
+                  fetchNextPage={fetchNextPage}
                 />
               </CardContent>
             </Card>

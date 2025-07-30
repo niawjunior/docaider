@@ -1,33 +1,37 @@
 "use client";
-import React, { useEffect, useRef, useMemo } from "react";
-import { useChats } from "../hooks/useChats";
+import React, { useEffect, useRef } from "react";
 import clsx from "clsx";
 import { Loader2 } from "lucide-react";
 
+interface Chat {
+  id: string;
+  messages: any[];
+  created_at: string;
+}
+
 interface KnowledgeSessionsProps {
   chatId?: string;
-  knowledgeBaseId?: string;
+  chats: Chat[];
   onChatClick: (chatId: string) => void;
+  isLoading: boolean;
+  isFetchingNextPage: boolean;
+  hasNextPage: boolean | undefined;
+  fetchNextPage: () => void;
 }
 const KnowledgeSessions = ({
   chatId,
-  knowledgeBaseId,
+  chats,
   onChatClick,
+  isLoading,
+  isFetchingNextPage,
+  hasNextPage,
+  fetchNextPage
 }: KnowledgeSessionsProps) => {
   const sidebarRef = useRef<HTMLUListElement>(null);
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useChats({
-      isKnowledgeBase: true,
-      knowledgeBaseId,
-    });
+  
   const handleChatClick = (newChatId: string) => {
     onChatClick(newChatId);
   };
-
-  // Extract chats from pages - each page contains an array of chat objects directly
-  const chats = useMemo(() => {
-    return data?.pages.flatMap((page) => page.data) ?? [];
-  }, [data?.pages]);
 
   useEffect(() => {
     const sidebar = sidebarRef.current;
@@ -64,8 +68,7 @@ const KnowledgeSessions = ({
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       ) : (
-        chats?.map(
-          (chat: { id: string; messages: any[]; created_at: string }) => (
+        chats.map((chat) => (
             <li key={chat.id} className="py-1">
               <button
                 onClick={() => handleChatClick(chat.id)}
