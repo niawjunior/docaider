@@ -22,11 +22,11 @@ export function ModeToggle() {
   const { session } = useSupabaseSession();
   const locale = useLocale() as Locale;
   const { updateConfig, isUpdating } = useUserConfig(session?.user?.id || "");
-  
+
   const handleThemeChange = async (theme: string) => {
     // Apply theme immediately for better UX
     setTheme(theme);
-    
+
     if (session?.user) {
       try {
         // Use the hook's updateConfig method
@@ -34,7 +34,7 @@ export function ModeToggle() {
           themePreference: theme as "system" | "light" | "dark",
           languagePreference: locale as "en" | "th",
         });
-        
+
         toast.success(settingsT("saveSuccess"));
       } catch (error) {
         toast.error(settingsT("saveError"));

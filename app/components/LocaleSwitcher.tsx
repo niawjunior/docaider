@@ -47,7 +47,7 @@ export default function LocaleSwitcher() {
             languagePreference: locale,
             themePreference: theme.theme as "system" | "light" | "dark",
           });
-          
+
           toast.success(settingsT("saveSuccess"));
         } catch (error) {
           toast.error(settingsT("saveError"));
@@ -59,7 +59,7 @@ export default function LocaleSwitcher() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className="mx-4">
+      <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
           size="sm"

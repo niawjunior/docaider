@@ -150,12 +150,12 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 </div>
               )}
 
-              <div className="flex flex-col space-y-4">
+              <div className="flex flex-col space-y-4 px-4">
                 <SheetClose asChild>
                   <Button
                     variant="ghost"
                     onClick={() => handleNavigation("/pricing")}
-                    className="justify-start"
+                    className="justify-start px-0"
                   >
                     {t("pricing")}
                   </Button>
@@ -166,7 +166,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                       <Button
                         variant="ghost"
                         onClick={() => handleNavigation("/dashboard")}
-                        className="justify-start"
+                        className="justify-start px-0"
                       >
                         {t("dashboard")}
                       </Button>
@@ -175,7 +175,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                       <Button
                         variant="ghost"
                         onClick={() => handleNavigation("/settings")}
-                        className="justify-start"
+                        className="justify-start px-0"
                       >
                         {t("settings")}
                       </Button>
@@ -184,7 +184,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                       <Button
                         variant="ghost"
                         onClick={handleSignOut}
-                        className="justify-start"
+                        className="justify-start px-0"
                       >
                         {t("signOut")}
                       </Button>
@@ -195,7 +195,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                     <Button
                       variant="ghost"
                       onClick={() => handleNavigation("/login")}
-                      className="justify-start"
+                      className="justify-start px-0"
                     >
                       {t("signIn")}
                     </Button>
