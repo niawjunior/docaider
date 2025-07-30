@@ -8,10 +8,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Globe } from "lucide-react";
+import { Globe, Loader2 } from "lucide-react";
 import { locales, type Locale } from "../../i18n/config";
 import { setUserLocale } from "@/app/utils/locale";
-import { startTransition } from "react";
+import { startTransition, useState } from "react";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
@@ -31,6 +31,7 @@ export default function LocaleSwitcher() {
   const { session } = useSupabaseSession();
   const settingsT = useTranslations("settings");
   const theme = useTheme();
+  const [loading, setLoading] = useState(false);
 
   const handleLocaleChange = async (newLocale: Locale) => {
     const locale = newLocale as Locale;
@@ -38,6 +39,7 @@ export default function LocaleSwitcher() {
       setUserLocale(locale);
 
       if (session?.user) {
+        setLoading(true);
         const response = await fetch("/api/user/config", {
           method: "POST",
           headers: {
@@ -52,6 +54,7 @@ export default function LocaleSwitcher() {
         if (!response.ok) throw new Error("Failed to update settings");
 
         toast.success(settingsT("saveSuccess"));
+        setLoading(false);
       }
     });
   };
@@ -59,8 +62,18 @@ export default function LocaleSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="mx-4">
-        <Button variant="outline" size="sm" className="flex items-center gap-2">
-          <Globe className="h-4 w-4" />
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          disabled={loading}
+        >
+          {!loading && (
+            <>
+              <Globe className="h-4 w-4" />
+            </>
+          )}
+          {loading && <Loader2 className="animate-spin" />}
           <span className="hidden sm:inline">
             {localeFlags[locale]} {localeNames[locale]}
           </span>

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Moon, Sun } from "lucide-react";
+import { Loader2, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Locale, useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -20,8 +20,10 @@ export function ModeToggle() {
   const settingsT = useTranslations("settings");
   const { session } = useSupabaseSession();
   const locale = useLocale() as Locale;
+  const [loading, setLoading] = React.useState(false);
   const handleThemeChange = async (theme: string) => {
     if (session?.user) {
+      setLoading(true);
       const response = await fetch("/api/user/config", {
         method: "POST",
         headers: {
@@ -39,6 +41,7 @@ export function ModeToggle() {
       setTheme(theme);
 
       toast.success(settingsT("saveSuccess"));
+      setLoading(false);
     } else {
       setTheme(theme);
     }
@@ -46,10 +49,15 @@ export function ModeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+        <Button variant="outline" size="sm" disabled={loading}>
+          {!loading && (
+            <>
+              <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+              <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+            </>
+          )}
           <span className="sr-only">{t("selectTheme")}</span>
+          {loading && <Loader2 className="animate-spin" />}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
