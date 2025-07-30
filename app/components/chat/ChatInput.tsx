@@ -16,6 +16,7 @@ interface ChatInputProps {
   isShowTool: boolean | undefined;
   isRequiredDocument: boolean;
   setIsRequiredDocument: (value: boolean) => void;
+  loading: boolean;
 }
 
 export default function ChatInput({
@@ -25,7 +26,8 @@ export default function ChatInput({
   status,
   isShowTool,
   isRequiredDocument,
-  setIsRequiredDocument
+  setIsRequiredDocument,
+  loading,
 }: ChatInputProps) {
   const t = useTranslations("chat");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -93,10 +95,8 @@ export default function ChatInput({
           value={input}
           ref={textareaRef}
           onChange={handleInputChange}
-          placeholder={
-            status !== "ready" ? t("thinking") : t("askAnything")
-          }
-          disabled={status !== "ready"}
+          placeholder={status !== "ready" ? t("thinking") : t("askAnything")}
+          disabled={status !== "ready" || loading}
           onKeyDown={handleKeyDown}
           className="flex-1 bg-card text-card-foreground px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
         />
@@ -112,9 +112,7 @@ export default function ChatInput({
       </div>
 
       <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-muted-foreground text-sm">
-          {t("disclaimer")}
-        </div>
+        <div className="text-muted-foreground text-sm">{t("disclaimer")}</div>
 
         {!isShowTool && (
           <div className="flex items-center space-x-2">
@@ -122,14 +120,10 @@ export default function ChatInput({
               checked={isRequiredDocument}
               onCheckedChange={setIsRequiredDocument}
             />
-            <Label htmlFor="document-search">
-              {t("alwaysSearchDocument")}
-            </Label>
+            <Label htmlFor="document-search">{t("alwaysSearchDocument")}</Label>
           </div>
         )}
       </div>
     </div>
   );
 }
-
-

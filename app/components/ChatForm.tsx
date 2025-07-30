@@ -212,6 +212,7 @@ export default function ChatForm({
                 isShowTool={isShowTool}
                 isRequiredDocument={isRequiredDocument}
                 setIsRequiredDocument={setIsRequiredDocument}
+                loading={isFetching || isLoading}
               />
             </div>
 
