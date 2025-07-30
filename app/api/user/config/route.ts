@@ -41,7 +41,7 @@ export async function GET() {
     if (!userConfigData || userConfigData.length === 0) {
       return NextResponse.json({
         language_preference: "en",
-        theme_preference: "dark",
+        theme_preference: "system",
       });
     }
 

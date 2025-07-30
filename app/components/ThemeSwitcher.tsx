@@ -21,7 +21,6 @@ export function ModeToggle() {
   const { session } = useSupabaseSession();
   const locale = useLocale() as Locale;
   const handleThemeChange = async (theme: string) => {
-    setTheme(theme);
     if (session?.user) {
       const response = await fetch("/api/user/config", {
         method: "POST",

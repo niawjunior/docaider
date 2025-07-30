@@ -65,7 +65,7 @@ export async function GET(request: Request) {
               .insert({
                 id: authUser.id,
                 language_preference: "th",
-                theme_preference: "dark",
+                theme_preference: "system",
               });
 
             if (configError) {

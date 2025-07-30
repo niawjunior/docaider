@@ -69,7 +69,7 @@ export default function SettingsPage() {
       if (data) {
         reset({
           language_preference: data.language_preference || "en",
-          theme_preference: data.theme_preference || "dark",
+          theme_preference: data.theme_preference || "system",
         });
       }
     } catch (error) {
@@ -163,7 +163,6 @@ export default function SettingsPage() {
                     value={watch("theme_preference")}
                     onValueChange={(value) => {
                       setValue("theme_preference", value);
-                      setTheme(value);
                     }}
                   >
                     <SelectTrigger className="w-full">
