@@ -35,7 +35,7 @@ const getPricingPlans = (
     credits: t("plans.starter.credits"),
     features: t.raw("plans.starter.features") as string[],
     cta: t("plans.starter.cta"),
-    href: "/chat",
+    href: "/dashboard",
     featured: false,
     disabled: false,
   },

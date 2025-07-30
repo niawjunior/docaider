@@ -38,7 +38,8 @@
     "selectTheme": "Select theme",
     "light": "Light",
     "dark": "Dark",
-    "system": "System"
+    "system": "System",
+    "getStarted": "Get Started"
   },
   "navigation": {
     "home": "Home",

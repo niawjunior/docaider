@@ -150,12 +150,12 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 </div>
               )}
 
-              <div className="flex flex-col space-y-4 px-4">
+              <div className="flex flex-col space-y-4 px-4 py-2 justify-center ">
                 <SheetClose asChild>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     onClick={() => handleNavigation("/pricing")}
-                    className="justify-start px-0"
+                    className="justify-center "
                   >
                     {t("pricing")}
                   </Button>
@@ -164,27 +164,27 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                   <>
                     <SheetClose asChild>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         onClick={() => handleNavigation("/dashboard")}
-                        className="justify-start px-0"
+                        className="justify-center "
                       >
                         {t("dashboard")}
                       </Button>
                     </SheetClose>
                     <SheetClose asChild>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         onClick={() => handleNavigation("/settings")}
-                        className="justify-start px-0"
+                        className="justify-center "
                       >
                         {t("settings")}
                       </Button>
                     </SheetClose>
                     <SheetClose asChild>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         onClick={handleSignOut}
-                        className="justify-start px-0"
+                        className="justify-center "
                       >
                         {t("signOut")}
                       </Button>
@@ -193,9 +193,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 ) : (
                   <SheetClose asChild>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       onClick={() => handleNavigation("/login")}
-                      className="justify-start px-0"
+                      className="justify-center "
                     >
                       {t("signIn")}
                     </Button>
