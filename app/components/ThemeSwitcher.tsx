@@ -39,6 +39,8 @@ export function ModeToggle() {
       setTheme(theme);
 
       toast.success(settingsT("saveSuccess"));
+    } else {
+      setTheme(theme);
     }
   };
   return (
