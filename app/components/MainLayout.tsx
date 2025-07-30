@@ -17,8 +17,6 @@ import {
 import LocaleSwitcher from "./LocaleSwitcher";
 import { useTranslations } from "next-intl";
 import { ModeToggle } from "./ThemeSwitcher";
-import { useTheme } from "next-themes";
-import { setUserLocale } from "../utils/locale";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
@@ -27,8 +25,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [userEmail, setUserEmail] = useState<string>("");
   const { credit, isLoading } = useCredit(session?.user?.id || "");
   const t = useTranslations("common");
-  const { setTheme } = useTheme();
-
   // Set user email when session is available
   useEffect(() => {
     if (session?.user?.email) {
@@ -47,28 +43,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  useEffect(() => {
-    fetchUserConfig();
-  }, [session]);
-
-  const fetchUserConfig = async () => {
-    if (session?.user?.id) {
-      try {
-        const response = await fetch("/api/user/config");
-        if (response.ok) {
-          const data = await response.json();
-          if (data && data.theme_preference) {
-            setTheme(data.theme_preference);
-          }
-          if (data && data.language_preference) {
-            setUserLocale(data.language_preference);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching user config:", error);
-      }
-    }
-  };
+  // Theme and language are now applied via cookies in middleware
+  // No need to apply config here, which prevents flash of default theme/language
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background">

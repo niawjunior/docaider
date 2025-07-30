@@ -11,10 +11,11 @@ import {
 import { Globe, Loader2 } from "lucide-react";
 import { locales, type Locale } from "../../i18n/config";
 import { setUserLocale } from "@/app/utils/locale";
-import { startTransition, useState } from "react";
+import { startTransition } from "react";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
+import useUserConfig from "../hooks/useUserConfig";
 
 const localeNames: Record<Locale, string> = {
   en: "English",
@@ -31,30 +32,27 @@ export default function LocaleSwitcher() {
   const { session } = useSupabaseSession();
   const settingsT = useTranslations("settings");
   const theme = useTheme();
-  const [loading, setLoading] = useState(false);
+  const { updateConfig, isUpdating } = useUserConfig(session?.user?.id || "");
 
   const handleLocaleChange = async (newLocale: Locale) => {
     const locale = newLocale as Locale;
     startTransition(async () => {
+      // Apply locale change immediately for better UX
       setUserLocale(locale);
 
       if (session?.user) {
-        setLoading(true);
-        const response = await fetch("/api/user/config", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            language_preference: locale,
-            theme_preference: theme.theme,
-          }),
-        });
-
-        if (!response.ok) throw new Error("Failed to update settings");
-
-        toast.success(settingsT("saveSuccess"));
-        setLoading(false);
+        try {
+          // Use the hook's updateConfig method
+          await updateConfig({
+            languagePreference: locale,
+            themePreference: theme.theme as "system" | "light" | "dark",
+          });
+          
+          toast.success(settingsT("saveSuccess"));
+        } catch (error) {
+          toast.error(settingsT("saveError"));
+          console.error("Failed to update settings:", error);
+        }
       }
     });
   };
@@ -66,14 +64,14 @@ export default function LocaleSwitcher() {
           variant="outline"
           size="sm"
           className="flex items-center gap-2"
-          disabled={loading}
+          disabled={isUpdating}
         >
-          {!loading && (
+          {!isUpdating && (
             <>
               <Globe className="h-4 w-4" />
             </>
           )}
-          {loading && <Loader2 className="animate-spin" />}
+          {isUpdating && <Loader2 className="animate-spin" />}
           <span className="hidden sm:inline">
             {localeFlags[locale]} {localeNames[locale]}
           </span>

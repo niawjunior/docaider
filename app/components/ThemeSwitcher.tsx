@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import useSupabaseSession from "../hooks/useSupabaseSession";
 import { toast } from "sonner";
+import useUserConfig from "../hooks/useUserConfig";
 
 export function ModeToggle() {
   const { setTheme } = useTheme();
@@ -20,44 +21,39 @@ export function ModeToggle() {
   const settingsT = useTranslations("settings");
   const { session } = useSupabaseSession();
   const locale = useLocale() as Locale;
-  const [loading, setLoading] = React.useState(false);
+  const { updateConfig, isUpdating } = useUserConfig(session?.user?.id || "");
+  
   const handleThemeChange = async (theme: string) => {
+    // Apply theme immediately for better UX
+    setTheme(theme);
+    
     if (session?.user) {
-      setLoading(true);
-      const response = await fetch("/api/user/config", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          theme_preference: theme,
-          language_preference: locale,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update settings");
-
-      // Apply theme immediately
-      setTheme(theme);
-
-      toast.success(settingsT("saveSuccess"));
-      setLoading(false);
-    } else {
-      setTheme(theme);
+      try {
+        // Use the hook's updateConfig method
+        await updateConfig({
+          themePreference: theme as "system" | "light" | "dark",
+          languagePreference: locale as "en" | "th",
+        });
+        
+        toast.success(settingsT("saveSuccess"));
+      } catch (error) {
+        toast.error(settingsT("saveError"));
+        console.error("Failed to update settings:", error);
+      }
     }
   };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" disabled={loading}>
-          {!loading && (
+        <Button variant="outline" size="sm" disabled={isUpdating}>
+          {!isUpdating && (
             <>
               <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
               <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
             </>
           )}
           <span className="sr-only">{t("selectTheme")}</span>
-          {loading && <Loader2 className="animate-spin" />}
+          {isUpdating && <Loader2 className="animate-spin" />}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/useUser";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -14,6 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import {
   Card,
   CardContent,
@@ -26,87 +35,80 @@ import { useTheme } from "next-themes";
 import MainLayout from "../components/MainLayout";
 import GlobalLoader from "../components/GlobalLoader";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import useUserConfig from "../hooks/useUserConfig";
+import { setUserLocale } from "../utils/locale";
 
-type UserConfig = {
-  language_preference: string;
-  theme_preference: string;
-};
+// Define the Zod schema for form validation
+const getFormSchema = () =>
+  z.object({
+    language_preference: z.enum(["en", "th"]),
+    theme_preference: z.enum(["light", "dark", "system"]),
+  });
+
+type SettingsFormValues = z.infer<ReturnType<typeof getFormSchema>>;
 
 export default function SettingsPage() {
-  const { user, loading } = useUser();
+  const { user, loading: userLoading } = useUser();
   const router = useRouter();
   const t = useTranslations("settings");
   const tCommon = useTranslations("common");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const { setTheme } = useTheme();
 
-  const { handleSubmit, reset, setValue, watch } = useForm<UserConfig>({
+  // Use the hook to get and update user config
+  const {
+    config,
+    loading: configLoading,
+    updateConfig,
+    isUpdating,
+  } = useUserConfig(user?.id || "");
+
+  // Initialize form with Zod validation
+  const FormSchema = getFormSchema();
+  const form = useForm<SettingsFormValues>({
+    resolver: zodResolver(FormSchema),
     defaultValues: {
       language_preference: "en",
-      theme_preference: "dark",
+      theme_preference: "system",
     },
   });
 
+  // Use useEffect to update form values when config loads
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-      return;
-    }
-
-    if (user) {
-      fetchUserConfig();
-    }
-  }, [user, loading, router]);
-
-  const fetchUserConfig = async () => {
-    try {
-      const response = await fetch("/api/user/config");
-      if (!response.ok) throw new Error("Failed to fetch user config");
-      const data = await response.json();
-
-      // Set form values from the API response
-      if (data) {
-        reset({
-          language_preference: data.language_preference || "en",
-          theme_preference: data.theme_preference || "system",
+    if (config) {
+      // Use reset with keepDefaultValues: false to ensure complete reset
+      setTimeout(() => {
+        form.reset({
+          language_preference: config.languagePreference as "en" | "th",
+          theme_preference: config.themePreference as
+            | "light"
+            | "dark"
+            | "system",
         });
-      }
-    } catch (error) {
-      console.error("Error fetching user config:", error);
-      toast.error(t("fetchError"));
-    } finally {
-      setIsLoading(false);
+      }, 100);
     }
-  };
+  }, [config, form]);
 
-  const onSubmit = async (data: UserConfig) => {
+  // Form submission handler
+  async function onSubmit(data: SettingsFormValues) {
     try {
-      setIsSaving(true);
-      const response = await fetch("/api/user/config", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+      // Use the hook's updateConfig method
+      await updateConfig({
+        themePreference: data.theme_preference,
+        languagePreference: data.language_preference,
       });
 
-      if (!response.ok) throw new Error("Failed to update settings");
-
-      // Apply
-      // theme immediately
+      // Apply theme immediately for better UX
       setTheme(data.theme_preference);
+      setUserLocale(data.language_preference);
 
       toast.success(t("saveSuccess"));
     } catch (error) {
       console.error("Error updating settings:", error);
       toast.error(t("saveError"));
-    } finally {
-      setIsSaving(false);
     }
-  };
+  }
 
-  if (isLoading) {
+  if (userLoading || configLoading) {
     return <GlobalLoader />;
   }
 
@@ -128,71 +130,99 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
-          {/* Display Settings */}
-          <Card className="border border-border">
-            <CardHeader>
-              <CardTitle>{t("displaySettings")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label>{t("language")}</Label>
-                  <Select
-                    value={watch("language_preference")}
-                    onValueChange={(value) =>
-                      setValue("language_preference", value)
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t("selectLanguage")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="th">ไทย</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
+            {/* Display Settings */}
+            <Card className="border border-border">
+              <CardHeader>
+                <CardTitle>{t("displaySettings")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="language_preference"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("language")}</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={form.formState.isSubmitting || isUpdating}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder={t("selectLanguage")} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="en">English</SelectItem>
+                              <SelectItem value="th">ไทย</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <div className="space-y-2">
-                  <Label>{t("theme")}</Label>
-                  <Select
-                    value={watch("theme_preference")}
-                    onValueChange={(value) => {
-                      setValue("theme_preference", value);
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t("selectTheme")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="light">{t("light")}</SelectItem>
-                      <SelectItem value="dark">{t("dark")}</SelectItem>
-                      <SelectItem value="system">{t("system")}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormField
+                    control={form.control}
+                    name="theme_preference"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("theme")}</FormLabel>
+                        <FormControl>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={form.formState.isSubmitting || isUpdating}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder={t("selectTheme")} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="light">
+                                {t("light")}
+                              </SelectItem>
+                              <SelectItem value="dark">{t("dark")}</SelectItem>
+                              <SelectItem value="system">
+                                {t("system")}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-end pt-4">
-              <Button
-                type="submit"
-                disabled={isSaving}
-                className="flex items-center gap-2"
-              >
-                {isSaving ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save size={16} />
-                )}
-                {isSaving ? t("saving") : t("saveChanges")}
-              </Button>
-            </CardFooter>
-          </Card>
-        </form>
+              </CardContent>
+              <CardFooter className="flex justify-end pt-4">
+                <Button
+                  type="submit"
+                  disabled={
+                    isUpdating ||
+                    !form.formState.isDirty ||
+                    form.formState.isSubmitting
+                  }
+                  className="flex items-center gap-2"
+                >
+                  {isUpdating || form.formState.isSubmitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save size={16} />
+                  )}
+                  {isUpdating || form.formState.isSubmitting
+                    ? t("saving")
+                    : t("saveChanges")}
+                </Button>
+              </CardFooter>
+            </Card>
+          </form>
+        </Form>
       </div>
     </MainLayout>
   );

@@ -1,15 +1,14 @@
 // hooks/useUserConfig.ts
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { getUserConfig, updateUserConfig } from "../utils/db-actions";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface UserConfig {
   id: string;
   createdAt: string;
   updatedAt: string;
-  languagePreference: string | null;
-  themePreference: string | null;
+  languagePreference: "en" | "th" | null;
+  themePreference: "system" | "light" | "dark" | null;
   notificationSettings:
     | {
         email?: boolean;
@@ -27,54 +26,92 @@ export interface UserConfig {
 }
 
 export default function useUserConfig(userId: string) {
-  const [config, setConfig] = useState<UserConfig | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const getConfig = useCallback(async () => {
-    try {
-      // Use server action instead of API route
-      const data = await getUserConfig(userId);
+  // Query for fetching user config
+  const {
+    data: config,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["userConfig", userId],
+    queryFn: async () => {
+      if (!userId) return null;
+      const response = await fetch(`/api/user/config`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch config: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Convert from API snake_case to our camelCase format
+      return {
+        id: userId,
+        languagePreference: data.language_preference,
+        themePreference: data.theme_preference,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        notificationSettings: {},
+        chatSettings: {},
+        defaultCurrency: null,
+        timezone: null,
+      } as UserConfig;
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Mutation for updating user config
+  const { mutateAsync: updateConfig, isPending: isUpdating } = useMutation({
+    mutationFn: async (updates: Partial<UserConfig>) => {
+      // Convert from our camelCase to API snake_case format
+      const apiPayload = {
+        language_preference: updates.languagePreference,
+        theme_preference: updates.themePreference,
+      };
+
+      const response = await fetch(`/api/user/config`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(apiPayload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update config: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Convert from API snake_case to our camelCase format
+      return {
+        ...config,
+        languagePreference: data.language_preference,
+        themePreference: data.theme_preference,
+        updatedAt: new Date().toISOString(),
+      } as UserConfig;
+    },
+    onSuccess: (data) => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["userConfig", userId] });
+
+      // Optionally update the cache directly
       if (data) {
-        setConfig(data as UserConfig);
+        queryClient.setQueryData(["userConfig", userId], data);
       }
-    } catch (err) {
-      console.error("Error fetching user config:", err);
-      setError(
-        err instanceof Error ? err : new Error("Failed to fetch config")
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
-
-  const updateConfig = async (updates: Partial<UserConfig>) => {
-    try {
-      // Use server action instead of API route
-      const updatedConfig = await updateUserConfig(userId, updates);
-
-      // Update state with the returned config
-      if (updatedConfig) {
-        setConfig(updatedConfig as UserConfig);
-      } else {
-        // Optimistically update state if no config returned
-        setConfig((prev) => (prev ? { ...prev, ...updates } : null));
-      }
-    } catch (err) {
+    },
+    onError: (err) => {
       console.error("Error updating user config:", err);
-      throw err instanceof Error ? err : new Error("Failed to update config");
-    }
-  };
-
-  useEffect(() => {
-    if (!userId) return;
-    getConfig();
-  }, [userId, getConfig]);
+    },
+  });
 
   return {
     config,
-    loading,
+    loading: isLoading,
     error,
     updateConfig,
+    isUpdating,
   };
 }
