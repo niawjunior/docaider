@@ -205,7 +205,7 @@ export default function ShareKnowledgeBaseDialog({
                     {isLoading ? (
                       <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        {t("loading", { ns: "common" })}
+                        {t("loading")}
                       </div>
                     ) : shares.length > 0 ? (
                       <>

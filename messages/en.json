@@ -146,7 +146,8 @@
       "add": "Add",
       "sharedWith": "Shared with",
       "noShares": "No shares yet",
-      "remove": "Remove"
+      "remove": "Remove",
+      "loading": "Loading..."
     },
     "viewPage": {
       "backToDashboard": "Back to Dashboard",

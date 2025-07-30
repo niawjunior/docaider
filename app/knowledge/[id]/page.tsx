@@ -101,12 +101,20 @@ export default function ViewKnowledgeBasePage() {
   }, [kbError, router, t]);
 
   useEffect(() => {
-    // set chatId to the first chat id only if chatId is not already set
-    if (knowledgeBaseChatsData.length > 0 && !chatId) {
-      console.log("Setting initial chatId to:", knowledgeBaseChatsData[0].id);
-      setChatId(knowledgeBaseChatsData[0].id);
+    // If chats are loaded (not loading anymore)
+    if (!isLoadingChats) {
+      // If there are chats, set chatId to the first chat id (if not already set)
+      if (knowledgeBaseChatsData.length > 0 && !chatId) {
+        console.log("Setting initial chatId to:", knowledgeBaseChatsData[0].id);
+        setChatId(knowledgeBaseChatsData[0].id);
+      } 
+      // If there are no chats and we're not already creating one, create a new chat
+      else if (knowledgeBaseChatsData.length === 0 && !chatId) {
+        console.log("No chats found, creating a new one");
+        createNewChat();
+      }
     }
-  }, [knowledgeBaseChatsData, chatId]);
+  }, [knowledgeBaseChatsData, chatId, isLoadingChats]);
 
   useEffect(() => {
     if (docsError) {

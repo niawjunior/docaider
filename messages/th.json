@@ -146,7 +146,8 @@
       "add": "เพิ่ม",
       "sharedWith": "แชร์กับ",
       "noShares": "ยังไม่มีการแชร์",
-      "remove": "ลบ"
+      "remove": "ลบ",
+      "loading": "กำลังโหลด..."
     },
     "viewPage": {
       "backToDashboard": "กลับไปที่แดชบอร์ด",

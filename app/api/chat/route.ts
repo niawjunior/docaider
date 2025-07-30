@@ -55,9 +55,13 @@ export async function POST(req: NextRequest) {
     if (knowledgeBase) {
       knowledgeBaseDocumentIds = knowledgeBase.documentIds || [];
       isPublicKnowledgeBase = knowledgeBase.isPublic || false;
-      
+
       // Check if knowledge base is shared with the user's email
-      if (!isPublicKnowledgeBase && knowledgeBase.userId !== user.id && user.email) {
+      if (
+        !isPublicKnowledgeBase &&
+        knowledgeBase.userId !== user.id &&
+        user.email
+      ) {
         const { data: sharedAccess } = await serviceSupabase
           .from("knowledge_base_shares")
           .select("id")
