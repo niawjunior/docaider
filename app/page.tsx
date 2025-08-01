@@ -115,9 +115,9 @@ export default function Home() {
               {t("title")}
             </motion.h1>
             <motion.div
-              className="absolute -inset-1 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-lg blur-lg -z-10"
+              className="absolute -inset-1 bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-lg blur-md -z-10"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              animate={{ opacity: 0.7 }}
               transition={{ delay: 0.3, duration: 0.8 }}
             />
           </motion.div>
