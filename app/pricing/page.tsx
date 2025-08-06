@@ -1,5 +1,5 @@
 "use client";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,6 +12,9 @@ import {
 import { useRouter } from "next/navigation";
 import MainLayout from "../components/MainLayout";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { toast } from "sonner";
+import useSupabaseSession from "../hooks/useSupabaseSession";
 
 interface PricingPlan {
   name: string;
@@ -23,6 +26,7 @@ interface PricingPlan {
   href: string;
   featured: boolean;
   disabled: boolean;
+  stripePriceId?: string;
 }
 
 const getPricingPlans = (
@@ -38,6 +42,7 @@ const getPricingPlans = (
     href: "/dashboard",
     featured: false,
     disabled: false,
+    stripePriceId: "price_free", // Free plan doesn't need a real Stripe price ID
   },
   {
     name: t("plans.pro.name"),
@@ -48,7 +53,8 @@ const getPricingPlans = (
     cta: t("plans.pro.cta"),
     href: "#",
     featured: true,
-    disabled: true,
+    disabled: false, // Enable the Pro plan
+    stripePriceId: "price_1OvXXXXXXXXXXXXXXXXXXXXX", // Replace with your actual Stripe Price ID
   },
   {
     name: t("plans.enterprise.name"),
@@ -57,16 +63,72 @@ const getPricingPlans = (
     credits: t("plans.enterprise.credits"),
     features: t.raw("plans.enterprise.features") as string[],
     cta: t("plans.enterprise.cta"),
-    href: "/contact",
+    href: "#",
     featured: false,
-    disabled: true,
+    disabled: true, // Enable the Enterprise plan
+    stripePriceId: "price_1OvXXXXXXXXXXXXXXXXXXXXX", // Replace with your actual Stripe Price ID
   },
 ];
 
 export default function PricingPage() {
   const router = useRouter();
   const t = useTranslations("pricing");
+  const commonT = useTranslations("common");
+  const supabase = useSupabaseSession();
+  const [isLoading, setIsLoading] = useState<string | null>(null);
   const pricingPlans = getPricingPlans(t);
+
+  const handleCheckout = async (plan: PricingPlan) => {
+    // Free plan - redirect to dashboard
+    if (plan.price === t("plans.starter.price")) {
+      router.push("/dashboard");
+      return;
+    }
+
+    // Enterprise plan - redirect to contact
+    if (plan.price === t("plans.enterprise.price")) {
+      router.push("/contact");
+      return;
+    }
+
+    if (!supabase?.session?.user) {
+      toast.error(t("loginRequired"), {
+        description: t("pleaseLoginToSubscribe"),
+      });
+      router.push("/login?callbackUrl=/pricing");
+      return;
+    }
+
+    try {
+      setIsLoading(plan.name);
+
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          priceId: plan.stripePriceId,
+          planName: plan.name,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+    } catch (error: any) {
+      console.error("Checkout error:", error);
+      toast.error(t("checkoutError"), {
+        description: error.message || t("somethingWentWrong"),
+      });
+      setIsLoading(null);
+    }
+  };
 
   return (
     <MainLayout>
@@ -140,9 +202,8 @@ export default function PricingPage() {
 
               <CardFooter className="mt-auto">
                 <Button
-                  asChild
                   variant="outline"
-                  disabled={plan.disabled}
+                  disabled={plan.disabled || isLoading === plan.name}
                   className={`
                   w-full py-6 text-lg font-semibold
                   ${
@@ -152,11 +213,16 @@ export default function PricingPage() {
                   }
                   ${plan.disabled ? "cursor-not-allowed" : "cursor-pointer"}
                 `}
-                  onClick={
-                    plan.disabled ? undefined : () => router.push(plan.href)
-                  }
+                  onClick={() => handleCheckout(plan)}
                 >
-                  <span>{plan.cta}</span>
+                  {isLoading === plan.name ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {commonT("loading")}
+                    </>
+                  ) : (
+                    <span>{plan.cta}</span>
+                  )}
                 </Button>
               </CardFooter>
             </Card>

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,7 +33,7 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import MainLayout from "../components/MainLayout";
 import GlobalLoader from "../components/GlobalLoader";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 import useUserConfig from "../hooks/useUserConfig";
 import { setUserLocale } from "../utils/locale";
 
@@ -49,9 +48,7 @@ type SettingsFormValues = z.infer<ReturnType<typeof getFormSchema>>;
 
 export default function SettingsPage() {
   const { user, loading: userLoading } = useUser();
-  const router = useRouter();
   const t = useTranslations("settings");
-  const tCommon = useTranslations("common");
   const { setTheme } = useTheme();
 
   // Use the hook to get and update user config
@@ -117,15 +114,6 @@ export default function SettingsPage() {
       <div className="px-6">
         <div className="flex items-center justify-between py-4">
           <div className="flex flex-col md:flex-row items-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push("/dashboard")}
-              className="mr-4"
-            >
-              <ArrowLeft size={16} className="mr-2" />
-              {tCommon("backToDashboard")}
-            </Button>
             <h1 className="md:text-lg text-md font-bold">{t("title")}</h1>
           </div>
         </div>

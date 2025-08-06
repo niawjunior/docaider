@@ -11,6 +11,8 @@ import {
   bigint,
   vector,
   integer,
+  varchar,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -33,6 +35,7 @@ export const users = pgTable(
     bio: text(),
     isActive: boolean("is_active").default(true),
     lastLogin: timestamp("last_login", { withTimezone: true, mode: "string" }),
+    stripeCustomerId: text("stripe_customer_id"),
   },
   (table) => [
     foreignKey({
@@ -468,6 +471,169 @@ export const userPinnedKnowledgeBases = pgTable(
     pgPolicy("Users can delete their own pins", {
       as: "permissive",
       for: "delete",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+  ]
+);
+
+// Subscription plan types
+export const planTypeEnum = pgEnum("plan_type", [
+  "free",
+  "premium",
+  "enterprise",
+]);
+
+// Subscription status types
+export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "active",
+  "canceled",
+  "incomplete",
+  "incomplete_expired",
+  "past_due",
+  "trialing",
+  "unpaid",
+]);
+
+// Plans table - defines available subscription plans
+export const plans = pgTable(
+  "plans",
+  {
+    id: uuid()
+      .default(sql`uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    name: text().notNull(),
+    description: text(),
+    stripePriceId: text("stripe_price_id").notNull(),
+    stripeProductId: text("stripe_product_id").notNull(),
+    type: planTypeEnum("type").notNull(),
+    price: integer().notNull(), // Price in cents
+    interval: text().notNull(), // monthly, yearly, etc.
+    features: jsonb(), // JSON array of features included in this plan
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .default(sql`timezone('utc'::text, now())`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .default(sql`timezone('utc'::text, now())`)
+      .notNull(),
+    active: boolean().default(true),
+    limits: jsonb(), // JSON object with plan limits (e.g., max documents, max KB size)
+  },
+  () => [
+    pgPolicy("Anyone can view active plans", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(active = true)`,
+    }),
+  ]
+);
+
+// Subscriptions table - tracks user subscriptions
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: uuid()
+      .default(sql`uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    planId: uuid("plan_id")
+      .notNull()
+      .references(() => plans.id),
+    stripeSubscriptionId: text("stripe_subscription_id").notNull(),
+    status: subscriptionStatusEnum("status").notNull(),
+    currentPeriodStart: timestamp("current_period_start", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    currentPeriodEnd: timestamp("current_period_end", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
+    canceledAt: timestamp("canceled_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .default(sql`timezone('utc'::text, now())`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .default(sql`timezone('utc'::text, now())`)
+      .notNull(),
+    metadata: jsonb(), // Additional subscription metadata
+  },
+  (table) => [
+    pgPolicy("Users can view their own subscriptions", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+  ]
+);
+
+// Payments table - tracks payment history
+export const payments = pgTable(
+  "payments",
+  {
+    id: uuid()
+      .default(sql`uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    user_id: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    subscription_id: uuid("subscription_id").references(() => subscriptions.id),
+    stripe_payment_intent_id: text("stripe_payment_intent_id"),
+    stripe_invoice_id: text("stripe_invoice_id").notNull(),
+    amount: integer().notNull(), // Amount in cents
+    currency: varchar("currency", { length: 3 }).notNull().default("USD"),
+    status: text().notNull(), // succeeded, processing, requires_payment_method, etc.
+    payment_method: text("payment_method").notNull(), // card, bank_transfer, etc.
+    receipt_url: text("receipt_url"),
+    created_at: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .default(sql`timezone('utc'::text, now())`)
+      .notNull(),
+    metadata: jsonb().default({}), // Additional payment metadata
+  },
+  (table) => [
+    pgPolicy("Users can view their own payments", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+  ]
+);
+
+// Usage records table - tracks usage for metered billing
+export const usageRecords = pgTable(
+  "usage_records",
+  {
+    id: uuid()
+      .default(sql`uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    subscriptionId: uuid("subscription_id").references(() => subscriptions.id),
+    category: text().notNull(), // e.g., "documents", "api_calls", "storage"
+    quantity: integer().notNull(),
+    recordedAt: timestamp("recorded_at", { withTimezone: true, mode: "string" })
+      .default(sql`timezone('utc'::text, now())`)
+      .notNull(),
+    metadata: jsonb(), // Additional usage metadata
+  },
+  (table) => [
+    pgPolicy("Users can view their own usage records", {
+      as: "permissive",
+      for: "select",
       to: ["public"],
       using: sql`(auth.uid() = user_id)`,
     }),

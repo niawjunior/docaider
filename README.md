@@ -4,54 +4,58 @@ An AI-powered Knowledge Management and Retrieval-Augmented Generation (RAG) syst
 
 ## Features
 
-- 📄 Document Processing: Upload and process various file formats (PDF, DOCX, CSV) with automatic text extraction and chunking
-
-- 📚 Knowledge Base Management: Create, edit, and organize knowledge bases with an intuitive UI
-
-- 🤖 AI-Powered Chat: Ask questions about your documents and get accurate, contextual responses
-
-- 🔒 Public/Private Sharing: Control access to your knowledge with flexible sharing options
-
-- ✨ Modern UI: Built with Next.js App Router and Tailwind CSS for a responsive, accessible experience
-
-Do you want me to also make it shorter
+- 📄 **Document Processing**: Upload and process various file formats (PDF, DOCX, CSV) with automatic text extraction and chunking
+- 📚 **Knowledge Base Management**: Create, edit, and organize knowledge bases with an intuitive UI
+- 🤖 **AI-Powered Chat**: Ask questions about your documents and get accurate, contextual responses
+- 🔗 **Collaboration & Sharing**: Share knowledge bases via email or make them public
+- 🌐 **Multi-Language Support**: Use the application in English or Thai with easy switching
+- 🎨 **Theme Support**: Choose between light, dark, or system theme
+- 🔍 **Search & Filter**: Find and organize your knowledge bases efficiently
+- ✨ **Modern UI**: Built with Next.js App Router and Tailwind CSS for a responsive, accessible experience
 
 ## Key Features
 
-### 1. Document Analysis & Q&A
+### 1. Knowledge Base Management
 
-- **Ask Questions**: Get precise answers from your uploaded documents
-- **Semantic Search**: Find relevant information using natural language queries
-- **Document Management**: View and organize all your uploaded documents in one place
-- **Context-Aware Responses**: AI understands document context for accurate answers
+- **Create & Organize**: Create public or private knowledge bases
+- **Pin Favorites**: Pin important knowledge bases for quick access
+- **Search & Filter**: Find knowledge bases with advanced filtering options
+- **Dashboard Views**: Categorized views for My Knowledge Bases, Shared With You, and Public Knowledge Bases
 
-### 2. Knowledge Base Creation
+### 2. Document Processing
 
-- **Document Processing**: Upload and process various document formats (PDF, CSV, TXT, DOCX)
-- **Knowledge Extraction**: Automatically extract key information from documents
-- **Knowledge Organization**: Structure and categorize information for efficient retrieval
-- **Multilingual Support**: Process and understand documents in multiple languages
+- **Multiple Formats**: Support for various document formats
+- **Automatic Processing**: Chunking and embedding for efficient retrieval
+- **Document Validation**: Title validation to prevent duplicates
+- **Document Management**: Add or remove documents from knowledge bases
 
-### 3. Retrieval-Augmented Generation
+### 3. AI-Powered Chat
 
-- **Contextual Responses**: Generate responses based on your knowledge base
-- **Source Attribution**: Identify which documents provided the information
-- **Confidence Scoring**: Understand the reliability of generated responses
-- **Knowledge Gaps Identification**: Identify areas where more information is needed
+- **Multiple Sessions**: Create multiple chat sessions per knowledge base
+- **Suggested Prompts**: Quick access to common questions
+- **Context-Aware**: Responses based on your document content
+- **Always Search**: Option to always search through documents for answers
 
-### 4. Vector Database Integration
+### 4. Collaboration & Sharing
 
-- **Efficient Storage**: Store document embeddings for fast retrieval
-- **Semantic Matching**: Match queries to the most relevant document sections
-- **Scalable Architecture**: Handle growing knowledge bases with ease
-- **Real-time Updates**: Update knowledge base with new information seamlessly
+- **Email Sharing**: Share knowledge bases with specific users via email
+- **Public Publishing**: Make knowledge bases available to everyone
+- **Access Control**: Manage who can access your shared resources
+- **Share Chat Links**: Generate and share links to specific chat sessions
 
-### 5. Knowledge Analytics
+### 5. Multi-Language Support
 
-- **Usage Insights**: Track which documents are most frequently queried
-- **Knowledge Coverage**: Identify strengths and gaps in your knowledge base
-- **Query Patterns**: Understand what information users seek most often
-- **Performance Metrics**: Monitor response quality and retrieval accuracy
+- **Bilingual Interface**: Full support for English and Thai languages
+- **Easy Switching**: Change language on the fly
+- **Consistent Experience**: Fully localized interface throughout the application
+- **User Preferences**: Language preference saved to user profile
+
+### 6. User Dashboard
+
+- **Intuitive Interface**: Manage all your knowledge resources in one place
+- **Quick Access**: Easily access recent and pinned knowledge bases
+- **Search & Filter**: Find knowledge bases with advanced filtering
+- **Responsive Design**: Optimized for both desktop and mobile devices
 
 ## Tech Stack
 

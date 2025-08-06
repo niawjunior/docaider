@@ -255,6 +255,9 @@
     "mostPopular": "ยอดนิยม",
     "creditsIncluded": "เครดิตรวมอยู่",
     "perMonth": "/เดือน",
+    "pleaseLoginToSubscribe": "กรุณาเข้าสู่ระบบเพื่อสมัคร",
+    "loginRequired": "ต้องเข้าสู่ระบบ",
+    "checkoutError": "เกิดข้อผิดพลาดในการชำระเงิน",
     "plans": {
       "starter": {
         "name": "เริ่มต้น",
@@ -281,7 +284,7 @@
           "การเข้าถึง API",
           "การทำงานร่วมกันเป็นทีม"
         ],
-        "cta": "เร็วๆ นี้"
+        "cta": "เริ่มต้นใช้งาน"
       },
       "enterprise": {
         "name": "องค์กร",

@@ -282,7 +282,7 @@
           "API Access",
           "Team Collaboration"
         ],
-        "cta": "Coming Soon"
+        "cta": "Get Started"
       },
       "enterprise": {
         "name": "Enterprise",
@@ -299,7 +299,10 @@
         ],
         "cta": "Coming Soon"
       }
-    }
+    },
+    "pleaseLoginToSubscribe": "Please login to subscribe",
+    "loginRequired": "Login Required",
+    "checkoutError": "Checkout Error"
   },
   "actions": {
     "createKnowledgeBase": "Create Knowledge Base",
