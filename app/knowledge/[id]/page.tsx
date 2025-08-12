@@ -262,7 +262,7 @@ export default function ViewKnowledgeBasePage() {
                       ))}
                     </ul>
                   </div>
-                  <Collapsible className="w-full">
+                  <Collapsible defaultOpen={true} className="w-full">
                     <CollapsibleTrigger className="flex items-center justify-between w-full text-left font-medium mb-2 text-sm hover:text-primary transition-colors">
                       <span>{commonT("connectedSources")}</span>
                       <ChevronDown className="h-4 w-4 transition-transform duration-200 ui-open:rotate-180" />
@@ -373,7 +373,7 @@ export default function ViewKnowledgeBasePage() {
                   </TooltipProvider>
                 </CardTitle>
               </CardContent>
-              <CardContent className="max-h-[calc(100vh-650px)] overflow-y-auto scroll-hidden">
+              <CardContent className="max-h-[100px] min-h-[100px] overflow-y-auto scroll-hidden">
                 <KnowledgeSessions
                   chatId={chatId}
                   chats={knowledgeBaseChatsData}
