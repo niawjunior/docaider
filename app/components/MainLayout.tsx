@@ -73,13 +73,13 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 {t("credits")}
               </Badge>
             )}
-            <Button
+            {/* <Button
               variant="ghost"
               onClick={() => router.push("/pricing")}
               className="text-sm"
             >
               {t("pricing")}
-            </Button>
+            </Button> */}
             {session ? (
               <>
                 <Button
