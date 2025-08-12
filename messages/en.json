@@ -233,7 +233,7 @@
     "documentTitle": "Document Title",
     "enterDocumentTitle": "Enter document title",
     "selectedFile": "Selected file: {name} ({size})",
-    "supportedFileTypes": "Supported file types: PDF, CSV, DOC, DOCX",
+    "supportedFileTypes": "Supported file types: PDF, CSV, DOC, DOCX, MD",
     "maximumFileSize": "Maximum file size: 2MB. Documents will be processed for knowledge retrieval.",
     "fileSizeExceeded": "File size exceeds the limit of {limit}. Current size: {size}",
     "duplicateTitleError": "A document with this title already exists. Please use a different title."

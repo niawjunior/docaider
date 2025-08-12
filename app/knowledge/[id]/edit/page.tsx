@@ -259,8 +259,10 @@ export default function EditKnowledgeBasePage() {
 
   const handleUploadSuccess = () => {
     setCurrentTab("current");
-    refetchDocs();
     refetchKB();
+    setTimeout(() => {
+      refetchDocs();
+    }, 1000);
   };
   const handleClick = (id: string) => {
     router.push(`/knowledge/${id}`);

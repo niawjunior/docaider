@@ -100,6 +100,10 @@ export default function ViewKnowledgeBasePage() {
     }
   }, [kbError, router, t]);
 
+  const createNewChat = async () => {
+    const id = await createChat();
+    setChatId(id);
+  };
   useEffect(() => {
     // If chats are loaded (not loading anymore)
     if (!isLoadingChats) {
@@ -153,11 +157,6 @@ export default function ViewKnowledgeBasePage() {
     });
     console.log("newChatId", newChatId);
     setChatId(newChatId);
-  };
-
-  const createNewChat = async () => {
-    const id = await createChat();
-    setChatId(id);
   };
 
   const handleChatFinished = async () => {

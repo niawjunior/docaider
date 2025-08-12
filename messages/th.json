@@ -232,7 +232,7 @@
     "documentTitle": "ชื่อเอกสาร",
     "enterDocumentTitle": "ป้อนชื่อเอกสาร",
     "selectedFile": "ไฟล์ที่เลือก: {name} ({size})",
-    "supportedFileTypes": "รูปแบบไฟล์ที่รองรับ: PDF, CSV, DOC, DOCX",
+    "supportedFileTypes": "รูปแบบไฟล์ที่รองรับ: PDF, CSV, DOC, DOCX, MD",
     "maximumFileSize": "ขนาดไฟล์สูงสุด: 2MB เอกสารจะถูกประมวลผลสำหรับการค้นคืนความรู้",
     "fileSizeExceeded": "ขนาดไฟล์เกินขีดจำกัด {limit} ขนาดปัจจุบัน: {size}",
     "duplicateTitleError": "มีเอกสารที่ใช้ชื่อนี้อยู่แล้ว โปรดใช้ชื่ออื่น"
