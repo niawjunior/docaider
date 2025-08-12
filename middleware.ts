@@ -1,7 +1,6 @@
 import { type NextRequest } from "next/server";
 import { updateSession } from "./app/utils/supabase/middleware";
 import { createClient, createServiceClient } from "./app/utils/supabase/server";
-import { applyUserConfig } from "./app/utils/config/middleware";
 
 export async function middleware(request: NextRequest) {
   const supabase = await createClient();
@@ -88,11 +87,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Get the session response
-  const sessionResponse = await updateSession(request);
-
-  // Apply user config settings to cookies
-  return await applyUserConfig(sessionResponse, user?.id);
+  // Get the session response and return it
+  return await updateSession(request);
 }
 export const config = {
   matcher: [
