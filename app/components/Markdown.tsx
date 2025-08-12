@@ -71,6 +71,7 @@ const Markdown = ({ isUser, text }: MarkdownProps) => {
           em: ({ children }) => (
             <em className="italic text-foreground">{children}</em>
           ),
+          br: () => <br className="hidden" />,
           // ✅ Inline code
           code({ className, children, ...props }) {
             const language = className?.replace("language-", "") ?? "";
