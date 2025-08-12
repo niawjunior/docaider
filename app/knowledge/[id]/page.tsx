@@ -107,7 +107,7 @@ export default function ViewKnowledgeBasePage() {
       if (knowledgeBaseChatsData.length > 0 && !chatId) {
         console.log("Setting initial chatId to:", knowledgeBaseChatsData[0].id);
         setChatId(knowledgeBaseChatsData[0].id);
-      } 
+      }
       // If there are no chats and we're not already creating one, create a new chat
       else if (knowledgeBaseChatsData.length === 0 && !chatId) {
         console.log("No chats found, creating a new one");
@@ -289,7 +289,7 @@ export default function ViewKnowledgeBasePage() {
                   </TooltipProvider>
                 </CardTitle>
               </CardContent>
-              <CardContent className="max-h-[110px] overflow-y-auto scroll-hidden">
+              <CardContent className="max-h-[calc(100vh-580px)] overflow-y-auto scroll-hidden">
                 <KnowledgeSessions
                   chatId={chatId}
                   chats={knowledgeBaseChatsData}

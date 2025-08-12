@@ -25,29 +25,38 @@ const KnowledgeSessions = ({
   isLoading,
   isFetchingNextPage,
   hasNextPage,
-  fetchNextPage
+  fetchNextPage,
 }: KnowledgeSessionsProps) => {
   const sidebarRef = useRef<HTMLUListElement>(null);
-  
+
   const handleChatClick = (newChatId: string) => {
     onChatClick(newChatId);
   };
 
   useEffect(() => {
     const sidebar = sidebarRef.current;
-    if (!sidebar) return;
+
+    if (!sidebar) {
+      return;
+    }
 
     const handleScroll = () => {
       if (
         sidebar.scrollTop + sidebar.clientHeight >=
-        sidebar.scrollHeight - 50
+        sidebar.scrollHeight - 150
       ) {
         if (hasNextPage && !isFetchingNextPage) fetchNextPage();
       }
     };
 
+    // Initial check in case content is already at bottom
+    handleScroll();
+
     sidebar.addEventListener("scroll", handleScroll);
-    return () => sidebar.removeEventListener("scroll", handleScroll);
+
+    return () => {
+      sidebar.removeEventListener("scroll", handleScroll);
+    };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const getMenuDisplayText = (chat: {
@@ -69,24 +78,23 @@ const KnowledgeSessions = ({
         </div>
       ) : (
         chats.map((chat) => (
-            <li key={chat.id} className="py-1">
-              <button
-                onClick={() => handleChatClick(chat.id)}
-                className={clsx(
-                  "w-full text-left text-sm py-2 px-2 rounded hover:bg-accent truncate",
-                  chatId === chat.id ? "bg-accent/50" : ""
-                )}
-                data-active={chatId === chat.id ? "true" : "false"}
-              >
-                {getMenuDisplayText(chat)}
-              </button>
-            </li>
-          )
-        )
+          <li key={chat.id} className="py-1">
+            <button
+              onClick={() => handleChatClick(chat.id)}
+              className={clsx(
+                "w-full text-left text-sm py-2 px-2 rounded hover:bg-accent truncate",
+                chatId === chat.id ? "bg-accent/50" : ""
+              )}
+              data-active={chatId === chat.id ? "true" : "false"}
+            >
+              {getMenuDisplayText(chat)}
+            </button>
+          </li>
+        ))
       )}
       {isFetchingNextPage && (
         <div className="py-2 text-xs text-center text-muted-foreground flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       )}
     </ul>

@@ -1,7 +1,7 @@
 // hooks/useChats.ts
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-const LIMIT = 20;
+const LIMIT = 10;
 
 export const useChats = ({
   isKnowledgeBase = false,

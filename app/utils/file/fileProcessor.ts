@@ -4,6 +4,8 @@ import { v4 as uuidv4 } from "uuid";
 import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
 import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { TextLoader } from "langchain/document_loaders/fs/text";
+
 import { OpenAIEmbeddings } from "@langchain/openai";
 
 import { db } from "../../../db/config";
@@ -25,6 +27,8 @@ const fileLoader = async (file: File): Promise<string> => {
       return await docLoader(file);
     case "docx":
       return await docxLoader(file);
+    case "md":
+      return await mdLoader(file);
     default:
       throw new Error("Unsupported file type");
   }
@@ -64,6 +68,12 @@ const docxLoader = async (file: File): Promise<string> => {
   const loader = new DocxLoader(file, {
     type: "docx",
   });
+  const docs = await loader.load();
+  return cleanText(docs.map((d) => d.pageContent).join("\n"));
+};
+
+const mdLoader = async (file: File): Promise<string> => {
+  const loader = new TextLoader(file);
   const docs = await loader.load();
   return cleanText(docs.map((d) => d.pageContent).join("\n"));
 };
@@ -132,7 +142,7 @@ export async function processFile(
       throw new Error("Failed to insert main document record");
     }
 
-    return chunks;
+    return [];
   } catch (error) {
     console.error("Error processing File:", error);
     throw new Error("Failed to process File");

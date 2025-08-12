@@ -53,8 +53,8 @@ export default function DocumentUpload({
   const [file, setFile] = useState<File | null>(null);
   const [fileSizeError, setFileSizeError] = useState<string | null>(null);
   const [titleError, setTitleError] = useState<string | null>(null);
-  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
-  const t = useTranslations('documents');
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+  const t = useTranslations("documents");
 
   // Use the document upload hook
   const { uploadDocument, isUploading } = useDocumentUpload();
@@ -137,7 +137,7 @@ export default function DocumentUpload({
 
           // Check if the error is related to duplicate title
           if (error.message?.includes("already exists")) {
-            setTitleError(t('duplicateTitleError'));
+            setTitleError(t("duplicateTitleError"));
           }
         },
       }
@@ -150,9 +150,9 @@ export default function DocumentUpload({
 
     if (selectedFile.size > MAX_FILE_SIZE) {
       setFileSizeError(
-        t('fileSizeExceeded', {
+        t("fileSizeExceeded", {
           limit: formatBytes(MAX_FILE_SIZE),
-          size: formatBytes(selectedFile.size)
+          size: formatBytes(selectedFile.size),
         })
       );
       setFile(null);
@@ -172,11 +172,14 @@ export default function DocumentUpload({
           )}
           {file && (
             <div className="text-sm text-gray-500 mb-2">
-              {t('selectedFile', { name: file.name, size: formatBytes(file.size) })}
+              {t("selectedFile", {
+                name: file.name,
+                size: formatBytes(file.size),
+              })}
             </div>
           )}
           <div className="space-y-2">
-            <Label>{t('documentTitle')}</Label>
+            <Label>{t("documentTitle")}</Label>
             <Input
               type="text"
               value={title}
@@ -185,7 +188,7 @@ export default function DocumentUpload({
                 // Clear title error when user types
                 if (titleError) setTitleError(null);
               }}
-              placeholder={t('enterDocumentTitle')}
+              placeholder={t("enterDocumentTitle")}
               required
               disabled={isUploading}
               className={titleError ? "border-red-500" : ""}
@@ -195,20 +198,16 @@ export default function DocumentUpload({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="file">
-              {t('supportedFileTypes')}
-            </Label>
+            <Label htmlFor="file">{t("supportedFileTypes")}</Label>
             <div className="relative w-full">
               <Input
                 id="file"
                 type="file"
-                accept=".pdf,.csv,.doc,.docx"
+                accept=".pdf,.csv,.doc,.docx,.md"
                 onChange={handleFileChange}
                 disabled={isUploading}
               />
-              <p className="text-xs text-gray-500">
-                {t('maximumFileSize')}
-              </p>
+              <p className="text-xs text-gray-500">{t("maximumFileSize")}</p>
             </div>
           </div>
           <Button
@@ -218,7 +217,7 @@ export default function DocumentUpload({
           >
             {isUploading && <Loader2 size={16} className="mr-2 animate-spin" />}
             {!isUploading && <Upload size={16} className="mr-2" />}
-            {isUploading ? t('uploading') : t('uploadDocument')}
+            {isUploading ? t("uploading") : t("uploadDocument")}
           </Button>
         </form>
         {isShowDocumentList && <DocumentsList />}

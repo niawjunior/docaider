@@ -179,7 +179,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
     created_at: new Date().toISOString(),
   };
 
-  // @ts-ignore - Type mismatch between schema and interface
+  // @ts-expect-error - Type mismatch between schema and interface
   await db.insert(payments).values(paymentData);
 
   // Update the subscription status if needed

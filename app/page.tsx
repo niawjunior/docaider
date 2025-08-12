@@ -320,7 +320,7 @@ export default function Home() {
                         <CardHeader className="pb-3">
                           <CardTitle className="text-xl font-bold truncate flex items-center">
                             <motion.div
-                              className="w-1 h-6 bg-gradient-to-b from-orange-500 to-red-500 rounded-full mr-3"
+                              className="w-1 h-6 bg-gradient-to-b from-orange-500 to-red-500 rounded-full mr-3 "
                               initial={{ height: 0 }}
                               whileInView={{ height: 24 }}
                               transition={{
@@ -329,7 +329,9 @@ export default function Home() {
                               }}
                               viewport={{ once: true }}
                             />
-                            {kb.name}
+                            <span className="overflow-hidden overflow-ellipsis whitespace-nowrap">
+                              {kb.name}
+                            </span>
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="min-h-[80px]">
@@ -409,47 +411,28 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <TestimonialCard
-                name="Sarah Johnson"
-                role="Data Analyst"
-                company="TechCorp"
-                avatar="SJ"
+                name="Bam"
+                role="Student"
+                company="N/A"
+                avatar="B"
                 rating={5}
                 content="DocAider has completely transformed how we analyze documents. The AI-powered insights save us hours of manual work every week."
               />
               <TestimonialCard
-                name="Michael Chen"
-                role="Product Manager"
-                company="InnoTech"
-                avatar="MC"
+                name="Chok"
+                role="Senior Software Engineer"
+                company="N/A"
+                avatar="C"
                 rating={4}
                 content="The knowledge management tools are incredibly intuitive. I can create and query knowledge bases in seconds. The only reason for 4 stars is we'd love to see more advanced RAG features in future updates."
               />
               <TestimonialCard
-                name="Emily Rodriguez"
-                role="Researcher"
-                company="Global Insights"
-                avatar="ER"
+                name="Niaw"
+                role="Software Engineer"
+                company="N/A"
+                avatar="N"
                 rating={5}
-                content="The document intelligence features are game-changing. It's like having a research assistant that works 24/7. The accuracy is impressive!"
-              />
-            </div>
-
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <TestimonialCard
-                name="Sofia Nguyen"
-                role="Product Manager"
-                company="Acme AI"
-                avatar="SN"
-                content="I love how I can juggle multiple conversations and each one remembers its context. It feels like having several smart assistants at once."
-                rating={5}
-              />
-              <TestimonialCard
-                name="Priya Patel"
-                role="Content Strategist"
-                company="ContentMint"
-                avatar="PP"
-                content="The knowledge base creation and RAG features have streamlined our research process significantly. Highly recommended!"
-                rating={5}
+                content="DocAider has completely transformed how we analyze documents. The AI-powered insights save us hours of manual work every week."
               />
             </div>
           </div>
