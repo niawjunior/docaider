@@ -416,7 +416,7 @@ export default function Home() {
                 company="N/A"
                 avatar="B"
                 rating={5}
-                content="DocAider has completely transformed how we analyze documents. The AI-powered insights save us hours of manual work every week."
+                content="iiG has completely transformed how we analyze documents. The AI-powered insights save us hours of manual work every week."
               />
               <TestimonialCard
                 name="Chok"
@@ -432,7 +432,7 @@ export default function Home() {
                 company="N/A"
                 avatar="N"
                 rating={5}
-                content="DocAider has completely transformed how we analyze documents. The AI-powered insights save us hours of manual work every week."
+                content="iiG has completely transformed how we analyze documents. The AI-powered insights save us hours of manual work every week."
               />
             </div>
           </div>

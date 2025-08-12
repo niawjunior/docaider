@@ -52,7 +52,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="flex gap-2 items-center">
             <Link href="/">
               <span className="text-foreground lg:text-xl text-md font-bold">
-                ✨ {t("appName")}
+                {t("appName")}
               </span>
             </Link>
           </div>
@@ -217,7 +217,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       <footer className="w-full bg-background border-t border-border px-6 py-3 text-muted-foreground text-sm">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
-            <span className="font-bold text-foreground">✨ {t("appName")}</span>{" "}
+            <span className="font-bold text-foreground"> {t("appName")}</span>{" "}
             &mdash;
             {t("tagline")}
           </div>

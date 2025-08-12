@@ -5,12 +5,11 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, Share2, PlusCircle, Eye } from "lucide-react";
+import { ArrowLeft, Edit, Share2, PlusCircle, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
 import GlobalLoader from "@/app/components/GlobalLoader";
 import useSupabaseSession from "@/app/hooks/useSupabaseSession";
-import { formatDistanceToNow } from "date-fns";
 import ChatForm from "@/app/components/ChatForm";
 import KnowledgeSessions from "@/app/components/KnowledgeSessions";
 import {
@@ -19,6 +18,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { createChat } from "@/app/utils/aisdk/chat";
 import { useChats } from "@/app/hooks/useChats";
 import { useQueryClient } from "@tanstack/react-query";
@@ -26,6 +30,7 @@ import Link from "next/link";
 import MainLayout from "@/app/components/MainLayout";
 import ShareKnowledgeBaseDialog from "@/app/components/ShareKnowledgeBaseDialog";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 // Type definitions are inferred from React Query hooks
 
@@ -187,7 +192,7 @@ export default function ViewKnowledgeBasePage() {
               <ArrowLeft size={16} className="mr-2" />
               {t("backToDashboard")}
             </Button>
-            <h1 className="md:text-lg text-md font-bold">
+            <h1 className="md:text-md text-md font-bold">
               {knowledgeBase.name}
             </h1>
           </div>
@@ -219,61 +224,141 @@ export default function ViewKnowledgeBasePage() {
           <div className="lg:col-span-1 flex flex-col gap-2">
             <Card>
               <CardHeader className="flex items-center justify-between">
-                <CardTitle>{t("aboutThisKnowledgeBase")}</CardTitle>
+                <CardTitle className="text-sm">
+                  {t("aboutThisKnowledgeBase")}
+                </CardTitle>
                 {knowledgeBase.isPublic && (
                   <Badge className="ml-2">{kbT("public")}</Badge>
                 )}
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-1">
                   {knowledgeBase.description && (
                     <p className="text-sm">{knowledgeBase.description}</p>
                   )}
-                  <div className="text-sm text-muted-foreground">
-                    <p>
-                      {t("lastUpdated", {
-                        time: formatDistanceToNow(
-                          new Date(knowledgeBase.updatedAt)
-                        ),
-                      })}
-                    </p>
-                  </div>
-                  <div className="border-t pt-4 max-h-[120px] overflow-y-auto scroll-hidden">
-                    <h3 className="font-medium mb-2">{kbT("documents")}</h3>
+
+                  <div className="border-t pt-2  overflow-y-auto scroll-hidden">
+                    <h3 className="font-medium mb-2 text-sm">
+                      {kbT("documents")}
+                    </h3>
                     {documentsData.length === 0 && (
                       <p className="text-sm text-muted-foreground">
                         {t("noDocumentsFound")}
                       </p>
                     )}
-                    <ul className="space-y-1 text-sm flex gap-2 flex-wrap">
+                    <ul className="space-y-1 text-xs flex gap-1 flex-wrap">
                       {documentsData.map((doc: Document) => (
-                        <li key={doc.id} className="truncate">
+                        <li key={doc.id} className="truncate text-xs">
                           <Badge variant="outline">
                             <Link
                               href={doc.url}
                               target="_blank"
-                              className="flex items-center gap-2 p-1"
+                              className="flex items-center gap-2"
                             >
                               {doc.title}
-                              <Eye size={16} />
                             </Link>
                           </Badge>
                         </li>
                       ))}
                     </ul>
                   </div>
+                  <Collapsible className="w-full">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full text-left font-medium mb-2 text-sm hover:text-primary transition-colors">
+                      <span>{commonT("connectedSources")}</span>
+                      <ChevronDown className="h-4 w-4 transition-transform duration-200 ui-open:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-2 ">
+                      <div className="flex flex-col gap-1 overflow-y-auto scroll-hidden max-h-[60px]">
+                        <TooltipProvider>
+                          <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2 rounded-md border border-slate-200 dark:border-slate-800">
+                            <div className="flex items-center gap-2">
+                              <Image
+                                src="/google-drive.png"
+                                alt="google-drive"
+                                width={20}
+                                height={20}
+                                className="rounded-sm"
+                              />
+                              <div className="flex flex-col">
+                                <span className="text-[10px] font-medium">
+                                  Google Drive
+                                </span>
+                                <span className="text-[10px] text-muted-foreground">
+                                  3 {commonT("files")} {commonT("synced")}
+                                </span>
+                              </div>
+                            </div>
+                            <Badge
+                              variant="outline"
+                              className="text-xs bg-green-50 text-green-600 hover:bg-green-50 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
+                            >
+                              {commonT("connected")}
+                            </Badge>
+                          </div>
+                        </TooltipProvider>
+
+                        <TooltipProvider>
+                          <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2 rounded-md border border-slate-200 dark:border-slate-800">
+                            <div className="flex items-center gap-2">
+                              <Image
+                                src="/salesforce.png"
+                                alt="salesforce"
+                                width={20}
+                                height={20}
+                                className="rounded-sm"
+                              />
+                              <div className="flex flex-col">
+                                <span className="text-[10px] font-medium">
+                                  Salesforce
+                                </span>
+                                <span className="text-[10px] text-muted-foreground">
+                                  1,535 {commonT("records")} {commonT("synced")}
+                                </span>
+                              </div>
+                            </div>
+                            <Badge
+                              variant="outline"
+                              className="text-xs bg-green-50 text-green-600 hover:bg-green-50 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
+                            >
+                              {commonT("connected")}
+                            </Badge>
+                          </div>
+                        </TooltipProvider>
+                      </div>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger className="w-full">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full text-xs"
+                              disabled
+                            >
+                              <PlusCircle size={14} className="mr-1" />
+                              {t("connectMore")}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{commonT("noPermission")}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="flex items-center justify-between">
-                <CardTitle>{t("knowledgeSessions")}</CardTitle>
+                <CardTitle className="text-sm">
+                  {t("knowledgeSessions")}
+                </CardTitle>
                 <CardTitle>
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
                         <Button
-                          size="icon"
+                          size="sm"
                           variant="outline"
                           onClick={createNewChat}
                           className="text-[20px] rounded-lg"
@@ -288,7 +373,7 @@ export default function ViewKnowledgeBasePage() {
                   </TooltipProvider>
                 </CardTitle>
               </CardContent>
-              <CardContent className="max-h-[calc(100vh-580px)] overflow-y-auto scroll-hidden">
+              <CardContent className="max-h-[calc(100vh-650px)] overflow-y-auto scroll-hidden">
                 <KnowledgeSessions
                   chatId={chatId}
                   chats={knowledgeBaseChatsData}

@@ -20,14 +20,14 @@ export default function TermsPage() {
           <div className="prose prose-invert max-w-none">
             <h2>1. Acceptance of Terms</h2>
             <p>
-              By accessing and using DocAider, you agree to be bound by these
-              Terms of Service. If you do not agree to these terms, please do
-              not use our services.
+              By accessing and using iiG, you agree to be bound by these Terms
+              of Service. If you do not agree to these terms, please do not use
+              our services.
             </p>
 
             <h2>2. User Conduct</h2>
             <p>
-              You agree to use DocAider only for lawful purposes and in a manner
+              You agree to use iiG only for lawful purposes and in a manner
               consistent with applicable laws and regulations. You may not:
             </p>
             <ul>
@@ -41,17 +41,15 @@ export default function TermsPage() {
 
             <h2>3. Intellectual Property</h2>
             <p>
-              All content on DocAider, including but not limited to text,
-              images, and software, is owned by DocAider and protected by
-              copyright laws.
+              All content on iiG, including but not limited to text, images, and
+              software, is owned by iiG and protected by copyright laws.
             </p>
 
             <h2>4. User Content</h2>
             <p>
-              You retain ownership of any content you submit to DocAider.
-              However, by submitting content, you grant DocAider a
-              non-exclusive, worldwide, royalty-free license to use, display,
-              and distribute your content.
+              You retain ownership of any content you submit to iiG. However, by
+              submitting content, you grant iiG a non-exclusive, worldwide,
+              royalty-free license to use, display, and distribute your content.
             </p>
 
             <h2>5. Privacy</h2>
@@ -63,7 +61,7 @@ export default function TermsPage() {
 
             <h2>6. Limitation of Liability</h2>
             <p>
-              DocAider is not liable for any damages arising from the use of our
+              iiG is not liable for any damages arising from the use of our
               services, including but not limited to direct, indirect,
               incidental, or consequential damages.
             </p>
@@ -71,7 +69,7 @@ export default function TermsPage() {
             <h2>7. Changes to Terms</h2>
             <p>
               We reserve the right to modify these terms at any time. Your
-              continued use of DocAider after changes are posted constitutes
+              continued use of iiG after changes are posted constitutes
               acceptance of the modified terms.
             </p>
 

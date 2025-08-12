@@ -112,22 +112,20 @@ export const askQuestionTool = tool({
           - Include days until the event
 
       # Response Structure
-      ## Summary
+      ## Problem Summary
       - Start with a clear, concise summary
       - Use **bold** for key points
 
-      ## Steps
-      1. Numbered steps for procedures
-      2. Clear, actionable instructions
+      ## Possible Root Cause
+      - Provide the possible root cause of the issue
+      - Provided possible resolution for each root cause
+
+      ## Related Historical Cases
+      - Display all related historical cases number
 
       ## Options
       • Bullet points for alternatives
       • Clear separation of ideas
-
-      ## Code
-      \`\`\`javascript
-      // Example code block
-      \`\`\`
 
       # Example of Proper Formatting
       ## Authentication Requirements

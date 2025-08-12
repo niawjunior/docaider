@@ -47,8 +47,8 @@ const MyFont = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: "DocAider - Your AI Document Assistant",
-    template: "%s | DocAider",
+    default: "iiG - Your AI Document Assistant",
+    template: "%s | iiG",
   },
   description: "AI-Powered Document & Data Platform",
   keywords:
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     },
   ],
   creator: "Pasupol Bunsaen",
-  publisher: "DocAider",
+  publisher: "iiG",
   robots: {
     index: true,
     follow: true,
@@ -73,16 +73,16 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "DocAider - Your AI Document Assistant",
+    title: "iiG - Your AI Document Assistant",
     description: "AI-Powered Document & Data Platform",
     url: "https://docaider.com",
-    siteName: "DocAider",
+    siteName: "iiG",
     images: [
       {
         url: "https://docaider.com/og-image.png",
         width: 1200,
         height: 630,
-        alt: "DocAider Logo",
+        alt: "iiG Logo",
       },
     ],
     locale: "en_US",
@@ -90,7 +90,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "DocAider - Your AI Document Assistant",
+    title: "iiG - Your AI Document Assistant",
     description: "AI-Powered Document & Data Platform",
     images: ["https://docaider.com/og-image.png"],
   },

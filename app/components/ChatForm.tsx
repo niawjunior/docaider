@@ -187,7 +187,6 @@ export default function ChatForm({
               messages={messages}
               status={status}
               bottomRef={bottomRef}
-              isKnowledgeBase={isKnowledgeBase}
               loading={isFetching || isLoading}
             />
           </div>

@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "DocAider",
+    "appName": "iiG",
     "tagline": "AI-Powered Document & Data Platform",
     "credits": "credits",
     "pricing": "Pricing",
@@ -12,7 +12,7 @@
     "terms": "Terms",
     "contact": "Contact",
     "allRightsReserved": "All rights reserved",
-    "copyright": "© {year} DocAider. All rights reserved.",
+    "copyright": "© {year} iiG. All rights reserved.",
     "loading": "Loading...",
     "save": "Save",
     "cancel": "Cancel",
@@ -39,7 +39,14 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System",
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "connectedSources": "Connected Sources",
+    "records": "records",
+    "synced": "Synced",
+    "lastSynced": "Last Synced",
+    "files": "Files",
+    "connected": "Connected",
+    "noPermission": "You don’t have permission to connect to data sources"
   },
   "navigation": {
     "home": "Home",
@@ -67,7 +74,7 @@
     "availableTools": "Available tools",
     "scrollToBottom": "Scroll to bottom",
     "askAnything": "Ask anything...",
-    "disclaimer": "Docaider can make mistakes. Check important info.",
+    "disclaimer": "AI can make mistakes. Check important info.",
     "searchingDocument": "Searching through the document...",
     "errorMessage": "Something went wrong. Please try again.",
     "manageKnowledgeBase": "Manage Knowledge Base",
@@ -165,6 +172,7 @@
       "knowledgeBaseNotFound": "Knowledge base not found",
       "unauthorized": "Unauthorized",
       "failedToFetchDocuments": "Failed to fetch knowledge base documents",
+      "connectMore": "Connect More Sources",
       "suggestedPrompts": {
         "tellMeAbout": "Tell me about this knowledge base",
         "whoIsAuthor": "Who is the author of this knowledge base?",
@@ -381,7 +389,7 @@
     "title": "Privacy Policy",
     "informationCollect": {
       "title": "1. Information We Collect",
-      "description": "We collect certain information when you use DocAider, including:",
+      "description": "We collect certain information when you use iiG, including:",
       "items": [
         "Personal information (name, email) when you sign up",
         "Chat history and interactions",
@@ -491,7 +499,7 @@
       "title": "What Our Users Say",
       "items": [
         {
-          "quote": "DocAider has transformed how we manage our documentation. The AI chat feature saves us hours of searching through documents.",
+          "quote": "iiG has transformed how we manage our documentation. The AI chat feature saves us hours of searching through documents.",
           "author": "Sarah J., Product Manager"
         },
         {
