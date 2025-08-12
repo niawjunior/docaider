@@ -139,13 +139,14 @@ export default function KnowledgeBaseList({
             <CardContent className="p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start mb-2">
                 <div className="flex items-center gap-2">
+                  <PinIndicator knowledgeBaseId={kb.id} />
                   <h3
                     className="md:text-lg text-base font-semibold overflow-hidden overflow-ellipsis whitespace-nowrap max-w-[250px]"
                     style={{ textOverflow: "ellipsis" }}
+                    title={kb.name}
                   >
                     {kb.name}
                   </h3>
-                  <PinIndicator knowledgeBaseId={kb.id} />
                 </div>
                 <div className="flex gap-1">
                   {kb.isPublic && (

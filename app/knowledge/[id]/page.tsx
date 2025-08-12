@@ -192,10 +192,11 @@ export default function ViewKnowledgeBasePage() {
               <ArrowLeft size={16} className="mr-2" />
               {t("backToDashboard")}
             </Button>
-            <h1 className="md:text-md text-md font-bold">
+            <h1 className="md:text-md text-md font-bold md:flex hidden">
               {knowledgeBase.name}
             </h1>
           </div>
+
           <div className="flex gap-2 mb-2">
             {canEdit && (
               <>
@@ -218,8 +219,10 @@ export default function ViewKnowledgeBasePage() {
               </>
             )}
           </div>
-        </div>
-
+        </div>{" "}
+        <h1 className="md:text-md text-md font-bold flex md:hidden">
+          {knowledgeBase.name}
+        </h1>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 flex flex-col gap-2">
             <Card>
