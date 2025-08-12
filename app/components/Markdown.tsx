@@ -29,24 +29,24 @@ const Markdown = ({ isUser, text }: MarkdownProps) => {
         rehypePlugins={[rehypeHighlight]}
         components={{
           h1: ({ children }) => (
-            <h1 className="px-4 py-2 text-xl font-bold text-foreground">
+            <h1 className="px-4 py-1 text-xl font-bold text-foreground">
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className="px-4 py-2 text-lg font-semibold text-foreground">
+            <h2 className="px-4 py-1 text-lg font-semibold text-foreground">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="px-4 py-2 text-base font-medium text-foreground">
+            <h3 className="px-4 py-1 text-base font-medium text-foreground">
               {children}
             </h3>
           ),
           p: ({ children }) => (
             <p
               className={clsx(
-                "px-4 py-2 leading-relaxed whitespace-pre-wrap rounded-2xl text-sm text-foreground",
+                "px-4 py-1 leading-relaxed whitespace-pre-wrap rounded-2xl text-sm text-foreground",
                 isUser ? "bg-primary text-primary-foreground inline-block" : ""
               )}
             >
@@ -54,12 +54,16 @@ const Markdown = ({ isUser, text }: MarkdownProps) => {
             </p>
           ),
           ul: ({ children }) => (
-            <ul className="list-disc pl-8 py-2 text-foreground">{children}</ul>
+            <ul className="list-disc pl-8 py-1 text-foreground">{children}</ul>
           ),
           ol: ({ children }) => (
-            <ol className="list-decimal pl-8 py-2 text-foreground">{children}</ol>
+            <ol className="list-decimal pl-8 py-1 text-foreground">
+              {children}
+            </ol>
           ),
-          li: ({ children }) => <li className="py-2 text-foreground">{children}</li>,
+          li: ({ children }) => (
+            <li className="py-1 text-foreground">{children}</li>
+          ),
 
           strong: ({ children }) => (
             <strong className="font-bold text-foreground">{children}</strong>

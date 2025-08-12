@@ -271,7 +271,7 @@ export default function ViewKnowledgeBasePage() {
                       <ChevronDown className="h-4 w-4 transition-transform duration-200 ui-open:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="space-y-2 ">
-                      <div className="flex flex-col gap-1 overflow-y-auto scroll-hidden max-h-[60px]">
+                      <div className="flex flex-col gap-1 overflow-y-auto scroll-hidden">
                         <TooltipProvider>
                           <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2 rounded-md border border-slate-200 dark:border-slate-800">
                             <div className="flex items-center gap-2">
@@ -376,7 +376,7 @@ export default function ViewKnowledgeBasePage() {
                   </TooltipProvider>
                 </CardTitle>
               </CardContent>
-              <CardContent className="max-h-[100px] min-h-[100px] overflow-y-auto scroll-hidden">
+              <CardContent className="h-[calc(100vh-700px)] overflow-y-auto scroll-hidden">
                 <KnowledgeSessions
                   chatId={chatId}
                   chats={knowledgeBaseChatsData}
