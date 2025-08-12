@@ -39,7 +39,9 @@ export interface SortOption {
   label: string;
 }
 
-const getSortOptions = (t: ReturnType<typeof useTranslations>): SortOption[] => [
+const getSortOptions = (
+  t: ReturnType<typeof useTranslations>
+): SortOption[] => [
   { value: "updated_desc", label: t("recentlyUpdated") },
   { value: "updated_asc", label: t("oldestFirst") },
   { value: "name_asc", label: t("nameAZ") },
@@ -48,7 +50,9 @@ const getSortOptions = (t: ReturnType<typeof useTranslations>): SortOption[] => 
   { value: "created_asc", label: t("oldestCreated") },
 ];
 
-const getFilterOptions = (t: ReturnType<typeof useTranslations>): FilterOption[] => [
+const getFilterOptions = (
+  t: ReturnType<typeof useTranslations>
+): FilterOption[] => [
   { value: "all", label: t("all") },
   { value: "active", label: t("active") },
   { value: "has_documents", label: t("hasDocuments") },
@@ -129,15 +133,15 @@ export default function SearchAndFilter({
       {/* Filters and Sort */}
       {(showFilters || showSort) && (
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap gap-2 items-center w-full">
             {showFilters && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 md:w-[140px] w-full">
                 <Filter className="h-4 w-4 text-muted-foreground" />
                 <Select value={filterBy} onValueChange={onFilterChange}>
-                  <SelectTrigger className="w-[140px]">
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder={t("filterBy")} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-full">
                     {defaultFilterOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -154,10 +158,10 @@ export default function SearchAndFilter({
             )}
 
             {showSort && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 md:w-[140px] w-full">
                 <SortAsc className="h-4 w-4 text-muted-foreground" />
                 <Select value={sortBy} onValueChange={onSortChange}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder={t("sortBy")} />
                   </SelectTrigger>
                   <SelectContent>

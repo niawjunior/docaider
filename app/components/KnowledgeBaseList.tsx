@@ -137,9 +137,12 @@ export default function KnowledgeBaseList({
         {knowledgeBases.map((kb) => (
           <Card key={kb.id} className="overflow-hidden bg-card p-0">
             <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-2">
+              <div className="flex flex-col sm:flex-row justify-between items-start mb-2">
                 <div className="flex items-center gap-2">
-                  <h3 className="md:text-lg text-base font-semibold truncate">
+                  <h3
+                    className="md:text-lg text-base font-semibold overflow-hidden overflow-ellipsis whitespace-nowrap max-w-[250px]"
+                    style={{ textOverflow: "ellipsis" }}
+                  >
                     {kb.name}
                   </h3>
                   <PinIndicator knowledgeBaseId={kb.id} />

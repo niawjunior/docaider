@@ -263,7 +263,7 @@ export default function ViewKnowledgeBasePage() {
                     </ul>
                   </div>
                   <Collapsible defaultOpen={true} className="w-full">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full text-left font-medium mb-2 text-sm hover:text-primary transition-colors">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full text-left font-medium mb-2 mt-2 text-sm hover:text-primary transition-colors">
                       <span>{commonT("connectedSources")}</span>
                       <ChevronDown className="h-4 w-4 transition-transform duration-200 ui-open:rotate-180" />
                     </CollapsibleTrigger>
