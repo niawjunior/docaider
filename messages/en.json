@@ -46,7 +46,9 @@
     "lastSynced": "Last Synced",
     "files": "Files",
     "connected": "Connected",
-    "noPermission": "You don’t have permission to connect to data sources"
+    "noPermission": "You don’t have permission to connect to data sources",
+    "openSidebar": "Open Sidebar",
+    "closeSidebar": "Close Sidebar"
   },
   "navigation": {
     "home": "Home",

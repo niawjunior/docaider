@@ -31,6 +31,11 @@ import MainLayout from "@/app/components/MainLayout";
 import ShareKnowledgeBaseDialog from "@/app/components/ShareKnowledgeBaseDialog";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import {
+  Sidebar,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 // Type definitions are inferred from React Query hooks
 
@@ -39,6 +44,7 @@ export default function ViewKnowledgeBasePage() {
   const kbT = useTranslations("knowledgeBase");
   const commonT = useTranslations("common");
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const { session } = useSupabaseSession();
@@ -180,231 +186,255 @@ export default function ViewKnowledgeBasePage() {
         shareUrl={shareUrl}
         isPublic={knowledgeBase?.isPublic || false}
       />
+
       <div className="px-4">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col md:flex-row items-center mb-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push("/dashboard")}
-              className="mr-4"
-            >
-              <ArrowLeft size={16} className="mr-2" />
-              {t("backToDashboard")}
-            </Button>
-            <h1 className="md:text-md text-md font-bold md:flex hidden">
-              {knowledgeBase.name}
-            </h1>
-          </div>
+        <div className="">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row items-center mb-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/dashboard")}
+                className="mr-4"
+              >
+                <ArrowLeft size={16} className="mr-2" />
+                {t("backToDashboard")}
+              </Button>
+              <h1 className="md:text-md text-md font-bold md:flex hidden">
+                {knowledgeBase.name}
+              </h1>
+            </div>
 
-          <div className="flex gap-2 mb-2">
-            {canEdit && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push(`/knowledge/${params.id}/edit`)}
-                >
-                  <Edit size={16} className="mr-2" />
-                  {kbT("edit")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShareDialogOpen(true)}
-                >
-                  <Share2 size={16} className="mr-2" />
-                  {commonT("share")}
-                </Button>
-              </>
-            )}
-          </div>
-        </div>{" "}
-        <h1 className="md:text-md text-md font-bold flex md:hidden">
-          {knowledgeBase.name}
-        </h1>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1 flex flex-col gap-2">
-            <Card>
-              <CardHeader className="flex items-center justify-between">
-                <CardTitle className="text-sm">
-                  {t("aboutThisKnowledgeBase")}
-                </CardTitle>
-                {knowledgeBase.isPublic && (
-                  <Badge className="ml-2">{kbT("public")}</Badge>
-                )}
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-1">
-                  {knowledgeBase.description && (
-                    <p className="text-sm">{knowledgeBase.description}</p>
-                  )}
-
-                  <div className="border-t pt-2  overflow-y-auto scroll-hidden">
-                    <h3 className="font-medium mb-2 text-sm">
-                      {kbT("documents")}
-                    </h3>
-                    {documentsData.length === 0 && (
-                      <p className="text-sm text-muted-foreground">
-                        {t("noDocumentsFound")}
-                      </p>
+            <div className="flex gap-2 mb-2">
+              {canEdit && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push(`/knowledge/${params.id}/edit`)}
+                  >
+                    <Edit size={16} className="mr-2" />
+                    {kbT("edit")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShareDialogOpen(true)}
+                  >
+                    <Share2 size={16} className="mr-2" />
+                    {commonT("share")}
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>{" "}
+          <h1 className="md:text-md text-md font-bold flex md:hidden">
+            {knowledgeBase.name}
+          </h1>
+          <SidebarProvider
+            open={isSidebarOpen}
+            onOpenChange={setIsSidebarOpen}
+            className=""
+          >
+            <Sidebar className="h-full mt-[115px] px-4 border-none">
+              <div className="w-full flex flex-col gap-2">
+                <Card>
+                  <CardHeader className="flex items-center justify-between">
+                    <CardTitle className="text-sm">
+                      {t("aboutThisKnowledgeBase")}
+                    </CardTitle>
+                    {knowledgeBase.isPublic && (
+                      <Badge className="ml-2">{kbT("public")}</Badge>
                     )}
-                    <ul className="space-y-1 text-xs flex gap-1 flex-wrap">
-                      {documentsData.map((doc: Document) => (
-                        <li key={doc.id} className="truncate text-xs">
-                          <Badge variant="outline">
-                            <Link
-                              href={doc.url}
-                              target="_blank"
-                              className="flex items-center gap-2"
-                            >
-                              {doc.title}
-                            </Link>
-                          </Badge>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <Collapsible defaultOpen={true} className="w-full">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full text-left font-medium mb-2 mt-2 text-sm hover:text-primary transition-colors">
-                      <span>{commonT("connectedSources")}</span>
-                      <ChevronDown className="h-4 w-4 transition-transform duration-200 ui-open:rotate-180" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="space-y-2 ">
-                      <div className="flex flex-col gap-1 overflow-y-auto scroll-hidden">
-                        <TooltipProvider>
-                          <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2 rounded-md border border-slate-200 dark:border-slate-800">
-                            <div className="flex items-center gap-2">
-                              <Image
-                                src="/google-drive.png"
-                                alt="google-drive"
-                                width={20}
-                                height={20}
-                                className="rounded-sm"
-                              />
-                              <div className="flex flex-col">
-                                <span className="text-[10px] font-medium">
-                                  Google Drive
-                                </span>
-                                <span className="text-[10px] text-muted-foreground">
-                                  3 {commonT("files")} {commonT("synced")}
-                                </span>
-                              </div>
-                            </div>
-                            <Badge
-                              variant="outline"
-                              className="text-xs bg-green-50 text-green-600 hover:bg-green-50 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
-                            >
-                              {commonT("connected")}
-                            </Badge>
-                          </div>
-                        </TooltipProvider>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-1">
+                      {knowledgeBase.description && (
+                        <p className="text-sm">{knowledgeBase.description}</p>
+                      )}
 
-                        <TooltipProvider>
-                          <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2 rounded-md border border-slate-200 dark:border-slate-800">
-                            <div className="flex items-center gap-2">
-                              <Image
-                                src="/salesforce.png"
-                                alt="salesforce"
-                                width={20}
-                                height={20}
-                                className="rounded-sm"
-                              />
-                              <div className="flex flex-col">
-                                <span className="text-[10px] font-medium">
-                                  Salesforce
-                                </span>
-                                <span className="text-[10px] text-muted-foreground">
-                                  1,535 {commonT("records")} {commonT("synced")}
-                                </span>
-                              </div>
-                            </div>
-                            <Badge
-                              variant="outline"
-                              className="text-xs bg-green-50 text-green-600 hover:bg-green-50 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
-                            >
-                              {commonT("connected")}
-                            </Badge>
-                          </div>
-                        </TooltipProvider>
+                      <div className="border-t pt-2  overflow-y-auto scroll-hidden">
+                        <h3 className="font-medium mb-2 text-sm">
+                          {kbT("documents")}
+                        </h3>
+                        {documentsData.length === 0 && (
+                          <p className="text-sm text-muted-foreground">
+                            {t("noDocumentsFound")}
+                          </p>
+                        )}
+                        <ul className="space-y-1 text-xs flex gap-1 flex-wrap">
+                          {documentsData.map((doc: Document) => (
+                            <li key={doc.id} className="truncate text-xs">
+                              <Badge variant="outline">
+                                <Link
+                                  href={doc.url}
+                                  target="_blank"
+                                  className="flex items-center gap-2"
+                                >
+                                  {doc.title}
+                                </Link>
+                              </Badge>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
+                      <Collapsible defaultOpen={true} className="w-full">
+                        <CollapsibleTrigger className="flex items-center justify-between w-full text-left font-medium mb-2 mt-2 text-sm hover:text-primary transition-colors">
+                          <span>{commonT("connectedSources")}</span>
+                          <ChevronDown className="h-4 w-4 transition-transform duration-200 ui-open:rotate-180" />
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="space-y-2 ">
+                          <div className="flex flex-col gap-1 overflow-y-auto scroll-hidden">
+                            <TooltipProvider>
+                              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2 rounded-md border border-slate-200 dark:border-slate-800">
+                                <div className="flex items-center gap-2">
+                                  <Image
+                                    src="/google-drive.png"
+                                    alt="google-drive"
+                                    width={20}
+                                    height={20}
+                                    className="rounded-sm"
+                                  />
+                                  <div className="flex flex-col">
+                                    <span className="text-[10px] font-medium">
+                                      Google Drive
+                                    </span>
+                                    <span className="text-[10px] text-muted-foreground">
+                                      3 {commonT("files")} {commonT("synced")}
+                                    </span>
+                                  </div>
+                                </div>
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs bg-green-50 text-green-600 hover:bg-green-50 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
+                                >
+                                  {commonT("connected")}
+                                </Badge>
+                              </div>
+                            </TooltipProvider>
+
+                            <TooltipProvider>
+                              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2 rounded-md border border-slate-200 dark:border-slate-800">
+                                <div className="flex items-center gap-2">
+                                  <Image
+                                    src="/salesforce.png"
+                                    alt="salesforce"
+                                    width={20}
+                                    height={20}
+                                    className="rounded-sm"
+                                  />
+                                  <div className="flex flex-col">
+                                    <span className="text-[10px] font-medium">
+                                      Salesforce
+                                    </span>
+                                    <span className="text-[10px] text-muted-foreground">
+                                      1,535 {commonT("records")}{" "}
+                                      {commonT("synced")}
+                                    </span>
+                                  </div>
+                                </div>
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs bg-green-50 text-green-600 hover:bg-green-50 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
+                                >
+                                  {commonT("connected")}
+                                </Badge>
+                              </div>
+                            </TooltipProvider>
+                          </div>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger className="w-full">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full text-xs"
+                                  disabled
+                                >
+                                  <PlusCircle size={14} className="mr-1" />
+                                  {t("connectMore")}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{commonT("noPermission")}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="flex items-center justify-between">
+                    <CardTitle className="text-sm">
+                      {t("knowledgeSessions")}
+                    </CardTitle>
+                    <CardTitle>
                       <TooltipProvider>
                         <Tooltip>
-                          <TooltipTrigger className="w-full">
+                          <TooltipTrigger>
                             <Button
-                              variant="outline"
                               size="sm"
-                              className="w-full text-xs"
-                              disabled
+                              variant="outline"
+                              onClick={createNewChat}
+                              className="text-[20px] rounded-lg"
                             >
-                              <PlusCircle size={14} className="mr-1" />
-                              {t("connectMore")}
+                              <PlusCircle />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>{commonT("noPermission")}</p>
+                            <p>{t("createNewChat")}</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="flex items-center justify-between">
-                <CardTitle className="text-sm">
-                  {t("knowledgeSessions")}
-                </CardTitle>
-                <CardTitle>
+                    </CardTitle>
+                  </CardContent>
+                  <CardContent className="h-[calc(100vh-710px)] overflow-y-auto scroll-hidden">
+                    <KnowledgeSessions
+                      chatId={chatId}
+                      chats={knowledgeBaseChatsData}
+                      onChatClick={handleChatClick}
+                      isLoading={isLoadingChats}
+                      isFetchingNextPage={isFetchingNextPage}
+                      hasNextPage={hasNextPage}
+                      fetchNextPage={fetchNextPage}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+            </Sidebar>
+            <div className="w-full">
+              <Card className="h-full flex flex-col">
+                <CardHeader className="flex items-center gap-2">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={createNewChat}
-                          className="text-[20px] rounded-lg"
-                        >
-                          <PlusCircle />
-                        </Button>
+                        <SidebarTrigger className="hidden md:flex" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{t("createNewChat")}</p>
+                        <span>
+                          {isSidebarOpen
+                            ? commonT("closeSidebar")
+                            : commonT("openSidebar")}
+                        </span>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                </CardTitle>
-              </CardContent>
-              <CardContent className="h-[calc(100vh-700px)] overflow-y-auto scroll-hidden">
-                <KnowledgeSessions
-                  chatId={chatId}
-                  chats={knowledgeBaseChatsData}
-                  onChatClick={handleChatClick}
-                  isLoading={isLoadingChats}
-                  isFetchingNextPage={isFetchingNextPage}
-                  hasNextPage={hasNextPage}
-                  fetchNextPage={fetchNextPage}
-                />
-              </CardContent>
-            </Card>
-          </div>
 
-          <div className="lg:col-span-2">
-            <Card className="h-full flex flex-col">
-              <CardHeader>
-                <CardTitle>{t("askQuestions")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ChatForm
-                  isKnowledgeBase={true}
-                  knowledgeBaseId={params.id}
-                  chatId={chatId}
-                  onFinished={handleChatFinished}
-                />
-              </CardContent>
-            </Card>
-          </div>
+                  <CardTitle>{t("askQuestions")}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ChatForm
+                    isKnowledgeBase={true}
+                    knowledgeBaseId={params.id}
+                    chatId={chatId}
+                    onFinished={handleChatFinished}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          </SidebarProvider>
         </div>
       </div>
     </MainLayout>

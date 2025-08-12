@@ -213,7 +213,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </header>
 
-      <main className=" py-2 min-h-[calc(100vh-160px)]">{children}</main>
+      <main className=" py-2 min-h-[calc(100vh-150px)]">{children}</main>
       <footer className="w-full bg-background border-t border-border px-6 py-3 text-muted-foreground text-sm">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
@@ -221,7 +221,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
             &mdash;
             {t("tagline")}
           </div>
-
           <div className="flex flex-wrap gap-4 justify-center md:justify-end text-muted-foreground">
             <Link href="/privacy" className="hover:text-foreground transition">
               {t("privacy")}

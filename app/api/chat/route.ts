@@ -135,7 +135,6 @@ export async function POST(req: NextRequest) {
     )
     .orderBy(documents.updatedAt);
 
-  console.log("allDocuments", allDocuments);
   // Get tools
   const tools = {
     askQuestion: askQuestionTool,

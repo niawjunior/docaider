@@ -98,14 +98,14 @@ export default function ChatInput({
           placeholder={status !== "ready" ? t("thinking") : t("askAnything")}
           disabled={status !== "ready" || loading}
           onKeyDown={handleKeyDown}
-          className="flex-1 bg-card text-card-foreground px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+          className="flex-1 bg-card max-h-[80px] text-card-foreground px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 overflow-y-auto scroll-hidden"
         />
 
         <Button
           onClick={handleSubmit}
           variant="outline"
           disabled={status !== "ready" || !input.trim()}
-          className="h-10 w-10 rounded-full border bg-background text-foreground border-border absolute right-2 bottom-[12px]"
+          className="h-10 w-10 rounded-full border bg-background text-foreground border-border absolute right-2 top-1/2 transform -translate-y-1/2"
         >
           <FaArrowUp />
         </Button>
