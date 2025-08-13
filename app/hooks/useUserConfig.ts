@@ -9,6 +9,7 @@ export interface UserConfig {
   updatedAt: string;
   languagePreference: "en" | "th" | null;
   themePreference: "system" | "light" | "dark" | null;
+  useDocument: boolean;
   notificationSettings:
     | {
         email?: boolean;
@@ -50,6 +51,7 @@ export default function useUserConfig(userId: string) {
         id: userId,
         languagePreference: data.language_preference,
         themePreference: data.theme_preference,
+        useDocument: data.use_document,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         notificationSettings: {},
@@ -66,10 +68,20 @@ export default function useUserConfig(userId: string) {
   const { mutateAsync: updateConfig, isPending: isUpdating } = useMutation({
     mutationFn: async (updates: Partial<UserConfig>) => {
       // Convert from our camelCase to API snake_case format
-      const apiPayload = {
-        language_preference: updates.languagePreference,
-        theme_preference: updates.themePreference,
-      };
+      // Only include fields that are actually being updated
+      const apiPayload: Record<string, any> = {};
+      
+      if (updates.languagePreference !== undefined) {
+        apiPayload.language_preference = updates.languagePreference;
+      }
+      
+      if (updates.themePreference !== undefined) {
+        apiPayload.theme_preference = updates.themePreference;
+      }
+      
+      if (updates.useDocument !== undefined) {
+        apiPayload.use_document = updates.useDocument;
+      }
 
       const response = await fetch(`/api/user/config`, {
         method: "POST",
@@ -90,6 +102,7 @@ export default function useUserConfig(userId: string) {
         ...config,
         languagePreference: data.language_preference,
         themePreference: data.theme_preference,
+        useDocument: data.use_document,
         updatedAt: new Date().toISOString(),
       } as UserConfig;
     },

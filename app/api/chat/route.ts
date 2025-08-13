@@ -6,16 +6,21 @@ import { NextRequest } from "next/server";
 import { createClient, createServiceClient } from "../../utils/supabase/server";
 import { askQuestionTool } from "@/app/tools/llm-tools";
 import { db } from "../../../db/config";
-import { credits, documents, chats, knowledgeBases } from "../../../db/schema";
+import {
+  credits,
+  documents,
+  chats,
+  knowledgeBases,
+  userConfig,
+} from "../../../db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
-  const { messages, chatId, currentTool, isKnowledgeBase, knowledgeBaseId } =
+  const { messages, id, isKnowledgeBase, knowledgeBaseId } =
     (await req.json()) as {
       messages: any[];
-      chatId: string;
-      currentTool: string;
+      id: string;
       isKnowledgeBase: boolean;
       knowledgeBaseId: string;
     };
@@ -32,6 +37,16 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  // Get all user config using Drizzle ORM
+  const userConfigData = await db
+    .select({
+      useDocument: userConfig.useDocument,
+    })
+    .from(userConfig)
+    .where(eq(userConfig.id, user.id))
+    .limit(1);
+  console.log("useDocument", userConfigData);
 
   // Get user credit using Drizzle ORM
   const [{ balance }] = await db
@@ -145,11 +160,11 @@ export async function POST(req: NextRequest) {
     toolChoice:
       balance <= 0 || allDocuments.length === 0
         ? "none"
-        : currentTool
+        : userConfigData?.[0]?.useDocument
         ? "required"
         : "auto",
     tools,
-    activeTools: currentTool ? [currentTool as "askQuestion"] : [],
+    activeTools: userConfigData?.[0]?.useDocument ? ["askQuestion"] : [],
     system: `
     You are **iiG** — a smart girl, polite, and friendly AI assistant specializing in Knowledge Management and RAG (Retrieval-Augmented Generation). Your primary goal is to help users understand, organize, and extract insights from their documents and knowledge bases.
     - Your current credit balance is ${balance}.
@@ -327,7 +342,7 @@ export async function POST(req: NextRequest) {
       await db
         .insert(chats)
         .values({
-          id: chatId,
+          id,
           messages: finalMessages,
           userId: user.id,
           isKnowledgeBase,

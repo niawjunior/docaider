@@ -21,14 +21,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import MainLayout from "../components/MainLayout";
@@ -42,9 +38,15 @@ const getFormSchema = () =>
   z.object({
     language_preference: z.enum(["en", "th"]),
     theme_preference: z.enum(["light", "dark", "system"]),
+    use_document: z.boolean().default(false),
   });
 
-type SettingsFormValues = z.infer<ReturnType<typeof getFormSchema>>;
+// Define the form values type explicitly to avoid TypeScript errors
+type SettingsFormValues = {
+  language_preference: "en" | "th";
+  theme_preference: "light" | "dark" | "system";
+  use_document: boolean;
+};
 
 export default function SettingsPage() {
   const { user, loading: userLoading } = useUser();
@@ -62,10 +64,11 @@ export default function SettingsPage() {
   // Initialize form with Zod validation
   const FormSchema = getFormSchema();
   const form = useForm<SettingsFormValues>({
-    resolver: zodResolver(FormSchema),
+    resolver: zodResolver(FormSchema) as any, // Type assertion to fix TypeScript errors
     defaultValues: {
       language_preference: "en",
       theme_preference: "system",
+      use_document: false,
     },
   });
 
@@ -80,6 +83,7 @@ export default function SettingsPage() {
             | "light"
             | "dark"
             | "system",
+          use_document: config.useDocument,
         });
       }, 100);
     }
@@ -92,6 +96,7 @@ export default function SettingsPage() {
       await updateConfig({
         themePreference: data.theme_preference,
         languagePreference: data.language_preference,
+        useDocument: data.use_document,
       });
 
       // Apply theme immediately for better UX
@@ -188,27 +193,59 @@ export default function SettingsPage() {
                   />
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-end pt-4">
-                <Button
-                  type="submit"
-                  disabled={
-                    isUpdating ||
-                    !form.formState.isDirty ||
-                    form.formState.isSubmitting
-                  }
-                  className="flex items-center gap-2"
-                >
-                  {isUpdating || form.formState.isSubmitting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save size={16} />
-                  )}
-                  {isUpdating || form.formState.isSubmitting
-                    ? t("saving")
-                    : t("saveChanges")}
-                </Button>
-              </CardFooter>
             </Card>
+
+            {/* Chat Settings */}
+            <Card className="border border-border">
+              <CardHeader>
+                <CardTitle>{t("chatSettings")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="use_document"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">
+                            {t("useDocument")}
+                          </FormLabel>
+                          <FormDescription>
+                            {t("useDocumentDescription")}
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={form.formState.isSubmitting || isUpdating}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="col-span-1 md:col-span-2 flex justify-end">
+              <Button
+                type="submit"
+                disabled={form.formState.isSubmitting || isUpdating}
+                className="flex items-center gap-2"
+              >
+                {form.formState.isSubmitting || isUpdating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+
+                {form.formState.isSubmitting || isUpdating
+                  ? t("saving")
+                  : t("saveChanges")}
+              </Button>
+            </div>
           </form>
         </Form>
       </div>

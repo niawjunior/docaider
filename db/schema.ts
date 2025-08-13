@@ -91,6 +91,7 @@ export const userConfig = pgTable(
       .default(sql`timezone('utc'::text, now())`)
       .notNull(),
     languagePreference: text("language_preference").default("en"),
+    useDocument: boolean("use_document").default(false),
     themePreference: text("theme_preference").default("system"),
   },
   (table) => [

@@ -66,6 +66,7 @@ export async function GET(request: Request) {
                 id: authUser.id,
                 language_preference: "th",
                 theme_preference: "system",
+                use_document: false,
               });
 
             if (configError) {

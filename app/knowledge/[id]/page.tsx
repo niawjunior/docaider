@@ -37,6 +37,16 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
+// Define connected sources data structure
+interface ConnectedSource {
+  id: string;
+  name: string;
+  icon: string;
+  count: number;
+  countType: "files" | "records";
+  status: "connected" | "disconnected";
+}
+
 // Type definitions are inferred from React Query hooks
 
 export default function ViewKnowledgeBasePage() {
@@ -47,6 +57,26 @@ export default function ViewKnowledgeBasePage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  
+  // Connected sources data array
+  const connectedSources: ConnectedSource[] = [
+    {
+      id: "google-drive",
+      name: "Google Drive",
+      icon: "/google-drive.png",
+      count: 3,
+      countType: "files",
+      status: "connected"
+    },
+    {
+      id: "salesforce",
+      name: "Salesforce",
+      icon: "/salesforce.png",
+      count: 1535,
+      countType: "records",
+      status: "connected"
+    }
+  ];
   const { session } = useSupabaseSession();
   const router = useRouter();
   const params = useParams<{ id: string; chatId: string }>();
@@ -285,62 +315,35 @@ export default function ViewKnowledgeBasePage() {
                         </CollapsibleTrigger>
                         <CollapsibleContent className="space-y-2 ">
                           <div className="flex flex-col gap-1 overflow-y-auto scroll-hidden">
-                            <TooltipProvider>
-                              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2 rounded-md border border-slate-200 dark:border-slate-800">
-                                <div className="flex items-center gap-2">
-                                  <Image
-                                    src="/google-drive.png"
-                                    alt="google-drive"
-                                    width={20}
-                                    height={20}
-                                    className="rounded-sm"
-                                  />
-                                  <div className="flex flex-col">
-                                    <span className="text-[10px] font-medium">
-                                      Google Drive
-                                    </span>
-                                    <span className="text-[10px] text-muted-foreground">
-                                      3 {commonT("files")} {commonT("synced")}
-                                    </span>
+                            {connectedSources.map((source) => (
+                              <TooltipProvider key={source.id}>
+                                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2 rounded-md border border-slate-200 dark:border-slate-800">
+                                  <div className="flex items-center gap-2">
+                                    <Image
+                                      src={source.icon}
+                                      alt={source.name.toLowerCase()}
+                                      width={20}
+                                      height={20}
+                                      className="rounded-sm"
+                                    />
+                                    <div className="flex flex-col">
+                                      <span className="text-[10px] font-medium">
+                                        {source.name}
+                                      </span>
+                                      <span className="text-[10px] text-muted-foreground">
+                                        {source.count.toLocaleString()} {commonT(source.countType)} {commonT("synced")}
+                                      </span>
+                                    </div>
                                   </div>
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs bg-green-50 text-green-600 hover:bg-green-50 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
+                                  >
+                                    {commonT(source.status)}
+                                  </Badge>
                                 </div>
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs bg-green-50 text-green-600 hover:bg-green-50 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
-                                >
-                                  {commonT("connected")}
-                                </Badge>
-                              </div>
-                            </TooltipProvider>
-
-                            <TooltipProvider>
-                              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-2 rounded-md border border-slate-200 dark:border-slate-800">
-                                <div className="flex items-center gap-2">
-                                  <Image
-                                    src="/salesforce.png"
-                                    alt="salesforce"
-                                    width={20}
-                                    height={20}
-                                    className="rounded-sm"
-                                  />
-                                  <div className="flex flex-col">
-                                    <span className="text-[10px] font-medium">
-                                      Salesforce
-                                    </span>
-                                    <span className="text-[10px] text-muted-foreground">
-                                      1,535 {commonT("records")}{" "}
-                                      {commonT("synced")}
-                                    </span>
-                                  </div>
-                                </div>
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs bg-green-50 text-green-600 hover:bg-green-50 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
-                                >
-                                  {commonT("connected")}
-                                </Badge>
-                              </div>
-                            </TooltipProvider>
+                              </TooltipProvider>
+                            ))}
                           </div>
                           <TooltipProvider>
                             <Tooltip>

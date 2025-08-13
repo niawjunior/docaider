@@ -38,6 +38,7 @@ export async function GET(
       .select({
         languagePreference: userConfig.languagePreference,
         themePreference: userConfig.themePreference,
+        useDocument: userConfig.useDocument,
       })
       .from(userConfig)
       .where(eq(userConfig.id, id))
@@ -48,6 +49,7 @@ export async function GET(
       return NextResponse.json({
         languagePreference: "en",
         themePreference: "system",
+        useDocument: false,
       });
     }
 

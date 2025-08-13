@@ -378,7 +378,9 @@
     "temperature": "Creativity",
     "precise": "Precise",
     "balanced": "Balanced",
-    "creative": "Creative"
+    "creative": "Creative",
+    "useDocument": "Use Documents in Chat",
+    "useDocumentDescription": "When enabled, chat will automatically search through your documents for relevant information"
   },
   "contact": {
     "title": "Contact Us",

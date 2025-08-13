@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { FaShare } from "react-icons/fa";
+import useUserConfig from "../hooks/useUserConfig";
 
 interface ChatFormProps {
   chatId?: string;
@@ -41,13 +42,13 @@ export default function ChatForm({
   onFinished,
 }: ChatFormProps) {
   const t = useTranslations("chat");
+  const settingsT = useTranslations("settings");
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const queryClient = useQueryClient();
   // isAtBottom state is now handled in ChatMessages
   const containerRef = useRef<HTMLDivElement>(null);
   const { session } = useSupabaseSession();
-  const [isRequiredDocument, setIsRequiredDocument] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const {
@@ -75,15 +76,18 @@ export default function ChatForm({
   });
 
   const [input, setInput] = useState("");
-
   const { messages, status, sendMessage, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
-      body: {
-        chatId,
-        currentTool: isRequiredDocument ? "askQuestion" : "",
-        isKnowledgeBase,
-        knowledgeBaseId,
+      prepareSendMessagesRequest: ({ id, messages }) => {
+        return {
+          body: {
+            id,
+            messages,
+            isKnowledgeBase,
+            knowledgeBaseId,
+          },
+        };
       },
     }),
     id: chatId,
@@ -113,13 +117,27 @@ export default function ChatForm({
     },
   });
 
-  console.log("status", status);
+  // Use the hook to get and update user config
+  const {
+    config,
+    updateConfig,
+    loading: configSaving,
+    isUpdating: configUpdating,
+  } = useUserConfig(session?.user?.id || "");
 
   const handleSubmit = useCallback(() => {
     if (!input.trim() || status !== "ready") return;
     sendMessage({ text: input });
     setInput("");
   }, [input, status, sendMessage]);
+
+  const handdleRequiredDocument = async () => {
+    // Update user config
+    await updateConfig({
+      useDocument: !config?.useDocument,
+    });
+    toast.success(settingsT("saveSuccess"));
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -193,9 +211,11 @@ export default function ChatForm({
                 handleSubmit={handleSubmit}
                 status={status}
                 isShowTool={isShowTool}
-                isRequiredDocument={isRequiredDocument}
-                setIsRequiredDocument={setIsRequiredDocument}
-                loading={isFetching || isLoading}
+                isRequiredDocument={config?.useDocument || false}
+                setIsRequiredDocument={handdleRequiredDocument}
+                loading={
+                  isFetching || isLoading || configSaving || configUpdating
+                }
               />
             </div>
 

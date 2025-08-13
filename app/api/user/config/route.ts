@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 interface UserConfigData {
   language_preference: string;
   theme_preference: string;
+  use_document: boolean;
 }
 
 /**
@@ -32,6 +33,7 @@ export async function GET() {
       .select({
         languagePreference: userConfig.languagePreference,
         themePreference: userConfig.themePreference,
+        useDocument: userConfig.useDocument,
       })
       .from(userConfig)
       .where(eq(userConfig.id, user.id))
@@ -42,6 +44,7 @@ export async function GET() {
       return NextResponse.json({
         language_preference: "en",
         theme_preference: "system",
+        use_document: false,
       });
     }
 
@@ -49,6 +52,7 @@ export async function GET() {
     return NextResponse.json({
       language_preference: userConfigData[0].languagePreference,
       theme_preference: userConfigData[0].themePreference,
+      use_document: userConfigData[0].useDocument ?? false,
     });
   } catch (error) {
     console.error("Error in GET /api/user/config:", error);
@@ -68,14 +72,15 @@ export async function POST(request: Request) {
     const supabase = await createClient();
 
     // Validate request body
-    let body: UserConfigData;
+    let body: Partial<UserConfigData>;
     try {
       body = await request.json();
 
-      // Validate required fields
-      if (!body.language_preference || !body.theme_preference) {
+      // No required fields - we support partial updates
+      // Just make sure the body isn't empty
+      if (Object.keys(body).length === 0) {
         return NextResponse.json(
-          { error: "Missing required fields" },
+          { error: "No fields to update" },
           { status: 400 }
         );
       }
@@ -106,18 +111,32 @@ export async function POST(request: Request) {
     let result;
 
     if (existingConfig && existingConfig.length > 0) {
+      // Build update object with only the fields that are provided
+      const updateData: Record<string, any> = {
+        updatedAt: new Date().toISOString(),
+      };
+      
+      if (body.language_preference !== undefined) {
+        updateData.languagePreference = body.language_preference;
+      }
+      
+      if (body.theme_preference !== undefined) {
+        updateData.themePreference = body.theme_preference;
+      }
+      
+      if (body.use_document !== undefined) {
+        updateData.useDocument = body.use_document;
+      }
+      
       // Update existing config
       result = await db
         .update(userConfig)
-        .set({
-          languagePreference: body.language_preference,
-          themePreference: body.theme_preference,
-          updatedAt: new Date().toISOString(),
-        })
+        .set(updateData)
         .where(eq(userConfig.id, user.id))
         .returning({
           languagePreference: userConfig.languagePreference,
           themePreference: userConfig.themePreference,
+          useDocument: userConfig.useDocument,
         });
     } else {
       // Insert new config
@@ -127,12 +146,14 @@ export async function POST(request: Request) {
           id: user.id,
           languagePreference: body.language_preference,
           themePreference: body.theme_preference,
+          useDocument: body.use_document,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         })
         .returning({
           languagePreference: userConfig.languagePreference,
           themePreference: userConfig.themePreference,
+          useDocument: userConfig.useDocument,
         });
     }
 
@@ -147,6 +168,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       language_preference: result[0].languagePreference,
       theme_preference: result[0].themePreference,
+      use_document: result[0].useDocument,
     });
   } catch (error) {
     console.error("Error in POST /api/user/config:", error);
