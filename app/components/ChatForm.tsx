@@ -193,16 +193,6 @@ export default function ChatForm({
 
           <div className="flex flex-col">
             <div className="sticky bottom-0 flex-col w-full py-2 px-2 flex gap-3">
-              <ChatToolbar
-                isShowTool={isShowTool}
-                messages={messages}
-                documents={documents}
-                currentTool={currentTool}
-                setCurrentTool={setCurrentTool}
-                onOpenPdfModal={() => setIsPdfModalOpen(true)}
-                onOpenShareModal={() => setIsShareModalOpen(true)}
-                isKnowledgeBase={isKnowledgeBase}
-              />
               <ChatInput
                 input={input}
                 setInput={setInput}

@@ -68,7 +68,7 @@ export default function ChatMessages({
       <div
         ref={containerRef}
         className={clsx(
-          "overflow-auto scroll-hidden md:px-2 px-0 relative md:h-[calc(100dvh-465px)] h-[calc(100dvh-500px)]"
+          "overflow-auto scroll-hidden md:px-2 px-0 relative md:h-[calc(100dvh-440px)] h-[calc(100dvh-500px)]"
         )}
       >
         {loading && (
@@ -81,10 +81,14 @@ export default function ChatMessages({
           return (
             <div
               key={index}
-              className={`flex py-2 ${
+              className={`flex relative py-2 ${
                 isUser ? "justify-end" : "justify-start"
               }`}
             >
+              {status === "submitted" &&
+                message.id === messages[messages.length - 1]?.id && (
+                  <Loader2 className="h-6 w-6 animate-spin absolute left-3" />
+                )}
               <div className="text-sm text-left">
                 {message.parts?.map((part: any, index: any) => {
                   switch (part.type) {
