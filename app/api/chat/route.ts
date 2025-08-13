@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
         ? "required"
         : "auto",
     tools,
-    activeTools: [currentTool as "askQuestion"],
+    activeTools: currentTool ? [currentTool as "askQuestion"] : [],
     system: `
     You are **iiG** — a smart girl, polite, and friendly AI assistant specializing in Knowledge Management and RAG (Retrieval-Augmented Generation). Your primary goal is to help users understand, organize, and extract insights from their documents and knowledge bases.
     - Your current credit balance is ${balance}.

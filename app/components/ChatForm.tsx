@@ -7,14 +7,12 @@ import clsx from "clsx";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useSupabaseSession from "../hooks/useSupabaseSession";
-import { useDocuments } from "../hooks/useDocuments";
 import GlobalLoader from "./GlobalLoader";
 import { useTranslations } from "next-intl";
 
 // Import our new subcomponents
 import ChatMessages from "./chat/ChatMessages";
 import ChatInput from "./chat/ChatInput";
-import ChatToolbar from "./chat/ChatToolbar";
 import ShareDialog from "./chat/ShareDialog";
 import DocumentUploadDialog from "./chat/DocumentUploadDialog";
 import {
@@ -46,11 +44,9 @@ export default function ChatForm({
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const queryClient = useQueryClient();
-  const [currentTool, setCurrentTool] = useState<string>("");
   // isAtBottom state is now handled in ChatMessages
   const containerRef = useRef<HTMLDivElement>(null);
   const { session } = useSupabaseSession();
-  const { useGetDocuments } = useDocuments();
   const [isRequiredDocument, setIsRequiredDocument] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -85,7 +81,7 @@ export default function ChatForm({
       api: "/api/chat",
       body: {
         chatId,
-        currentTool: isRequiredDocument ? "askQuestion" : currentTool,
+        currentTool: isRequiredDocument ? "askQuestion" : "",
         isKnowledgeBase,
         knowledgeBaseId,
       },
@@ -124,8 +120,6 @@ export default function ChatForm({
     sendMessage({ text: input });
     setInput("");
   }, [input, status, sendMessage]);
-
-  const { data: documents = [] } = useGetDocuments({ isKnowledgeBase });
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
