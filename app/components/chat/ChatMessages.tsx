@@ -85,10 +85,6 @@ export default function ChatMessages({
                 isUser ? "justify-end" : "justify-start"
               }`}
             >
-              {status === "submitted" &&
-                message.id === messages[messages.length - 1]?.id && (
-                  <Loader2 className="h-6 w-6 animate-spin absolute left-3" />
-                )}
               <div className="text-sm text-left">
                 {message.parts?.map((part: any, index: any) => {
                   switch (part.type) {
@@ -96,6 +92,11 @@ export default function ChatMessages({
                       return (
                         <div key={index} className="">
                           <Markdown isUser={isUser} text={part.text} />
+                          {status === "submitted" &&
+                            message.id ===
+                              messages[messages.length - 1]?.id && (
+                              <Loader2 className="h-6 w-6 animate-spin absolute left-3" />
+                            )}
                         </div>
                       );
                     case "tool-askQuestion":
