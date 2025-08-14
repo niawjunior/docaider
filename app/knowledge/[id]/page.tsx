@@ -266,7 +266,7 @@ export default function ViewKnowledgeBasePage() {
             onOpenChange={setIsSidebarOpen}
             className=""
           >
-            <Sidebar className="h-full mt-[97px] px-4 border-none">
+            <Sidebar className="h-full mt-[97px] px-4 border-none pr-0">
               <div className="w-full flex flex-col gap-2">
                 <Card>
                   <CardHeader className="flex  items-center justify-between">
