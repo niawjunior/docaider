@@ -68,7 +68,7 @@ export default function ChatMessages({
       <div
         ref={containerRef}
         className={clsx(
-          "overflow-auto scroll-hidden md:px-2 px-0 relative md:h-[calc(100dvh-440px)] h-[calc(100dvh-500px)]"
+          "overflow-auto scroll-hidden md:px-2 px-0 relative md:h-[calc(100dvh-415px)] h-[calc(100dvh-500px)]"
         )}
       >
         {loading && (

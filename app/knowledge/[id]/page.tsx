@@ -57,16 +57,16 @@ export default function ViewKnowledgeBasePage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
-  
+
   // Connected sources data array
   const connectedSources: ConnectedSource[] = [
     {
       id: "google-drive",
       name: "Google Drive",
       icon: "/google-drive.png",
-      count: 3,
+      count: 34,
       countType: "files",
-      status: "connected"
+      status: "connected",
     },
     {
       id: "salesforce",
@@ -74,8 +74,8 @@ export default function ViewKnowledgeBasePage() {
       icon: "/salesforce.png",
       count: 1535,
       countType: "records",
-      status: "connected"
-    }
+      status: "connected",
+    },
   ];
   const { session } = useSupabaseSession();
   const router = useRouter();
@@ -266,10 +266,10 @@ export default function ViewKnowledgeBasePage() {
             onOpenChange={setIsSidebarOpen}
             className=""
           >
-            <Sidebar className="h-full mt-[115px] px-4 border-none">
+            <Sidebar className="h-full mt-[97px] px-4 border-none">
               <div className="w-full flex flex-col gap-2">
                 <Card>
-                  <CardHeader className="flex items-center justify-between">
+                  <CardHeader className="flex  items-center justify-between">
                     <CardTitle className="text-sm">
                       {t("aboutThisKnowledgeBase")}
                     </CardTitle>
@@ -331,7 +331,9 @@ export default function ViewKnowledgeBasePage() {
                                         {source.name}
                                       </span>
                                       <span className="text-[10px] text-muted-foreground">
-                                        {source.count.toLocaleString()} {commonT(source.countType)} {commonT("synced")}
+                                        {source.count.toLocaleString()}{" "}
+                                        {commonT(source.countType)}{" "}
+                                        {commonT("synced")}
                                       </span>
                                     </div>
                                   </div>
@@ -393,7 +395,7 @@ export default function ViewKnowledgeBasePage() {
                       </TooltipProvider>
                     </CardTitle>
                   </CardContent>
-                  <CardContent className="h-[calc(100vh-710px)] overflow-y-auto scroll-hidden">
+                  <CardContent className="h-[calc(100vh-680px)] min-h-[27px] overflow-y-auto scroll-hidden">
                     <KnowledgeSessions
                       chatId={chatId}
                       chats={knowledgeBaseChatsData}

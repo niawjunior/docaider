@@ -48,7 +48,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
-        <div className="px-6 flex h-16 items-center justify-between">
+        <div className="px-6 flex h-12 items-center justify-between">
           <div className="flex gap-2 items-center">
             <Link href="/">
               <span className="text-foreground lg:text-xl text-md font-bold">
@@ -213,7 +213,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </header>
 
-      <main className=" py-2 min-h-[calc(100vh-150px)]">{children}</main>
+      <main className=" py-2 min-h-[calc(100vh-120px)]">{children}</main>
       <footer className="w-full bg-background border-t border-border px-6 py-3 text-muted-foreground text-sm">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
