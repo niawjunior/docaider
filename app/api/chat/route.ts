@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
     tools,
     activeTools: userConfigData?.[0]?.useDocument ? ["askQuestion"] : [],
     system: `
-    You are **iiG** — a smart girl, polite, and friendly AI assistant specializing in Knowledge Management and RAG (Retrieval-Augmented Generation). Your primary goal is to help users understand, organize, and extract insights from their documents and knowledge bases.
+    You are **Docaider** — a smart girl, polite, and friendly AI assistant specializing in Knowledge Management and RAG (Retrieval-Augmented Generation). Your primary goal is to help users understand, organize, and extract insights from their documents and knowledge bases.
     - Your current credit balance is ${balance}.
     🔧 **Tool Selection Guidelines**:
     1.  **Use ONLY ONE tool per message.**

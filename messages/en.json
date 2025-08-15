@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "iiG",
+    "appName": "Docaider",
     "tagline": "AI-Powered Document & Data Platform",
     "credits": "credits",
     "pricing": "Pricing",
@@ -12,7 +12,7 @@
     "terms": "Terms",
     "contact": "Contact",
     "allRightsReserved": "All rights reserved",
-    "copyright": "© {year} iiG. All rights reserved.",
+    "copyright": "© {year} Docaider. All rights reserved.",
     "loading": "Loading...",
     "save": "Save",
     "cancel": "Cancel",
@@ -393,7 +393,7 @@
     "title": "Privacy Policy",
     "informationCollect": {
       "title": "1. Information We Collect",
-      "description": "We collect certain information when you use iiG, including:",
+      "description": "We collect certain information when you use Docaider, including:",
       "items": [
         "Personal information (name, email) when you sign up",
         "Chat history and interactions",
@@ -503,7 +503,7 @@
       "title": "What Our Users Say",
       "items": [
         {
-          "quote": "iiG has transformed how we manage our documentation. The AI chat feature saves us hours of searching through documents.",
+          "quote": "Docaider has transformed how we manage our documentation. The AI chat feature saves us hours of searching through documents.",
           "author": "Sarah J., Product Manager"
         },
         {

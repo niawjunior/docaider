@@ -16,7 +16,7 @@ const LoginComponent = () => {
       {/* Login Box */}
       <div className="relative z-10 bg-card/80 backdrop-blur-lg shadow-xl rounded-2xl p-10 w-full max-w-md border border-border">
         <div className="text-center mb-6">
-          <span className="text-orange-500 font-bold text-3xl">iiG</span>
+          <span className="text-orange-500 font-bold text-3xl">Docaider</span>
           <h1 className="text-2xl font-semibold mt-2">{t("title")}</h1>
         </div>
 
