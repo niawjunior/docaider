@@ -1,5 +1,5 @@
 import { convertToModelMessages, streamText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
+import { openai } from "@ai-sdk/openai";
 
 import { NextRequest } from "next/server";
 
@@ -15,9 +15,9 @@ import {
 } from "../../../db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 
-const openai = createOpenAI({
-  baseURL: `https://gateway.ai.cloudflare.com/v1/a599ab03a24f46fa6aecd03babd1bb50/docaider/openai`,
-});
+// const openai = createOpenAI({
+//   baseURL: `https://gateway.ai.cloudflare.com/v1/a599ab03a24f46fa6aecd03babd1bb50/docaider/openai`,
+// });
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
