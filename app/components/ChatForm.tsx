@@ -76,7 +76,7 @@ export default function ChatForm({
   });
 
   const [input, setInput] = useState("");
-  const { messages, status, sendMessage, setMessages } = useChat({
+  const { messages, status, sendMessage, setMessages, error } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
       prepareSendMessagesRequest: ({ id, messages }) => {
@@ -114,6 +114,7 @@ export default function ChatForm({
     },
     onError: (error) => {
       console.log("onError", error);
+      toast.error(error.message);
     },
   });
 
@@ -126,10 +127,10 @@ export default function ChatForm({
   } = useUserConfig(session?.user?.id || "");
 
   const handleSubmit = useCallback(() => {
-    if (!input.trim() || status !== "ready") return;
+    if (!input.trim() || configSaving || configUpdating) return;
     sendMessage({ text: input });
     setInput("");
-  }, [input, status, sendMessage]);
+  }, [input, configSaving, configUpdating, sendMessage]);
 
   const handdleRequiredDocument = async () => {
     // Update user config
@@ -200,6 +201,7 @@ export default function ChatForm({
               status={status}
               bottomRef={bottomRef}
               loading={isFetching || isLoading}
+              error={error?.message}
             />
           </div>
 
@@ -216,6 +218,7 @@ export default function ChatForm({
                 loading={
                   isFetching || isLoading || configSaving || configUpdating
                 }
+                error={error?.message}
               />
             </div>
 

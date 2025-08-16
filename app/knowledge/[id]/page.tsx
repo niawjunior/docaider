@@ -59,24 +59,7 @@ export default function ViewKnowledgeBasePage() {
   const [shareUrl, setShareUrl] = useState("");
 
   // Connected sources data array
-  const connectedSources: ConnectedSource[] = [
-    {
-      id: "google-drive",
-      name: "Google Drive",
-      icon: "/google-drive.png",
-      count: 34,
-      countType: "files",
-      status: "connected",
-    },
-    {
-      id: "salesforce",
-      name: "Salesforce",
-      icon: "/salesforce.png",
-      count: 1535,
-      countType: "records",
-      status: "connected",
-    },
-  ];
+  const connectedSources: ConnectedSource[] = [];
   const { session } = useSupabaseSession();
   const router = useRouter();
   const params = useParams<{ id: string; chatId: string }>();

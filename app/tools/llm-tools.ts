@@ -112,16 +112,9 @@ export const askQuestionTool = tool({
           - Include days until the event
 
       # Response Structure
-      ## Problem Summary
+      ## Summary
       - Start with a clear, concise summary
       - Use **bold** for key points
-
-      ## Possible Root Cause
-      - Provide the possible root cause of the issue
-      - Provided possible resolution for each root cause
-
-      ## Related Historical Cases
-      - Display all related historical cases number
 
       ## Options
       • Bullet points for alternatives

@@ -7,12 +7,14 @@ import { IoArrowDownSharp } from "react-icons/io5";
 import clsx from "clsx";
 import Markdown from "../Markdown";
 import { Loader2 } from "lucide-react";
+import { CiWarning } from "react-icons/ci";
 
 interface ChatMessagesProps {
   messages: any[];
   status: string;
   bottomRef?: React.RefObject<HTMLDivElement | null>;
   loading?: boolean;
+  error?: string;
 }
 
 export default function ChatMessages({
@@ -20,7 +22,9 @@ export default function ChatMessages({
   status,
   bottomRef: externalBottomRef,
   loading,
+  error,
 }: ChatMessagesProps) {
+  console.log("error", error);
   const t = useTranslations("chat");
   const internalBottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -76,6 +80,7 @@ export default function ChatMessages({
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         )}
+
         {messages.map((message: any, index: any) => {
           const isUser = message.role === "user";
           return (
@@ -92,6 +97,16 @@ export default function ChatMessages({
                       return (
                         <div key={index} className="">
                           <Markdown isUser={isUser} text={part.text} />
+                          {error &&
+                            message.id ===
+                              messages[messages.length - 1]?.id && (
+                              <div className="absolute left-0 rounded-md flex items-center gap-2 text-red-600">
+                                <CiWarning className="h-4 w-4" />
+                                <p className="text-sm font-medium">
+                                  {t("error")}
+                                </p>
+                              </div>
+                            )}
                           {status === "submitted" &&
                             message.id ===
                               messages[messages.length - 1]?.id && (
