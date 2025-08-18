@@ -24,7 +24,7 @@ Docaider is an AI-powered knowledge management and RAG (Retrieval-Augmented Gene
 - **Pinning**: Important knowledge bases can be pinned for quick access.
 
 ### 2. Document Management
-- **Supported File Types**: PDF, CSV, DOC, DOCX, and MD files.
+- **Supported File Types**: PDF, CSV, DOC, DOCX, TXT, and MD files.
 - **Document Upload**: Users can upload documents to knowledge bases or as standalone documents.
 - **Document Processing**: Files are automatically processed, chunked, and embedded for AI retrieval.
 - **Document Organization**: Documents can be added to knowledge bases or kept separate.
@@ -66,7 +66,7 @@ Docaider is an AI-powered knowledge management and RAG (Retrieval-Augmented Gene
 ## Common User Questions & Issues
 - **Credit Usage**: Each AI chat interaction that uses document context consumes credits.
 - **Document Limits**: There may be file size limits (typically 1MB per file).
-- **Supported Formats**: PDF, CSV, DOC, DOCX, and MD files are supported.
+- **Supported Formats**: PDF, CSV, DOC, DOCX, TXT, and MD files are supported.
 - **Privacy**: Private knowledge bases are only visible to the owner and those they've been shared with.
 - **Search Functionality**: The search feature works across knowledge base names and content.
 

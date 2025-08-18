@@ -235,7 +235,7 @@
     "uploadDocuments": "อัปโหลดเอกสาร",
     "uploadDocument": "อัปโหลดเอกสาร",
     "dragAndDrop": "ลากและวางไฟล์ที่นี่ หรือคลิกเพื่อเลือกไฟล์",
-    "supportedFormats": "รูปแบบที่รองรับ: PDF, DOCX, TXT, MD",
+    "supportedFormats": "รูปแบบที่รองรับ: PDF, CSV, DOC, DOCX, TXT, MD",
     "uploading": "กำลังอัปโหลด...",
     "processing": "กำลังประมวลผล...",
     "delete": "ลบ",
@@ -243,7 +243,7 @@
     "documentTitle": "ชื่อเอกสาร",
     "enterDocumentTitle": "ป้อนชื่อเอกสาร",
     "selectedFile": "ไฟล์ที่เลือก: {name} ({size})",
-    "supportedFileTypes": "รูปแบบไฟล์ที่รองรับ: PDF, CSV, DOC, DOCX, MD",
+    "supportedFileTypes": "รูปแบบไฟล์ที่รองรับ: PDF, CSV, DOC, DOCX, TXT, MD",
     "maximumFileSize": "ขนาดไฟล์สูงสุด: 2MB เอกสารจะถูกประมวลผลสำหรับการค้นคืนความรู้",
     "fileSizeExceeded": "ขนาดไฟล์เกินขีดจำกัด {limit} ขนาดปัจจุบัน: {size}",
     "duplicateTitleError": "มีเอกสารที่ใช้ชื่อนี้อยู่แล้ว โปรดใช้ชื่ออื่น"

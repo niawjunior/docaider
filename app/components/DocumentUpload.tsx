@@ -203,7 +203,7 @@ export default function DocumentUpload({
               <Input
                 id="file"
                 type="file"
-                accept=".pdf,.csv,.doc,.docx,.md"
+                accept=".pdf,.csv,.doc,.docx,.txt,.md"
                 onChange={handleFileChange}
                 disabled={isUploading}
               />

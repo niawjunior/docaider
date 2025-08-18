@@ -29,6 +29,8 @@ const fileLoader = async (file: File): Promise<string> => {
       return await docxLoader(file);
     case "md":
       return await mdLoader(file);
+    case "txt":
+      return await mdLoader(file);
     default:
       throw new Error("Unsupported file type");
   }
