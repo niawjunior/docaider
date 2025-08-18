@@ -17,6 +17,7 @@ import {
 import LocaleSwitcher from "./LocaleSwitcher";
 import { useTranslations } from "next-intl";
 import { ModeToggle } from "./ThemeSwitcher";
+import { ChatBox } from "./ChatBox";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
@@ -214,6 +215,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       </header>
 
       <main className=" py-2 min-h-[calc(100vh-120px)]">{children}</main>
+      <div className="hidden md:block">
+        <ChatBox />
+      </div>
       <footer className="w-full bg-background border-t border-border px-6 py-3 text-muted-foreground text-sm">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
