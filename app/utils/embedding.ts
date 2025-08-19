@@ -79,6 +79,48 @@ export const findRelevantContent = async (
         return [];
       }
     }
+
+    // DROP FUNCTION IF EXISTS match_document_chunks(vector, double precision, integer);
+    // DROP FUNCTION IF EXISTS match_document_chunks(vector, double precision, integer, jsonb);
+    // DROP FUNCTION IF EXISTS match_selected_document_chunks(vector, double precision, integer, jsonb);
+    // DROP FUNCTION IF EXISTS match_selected_document_chunks(vector, double precision, integer, jsonb, jsonb);
+    // DROP FUNCTION IF EXISTS public.match_selected_document_chunks(vector, double precision, integer, jsonb);
+    // DROP FUNCTION IF EXISTS public.match_selected_document_chunks(vector, double precision, integer, text[]);
+
+    // CREATE OR REPLACE FUNCTION match_document_chunks(
+    //   query_embedding vector(3072),
+    //   match_threshold float,
+    //   match_count int
+    // )
+    // RETURNS SETOF document_chunks
+    // LANGUAGE sql SECURITY DEFINER
+    // AS $$
+    //   SELECT *
+    //   FROM document_chunks
+    //   WHERE document_chunks.embedding <=> query_embedding < 1 - match_threshold
+    //   ORDER BY document_chunks.embedding <=> query_embedding ASC
+    //   LIMIT LEAST(match_count, 200);
+    // $$;
+
+    // CREATE OR REPLACE FUNCTION match_selected_document_chunks(
+    //   query_embedding vector(3072),
+    //   match_threshold float,
+    //   match_count int,
+    //   document_ids jsonb  -- Array of document IDs to filter by
+    // )
+    // RETURNS SETOF document_chunks
+    // LANGUAGE sql SECURITY DEFINER
+    // AS $$
+    //   SELECT *
+    //   FROM document_chunks
+    //   WHERE document_chunks.document_id IN (
+    //     SELECT value FROM jsonb_array_elements_text(document_ids)
+    //   )
+    //   AND document_chunks.embedding <=> query_embedding < 1 - match_threshold
+    //   ORDER BY document_chunks.embedding <=> query_embedding ASC
+    //   LIMIT LEAST(match_count, 200);
+    // $$;
+
     // Use Supabase RPC for vector similarity search
     const { data: relevantChunks, error } = await supabase.rpc(
       documentIds && documentIds.length > 0
@@ -90,7 +132,9 @@ export const findRelevantContent = async (
         match_count: 1000,
         ...(documentIds &&
           documentIds.length > 0 && {
-            document_ids: documentIds.map((d) => d.id),
+            document_ids: documentIds
+              .filter((d) => d.id != null)
+              .map((d) => String(d.id)), // -> becomes a JSON array automatically
           }),
       }
     );
