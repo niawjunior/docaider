@@ -96,7 +96,7 @@ export async function processFile(
     // Split text into chunks with better context
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000, // Maximum characters per chunk
-      chunkOverlap: 0, // Overlap between chunks to maintain context
+      chunkOverlap: 20, // Overlap between chunks to maintain context
     });
     const chunks = await splitter.splitText(data);
 
