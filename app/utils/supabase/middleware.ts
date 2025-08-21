@@ -53,7 +53,9 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/robots.txt") &&
     !request.nextUrl.pathname.startsWith("/api/user/config") &&
     !request.nextUrl.pathname.startsWith("/api/support") &&
-    !request.nextUrl.pathname.startsWith("/embed.js")
+    !request.nextUrl.pathname.startsWith("/embed.js") &&
+    !request.nextUrl.pathname.startsWith("/api/embed/chat") &&
+    !request.nextUrl.pathname.startsWith("/api/embed/initialize")
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
