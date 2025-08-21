@@ -136,22 +136,31 @@ export default function EditKnowledgeBasePage() {
   }, [params.id]);
 
   useEffect(() => {
-    if (knowledgeBase && session?.user?.id) {
-      // 🔒 AUTHORIZATION CHECK: Only allow owner to access edit page
-      if (session?.user?.id !== knowledgeBase.userId) {
-        console.error("Unauthorized access attempt to edit knowledge base");
+    const checkEditPermission = async () => {
+      if (knowledgeBase && session?.user?.id) {
+        // 🔒 AUTHORIZATION CHECK: Only allow owner to access edit page
+        if (session?.user?.id !== knowledgeBase.userId) {
+          console.error("Unauthorized access attempt to edit knowledge base");
+          toast.error(t("unauthorizedEdit"));
+          router.push("/dashboard");
+          return;
+        }
+
+        form.reset({
+          name: knowledgeBase.name,
+          description: knowledgeBase.description || "",
+          isPublic: knowledgeBase.isPublic,
+        });
+      } else if (knowledgeBase && !session) {
+        // If no session, redirect to login
         toast.error(t("unauthorizedEdit"));
-        router.push("/dashboard");
+        router.push("/login");
         return;
       }
+    };
 
-      form.reset({
-        name: knowledgeBase.name,
-        description: knowledgeBase.description || "",
-        isPublic: knowledgeBase.isPublic,
-      });
-    }
-  }, [knowledgeBase, form, session?.user?.id, router]);
+    checkEditPermission();
+  }, [knowledgeBase, form, session, router, t]);
 
   useEffect(() => {
     if (kbError) {

@@ -24,6 +24,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { createChat } from "@/app/utils/aisdk/chat";
+import { createClient } from "@/app/utils/supabase/client";
 import { useChats } from "@/app/hooks/useChats";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -105,7 +106,7 @@ export default function ViewKnowledgeBasePage() {
     return knowledgeBaseChats?.pages.flatMap((page) => page?.data) ?? [];
   }, [knowledgeBaseChats]);
 
-  // Handle errors
+  // Handle errors and permission checks
   useEffect(() => {
     if (kbError) {
       console.error("Error fetching knowledge base:", kbError);
@@ -123,6 +124,51 @@ export default function ViewKnowledgeBasePage() {
       }
     }
   }, [kbError, router, t]);
+
+  // Permission check - moved from middleware
+  useEffect(() => {
+    const checkPermissions = async () => {
+      if (!knowledgeBase) return;
+      
+      // If knowledge base is not public and user is not authenticated, redirect to login
+      if (!knowledgeBase.isPublic && !session) {
+        toast(t("unauthorized"));
+        router.push("/login");
+        return;
+      }
+
+      // If knowledge base is not public, check if user has access
+      if (!knowledgeBase.isPublic && session) {
+        // Check if user owns the knowledge base
+        const isOwner = knowledgeBase.userId === session.user.id;
+        
+        if (!isOwner) {
+          // Check if knowledge base is shared with this user's email
+          try {
+            const supabase = await createClient();
+            const { data: sharedAccess, error } = await supabase
+              .from("knowledge_base_shares")
+              .select("id")
+              .eq("knowledge_base_id", params.id)
+              .eq("shared_with_email", session.user.email)
+              .single();
+
+            // If user doesn't own it and it's not shared with them, redirect to dashboard
+            if (error || !sharedAccess) {
+              toast(t("unauthorized"));
+              router.push("/dashboard");
+            }
+          } catch (error) {
+            console.error("Error checking shared access:", error);
+            toast(t("unauthorized"));
+            router.push("/dashboard");
+          }
+        }
+      }
+    };
+
+    checkPermissions();
+  }, [knowledgeBase, session, params.id, router, t]);
 
   const createNewChat = async () => {
     const id = await createChat();
@@ -168,6 +214,7 @@ export default function ViewKnowledgeBasePage() {
     return null;
   }
 
+  // Check if user can edit the knowledge base
   const canEdit = session && session.user.id === knowledgeBase.userId;
 
   const handleChatClick = (newChatId: string) => {
