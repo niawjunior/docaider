@@ -216,7 +216,9 @@ export const useKnowledgeBases = () => {
     },
     onSuccess: () => {
       // Invalidate relevant queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ["knowledgeBases"] });
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["knowledgeBases"] });
+      }, 1000);
       toast(messageT("knowledgeBaseCreated"), {
         duration: 3000,
       });

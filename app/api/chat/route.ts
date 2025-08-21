@@ -1,4 +1,4 @@
-import { convertToModelMessages, streamText } from "ai";
+import { convertToModelMessages, stepCountIs, streamText } from "ai";
 import { openai } from "@ai-sdk/openai";
 
 import { NextRequest } from "next/server";
@@ -299,7 +299,7 @@ export async function POST(req: NextRequest) {
     -   Avoid jargon and keep responses simple, human, and welcoming.
     -   Encourage continued interaction (e.g., "Want to explore more?" or "Need a pie chart for this too?").
     `,
-
+    stopWhen: stepCountIs(1),
     messages: convertToModelMessages(messages),
     onStepFinish: async (response) => {
       const tools = response.toolResults;
