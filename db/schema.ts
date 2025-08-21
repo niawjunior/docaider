@@ -325,6 +325,8 @@ export const knowledgeBases = pgTable(
     name: text().notNull(),
     description: text(),
     isPublic: boolean("is_public").default(false),
+    // Embedding configuration
+    allowEmbedding: boolean("allow_embedding").default(false),
     // Removed isPinned - now using separate user_pinned_knowledge_bases table
     userId: uuid("user_id")
       .notNull()
@@ -338,6 +340,7 @@ export const knowledgeBases = pgTable(
       withTimezone: true,
       mode: "string",
     }).default(sql`timezone('utc'::text, now())`),
+    embedConfig: jsonb("embed_config").default({}), // Configuration for embedded chat (colors, position, etc.)
   },
   () => [
     pgPolicy("Users can view their own knowledge bases", {
@@ -637,6 +640,74 @@ export const usageRecords = pgTable(
       for: "select",
       to: ["public"],
       using: sql`(auth.uid() = user_id)`,
+    }),
+  ]
+);
+
+// Embed access logs - tracks when embedded chatboxes are initialized
+export const embedAccessLogs = pgTable(
+  "embed_access_logs",
+  {
+    id: uuid()
+      .default(sql`uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    knowledgeBaseId: uuid("knowledge_base_id")
+      .notNull()
+      .references(() => knowledgeBases.id, { onDelete: "cascade" }),
+    chatId: text("chat_id").notNull(),
+    referrer: text("referrer"),
+    timestamp: timestamp("timestamp", { withTimezone: true, mode: "string" })
+      .default(sql`timezone('utc'::text, now())`)
+      .notNull(),
+    userAgent: text("user_agent"),
+    ipAddress: text("ip_address"),
+  },
+  (table) => [
+    pgPolicy("Knowledge base owners can view embed access logs", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(
+        EXISTS (
+          SELECT 1 FROM knowledge_bases kb 
+          WHERE kb.id = knowledge_base_id 
+          AND kb.user_id = auth.uid()
+        )
+      )`,
+    }),
+  ]
+);
+
+// Embed message logs - tracks messages sent through embedded chatboxes
+export const embedMessageLogs = pgTable(
+  "embed_message_logs",
+  {
+    id: uuid()
+      .default(sql`uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    knowledgeBaseId: uuid("knowledge_base_id")
+      .notNull()
+      .references(() => knowledgeBases.id, { onDelete: "cascade" }),
+    chatId: text("chat_id").notNull(),
+    message: text("message").notNull(),
+    timestamp: timestamp("timestamp", { withTimezone: true, mode: "string" })
+      .default(sql`timezone('utc'::text, now())`)
+      .notNull(),
+  },
+  (table) => [
+    pgPolicy("Knowledge base owners can view embed message logs", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(
+        EXISTS (
+          SELECT 1 FROM knowledge_bases kb 
+          WHERE kb.id = knowledge_base_id 
+          AND kb.user_id = auth.uid()
+        )
+      )`,
     }),
   ]
 );

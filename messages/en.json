@@ -48,7 +48,8 @@
     "connected": "Connected",
     "noPermission": "You don’t have permission to connect to data sources",
     "openSidebar": "Open Sidebar",
-    "closeSidebar": "Close Sidebar"
+    "closeSidebar": "Close Sidebar",
+    "deploy": "Deploy"
   },
   "navigation": {
     "home": "Home",
@@ -144,6 +145,7 @@
     "cancel": "Cancel",
     "backToDashboard": "Back to Dashboard",
     "share": "Share",
+    "deploy": "Deploy",
     "shareDialog": {
       "title": "Share Knowledge Base",
       "publicDescription": "This knowledge base is public. Anyone with the link can access it.",
@@ -335,6 +337,8 @@
     "documentUploaded": "Document uploaded successfully",
     "documentDeleted": "Document deleted successfully",
     "documentDeleteError": "Error deleting document",
+    "embedSettingsSaved": "Embed settings saved successfully",
+    "embedSettingsError": "Error saving embed settings",
     "errorOccurred": "An error occurred",
     "unauthorized": "Unauthorized access",
     "notFound": "Not found"
@@ -440,6 +444,39 @@
       "email": "pasupolworks@gmail.com"
     }
   },
+  "EmbedDialog": {
+    "embedKnowledgeBase": "Embed Knowledge Base",
+    "embedDescription": "Add your knowledge base to any website with this embed code. Visitors can chat with your knowledge base directly on your site.",
+    "allowEmbedding": "Allow embedding on external websites",
+    "privateKnowledgeBaseWarning": "This knowledge base is private. You must enable embedding or make it public to allow embedding on external websites.",
+    "embedCode": "Embed Code",
+    "appearance": "Appearance",
+    "copyCodeBelow": "Copy the code below and paste it into your website's HTML",
+    "addCodeToWebsite": "Add this code to your website where you want the chat widget to appear.",
+    "welcomeMessage": "Welcome Message",
+    "welcomeMessagePlaceholder": "Enter a welcome message for your visitors",
+    "primaryColor": "Primary Color",
+    "position": "Position",
+    "buttonText": "Button Text",
+    "buttonTextPlaceholder": "Enter button text",
+    "showButtonText": "Show button text",
+    "size": "Size",
+    "width": "Width",
+    "height": "Height",
+    "cancel": "Cancel",
+    "saveSettings": "Save Settings",
+    "settingsSaved": "Settings Saved",
+    "embedSettingsSaved": "Embed settings saved successfully",
+    "error": "Error",
+    "errorSavingSettings": "Error saving embed settings",
+    "copied": "Copied!",
+    "codeCopied": "Embed code copied to clipboard",
+    "bottom-right": "Bottom Right",
+    "bottom-left": "Bottom Left",
+    "top-right": "Top Right",
+    "top-left": "Top Left"
+  },
+
   "home": {
     "title": "AI-Powered Document Assistant for Knowledge Management",
     "subtitle": "Upload your documents and chat with them using advanced AI. Get insights, summaries, and answers from your knowledge base.",

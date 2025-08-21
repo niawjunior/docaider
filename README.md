@@ -8,6 +8,7 @@ An AI-powered Knowledge Management and Retrieval-Augmented Generation (RAG) syst
 - 📚 **Knowledge Base Management**: Create, edit, and organize knowledge bases with an intuitive UI
 - 🤖 **AI-Powered Chat**: Ask questions about your documents and get accurate, contextual responses
 - 🔗 **Collaboration & Sharing**: Share knowledge bases via email or make them public
+- 🔌 **Embeddable Chatbox**: Embed your knowledge base chat on any website
 - 🌐 **Multi-Language Support**: Use the application in English or Thai with easy switching
 - 🎨 **Theme Support**: Choose between light, dark, or system theme
 - 🔍 **Search & Filter**: Find and organize your knowledge bases efficiently
@@ -42,6 +43,8 @@ An AI-powered Knowledge Management and Retrieval-Augmented Generation (RAG) syst
 - **Public Publishing**: Make knowledge bases available to everyone
 - **Access Control**: Manage who can access your shared resources
 - **Share Chat Links**: Generate and share links to specific chat sessions
+- **Embeddable Chatbox**: Add your knowledge base chat to any external website
+- **Customizable Embedding**: Configure colors, position, and appearance of embedded chat
 
 ### 5. Multi-Language Support
 

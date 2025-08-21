@@ -5,7 +5,14 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, Share2, PlusCircle, ChevronDown } from "lucide-react";
+import {
+  ArrowLeft,
+  Edit,
+  Share2,
+  PlusCircle,
+  ChevronDown,
+  Code,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
 import GlobalLoader from "@/app/components/GlobalLoader";
@@ -30,6 +37,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import MainLayout from "@/app/components/MainLayout";
 import ShareKnowledgeBaseDialog from "@/app/components/ShareKnowledgeBaseDialog";
+import EmbedDialog from "@/components/knowledge/EmbedDialog";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
@@ -57,6 +65,7 @@ export default function ViewKnowledgeBasePage() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [deployDialogOpen, setDeployDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
 
   // Connected sources data array
@@ -129,7 +138,7 @@ export default function ViewKnowledgeBasePage() {
   useEffect(() => {
     const checkPermissions = async () => {
       if (!knowledgeBase) return;
-      
+
       // If knowledge base is not public and user is not authenticated, redirect to login
       if (!knowledgeBase.isPublic && !session) {
         toast(t("unauthorized"));
@@ -141,7 +150,7 @@ export default function ViewKnowledgeBasePage() {
       if (!knowledgeBase.isPublic && session) {
         // Check if user owns the knowledge base
         const isOwner = knowledgeBase.userId === session.user.id;
-        
+
         if (!isOwner) {
           // Check if knowledge base is shared with this user's email
           try {
@@ -247,6 +256,17 @@ export default function ViewKnowledgeBasePage() {
         isPublic={knowledgeBase?.isPublic || false}
       />
 
+      {canEdit && (
+        <EmbedDialog
+          open={deployDialogOpen}
+          onOpenChange={setDeployDialogOpen}
+          knowledgeBaseId={params.id}
+          isPublic={knowledgeBase?.isPublic || false}
+          allowEmbedding={knowledgeBase?.allowEmbedding || false}
+          embedConfig={knowledgeBase?.embedConfig || {}}
+        />
+      )}
+
       <div className="px-4">
         <div className="">
           <div className="flex items-center justify-between">
@@ -268,6 +288,15 @@ export default function ViewKnowledgeBasePage() {
             <div className="flex gap-2 mb-2">
               {canEdit && (
                 <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDeployDialogOpen(true)}
+                  >
+                    <Code size={16} className="mr-2" />
+                    {kbT("deploy")}
+                  </Button>
+
                   <Button
                     variant="outline"
                     size="sm"
