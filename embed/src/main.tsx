@@ -11,11 +11,12 @@ import App from "../src/App";
     console.error("Docaider: Could not find script tag");
     return;
   }
+  const origin = new URL(scriptTag.getAttribute("src")!).origin;
 
   // Extract configuration from data attributes
   const config = {
     knowledgeBaseId: scriptTag.getAttribute("data-kb-id"),
-    src: scriptTag.getAttribute("src"),
+    src: origin,
     primaryColor: scriptTag.getAttribute("data-primary-color") || "#0091ff",
     textColor: scriptTag.getAttribute("data-text-color") || "#FFFFFF",
     position: scriptTag.getAttribute("data-position") || "bottom-right",
@@ -62,7 +63,6 @@ import App from "../src/App";
   // Tailwind CSS is now bundled directly into the embed.js file
   // No need to load it externally
 
-  const origin = new URL(config.src!).origin;
   // Add Google Fonts Prompt font
   const fontPreconnect1 = document.createElement("link");
   fontPreconnect1.rel = "preconnect";

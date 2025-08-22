@@ -1,5 +1,6 @@
 interface DocaiderChatConfig {
   knowledgeBaseId: string;
+  src: string;
   chatboxTitle?: string;
   primaryColor?: string;
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";

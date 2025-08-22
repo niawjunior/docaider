@@ -15,20 +15,19 @@ function App() {
     if (windowConfig) {
       setConfig(windowConfig);
       // Initialize chat as soon as we have the config
-      initializeChat(windowConfig.knowledgeBaseId);
+      initializeChat(windowConfig.knowledgeBaseId, windowConfig.src);
     } else {
       console.error("Docaider ChatConfig not found in window object");
     }
   }, []);
 
   // Initialize chat with the API
-  const initializeChat = async (knowledgeBaseId: string) => {
+  const initializeChat = async (knowledgeBaseId: string, src: string) => {
     if (isInitializing || chatId) return; // Prevent multiple initializations
-    const origin = new URL(config.src!).origin;
 
     setIsInitializing(true);
     try {
-      const response = await fetch(`${origin}/api/embed/initialize`, {
+      const response = await fetch(`${src}/api/embed/initialize`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

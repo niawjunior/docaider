@@ -65,7 +65,7 @@ export function EmbedChatBox({
   // Use the AI SDK's useChat hook
   const { messages, sendMessage, status, error, stop } = useChat({
     transport: new DefaultChatTransport({
-      api: `${new URL(src!).origin}/api/embed/chat`,
+      api: `${src}/api/embed/chat`,
       body: {
         chatId: chatId!,
         knowledgeBaseId,
