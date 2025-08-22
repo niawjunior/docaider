@@ -21,7 +21,6 @@ export function ChatBox() {
     // Add initial welcome message
     id: "support-chat",
   });
-  console.log(messages);
 
   const [inputValue, setInputValue] = useState("");
 

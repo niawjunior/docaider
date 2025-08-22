@@ -9,12 +9,17 @@ import { eq, and, inArray } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, chatId, knowledgeBaseId } = await req.json();
+    const {
+      messages,
+      chatId,
+      knowledgeBaseId,
+    }: { messages: any[]; chatId: string; knowledgeBaseId: string } =
+      await req.json();
 
-    if (!message || !chatId || !knowledgeBaseId) {
+    if (!chatId || !knowledgeBaseId) {
       return new Response(
         JSON.stringify({
-          error: "Message, chat ID, and knowledge base ID are required",
+          error: "Chat ID and knowledge base ID are required",
         }),
         {
           status: 400,
@@ -51,28 +56,6 @@ export async function POST(req: NextRequest) {
         }
       );
     }
-
-    // Get existing chat messages
-    const [existingChat] = await db
-      .select()
-      .from(chats)
-      .where(eq(chats.id, chatId))
-      .limit(1);
-
-    // Initialize messages array
-    let messages: UIMessage[] = [];
-
-    // If chat exists, use its messages
-    if (existingChat && existingChat.messages) {
-      messages = existingChat.messages as UIMessage[];
-    }
-
-    // Add the new user message
-    messages.push({
-      id: `user-${Date.now()}`,
-      role: "user",
-      parts: [{ type: "text", text: message }],
-    });
 
     // Get knowledge base documents
     const knowledgeBaseDocumentIds = knowledgeBase.documentIds || [];
@@ -170,7 +153,7 @@ export async function POST(req: NextRequest) {
         await serviceSupabase.from("embed_message_logs").insert({
           knowledge_base_id: knowledgeBaseId,
           chat_id: chatId,
-          message: message,
+          message: messages[messages.length - 1].parts[0].text,
           timestamp: new Date().toISOString(),
         });
       },

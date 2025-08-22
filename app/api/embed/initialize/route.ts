@@ -40,7 +40,9 @@ export async function POST(req: NextRequest) {
     // Private knowledge bases need to have embedding explicitly enabled
     if (!knowledgeBase.isPublic && !knowledgeBase.allowEmbedding) {
       return new Response(
-        JSON.stringify({ error: "Embedding not allowed for this knowledge base" }),
+        JSON.stringify({
+          error: "Embedding not allowed for this knowledge base",
+        }),
         {
           status: 403,
           headers: { "Content-Type": "application/json" },

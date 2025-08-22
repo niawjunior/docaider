@@ -4,128 +4,73 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Docaider Embed Test</title>
-    <script src="/test-embed-script.js"></script>
     <style>
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-        line-height: 1.6;
-        margin: 0;
-        padding: 20px;
-        color: #333;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         max-width: 800px;
         margin: 0 auto;
+        padding: 2rem;
+        line-height: 1.6;
       }
       h1 {
-        color: #7c3aed;
-        margin-bottom: 20px;
+        margin-bottom: 1rem;
       }
-      .content {
-        background-color: #f9f9f9;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
+      p {
+        margin-bottom: 1rem;
       }
-      .test-section {
-        margin-top: 40px;
-        border-top: 1px solid #ddd;
-        padding-top: 20px;
-      }
-      code {
-        background-color: #f0f0f0;
-        padding: 2px 6px;
+      pre {
+        background-color: #f5f5f5;
+        padding: 1rem;
         border-radius: 4px;
-        font-family: monospace;
+        overflow-x: auto;
+      }
+      .container {
+        margin-top: 2rem;
       }
     </style>
   </head>
   <body>
-    <h1>Docaider Embedded Chat Test</h1>
-
-    <div class="content">
-      <h2>About This Test Page</h2>
-      <p>
-        This page demonstrates the Docaider embedded chatbox functionality. The
-        chatbox should appear in the bottom-right corner (or as configured in
-        the embed settings).
-      </p>
-
-      <p>If you're seeing this page but not the chatbox:</p>
-      <ul>
-        <li>Make sure embedding is enabled for the knowledge base</li>
-        <li>Check that the knowledge base ID in the script tag is correct</li>
-        <li>
-          Verify that the embed.js file is properly served from the public
-          directory
-        </li>
-      </ul>
+    <h1>Docaider Embed Test Page</h1>
+    <p>This page demonstrates the simplified embed script integration with a single script tag.</p>
+    
+    <div class="container">
+      <h2>How It Works</h2>
+      <p>The chat widget is loaded with a single script tag that includes all necessary configuration as data attributes:</p>
+      <pre><code>&lt;script 
+  src="./embed.js"
+  data-kb-id="c962805f-2d89-4e3f-9334-e4f7a1d5cb30"
+  data-title="Docaider Test"
+  data-primary-color="#7C3AED"
+  data-position="bottom-right"
+  data-width="350px"
+  data-height="500px"
+  data-welcome-message="Hello! This is a test of the simplified embed script."
+  data-placeholder="Ask me anything..."
+  data-button-text="Chat with Docaider"
+  data-show-button-text="true"
+  data-text-color="#FFFFFF"&gt;
+&lt;/script&gt;</code></pre>
+    </div>
+    
+    <div class="container">
+      <h2>Try It Out</h2>
+      <p>You should see a chat button in the bottom right corner of this page. Click it to open the chat widget.</p>
     </div>
 
-    <div class="test-section">
-      <h2>Test Content</h2>
-      <p>
-        This is some sample content to test how the chatbox integrates with a
-        regular webpage. The chatbox should float above this content without
-        interfering with the page layout.
-      </p>
-
-      <p>
-        You can ask the AI questions about the knowledge base that's connected
-        to this embedded chat.
-      </p>
-    </div>
-
-    <!-- The embed script will be added dynamically via JavaScript below -->
-    <div id="embed-script-container"></div>
-
-    <!-- Test instructions -->
-    <div class="test-section">
-      <h2>Testing Instructions</h2>
-      <p>
-        Click the "Run Embedded Chatbox Test" button in the top-right corner to
-        run automated tests on the embedded chatbox.
-      </p>
-      <p>
-        Test results will appear in your browser's console (press F12 to open
-        developer tools).
-      </p>
-    </div>
-
-    <script>
-      // This script dynamically adds the embed code with the current origin
-      window.addEventListener("DOMContentLoaded", () => {
-        // Replace with an actual knowledge base ID for testing
-        // You must replace this with a real knowledge base ID from your database
-        const knowledgeBaseId = prompt(
-          "Enter a knowledge base ID to test:",
-          ""
-        );
-
-        // Create the script element
-        const script = document.createElement("script");
-        script.src = `${window.location.origin}/embed.js`;
-        script.setAttribute("data-kb-id", knowledgeBaseId);
-        script.setAttribute("data-primary-color", "#7C3AED");
-        script.setAttribute("data-text-color", "#FFFFFF");
-        script.setAttribute("data-position", "bottom-right");
-        script.setAttribute(
-          "data-welcome-message",
-          "Hi there! How can I help you with your questions?"
-        );
-        script.setAttribute("data-button-text", "Chat with AI");
-        script.setAttribute("data-show-button-text", "true");
-        script.setAttribute("data-height", "500px");
-        script.setAttribute("data-width", "350px");
-        script.setAttribute("data-show-button-text", "true");
-
-        // Append to the container
-        document.getElementById("embed-script-container").appendChild(script);
-
-        // Add the test script
-        const testScript = document.createElement("script");
-        testScript.src = `${window.location.origin}/test-embed-script.js`;
-        document.body.appendChild(testScript);
-      });
+    <!-- Docaider Embed Script with data attributes -->
+    <script 
+      src="./embed.js"
+      data-kb-id="c962805f-2d89-4e3f-9334-e4f7a1d5cb30"
+      data-title="Docaider Test"
+      data-primary-color="#7C3AED"
+      data-position="bottom-right"
+      data-width="350px"
+      data-height="500px"
+      data-welcome-message="Hello! This is a test of the simplified embed script."
+      data-placeholder="Ask me anything..."
+      data-button-text="Chat with Docaider"
+      data-show-button-text="true"
+      data-text-color="#FFFFFF">
     </script>
   </body>
 </html>

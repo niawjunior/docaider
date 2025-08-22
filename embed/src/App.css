@@ -1,0 +1,59 @@
+/* Base styles for the embed chat */
+/* Font is now loaded via JavaScript in main.tsx */
+@import "tailwindcss";
+
+/* CSS variables for dynamic colors */
+:root {
+  --primary-color: #7c3aed;
+  --text-color: #ffffff;
+  --background-color: #ffffff;
+  --border-color: #e5e7eb;
+  --muted-color: #f3f4f6;
+  --muted-foreground: #6b7280;
+}
+
+/* Basic reset and font settings */
+#docaider-embed-container * {
+  box-sizing: border-box;
+  font-family: "Prompt" !important;
+}
+
+#docaider-embed-container {
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+/* Scroll area styles that might not be in Tailwind by default */
+.scroll-area {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted-foreground) transparent;
+}
+
+.scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-area::-webkit-scrollbar-thumb {
+  background-color: var(--muted-foreground);
+  border-radius: 3px;
+}
+
+/* Animation for pulse that might not be in Tailwind by default */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

@@ -54,6 +54,7 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/api/user/config") &&
     !request.nextUrl.pathname.startsWith("/api/support") &&
     !request.nextUrl.pathname.startsWith("/embed.js") &&
+    !request.nextUrl.pathname.startsWith("/public/embed.js") &&
     !request.nextUrl.pathname.startsWith("/api/embed/chat") &&
     !request.nextUrl.pathname.startsWith("/api/embed/initialize")
   ) {

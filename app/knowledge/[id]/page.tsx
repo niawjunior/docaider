@@ -37,7 +37,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import MainLayout from "@/app/components/MainLayout";
 import ShareKnowledgeBaseDialog from "@/app/components/ShareKnowledgeBaseDialog";
-import EmbedDialog from "@/components/knowledge/EmbedDialog";
+import EmbedDialog from "@/app/components/knowledge/EmbedDialog";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
