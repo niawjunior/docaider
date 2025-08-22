@@ -61,6 +61,7 @@ export default function EmbedDialog({
         : true,
     height: initialEmbedConfig.height || "500px",
     width: initialEmbedConfig.width || "350px",
+    title: initialEmbedConfig.title || "AI Assistant",
   });
 
   // Update local state when props change
@@ -84,6 +85,7 @@ export default function EmbedDialog({
             : true,
         height: initialEmbedConfig.height || "500px",
         width: initialEmbedConfig.width || "350px",
+        title: initialEmbedConfig.title || "AI Assistant",
       });
     }
   }, [allowEmbedding, initialEmbedConfig]);
@@ -100,6 +102,7 @@ export default function EmbedDialog({
       `data-welcome-message="${embedConfig.welcomeMessage}"`,
       `data-button-icon="${embedConfig.buttonIcon}"`,
       `data-button-text="${embedConfig.buttonText}"`,
+      `data-title="${embedConfig.title}"`,
       `data-show-button-text="${embedConfig.showButtonText}"`,
       `data-height="${embedConfig.height}"`,
       `data-width="${embedConfig.width}"`,
@@ -205,6 +208,21 @@ export default function EmbedDialog({
                 <p className="text-sm text-muted-foreground mt-2">
                   {t("addCodeToWebsite")}
                 </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="title">{t("title")}</Label>
+                <Input
+                  id="title"
+                  value={embedConfig.title}
+                  onChange={(e) =>
+                    setEmbedConfig({
+                      ...embedConfig,
+                      title: e.target.value,
+                    })
+                  }
+                  placeholder={t("titlePlaceholder")}
+                />
               </div>
 
               <div className="space-y-2">

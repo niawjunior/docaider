@@ -1,24 +1,741 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Docaider Chat Embed Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>เที่ยวไทยง่าย ๆ | Thailand Travel</title>
+
+    <!-- Google Font: Prompt -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: [
+                "Prompt",
+                "ui-sans-serif",
+                "system-ui",
+                "-apple-system",
+                "Segoe UI",
+                "Roboto",
+                "Noto Sans",
+                "Ubuntu",
+                "Cantarell",
+                "Helvetica Neue",
+                "Arial",
+                "sans-serif",
+              ],
+            },
+            colors: {
+              primary: {
+                50: "#eff6ff",
+                100: "#dbeafe",
+                200: "#bfdbfe",
+                300: "#93c5fd",
+                400: "#60a5fa",
+                500: "#3b82f6",
+                600: "#2563eb",
+                700: "#1d4ed8",
+                800: "#1e40af",
+                900: "#1e3a8a",
+              },
+            },
+            boxShadow: {
+              soft: "0 10px 25px -5px rgba(0,0,0,.1), 0 8px 10px -6px rgba(0,0,0,.1)",
+            },
+            backgroundImage: {
+              "hero-pattern":
+                "linear-gradient(to bottom, rgba(0,0,0,.25), rgba(0,0,0,.55)), url('https://images.unsplash.com/photo-1563492065599-3520f775eeed?q=80&w=1548&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* Improve font rendering */
+      html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+    </style>
   </head>
-  <body>
-    <!-- Single script tag with data attributes for configuration -->
-    <script
-      src="https://www.docaider.com/embed.js"
-      data-kb-id="c962805f-2d89-4e3f-9334-e4f7a1d5cb30"
-      data-primary-color="#7C3AED"
-      data-text-color="#FFFFFF"
-      data-position="bottom-right"
-      data-welcome-message="Hi there! How can I help you with your questions?"
-      data-button-icon="chat"
-      data-button-text="Chat with AI"
-      data-show-button-text="false"
-      data-height="500px"
-      data-width="350px"
-    ></script>
+
+  <body class="font-sans text-slate-800">
+    <!-- Navbar -->
+    <header
+      class="fixed inset-x-0 top-0 z-50 bg-white/70 backdrop-blur border-b border-slate-200"
+    >
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+          <a href="#" class="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              class="size-6 text-primary-600"
+            >
+              <path d="M12 2l3 7h7l-5.5 4 2.5 7-7-4.5L5 20l2.5-7L2 9h7z" />
+            </svg>
+            <span class="text-lg font-semibold">เที่ยวไทยง่าย ๆ</span>
+          </a>
+          <nav class="hidden md:flex items-center gap-8 text-sm">
+            <a href="#destinations" class="hover:text-primary-600">จุดหมาย</a>
+            <a href="#experiences" class="hover:text-primary-600">ประสบการณ์</a>
+            <a href="#why" class="hover:text-primary-600">ทำไมต้องไทย</a>
+            <a href="#contact" class="hover:text-primary-600">ติดต่อเรา</a>
+          </nav>
+          <div class="hidden md:flex items-center gap-3">
+            <a
+              href="#book"
+              class="px-4 py-2 text-sm font-medium rounded-full border border-primary-600 text-primary-700 hover:bg-primary-50"
+              >สำรวจแพ็กเกจ</a
+            >
+            <a
+              href="#newsletter"
+              class="px-4 py-2 text-sm font-semibold rounded-full bg-primary-600 text-white hover:bg-primary-700 shadow-soft"
+              >รับแรงบันดาลใจ</a
+            >
+          </div>
+          <button
+            id="menuBtn"
+            class="md:hidden rounded-lg p-2 hover:bg-slate-100"
+            aria-label="Toggle menu"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              class="size-6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <!-- Mobile menu -->
+      <div
+        id="mobileNav"
+        class="md:hidden hidden border-t border-slate-200 bg-white"
+      >
+        <div class="px-4 py-3 space-y-2 text-sm">
+          <a href="#destinations" class="block py-2">จุดหมาย</a>
+          <a href="#experiences" class="block py-2">ประสบการณ์</a>
+          <a href="#why" class="block py-2">ทำไมต้องไทย</a>
+          <a href="#contact" class="block py-2">ติดต่อเรา</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="relative bg-hero-pattern bg-cover bg-center bg-no-repeat">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="pt-28 pb-24 sm:pt-32 sm:pb-28 lg:pt-40 lg:pb-40 text-white">
+          <span
+            class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium ring-1 ring-inset ring-white/30 backdrop-blur"
+          >
+            <span
+              class="inline-block size-2 rounded-full bg-emerald-400"
+            ></span>
+            Ready to Explore Thailand
+          </span>
+          <h1
+            class="mt-4 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight"
+          >
+            พบเสน่ห์เมืองไทย
+            <span class="block text-primary-200"
+              >ทะเลสวย ภูเขางาม วัฒนธรรมงดงาม</span
+            >
+          </h1>
+          <p class="mt-4 max-w-2xl text-base sm:text-lg text-white/90">
+            วางแผนทริปต่อไปของคุณสู่ กรุงเทพฯ เชียงใหม่ ภูเก็ต เกาะสมุย
+            และอีกมากมาย — คัดสรรประสบการณ์ดีที่สุด พร้อมข้อเสนอพิเศษเฉพาะคุณ
+          </p>
+
+          <!-- Search / Booking Bar -->
+          <!-- <div
+            id="book"
+            class="mt-8 rounded-2xl bg-white/90 p-4 sm:p-6 shadow-soft backdrop-blur"
+          >
+            <form class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              <label class="flex flex-col text-sm">
+                <span class="font-medium text-slate-700">จุดหมาย</span>
+                <input
+                  type="text"
+                  placeholder="เช่น ภูเก็ต, เชียงใหม่"
+                  class="mt-1 rounded-xl border-slate-300 focus:border-primary-500 focus:ring-primary-500"
+                />
+              </label>
+              <label class="flex flex-col text-sm">
+                <span class="font-medium text-slate-700">เช็คอิน</span>
+                <input
+                  type="date"
+                  class="mt-1 rounded-xl border-slate-300 focus:border-primary-500 focus:ring-primary-500"
+                />
+              </label>
+              <label class="flex flex-col text-sm">
+                <span class="font-medium text-slate-700">เช็คเอาท์</span>
+                <input
+                  type="date"
+                  class="mt-1 rounded-xl border-slate-300 focus:border-primary-500 focus:ring-primary-500"
+                />
+              </label>
+              <label class="flex flex-col text-sm">
+                <span class="font-medium text-slate-700">ผู้เดินทาง</span>
+                <select
+                  class="mt-1 rounded-xl border-slate-300 focus:border-primary-500 focus:ring-primary-500"
+                >
+                  <option>1 คน</option>
+                  <option>2 คน</option>
+                  <option>3 คน</option>
+                  <option>4+ คน</option>
+                </select>
+              </label>
+              <div class="flex items-end">
+                <button
+                  type="button"
+                  class="w-full rounded-xl bg-primary-600 py-3 font-semibold text-white hover:bg-primary-700 shadow-soft"
+                >
+                  ค้นหา
+                </button>
+              </div>
+            </form>
+          </div> -->
+
+          <div class="mt-6 flex items-center gap-4 text-sm text-white/80">
+            <div class="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="size-5"
+              >
+                <path
+                  d="M12 2a9 9 0 100 18 9 9 0 000-18zm1 13h-2v-2H9v-2h2V9h2v2h2v2h-2v2z"
+                />
+              </svg>
+              ยกเลิกฟรีบางรายการ
+            </div>
+            <div class="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="size-5"
+              >
+                <path d="M12 2l7 7-7 13L5 9l7-7z" />
+              </svg>
+              คู่มือท้องถิ่นแนะนำ
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Wave -->
+      <svg
+        class="-mb-1 block w-full text-white"
+        viewBox="0 0 1440 100"
+        preserveAspectRatio="none"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          d="M0 0h1440v55c-120 30-240 45-360 45s-240-15-360-45S480 10 360 10 120 25 0 55V0z"
+        />
+      </svg>
+    </section>
+
+    <!-- Destinations -->
+    <section id="destinations" class="py-16 sm:py-20 bg-white">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex items-end justify-between gap-6">
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold">จุดหมายยอดนิยม</h2>
+            <p class="mt-2 text-slate-600">
+              เลือกเมืองโปรดของคุณ แล้วออกเดินทาง
+            </p>
+          </div>
+          <a
+            href="#"
+            class="hidden sm:inline-block text-sm font-medium text-primary-700 hover:underline"
+            >ดูทั้งหมด →</a
+          >
+        </div>
+
+        <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <!-- Card -->
+          <a
+            href="#"
+            class="group rounded-2xl overflow-hidden shadow-soft ring-1 ring-slate-200 hover:-translate-y-1 hover:shadow-lg transition"
+          >
+            <div class="aspect-[4/3] bg-gray-200 overflow-hidden">
+              <img
+                alt="Bangkok"
+                src="https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?q=80&w=1200&auto=format&fit=crop"
+                class="h-full w-full object-cover group-hover:scale-105 transition"
+              />
+            </div>
+            <div class="p-4">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold">กรุงเทพฯ</h3>
+                <span
+                  class="text-xs rounded-full bg-primary-50 text-primary-700 px-2 py-1"
+                  >City vibes</span
+                >
+              </div>
+              <p class="mt-1 text-sm text-slate-600">
+                วัดสวย อาหารอร่อย ช้อปปิ้งไม่รู้จบ
+              </p>
+            </div>
+          </a>
+
+          <a
+            href="#"
+            class="group rounded-2xl overflow-hidden shadow-soft ring-1 ring-slate-200 hover:-translate-y-1 hover:shadow-lg transition"
+          >
+            <div class="aspect-[4/3] bg-gray-200 overflow-hidden">
+              <img
+                alt="Chiang Mai"
+                src="https://images.unsplash.com/photo-1674580789919-f212e9194935?q=80&w=1548&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                class="h-full w-full object-cover group-hover:scale-105 transition"
+              />
+            </div>
+            <div class="p-4">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold">เชียงใหม่</h3>
+                <span
+                  class="text-xs rounded-full bg-emerald-50 text-emerald-700 px-2 py-1"
+                  >Nature</span
+                >
+              </div>
+              <p class="mt-1 text-sm text-slate-600">
+                ภูเขา คาเฟ่ศิลป์ วัฒนธรรมล้านนา
+              </p>
+            </div>
+          </a>
+
+          <a
+            href="#"
+            class="group rounded-2xl overflow-hidden shadow-soft ring-1 ring-slate-200 hover:-translate-y-1 hover:shadow-lg transition"
+          >
+            <div class="aspect-[4/3] bg-gray-200 overflow-hidden">
+              <img
+                alt="Phuket"
+                src="https://plus.unsplash.com/premium_photo-1730035378578-cb261b5727e4?q=80&w=1548&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                class="h-full w-full object-cover group-hover:scale-105 transition"
+              />
+            </div>
+            <div class="p-4">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold">ภูเก็ต</h3>
+                <span
+                  class="text-xs rounded-full bg-sky-50 text-sky-700 px-2 py-1"
+                  >Beach</span
+                >
+              </div>
+              <p class="mt-1 text-sm text-slate-600">
+                หาดทราย น้ำทะเลใส กิจกรรมทางน้ำ
+              </p>
+            </div>
+          </a>
+
+          <a
+            href="#"
+            class="group rounded-2xl overflow-hidden shadow-soft ring-1 ring-slate-200 hover:-translate-y-1 hover:shadow-lg transition"
+          >
+            <div class="aspect-[4/3] bg-gray-200 overflow-hidden">
+              <img
+                alt="Krabi"
+                src="https://images.unsplash.com/photo-1526367790999-0150786686a2?q=80&w=1200&auto=format&fit=crop"
+                class="h-full w-full object-cover group-hover:scale-105 transition"
+              />
+            </div>
+            <div class="p-4">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold">กระบี่</h3>
+                <span
+                  class="text-xs rounded-full bg-rose-50 text-rose-700 px-2 py-1"
+                  >Adventure</span
+                >
+              </div>
+              <p class="mt-1 text-sm text-slate-600">
+                ภูเขาหินปูน ดำน้ำ ปีนผา โลเคชันพรีเมียม
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Experiences / Collections -->
+    <section id="experiences" class="py-16 sm:py-20 bg-slate-50">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex items-end justify-between gap-6">
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold">
+              เลือกสไตล์ทริปของคุณ
+            </h2>
+            <p class="mt-2 text-slate-600">แพ็กเกจและกิจกรรมยอดนิยม</p>
+          </div>
+        </div>
+        <div class="mt-8 grid gap-6 md:grid-cols-3">
+          <div
+            class="rounded-2xl overflow-hidden ring-1 ring-slate-200 bg-white shadow-soft"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1541417904950-b855846fe074?q=80&w=1200&auto=format&fit=crop"
+              alt="Thai street food"
+              class="h-52 w-full object-cover"
+            />
+            <div class="p-5">
+              <h3 class="text-lg font-bold">
+                สายกิน: สตรีทฟู้ด &amp; มิชลินไกด์
+              </h3>
+              <p class="mt-1 text-sm text-slate-600">
+                ลิ้มรสอาหารท้องถิ่นตั้งแต่เยาวราชถึงข้าวหมกไก่
+              </p>
+              <div class="mt-4 flex items-center justify-between">
+                <span class="text-sm font-semibold text-primary-700"
+                  >เริ่มต้น 1,990 บาท</span
+                >
+                <a
+                  href="#"
+                  class="text-sm font-medium text-primary-700 hover:underline"
+                  >จองเลย →</a
+                >
+              </div>
+            </div>
+          </div>
+          <div
+            class="rounded-2xl overflow-hidden ring-1 ring-slate-200 bg-white shadow-soft"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1490772888775-55fceea286b2?q=80&w=1200&auto=format&fit=crop"
+              alt="Thai temple"
+              class="h-52 w-full object-cover"
+            />
+            <div class="p-5">
+              <h3 class="text-lg font-bold">
+                สายวัฒนธรรม: วัด งานคราฟต์ ชุมชน
+              </h3>
+              <p class="mt-1 text-sm text-slate-600">
+                สัมผัสศิลปะ วัฒนธรรม และวิถีชีวิตไทยแท้
+              </p>
+              <div class="mt-4 flex items-center justify-between">
+                <span class="text-sm font-semibold text-primary-700"
+                  >เริ่มต้น 1,490 บาท</span
+                >
+                <a
+                  href="#"
+                  class="text-sm font-medium text-primary-700 hover:underline"
+                  >ดูรายละเอียด →</a
+                >
+              </div>
+            </div>
+          </div>
+          <div
+            class="rounded-2xl overflow-hidden ring-1 ring-slate-200 bg-white shadow-soft"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1482192505345-5655af888cc4?q=80&w=1200&auto=format&fit=crop"
+              alt="Island hopping"
+              class="h-52 w-full object-cover"
+            />
+            <div class="p-5">
+              <h3 class="text-lg font-bold">สายทะเล: ดำน้ำ &amp; ล่องเรือ</h3>
+              <p class="mt-1 text-sm text-slate-600">
+                เกาะพีพี เกาะหลีเป๊ะ เขาหลัก และอีกมากมาย
+              </p>
+              <div class="mt-4 flex items-center justify-between">
+                <span class="text-sm font-semibold text-primary-700"
+                  >เริ่มต้น 2,490 บาท</span
+                >
+                <a
+                  href="#"
+                  class="text-sm font-medium text-primary-700 hover:underline"
+                  >สำรวจ →</a
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Thailand -->
+    <section id="why" class="py-16 sm:py-20 bg-white">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <h2 class="text-2xl sm:text-3xl font-extrabold">
+            ทำไมต้องเที่ยวไทยกับเรา?
+          </h2>
+          <p class="mt-3 text-slate-600">
+            เราออกแบบทุกทริปด้วยหัวใจ ให้คุณได้ประสบการณ์ที่ใช่ ในงบที่ชอบ
+          </p>
+        </div>
+        <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div class="rounded-2xl p-6 ring-1 ring-slate-200 bg-slate-50">
+            <div
+              class="size-10 rounded-xl bg-primary-100 text-primary-700 flex items-center justify-center"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="size-5"
+              >
+                <path
+                  d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14H7l5-10v10zm2 0h2V6l-2 10z"
+                />
+              </svg>
+            </div>
+            <h3 class="mt-4 font-bold">ผู้เชี่ยวชาญท้องถิ่น</h3>
+            <p class="mt-1 text-sm text-slate-600">
+              ทีมไกด์และพาร์ทเนอร์ในแต่ละพื้นที่ แนะนำของแท้ของดี
+            </p>
+          </div>
+          <div class="rounded-2xl p-6 ring-1 ring-slate-200 bg-slate-50">
+            <div
+              class="size-10 rounded-xl bg-primary-100 text-primary-700 flex items-center justify-center"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="size-5"
+              >
+                <path d="M5 12l5 5L20 7" />
+              </svg>
+            </div>
+            <h3 class="mt-4 font-bold">จองง่าย ปลอดภัย</h3>
+            <p class="mt-1 text-sm text-slate-600">
+              ระบบชำระเงินมาตรฐาน พร้อมยกเลิกฟรีตามเงื่อนไข
+            </p>
+          </div>
+          <div class="rounded-2xl p-6 ring-1 ring-slate-200 bg-slate-50">
+            <div
+              class="size-10 rounded-xl bg-primary-100 text-primary-700 flex items-center justify-center"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                class="size-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zm0 0V4m0 8v8"
+                />
+              </svg>
+            </div>
+            <h3 class="mt-4 font-bold">ราคาคุ้มค่า</h3>
+            <p class="mt-1 text-sm text-slate-600">
+              ดีลเฉพาะสมาชิก และโปรโมชั่นฤดูกาลท่องเที่ยว
+            </p>
+          </div>
+          <div class="rounded-2xl p-6 ring-1 ring-slate-200 bg-slate-50">
+            <div
+              class="size-10 rounded-xl bg-primary-100 text-primary-700 flex items-center justify-center"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="size-5"
+              >
+                <path d="M12 2l4 8 8 1-6 6 2 9-8-5-8 5 2-9-6-6 8-1z" />
+              </svg>
+            </div>
+            <h3 class="mt-4 font-bold">รีวิวจริงจากลูกค้า</h3>
+            <p class="mt-1 text-sm text-slate-600">
+              เรตติ้งสูงสม่ำเสมอจากนักท่องเที่ยวทั่วโลก
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-16 sm:py-20 bg-slate-50">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-6 lg:grid-cols-3">
+          <div class="lg:col-span-1">
+            <h2 class="text-2xl sm:text-3xl font-extrabold">
+              เสียงจากผู้เดินทาง
+            </h2>
+            <p class="mt-2 text-slate-600">
+              ประสบการณ์จริง ที่ช่วยให้คุณมั่นใจ
+            </p>
+          </div>
+          <div class="lg:col-span-2 grid gap-6 md:grid-cols-2">
+            <figure
+              class="rounded-2xl bg-white p-6 ring-1 ring-slate-200 shadow-soft"
+            >
+              <blockquote class="text-slate-700">
+                “บริการดีมาก ไกด์เป็นกันเอง เที่ยวเชียงใหม่สบายใจสุด ๆ”
+              </blockquote>
+              <figcaption class="mt-4 text-sm text-slate-500">
+                — คุณแอน, กรุงเทพฯ
+              </figcaption>
+            </figure>
+            <figure
+              class="rounded-2xl bg-white p-6 ring-1 ring-slate-200 shadow-soft"
+            >
+              <blockquote class="text-slate-700">
+                “แพ็กเกจทะเลคุ้มค่า วิวสวย อาหารอร่อย ครบ!”
+              </blockquote>
+              <figcaption class="mt-4 text-sm text-slate-500">
+                — John, UK
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Newsletter / CTA -->
+    <section
+      id="newsletter"
+      class="py-16 sm:py-20 bg-gradient-to-b from-primary-50 to-white"
+    >
+      <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-2xl sm:text-3xl font-extrabold">
+          รับแรงบันดาลใจท่องเที่ยวทุกสัปดาห์
+        </h2>
+        <p class="mt-2 text-slate-600">
+          ดีลพิเศษ ไอเดียเส้นทาง และเคล็ดลับการเดินทางในไทย
+        </p>
+        <form class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+          <input
+            type="email"
+            placeholder="อีเมลของคุณ"
+            class="w-full sm:w-96 rounded-xl border-slate-300 focus:border-primary-500 focus:ring-primary-500"
+          />
+          <button
+            type="button"
+            class="rounded-xl bg-primary-600 px-6 py-3 font-semibold text-white hover:bg-primary-700 shadow-soft"
+          >
+            สมัครรับข่าวสาร
+          </button>
+        </form>
+        <p class="mt-2 text-xs text-slate-500">
+          สมัครแล้วสามารถยกเลิกได้ทุกเวลา
+        </p>
+      </div>
+    </section>
+
+    <!-- Contact & Footer -->
+    <footer id="contact" class="border-t border-slate-200 bg-white">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid gap-8 md:grid-cols-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="size-6 text-primary-600"
+              >
+                <path d="M12 2l3 7h7l-5.5 4 2.5 7-7-4.5L5 20l2.5-7L2 9h7z" />
+              </svg>
+              <span class="text-lg font-semibold">เที่ยวไทยง่าย ๆ</span>
+            </div>
+            <p class="mt-3 text-sm text-slate-600">
+              แพลตฟอร์มท่องเที่ยวไทยที่คัดสรรโดยผู้รู้จริง
+            </p>
+          </div>
+          <div>
+            <h3 class="font-semibold">ช่วยเหลือ</h3>
+            <ul class="mt-3 space-y-2 text-sm text-slate-600">
+              <li>
+                <a href="#" class="hover:text-primary-700">ศูนย์ช่วยเหลือ</a>
+              </li>
+              <li>
+                <a href="#" class="hover:text-primary-700"
+                  >ยกเลิก &amp; เปลี่ยนแปลง</a
+                >
+              </li>
+              <li>
+                <a href="#" class="hover:text-primary-700"
+                  >ความปลอดภัยการชำระเงิน</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="font-semibold">จุดหมาย</h3>
+            <ul class="mt-3 space-y-2 text-sm text-slate-600">
+              <li><a href="#" class="hover:text-primary-700">กรุงเทพฯ</a></li>
+              <li><a href="#" class="hover:text-primary-700">เชียงใหม่</a></li>
+              <li><a href="#" class="hover:text-primary-700">ภูเก็ต</a></li>
+              <li><a href="#" class="hover:text-primary-700">กระบี่</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="font-semibold">ติดต่อ</h3>
+            <ul class="mt-3 space-y-2 text-sm text-slate-600">
+              <li>Line: @travelth</li>
+              <li>อีเมล: hello@travelth.example</li>
+              <li>โทร: 02-000-0000</li>
+            </ul>
+          </div>
+        </div>
+        <div
+          class="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 pt-6 text-xs text-slate-500"
+        >
+          <p>
+            © <span id="year"></span> เที่ยวไทยง่าย ๆ — All rights reserved.
+          </p>
+          <div class="flex items-center gap-4">
+            <a href="#" class="hover:text-primary-700">Privacy</a>
+            <a href="#" class="hover:text-primary-700">Terms</a>
+            <a href="#" class="hover:text-primary-700">Cookies</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Mobile nav toggle
+      const menuBtn = document.getElementById("menuBtn");
+      const mobileNav = document.getElementById("mobileNav");
+      menuBtn?.addEventListener("click", () =>
+        mobileNav.classList.toggle("hidden")
+      );
+      // Current year
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
   </body>
+
+  <script
+    src="https://www.docaider.com/embed.js"
+    data-kb-id="be5d3f12-abc6-4400-9976-1d612e9b3afb"
+    data-primary-color="#7C3AED"
+    data-text-color="#FFFFFF"
+    data-position="bottom-right"
+    data-welcome-message="สวัสดีค่ะ คุณอยากให้ฉันช่วยตอบคำถามเรื่องอะไรดีคะ?"
+    data-button-icon="chat"
+    data-button-text="แชทกับรู้ใจ"
+    data-title="แชทกับรู้ใจ"
+    data-show-button-text="false"
+    data-height="500px"
+    data-width="350px"
+  ></script>
 </html>

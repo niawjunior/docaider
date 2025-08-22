@@ -453,6 +453,8 @@
     "appearance": "Appearance",
     "copyCodeBelow": "Copy the code below and paste it into your website's HTML",
     "addCodeToWebsite": "Add this code to your website where you want the chat widget to appear.",
+    "title": "Title",
+    "titlePlaceholder": "Enter a title for your chat widget",
     "welcomeMessage": "Welcome Message",
     "welcomeMessagePlaceholder": "Enter a welcome message for your visitors",
     "primaryColor": "Primary Color",
