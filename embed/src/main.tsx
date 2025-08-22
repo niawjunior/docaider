@@ -11,7 +11,6 @@ import App from "../src/App";
     console.error("Docaider: Could not find script tag");
     return;
   }
-  console.log(scriptTag);
 
   // Extract configuration from data attributes
   const config = {

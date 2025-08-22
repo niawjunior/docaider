@@ -235,7 +235,6 @@ export default function ViewKnowledgeBasePage() {
     queryClient.refetchQueries({
       queryKey: ["chat", chatId],
     });
-    console.log("newChatId", newChatId);
     setChatId(newChatId);
   };
 

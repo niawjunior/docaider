@@ -43,7 +43,6 @@ function App() {
       }
 
       const data = await response.json();
-      console.log("data", data);
       setChatId(data.chatId);
     } catch (error) {
       console.error("Error initializing chat:", error);
