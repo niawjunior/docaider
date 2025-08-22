@@ -22,6 +22,7 @@ import clsx from "clsx";
 
 interface EmbedChatBoxProps {
   knowledgeBaseId: string;
+  src: string;
   chatId: string | null;
   chatboxTitle?: string;
   primaryColor?: string;
@@ -40,6 +41,7 @@ interface EmbedChatBoxProps {
 
 export function EmbedChatBox({
   knowledgeBaseId,
+  src,
   chatId,
   chatboxTitle = "AI Assistant",
   primaryColor = "#0091ff",
@@ -63,7 +65,7 @@ export function EmbedChatBox({
   // Use the AI SDK's useChat hook
   const { messages, sendMessage, status, error, stop } = useChat({
     transport: new DefaultChatTransport({
-      api: "/api/embed/chat",
+      api: `${new URL(src!).origin}/api/embed/chat`,
       body: {
         chatId: chatId!,
         knowledgeBaseId,

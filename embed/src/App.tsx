@@ -24,10 +24,11 @@ function App() {
   // Initialize chat with the API
   const initializeChat = async (knowledgeBaseId: string) => {
     if (isInitializing || chatId) return; // Prevent multiple initializations
+    const origin = new URL(config.src!).origin;
 
     setIsInitializing(true);
     try {
-      const response = await fetch("/api/embed/initialize", {
+      const response = await fetch(`${origin}/api/embed/initialize`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,6 +61,7 @@ function App() {
 
   return (
     <EmbedChatBox
+      src={config.src}
       knowledgeBaseId={config.knowledgeBaseId}
       chatId={chatId}
       chatboxTitle={config.chatboxTitle}
