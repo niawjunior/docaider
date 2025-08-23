@@ -1,9 +1,10 @@
 import { embed, embedMany } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { createClient } from "./supabase/client";
+import { createServiceClient } from "./supabase/server";
 import { db } from "../../db/config";
-import { documents } from "../../db/schema";
-import { and, inArray } from "drizzle-orm";
+import { documents, knowledgeBases } from "../../db/schema";
+import { and, inArray, eq } from "drizzle-orm";
 
 const embeddingModel = openai.embedding("text-embedding-3-large");
 
@@ -152,6 +153,88 @@ export const findRelevantContent = async (
     return relevantChunks as DatabaseChunk[];
   } catch (error) {
     console.error("Error finding relevant content:", error);
+    throw error;
+  }
+};
+
+// Special version of findRelevantContent for embed context that doesn't require user authentication
+export const findEmbedRelevantContent = async (
+  knowledgeBaseId: string,
+  question: string,
+  selectedDocumentNames?: string[]
+): Promise<DatabaseChunk[]> => {
+  try {
+    const questionEmbedding = await generateEmbedding(question);
+
+    // Create Supabase service client (no user auth required)
+    const supabase = createServiceClient();
+    
+    // Get the knowledge base to access its documentIds
+    const [knowledgeBase] = await db
+      .select()
+      .from(knowledgeBases)
+      .where(eq(knowledgeBases.id, knowledgeBaseId));
+
+    if (!knowledgeBase) {
+      console.error("Knowledge base not found");
+      return [];
+    }
+    
+    // Get document_id from document_name using Drizzle ORM
+    let documentIds: { id: number | null }[] = [];
+    
+    if (selectedDocumentNames && selectedDocumentNames.length > 0) {
+      // Filter by both knowledge base documentIds and selected document names
+      documentIds = await db
+        .select({ id: documents.id })
+        .from(documents)
+        .where(
+          and(
+            inArray(documents.title, selectedDocumentNames),
+            knowledgeBase.documentIds && knowledgeBase.documentIds.length > 0
+              ? inArray(documents.documentId, knowledgeBase.documentIds)
+              : eq(documents.id, -1) // No matching documents if empty array
+          )
+        );
+    } else if (knowledgeBase.documentIds && knowledgeBase.documentIds.length > 0) {
+      // Just filter by knowledge base documentIds
+      documentIds = await db
+        .select({ id: documents.id })
+        .from(documents)
+        .where(inArray(documents.documentId, knowledgeBase.documentIds));
+    }
+
+    if (documentIds.length === 0) {
+      console.log("No matching documents found for the knowledge base");
+      return [];
+    }
+
+    // Use Supabase RPC for vector similarity search
+    const { data: relevantChunks, error } = await supabase.rpc(
+      "match_selected_document_chunks",
+      {
+        query_embedding: questionEmbedding,
+        match_threshold: 0.1,
+        match_count: 1000,
+        document_ids: documentIds
+          .filter((d) => d.id != null)
+          .map((d) => String(d.id)),
+      }
+    );
+
+    if (error) {
+      console.error("Error in vector search:", error);
+      throw new Error(`Vector search failed: ${error.message}`);
+    }
+
+    if (!relevantChunks || relevantChunks.length === 0) {
+      console.log("No relevant content found");
+      return [];
+    }
+
+    return relevantChunks as DatabaseChunk[];
+  } catch (error) {
+    console.error("Error finding relevant content for embed:", error);
     throw error;
   }
 };

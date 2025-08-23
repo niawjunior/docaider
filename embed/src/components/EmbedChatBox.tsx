@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Bot } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import { Loader } from "@/components/ai-elements/loader";
+
 import {
   Conversation,
   ConversationContent,
@@ -76,6 +78,9 @@ export function EmbedChatBox({
     },
     onFinish: () => {
       setIsToolCall(false);
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 500);
     },
     id: chatId!,
   });
@@ -92,7 +97,7 @@ export function EmbedChatBox({
         if (inputRef.current) {
           inputRef.current.focus();
         }
-      }, 100);
+      }, 500);
     }
   }, [messages]);
 
@@ -177,20 +182,22 @@ export function EmbedChatBox({
                   <Message
                     key={msg.id}
                     from={msg.role}
-                    className={
+                    className={clsx(
+                      "relative",
                       msg.role === "user" ? "justify-end" : "justify-start"
-                    }
+                    )}
                   >
                     {status === "submitted" &&
                       msg.id === messages[messages.length - 1]?.id && (
-                        <div className="flex items-center gap-2 absolute left-0">
+                        <div className="flex items-center gap-2 absolute left-0 top-[60px]">
                           <div className="px-3 py-1 text-xs text-gray-500 flex items-center gap-2">
                             <div className="animate-pulse h-2 w-2 rounded-full bg-purple-600"></div>
-                            <span>AI is thinking...</span>
+                            <span className="flex items-center gap-2">
+                              AI is thinking... <Loader />
+                            </span>
                           </div>
                         </div>
                       )}
-
                     <MessageContent
                       className={clsx(
                         "relative",
@@ -238,9 +245,15 @@ export function EmbedChatBox({
               <div className="px-3 py-1 text-xs text-gray-500 flex items-center gap-2">
                 <div className="animate-pulse h-2 w-2 rounded-full bg-purple-600"></div>
                 {isToolCall ? (
-                  <span>Searching through documents...</span>
+                  <span className="flex items-center gap-2">
+                    Searching through documents...
+                    <Loader />
+                  </span>
                 ) : (
-                  <span>AI is responding...</span>
+                  <span className="flex items-center gap-2">
+                    AI is responding...
+                    <Loader />
+                  </span>
                 )}
                 <button
                   className="ml-auto h-6 text-xs px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 transition-colors"

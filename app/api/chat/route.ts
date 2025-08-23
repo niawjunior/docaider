@@ -50,7 +50,6 @@ export async function POST(req: NextRequest) {
     .from(userConfig)
     .where(eq(userConfig.id, user.id))
     .limit(1);
-  console.log("useDocument", userConfigData);
 
   // Get user credit using Drizzle ORM
   const [{ balance }] = await db

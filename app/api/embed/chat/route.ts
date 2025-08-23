@@ -2,7 +2,7 @@ import { convertToModelMessages, stepCountIs, streamText, UIMessage } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { NextRequest } from "next/server";
 import { createServiceClient } from "@/app/utils/supabase/server";
-import { askQuestionTool } from "@/app/tools/llm-tools";
+import { embedAskQuestionTool } from "@/app/tools/embed-tools";
 import { db } from "@/db/config";
 import { chats, knowledgeBases, documents } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
@@ -80,9 +80,9 @@ export async function POST(req: NextRequest) {
       )
       .orderBy(documents.updatedAt);
 
-    // Get tools
+    // Get tools - using embed-specific tool that doesn't require authentication
     const tools = {
-      askQuestion: askQuestionTool,
+      askQuestion: embedAskQuestionTool,
     };
 
     // Create the stream response
@@ -97,6 +97,7 @@ export async function POST(req: NextRequest) {
       **Knowledge Base Information:**
       - Name: ${knowledgeBase.name}
       - Description: ${knowledgeBase.description || "No description provided"}
+      - ID: ${knowledgeBaseId}
       
       **Document Information:**
       - Current document count: ${allDocuments.length}
