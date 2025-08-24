@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { useKnowledgeBases } from "./hooks/useKnowledgeBases";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -257,12 +258,12 @@ export default function Home() {
             rel="noopener noreferrer"
             className="hover:opacity-90 transition-opacity duration-300"
           >
-            <img
+            <Image
               src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1008829&theme=light&t=1756029291812"
               alt="Docaider - Transform your documents into an AI knowledge assistant | Product Hunt"
               style={{ width: "250px", height: "54px" }}
-              width="250"
-              height="54"
+              width={250}
+              height={54}
             />
           </a>
         </motion.div>
