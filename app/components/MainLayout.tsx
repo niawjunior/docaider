@@ -74,13 +74,13 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 {t("credits")}
               </Badge>
             )}
-            {/* <Button
+            <Button
               variant="ghost"
               onClick={() => router.push("/pricing")}
               className="text-sm"
             >
               {t("pricing")}
-            </Button> */}
+            </Button>
             {session ? (
               <>
                 <Button
@@ -152,7 +152,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               )}
 
               <div className="flex flex-col space-y-4 px-4 py-2 justify-center ">
-                {/* <SheetClose asChild>
+                <SheetClose asChild>
                   <Button
                     variant="outline"
                     onClick={() => handleNavigation("/pricing")}
@@ -160,7 +160,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                   >
                     {t("pricing")}
                   </Button>
-                </SheetClose> */}
+                </SheetClose>
                 {session ? (
                   <>
                     <SheetClose asChild>

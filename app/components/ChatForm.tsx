@@ -215,9 +215,6 @@ export default function ChatForm({
                 isShowTool={isShowTool}
                 isRequiredDocument={config?.useDocument || false}
                 setIsRequiredDocument={handdleRequiredDocument}
-                loading={
-                  isFetching || isLoading || configSaving || configUpdating
-                }
                 error={error?.message}
               />
             </div>
