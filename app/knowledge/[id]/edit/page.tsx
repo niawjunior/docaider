@@ -96,7 +96,7 @@ export default function EditKnowledgeBasePage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
-  const { session } = useSupabaseSession();
+  const { session, loading: sessionLoading } = useSupabaseSession();
   const [documentId, setDocumentId] = useState<string | null>(null);
 
   // Initialize react-hook-form with Zod validation
@@ -135,11 +135,29 @@ export default function EditKnowledgeBasePage() {
     setShareUrl(`${baseUrl}/knowledge/${params.id}`);
   }, [params.id]);
 
+  // Track if we've already checked permissions to avoid duplicate toasts/redirects
+  const [permissionChecked, setPermissionChecked] = useState(false);
+  
   useEffect(() => {
     const checkEditPermission = async () => {
-      if (knowledgeBase && session?.user?.id) {
+      // Only proceed if we have both knowledgeBase and session data
+      if (!knowledgeBase) return;
+      
+      // If session is still loading, don't do anything yet
+      if (sessionLoading) return;
+      
+      // Prevent duplicate checks
+      if (permissionChecked) return;
+      
+      console.log("knowledgeBase", knowledgeBase);
+      console.log("session", session);
+      console.log("sessionLoading", sessionLoading);
+      
+      setPermissionChecked(true);
+      
+      if (session?.user?.id) {
         // 🔒 AUTHORIZATION CHECK: Only allow owner to access edit page
-        if (session?.user?.id !== knowledgeBase.userId) {
+        if (session.user.id !== knowledgeBase.userId) {
           console.error("Unauthorized access attempt to edit knowledge base");
           toast.error(t("unauthorizedEdit"));
           router.push("/dashboard");
@@ -151,7 +169,7 @@ export default function EditKnowledgeBasePage() {
           description: knowledgeBase.description || "",
           isPublic: knowledgeBase.isPublic,
         });
-      } else if (knowledgeBase && !session) {
+      } else {
         // If no session, redirect to login
         toast.error(t("unauthorizedEdit"));
         router.push("/login");
@@ -160,7 +178,7 @@ export default function EditKnowledgeBasePage() {
     };
 
     checkEditPermission();
-  }, [knowledgeBase, form, session, router, t]);
+  }, [knowledgeBase, form, session, sessionLoading, router, t, permissionChecked]);
 
   useEffect(() => {
     if (kbError) {

@@ -202,7 +202,9 @@
     "createTitle": "Create Knowledge Base",
     "createDescription": "Create a new knowledge base to organize your documents and share knowledge.",
     "createdSuccess": "Knowledge base created successfully",
-    "createError": "Failed to create knowledge base"
+    "createError": "Failed to create knowledge base",
+    "unauthorizedEdit": "Unauthorized to edit this knowledge base",
+    "documentsFetchError": "Failed to fetch knowledge base documents"
   },
   "search": {
     "searchQuery": "Search...",
