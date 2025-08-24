@@ -4,14 +4,16 @@ An AI-powered Knowledge Management and Retrieval-Augmented Generation (RAG) syst
 
 ## Features
 
-- 📄 **Document Processing**: Upload and process various file formats (PDF, DOCX, CSV) with automatic text extraction and chunking
+- 📄 **Document Processing**: Upload and process various file formats (PDF, DOCX, CSV, TXT, MD) with automatic text extraction and chunking
 - 📚 **Knowledge Base Management**: Create, edit, and organize knowledge bases with an intuitive UI
 - 🤖 **AI-Powered Chat**: Ask questions about your documents and get accurate, contextual responses
 - 🔗 **Collaboration & Sharing**: Share knowledge bases via email or make them public
-- 🔌 **Embeddable Chatbox**: Embed your knowledge base chat on any website
+- 🔌 **Embeddable Chatbox**: Embed your knowledge base chat on any website with extensive customization
 - 🌐 **Multi-Language Support**: Use the application in English or Thai with easy switching
 - 🎨 **Theme Support**: Choose between light, dark, or system theme
-- 🔍 **Search & Filter**: Find and organize your knowledge bases efficiently
+- 🔍 **Advanced Search & Filter**: Find and organize your knowledge bases with comprehensive filtering options
+- 💳 **Subscription Management**: Manage subscription plans with Stripe integration
+- 📊 **Billing History**: Track payment history and manage billing details
 - ✨ **Modern UI**: Built with Next.js App Router and Tailwind CSS for a responsive, accessible experience
 
 ## Key Features
@@ -20,15 +22,18 @@ An AI-powered Knowledge Management and Retrieval-Augmented Generation (RAG) syst
 
 - **Create & Organize**: Create public or private knowledge bases
 - **Pin Favorites**: Pin important knowledge bases for quick access
-- **Search & Filter**: Find knowledge bases with advanced filtering options
+- **Advanced Search & Filter**: Find knowledge bases with comprehensive filtering options including name, status, and content
 - **Dashboard Views**: Categorized views for My Knowledge Bases, Shared With You, and Public Knowledge Bases
+- **Real-time Filtering**: Debounced search with multiple sorting options (Recently Updated, Name A-Z/Z-A, Created Date)
 
 ### 2. Document Processing
 
 - **Multiple Formats**: Support for various document formats
 - **Automatic Processing**: Chunking and embedding for efficient retrieval
-- **Document Validation**: Title validation to prevent duplicates
-- **Document Management**: Add or remove documents from knowledge bases
+- **Document Validation**: Title validation to prevent duplicates with separate validation for regular and knowledge base documents
+- **Document Management**: Add or remove documents from knowledge bases with automatic updates to knowledge base references
+- **Optimized Vector Storage**: Separate document metadata from chunks/vectors for better performance
+- **Batch Processing**: Efficient handling of document chunks with proper error handling
 
 ### 3. AI-Powered Chat
 
@@ -36,6 +41,8 @@ An AI-powered Knowledge Management and Retrieval-Augmented Generation (RAG) syst
 - **Suggested Prompts**: Quick access to common questions
 - **Context-Aware**: Responses based on your document content
 - **Always Search**: Option to always search through documents for answers
+- **Document Filtering**: Filter responses by specific document names
+- **Optimized Vector Search**: Improved PostgreSQL vector search functions for better results
 
 ### 4. Collaboration & Sharing
 
@@ -44,7 +51,8 @@ An AI-powered Knowledge Management and Retrieval-Augmented Generation (RAG) syst
 - **Access Control**: Manage who can access your shared resources
 - **Share Chat Links**: Generate and share links to specific chat sessions
 - **Embeddable Chatbox**: Add your knowledge base chat to any external website
-- **Customizable Embedding**: Configure colors, position, and appearance of embedded chat
+- **Comprehensive Embedding Customization**: Configure colors, position, size, welcome messages, and appearance of embedded chat
+- **Shared Knowledge Base Dashboard**: View all knowledge bases shared with you in a dedicated section
 
 ### 5. Multi-Language Support
 
@@ -52,13 +60,25 @@ An AI-powered Knowledge Management and Retrieval-Augmented Generation (RAG) syst
 - **Easy Switching**: Change language on the fly
 - **Consistent Experience**: Fully localized interface throughout the application
 - **User Preferences**: Language preference saved to user profile
+- **Localized AI Responses**: AI responses in the selected language
 
 ### 6. User Dashboard
 
 - **Intuitive Interface**: Manage all your knowledge resources in one place
 - **Quick Access**: Easily access recent and pinned knowledge bases
-- **Search & Filter**: Find knowledge bases with advanced filtering
+- **Advanced Search & Filter**: Find knowledge bases with comprehensive filtering options
 - **Responsive Design**: Optimized for both desktop and mobile devices
+- **Results Summary**: View filtered vs. total counts for each knowledge base section
+
+### 7. Subscription Management
+
+- **Subscription Plans**: Choose from different subscription plans (Free, Pro, Enterprise)
+- **Billing Management**: View and manage your billing information
+- **Payment History**: Access your payment history and invoices
+- **Usage Tracking**: Monitor your usage and credits
+- **Stripe Integration**: Secure payment processing with Stripe
+- **Subscription Status**: View active, canceling, or canceled subscription status
+- **Customer Portal**: Access Stripe Customer Portal for payment methods
 
 ## Tech Stack
 
@@ -68,6 +88,8 @@ An AI-powered Knowledge Management and Retrieval-Augmented Generation (RAG) syst
 - **Backend**: Next.js API Routes
 - **Database**: Vector Database (Supabase)
 - **Authentication**: Supabase Auth
+- **Payment Processing**: Stripe
+- **State Management**: React Query
 - **Icons**: React Icons
 
 ## Getting Started
@@ -109,6 +131,8 @@ NEXT_PUBLIC_SITE_URL=<your_site_url>
 NEXT_PUBLIC_SUPABASE_URL=<your_supabase_url>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your_supabase_anon_key>
 OPENAI_API_KEY=<your_openai_api_key>
+STRIPE_SECRET_KEY=<your_stripe_secret_key>
+STRIPE_WEBHOOK_SECRET=<your_stripe_webhook_secret>
 ```
 
 5. Run database migrations (if applicable)
@@ -121,7 +145,7 @@ npm run dev
 yarn dev
 ```
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser
+7. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Development
 
