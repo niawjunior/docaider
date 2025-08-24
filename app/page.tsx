@@ -142,6 +142,7 @@ export default function Home() {
               {commonT("getStarted")} <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </motion.div>
+
           <section className="relative z-10 mt-16 scroll-mt-16" id="features">
             <motion.div
               initial={{ opacity: 0 }}
@@ -244,6 +245,26 @@ export default function Home() {
               </div>
             </motion.div>
           </section>
+        </motion.div>
+        {/* ProductHunt Badge */}
+        <motion.div
+          variants={itemVariants}
+          className="mt-8 flex justify-center"
+        >
+          <a
+            href="https://www.producthunt.com/products/docaider?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-docaider"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:opacity-90 transition-opacity duration-300"
+          >
+            <img
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1008829&theme=light&t=1756029291812"
+              alt="Docaider - Transform your documents into an AI knowledge assistant | Product Hunt"
+              style={{ width: "250px", height: "54px" }}
+              width="250"
+              height="54"
+            />
+          </a>
         </motion.div>
 
         <section className="relative z-10 py-16 overflow-hidden">
