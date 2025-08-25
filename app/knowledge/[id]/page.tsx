@@ -268,7 +268,7 @@ export default function ViewKnowledgeBasePage() {
 
       <div className="px-4">
         <div className="">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between">
             <div className="flex flex-col md:flex-row items-center mb-2">
               <Button
                 variant="outline"
