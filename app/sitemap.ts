@@ -9,27 +9,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-      url: "https://docaider.com/chat",
+      url: "https://docaider.com/pricing",
       lastModified: new Date(),
-      changeFrequency: "daily",
+      changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: "https://docaider.com/terms",
       lastModified: new Date(),
-      changeFrequency: "daily",
+      changeFrequency: "monthly",
       priority: 0.5,
     },
     {
       url: "https://docaider.com/privacy",
       lastModified: new Date(),
-      changeFrequency: "daily",
+      changeFrequency: "monthly",
       priority: 0.5,
     },
     {
       url: "https://docaider.com/contact",
       lastModified: new Date(),
-      changeFrequency: "daily",
+      changeFrequency: "monthly",
       priority: 0.5,
     },
   ];
