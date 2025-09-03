@@ -109,15 +109,6 @@ export default function ChatForm({
       if (totalCreditCost > 0) {
         toast.success(`Used ${totalCreditCost} credits.`);
       }
-
-      // Get the last message text for text-to-speech
-      const lastMessage: any = message.parts?.[message.parts?.length - 1];
-      const messageText = lastMessage?.text;
-
-      // Use the state directly instead of checking DOM
-      if (config?.useVoiceMode && messageText) {
-        handleTextToSpeech(messageText);
-      }
     },
     onError: (error) => {
       console.log("onError", error);
@@ -257,6 +248,23 @@ export default function ChatForm({
     }
   }, [initialMessages, setMessages]);
 
+  useEffect(() => {
+    console.log(status);
+
+    if (status === "ready" && messages.length) {
+      // Get the last message text for text-to-speech
+      const lastMessage: any =
+        messages[messages.length - 1].parts?.[
+          messages[messages.length - 1].parts?.length - 1
+        ];
+      const messageText = lastMessage?.text;
+
+      // Use the state directly instead of checking DOM
+      if (config?.useVoiceMode && messageText) {
+        handleTextToSpeech(messageText);
+      }
+    }
+  }, [status]);
   // Scroll event listener is now handled in ChatMessages
 
   // Only show the global loader for non-knowledge base chats when loading initial data
