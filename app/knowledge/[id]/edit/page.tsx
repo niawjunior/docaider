@@ -137,24 +137,19 @@ export default function EditKnowledgeBasePage() {
 
   // Track if we've already checked permissions to avoid duplicate toasts/redirects
   const [permissionChecked, setPermissionChecked] = useState(false);
-  
+
   useEffect(() => {
     const checkEditPermission = async () => {
       // Only proceed if we have both knowledgeBase and session data
       if (!knowledgeBase) return;
-      
+
       // If session is still loading, don't do anything yet
       if (sessionLoading) return;
-      
+
       // Prevent duplicate checks
       if (permissionChecked) return;
-      
-      console.log("knowledgeBase", knowledgeBase);
-      console.log("session", session);
-      console.log("sessionLoading", sessionLoading);
-      
       setPermissionChecked(true);
-      
+
       if (session?.user?.id) {
         // 🔒 AUTHORIZATION CHECK: Only allow owner to access edit page
         if (session.user.id !== knowledgeBase.userId) {
@@ -178,7 +173,15 @@ export default function EditKnowledgeBasePage() {
     };
 
     checkEditPermission();
-  }, [knowledgeBase, form, session, sessionLoading, router, t, permissionChecked]);
+  }, [
+    knowledgeBase,
+    form,
+    session,
+    sessionLoading,
+    router,
+    t,
+    permissionChecked,
+  ]);
 
   useEffect(() => {
     if (kbError) {
@@ -309,224 +312,230 @@ export default function EditKnowledgeBasePage() {
         isPublic={knowledgeBase?.isPublic || false}
       />
       <div className="px-4">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col md:flex-row items-center mb-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push("/dashboard")}
-              className="mr-4"
-            >
-              <ArrowLeft size={16} className="mr-2" />
-              {t("backToDashboard")}
-            </Button>
-            <h1 className="md:text-lg text-md font-bold">
+        <div className="flex flex-col gap-2">
+          <div className="flex md:flex-row flex-col gap-2 w-full items-center justify-between">
+            <div className="flex w-full gap-2 flex-col md:flex-row items-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/dashboard")}
+                className="w-full md:w-auto"
+              >
+                <ArrowLeft size={16} className="mr-2" />
+                {t("backToDashboard")}
+              </Button>
+              <h1 className="md:text-md text-md font-bold md:flex hidden">
+                {knowledgeBase.name}
+              </h1>
+            </div>
+
+            <div className="flex justify-end w-full gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleClick(params.id)}
+              >
+                <Eye size={16} className="mr-2" />
+                {t("view")}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShareDialogOpen(true)}
+              >
+                <Share2 size={16} className="mr-2" />
+                {t("share")}
+              </Button>
+            </div>
+            <h1 className="md:text-md text-md font-bold flex md:hidden">
               {knowledgeBase.name}
             </h1>
           </div>
-          <div className="flex gap-2 mb-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleClick(params.id)}
-            >
-              <Eye size={16} className="mr-2" />
-              {t("view")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShareDialogOpen(true)}
-            >
-              <Share2 size={16} className="mr-2" />
-              {t("share")}
-            </Button>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("details")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4"
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("details")}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Form {...form}>
+                    <form
+                      onSubmit={form.handleSubmit(onSubmit)}
+                      className="space-y-4"
+                    >
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("name")}</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={t("namePlaceholder")}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("description")}</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder={t("descriptionPlaceholder")}
+                                rows={3}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="isPublic"
+                        render={({ field }) => (
+                          <FormItem className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                              <FormLabel>{t("makePublic")}</FormLabel>
+                              <FormDescription>
+                                {t("publicDescription")}
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={isSaving}
+                      >
+                        {isSaving && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        {!isSaving && <Save size={16} className="mr-2" />}
+                        {t("saveChanges")}
+                      </Button>
+
+                      <Button
+                        variant="destructive"
+                        className="w-full"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setDeleteId(params.id);
+                        }}
+                        disabled={isDeleting}
+                      >
+                        {isDeleting && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        {!isDeleting && <Trash2 size={16} className="mr-2" />}
+                        {t("deleteKnowledgeBase")}
+                      </Button>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="lg:col-span-2">
+              <Tabs value={currentTab} onValueChange={setCurrentTab}>
+                <TabsList className="mb-4 w-full">
+                  <TabsTrigger
+                    disabled={deleteDocument.isPending || isUploading}
+                    value="current"
                   >
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("name")}</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder={t("namePlaceholder")}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {t("currentDocuments")}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    disabled={deleteDocument.isPending || isUploading}
+                    value="upload"
+                  >
+                    {t("uploadNewDocument")}
+                  </TabsTrigger>
+                </TabsList>
 
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("description")}</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder={t("descriptionPlaceholder")}
-                              rows={3}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="isPublic"
-                      render={({ field }) => (
-                        <FormItem className="flex items-center justify-between">
-                          <div className="space-y-0.5">
-                            <FormLabel>{t("makePublic")}</FormLabel>
-                            <FormDescription>
-                              {t("publicDescription")}
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isSaving}
-                    >
-                      {isSaving && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      )}
-                      {!isSaving && <Save size={16} className="mr-2" />}
-                      {t("saveChanges")}
-                    </Button>
-
-                    <Button
-                      variant="destructive"
-                      className="w-full"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setDeleteId(params.id);
-                      }}
-                      disabled={isDeleting}
-                    >
-                      {isDeleting && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      )}
-                      {!isDeleting && <Trash2 size={16} className="mr-2" />}
-                      {t("deleteKnowledgeBase")}
-                    </Button>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="lg:col-span-2">
-            <Tabs value={currentTab} onValueChange={setCurrentTab}>
-              <TabsList className="mb-4 w-full">
-                <TabsTrigger
-                  disabled={deleteDocument.isPending || isUploading}
-                  value="current"
-                >
-                  {t("currentDocuments")}
-                </TabsTrigger>
-                <TabsTrigger
-                  disabled={deleteDocument.isPending || isUploading}
-                  value="upload"
-                >
-                  {t("uploadNewDocument")}
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="current">
-                <Card>
-                  <CardContent>
-                    {kbDocuments?.length === 0 ? (
-                      <p className="text-center text-muted-foreground py-8">
-                        {t("noDocuments")}
-                      </p>
-                    ) : (
-                      <div className="space-y-2">
-                        {kbDocuments?.map((doc: Document) => (
-                          <div
-                            key={doc.id}
-                            className="flex items-center justify-between"
-                          >
-                            <div>
-                              <p className="font-medium">{doc.title}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {doc.documentId} •{" "}
-                                {t("addedOn", {
-                                  date: new Date(
-                                    doc.updatedAt
-                                  ).toLocaleDateString(),
-                                })}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Link
-                                target="_blank"
-                                href={doc.url}
-                                className="cursor-pointer"
-                              >
-                                <Button variant="ghost" size="icon">
-                                  <FileText size={16} />
+                <TabsContent value="current">
+                  <Card>
+                    <CardContent>
+                      {kbDocuments?.length === 0 ? (
+                        <p className="text-center text-muted-foreground py-8">
+                          {t("noDocuments")}
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          {kbDocuments?.map((doc: Document) => (
+                            <div
+                              key={doc.id}
+                              className="flex items-center justify-between"
+                            >
+                              <div>
+                                <p className="font-medium">{doc.title}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {doc.documentId} •{" "}
+                                  {t("addedOn", {
+                                    date: new Date(
+                                      doc.updatedAt
+                                    ).toLocaleDateString(),
+                                  })}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Link
+                                  target="_blank"
+                                  href={doc.url}
+                                  className="cursor-pointer"
+                                >
+                                  <Button variant="ghost" size="icon">
+                                    <FileText size={16} />
+                                  </Button>
+                                </Link>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDeleteDocument(doc)}
+                                  disabled={deleteDocument.isPending}
+                                >
+                                  {deleteDocument.isPending &&
+                                  documentId === doc.id ? (
+                                    <Loader2 className="animate-spin" />
+                                  ) : (
+                                    <Trash2 size={16} />
+                                  )}
                                 </Button>
-                              </Link>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteDocument(doc)}
-                                disabled={deleteDocument.isPending}
-                              >
-                                {deleteDocument.isPending &&
-                                documentId === doc.id ? (
-                                  <Loader2 className="animate-spin" />
-                                ) : (
-                                  <Trash2 size={16} />
-                                )}
-                              </Button>
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              <TabsContent value="upload">
-                <DocumentUpload
-                  knowledgeBaseId={params.id}
-                  onUpload={(isUploading) => setIsUploading(isUploading)}
-                  onFileUploaded={handleUploadSuccess}
-                  isKnowledgeBase={true}
-                />
-              </TabsContent>
-            </Tabs>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+                <TabsContent value="upload">
+                  <DocumentUpload
+                    knowledgeBaseId={params.id}
+                    onUpload={(isUploading) => setIsUploading(isUploading)}
+                    onFileUploaded={handleUploadSuccess}
+                    isKnowledgeBase={true}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </div>
       </div>

@@ -137,7 +137,7 @@ export default function KnowledgeBaseList({
         {knowledgeBases.map((kb) => (
           <Card key={kb.id} className="overflow-hidden bg-card p-0">
             <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start mb-2">
+              <div className="flex flex-col sm:flex-row justify-between gap-2 items-start mb-2">
                 <div className="flex items-center gap-2">
                   <PinIndicator knowledgeBaseId={kb.id} />
                   <h3
@@ -148,7 +148,7 @@ export default function KnowledgeBaseList({
                     {kb.name}
                   </h3>
                 </div>
-                <div className="flex gap-1">
+                <div>
                   {kb.isPublic && (
                     <Badge variant="default">{t("public")}</Badge>
                   )}

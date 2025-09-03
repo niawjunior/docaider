@@ -31,11 +31,12 @@ import {
 } from "@/components/ui/form";
 
 // Define the Zod schema for form validation
-const getFormSchema = (t: any) => z.object({
-  name: z.string().min(1, { message: t('knowledgeBase.nameRequired') }),
-  description: z.string().optional(),
-  isPublic: z.boolean(),
-});
+const getFormSchema = (t: any) =>
+  z.object({
+    name: z.string().min(1, { message: t("knowledgeBase.nameRequired") }),
+    description: z.string().optional(),
+    isPublic: z.boolean(),
+  });
 
 type FormValues = z.infer<ReturnType<typeof getFormSchema>>;
 
@@ -86,10 +87,10 @@ export default function CreateKnowledgeBaseDialog({
       // Close dialog
       onOpenChange(false);
 
-      toast.success(t('knowledgeBase.createdSuccess'));
+      toast.success(t("knowledgeBase.createdSuccess"));
     } catch (error: any) {
       console.error("Error creating knowledge base:", error);
-      toast.error(error.message || t('knowledgeBase.createError'));
+      toast.error(error.message || t("knowledgeBase.createError"));
     } finally {
       setIsLoading(false);
     }
@@ -97,11 +98,11 @@ export default function CreateKnowledgeBaseDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="p-3">
         <DialogHeader>
-          <DialogTitle>{t('knowledgeBase.createTitle')}</DialogTitle>
+          <DialogTitle>{t("knowledgeBase.createTitle")}</DialogTitle>
           <DialogDescription>
-            {t('knowledgeBase.createDescription')}
+            {t("knowledgeBase.createDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -115,10 +116,10 @@ export default function CreateKnowledgeBaseDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('knowledgeBase.name')}</FormLabel>
+                  <FormLabel>{t("knowledgeBase.name")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={t('knowledgeBase.namePlaceholder')}
+                      placeholder={t("knowledgeBase.namePlaceholder")}
                       disabled={isLoading}
                       {...field}
                     />
@@ -133,17 +134,17 @@ export default function CreateKnowledgeBaseDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('knowledgeBase.description')}</FormLabel>
+                  <FormLabel>{t("knowledgeBase.description")}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder={t('knowledgeBase.descriptionPlaceholder')}
+                      placeholder={t("knowledgeBase.descriptionPlaceholder")}
                       disabled={isLoading}
                       rows={3}
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    {t('knowledgeBase.descriptionHelp')}
+                    {t("knowledgeBase.descriptionHelp")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -156,9 +157,9 @@ export default function CreateKnowledgeBaseDialog({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel>{t('knowledgeBase.makePublic')}</FormLabel>
+                    <FormLabel>{t("knowledgeBase.makePublic")}</FormLabel>
                     <FormDescription>
-                      {t('knowledgeBase.publicDescription')}
+                      {t("knowledgeBase.publicDescription")}
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -179,11 +180,11 @@ export default function CreateKnowledgeBaseDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={isLoading}
               >
-{t('common.cancel')}
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-{t('knowledgeBase.create')}
+                {t("knowledgeBase.create")}
               </Button>
             </DialogFooter>
           </form>

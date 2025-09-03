@@ -151,7 +151,7 @@ export default function EmbedDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="p-3">
         <DialogHeader>
           <DialogTitle>{t("embedKnowledgeBase")}</DialogTitle>
           <DialogDescription>{t("embedDescription")}</DialogDescription>

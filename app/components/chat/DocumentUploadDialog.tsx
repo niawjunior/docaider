@@ -22,7 +22,7 @@ export default function DocumentUploadDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="p-3">
         <DialogHeader>
           <DialogTitle>{t("manageKnowledgeBase")}</DialogTitle>
         </DialogHeader>

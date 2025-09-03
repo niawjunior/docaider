@@ -60,7 +60,7 @@ export default function ShareDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="p-3">
         <DialogHeader>
           <DialogTitle>{t("shareDialogTitle")}</DialogTitle>
         </DialogHeader>
