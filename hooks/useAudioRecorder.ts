@@ -5,6 +5,7 @@ interface UseAudioRecorderProps {
   onRecordingStopped?: () => void; // Add callback for when recording stops
   silenceTimeout?: number;
   silenceThreshold?: number;
+  maxRecordingTime?: number; // Maximum recording time in milliseconds
 }
 
 interface UseAudioRecorderReturn {
@@ -21,6 +22,7 @@ export const useAudioRecorder = ({
   onRecordingStopped,
   silenceTimeout = 3000,
   silenceThreshold = 5, // Lower threshold for better silence detection (0-255)
+  maxRecordingTime = 10000, // Default maximum recording time: 10 seconds
 }: UseAudioRecorderProps = {}): UseAudioRecorderReturn => {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -37,6 +39,7 @@ export const useAudioRecorder = ({
   const streamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const maxRecordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   // Use a ref to track recording state for immediate access in callbacks
   const isRecordingRef = useRef<boolean>(false);
   // Use a ref to maintain reference to mediaRecorder across async callbacks
@@ -63,6 +66,11 @@ export const useAudioRecorder = ({
       silenceTimerRef.current = null;
     }
 
+    if (maxRecordingTimerRef.current) {
+      clearTimeout(maxRecordingTimerRef.current);
+      maxRecordingTimerRef.current = null;
+    }
+
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
@@ -81,11 +89,11 @@ export const useAudioRecorder = ({
 
   // Function to detect silence using audio analysis
   const detectSilence = () => {
-    console.log("Silence detection check:", {
-      analyser: !!analyserRef.current,
-      isRecording, // React state (may be delayed)
-      isRecordingRef: isRecordingRef.current, // Ref value (immediate)
-    });
+    // console.log("Silence detection check:", {
+    //   analyser: !!analyserRef.current,
+    //   isRecording, // React state (may be delayed)
+    //   isRecordingRef: isRecordingRef.current, // Ref value (immediate)
+    // });
 
     // Only proceed if we have both an analyser and we're recording
     if (!analyserRef.current) {
@@ -250,6 +258,13 @@ export const useAudioRecorder = ({
           animationFrameRef.current = requestAnimationFrame(detectSilence);
         }
       }, 1000); // 1 second delay
+
+      // Set up maximum recording time limit
+      maxRecordingTimerRef.current = setTimeout(() => {
+        if (isRecordingRef.current) {
+          stopRecording();
+        }
+      }, maxRecordingTime);
     } catch (error) {
       console.error("Error accessing microphone:", error);
       throw new Error("Could not access microphone. Please check permissions.");

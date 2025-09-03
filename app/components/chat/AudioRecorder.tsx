@@ -29,6 +29,7 @@ export default function AudioRecorder({
       },
       silenceTimeout: 3000, // 3 seconds of silence
       silenceThreshold: 10, // Adjust this value based on testing (0-255)
+      maxRecordingTime: 10000, // 10 seconds maximum recording time
     });
 
   const handleMicClick = async () => {

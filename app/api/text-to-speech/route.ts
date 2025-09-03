@@ -35,7 +35,9 @@ export async function POST(req: NextRequest) {
               voice: voice,
               input: text,
               response_format: responseFormat,
-              instructions: "Speak in a natural and engaging tone.",
+              speed: 1.2,
+              instructions:
+                "You are a young Thai woman. Speak in a sweet, soft, and pleasant voice. Your tone should be natural, polite, and feminine, using 'ค่ะ' as polite ending. Respond in a consultative way: explain things clearly, give thoughtful suggestions, and maintain a caring, professional attitude like a friendly advisor.",
             });
 
             // Get the audio data as an ArrayBuffer
@@ -79,7 +81,8 @@ export async function POST(req: NextRequest) {
         voice: voice,
         input: text,
         response_format: responseFormat,
-        instructions: "Speak in a natural and engaging tone.",
+        instructions:
+          "You are a Thai girl. Speak in a sweet and pleasant tone, soft and polite. Use natural feminine Thai expressions and polite ending particles such as 'ค่ะ'.",
       });
 
       // Get the audio data as an ArrayBuffer
