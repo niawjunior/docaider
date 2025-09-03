@@ -117,53 +117,7 @@ export default function ChatForm({
 
       // Use the state directly instead of checking DOM
       if (isUseVoiceMode && messageText) {
-        try {
-          // Set speaking state to true and show toast
-          setIsSpeaking(true);
-          toast.loading("Generating speech...", { id: "tts-loading" });
-
-          // Call the text-to-speech API
-          const response = await fetch("/api/text-to-speech", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              text: messageText,
-              voice: "alloy", // Updated to match the API change
-            }),
-          });
-
-          if (response.ok) {
-            // Dismiss loading toast and show success
-            toast.dismiss("tts-loading");
-            toast.success("Playing audio response");
-
-            const audioBlob = await response.blob();
-            const audioUrl = URL.createObjectURL(audioBlob);
-            const audio = new Audio(audioUrl);
-
-            // Add event listener for when audio ends
-            audio.addEventListener("ended", () => {
-              setIsSpeaking(false);
-              toast.success("Audio playback completed");
-            });
-
-            audio.play();
-          } else {
-            // Dismiss loading toast and show error
-            toast.dismiss("tts-loading");
-            toast.error("Failed to generate speech");
-            setIsSpeaking(false);
-            console.error("Failed to generate speech");
-          }
-        } catch (error) {
-          // Dismiss loading toast and show error
-          toast.dismiss("tts-loading");
-          toast.error(`Text-to-speech error: ${error}`);
-          setIsSpeaking(false);
-          console.error("Text-to-speech error:", error);
-        }
+        handleTextToSpeech(messageText);
       }
     },
     onError: (error) => {
@@ -187,6 +141,90 @@ export default function ChatForm({
     sendMessage({ text: currentInput });
     setInput("");
   }, [input, configSaving, configUpdating, sendMessage]);
+
+  const handleTextToSpeech = async (text: string) => {
+    if (!text) return;
+
+    setIsSpeaking(true);
+    toast.info(t("speaking"));
+
+    try {
+      // Initialize Web Audio API
+      const audioContext = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
+
+      const response = await fetch("/api/text-to-speech", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text,
+          voice: "coral",
+          model: "gpt-4o-mini-tts",
+          streaming: true,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+
+      if (!reader) {
+        throw new Error('Failed to get stream reader');
+      }
+
+      // Store chunks to combine them later
+      const chunks: Uint8Array[] = [];
+      
+      // Read stream
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        
+        chunks.push(value);
+      }
+
+      // Combine all chunks into a single array
+      let totalLength = 0;
+      chunks.forEach(chunk => {
+        totalLength += chunk.length;
+      });
+      
+      const combinedChunks = new Uint8Array(totalLength);
+      
+      let offset = 0;
+      chunks.forEach(chunk => {
+        combinedChunks.set(chunk, offset);
+        offset += chunk.length;
+      });
+
+      // Decode audio data
+      const audioBuffer = await audioContext.decodeAudioData(
+        combinedChunks.buffer
+      );
+
+      // Create and start audio source
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(audioContext.destination);
+      
+      // Handle completion
+      source.onended = () => {
+        setIsSpeaking(false);
+      };
+      
+      // Start playing
+      source.start(0);
+
+    } catch (error) {
+      console.error("Error playing audio:", error);
+      toast.error("Failed to play audio");
+      setIsSpeaking(false);
+    }
+  };
 
   const handdleRequiredDocument = async () => {
     // Update user config
