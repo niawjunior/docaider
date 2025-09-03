@@ -24,7 +24,6 @@ export default function ChatMessages({
   loading,
   error,
 }: ChatMessagesProps) {
-  console.log("error", error);
   const t = useTranslations("chat");
   const internalBottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);

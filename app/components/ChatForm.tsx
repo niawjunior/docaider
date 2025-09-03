@@ -28,7 +28,6 @@ import useUserConfig from "../hooks/useUserConfig";
 interface ChatFormProps {
   chatId?: string;
   suggestedPrompts?: { title: string; subtitle?: string }[];
-  isShowTool?: boolean;
   isKnowledgeBase?: boolean;
   knowledgeBaseId?: string;
   onFinished?: () => void;
@@ -36,7 +35,6 @@ interface ChatFormProps {
 
 export default function ChatForm({
   chatId,
-  isShowTool,
   isKnowledgeBase = false,
   knowledgeBaseId,
   onFinished,
@@ -127,8 +125,10 @@ export default function ChatForm({
   } = useUserConfig(session?.user?.id || "");
 
   const handleSubmit = useCallback(() => {
-    if (!input.trim() || configSaving || configUpdating) return;
-    sendMessage({ text: input });
+    // Get the current input value directly from state to ensure we have the latest value
+    const currentInput = input;
+    if (!currentInput.trim() || configSaving || configUpdating) return;
+    sendMessage({ text: currentInput });
     setInput("");
   }, [input, configSaving, configUpdating, sendMessage]);
 
@@ -212,7 +212,6 @@ export default function ChatForm({
                 setInput={setInput}
                 handleSubmit={handleSubmit}
                 status={status}
-                isShowTool={isShowTool}
                 isRequiredDocument={config?.useDocument || false}
                 setIsRequiredDocument={handdleRequiredDocument}
                 error={error?.message}

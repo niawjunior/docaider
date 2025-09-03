@@ -15,7 +15,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.7",
+    "@ai-sdk/openai": "^2.0.23",
     "@ai-sdk/react": "^2.0.8",
     "@hookform/resolvers": "^5.1.1",
     "@langchain/community": "^0.3.47",
@@ -44,7 +44,7 @@
     "@supabase/supabase-js": "^2.54.0",
     "@tanstack/react-query": "^5.76.1",
     "@tanstack/react-query-devtools": "^5.76.1",
-    "ai": "^5.0.0",
+    "ai": "^5.0.30",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

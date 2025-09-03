@@ -114,7 +114,6 @@ export const useKnowledgeBases = () => {
         const data = await response.json();
         return data.knowledgeBases || [];
       } catch (error) {
-        console.log("error", error);
         console.error("Error fetching public knowledge bases:", error);
         throw error;
       }
