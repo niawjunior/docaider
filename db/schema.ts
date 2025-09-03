@@ -92,6 +92,7 @@ export const userConfig = pgTable(
       .notNull(),
     languagePreference: text("language_preference").default("en"),
     useDocument: boolean("use_document").default(false),
+    useVoiceMode: boolean("use_voice_mode").default(true),
     themePreference: text("theme_preference").default("system"),
   },
   (table) => [

@@ -74,7 +74,6 @@ export default function ChatForm({
   });
 
   const [input, setInput] = useState("");
-  const [isUseVoiceMode, setIsUseVoiceMode] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const { messages, status, sendMessage, setMessages, error } = useChat({
     transport: new DefaultChatTransport({
@@ -116,7 +115,7 @@ export default function ChatForm({
       const messageText = lastMessage?.text;
 
       // Use the state directly instead of checking DOM
-      if (isUseVoiceMode && messageText) {
+      if (config?.useVoiceMode && messageText) {
         handleTextToSpeech(messageText);
       }
     },
@@ -173,30 +172,30 @@ export default function ChatForm({
       const reader = response.body?.getReader();
 
       if (!reader) {
-        throw new Error('Failed to get stream reader');
+        throw new Error("Failed to get stream reader");
       }
 
       // Store chunks to combine them later
       const chunks: Uint8Array[] = [];
-      
+
       // Read stream
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-        
+
         chunks.push(value);
       }
 
       // Combine all chunks into a single array
       let totalLength = 0;
-      chunks.forEach(chunk => {
+      chunks.forEach((chunk) => {
         totalLength += chunk.length;
       });
-      
+
       const combinedChunks = new Uint8Array(totalLength);
-      
+
       let offset = 0;
-      chunks.forEach(chunk => {
+      chunks.forEach((chunk) => {
         combinedChunks.set(chunk, offset);
         offset += chunk.length;
       });
@@ -210,20 +209,31 @@ export default function ChatForm({
       const source = audioContext.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(audioContext.destination);
-      
-      // Handle completion
-      source.onended = () => {
-        setIsSpeaking(false);
-      };
-      
+
       // Start playing
       source.start(0);
 
+      // Handle completion - add a small delay to ensure the voice has completely finished
+      source.onended = () => {
+        // Add a small delay before setting isSpeaking to false
+        setTimeout(() => {
+          setIsSpeaking(false);
+          toast.success("Audio playback completed");
+        }, 300); // 300ms delay to ensure voice has completely finished
+      };
     } catch (error) {
       console.error("Error playing audio:", error);
       toast.error("Failed to play audio");
       setIsSpeaking(false);
     }
+  };
+
+  const handleVoiceModeToggle = async (value: boolean) => {
+    // Update user config
+    await updateConfig({
+      useVoiceMode: value,
+    });
+    toast.success(settingsT("saveSuccess"));
   };
 
   const handdleRequiredDocument = async () => {
@@ -308,8 +318,8 @@ export default function ChatForm({
                 status={status}
                 isRequiredDocument={config?.useDocument || false}
                 setIsRequiredDocument={handdleRequiredDocument}
-                isUseVoiceMode={isUseVoiceMode}
-                setIsUseVoiceMode={setIsUseVoiceMode}
+                isUseVoiceMode={config?.useVoiceMode || false}
+                setIsUseVoiceMode={handleVoiceModeToggle}
                 isSpeaking={isSpeaking}
                 error={error?.message}
               />

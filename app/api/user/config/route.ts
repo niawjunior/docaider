@@ -9,6 +9,7 @@ interface UserConfigData {
   language_preference: string;
   theme_preference: string;
   use_document: boolean;
+  use_voice_mode?: boolean;
 }
 
 /**
@@ -34,6 +35,7 @@ export async function GET() {
         languagePreference: userConfig.languagePreference,
         themePreference: userConfig.themePreference,
         useDocument: userConfig.useDocument,
+        useVoiceMode: userConfig.useVoiceMode,
       })
       .from(userConfig)
       .where(eq(userConfig.id, user.id))
@@ -45,6 +47,7 @@ export async function GET() {
         language_preference: "en",
         theme_preference: "system",
         use_document: false,
+        use_voice_mode: true,
       });
     }
 
@@ -53,6 +56,7 @@ export async function GET() {
       language_preference: userConfigData[0].languagePreference,
       theme_preference: userConfigData[0].themePreference,
       use_document: userConfigData[0].useDocument ?? false,
+      use_voice_mode: userConfigData[0].useVoiceMode ?? true,
     });
   } catch (error) {
     console.error("Error in GET /api/user/config:", error);
@@ -128,6 +132,10 @@ export async function POST(request: Request) {
         updateData.useDocument = body.use_document;
       }
       
+      if (body.use_voice_mode !== undefined) {
+        updateData.useVoiceMode = body.use_voice_mode;
+      }
+      
       // Update existing config
       result = await db
         .update(userConfig)
@@ -137,6 +145,7 @@ export async function POST(request: Request) {
           languagePreference: userConfig.languagePreference,
           themePreference: userConfig.themePreference,
           useDocument: userConfig.useDocument,
+          useVoiceMode: userConfig.useVoiceMode,
         });
     } else {
       // Insert new config
@@ -147,6 +156,7 @@ export async function POST(request: Request) {
           languagePreference: body.language_preference,
           themePreference: body.theme_preference,
           useDocument: body.use_document,
+          useVoiceMode: body.use_voice_mode ?? true,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         })
@@ -154,6 +164,7 @@ export async function POST(request: Request) {
           languagePreference: userConfig.languagePreference,
           themePreference: userConfig.themePreference,
           useDocument: userConfig.useDocument,
+          useVoiceMode: userConfig.useVoiceMode,
         });
     }
 
@@ -169,6 +180,7 @@ export async function POST(request: Request) {
       language_preference: result[0].languagePreference,
       theme_preference: result[0].themePreference,
       use_document: result[0].useDocument,
+      use_voice_mode: result[0].useVoiceMode,
     });
   } catch (error) {
     console.error("Error in POST /api/user/config:", error);

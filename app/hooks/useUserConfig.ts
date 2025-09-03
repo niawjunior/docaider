@@ -10,6 +10,7 @@ export interface UserConfig {
   languagePreference: "en" | "th" | null;
   themePreference: "system" | "light" | "dark" | null;
   useDocument: boolean;
+  useVoiceMode?: boolean;
   notificationSettings:
     | {
         email?: boolean;
@@ -52,6 +53,7 @@ export default function useUserConfig(userId: string) {
         languagePreference: data.language_preference,
         themePreference: data.theme_preference,
         useDocument: data.use_document,
+        useVoiceMode: data.use_voice_mode,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         notificationSettings: {},
@@ -70,17 +72,21 @@ export default function useUserConfig(userId: string) {
       // Convert from our camelCase to API snake_case format
       // Only include fields that are actually being updated
       const apiPayload: Record<string, any> = {};
-      
+
       if (updates.languagePreference !== undefined) {
         apiPayload.language_preference = updates.languagePreference;
       }
-      
+
       if (updates.themePreference !== undefined) {
         apiPayload.theme_preference = updates.themePreference;
       }
-      
+
       if (updates.useDocument !== undefined) {
         apiPayload.use_document = updates.useDocument;
+      }
+
+      if (updates.useVoiceMode !== undefined) {
+        apiPayload.use_voice_mode = updates.useVoiceMode;
       }
 
       const response = await fetch(`/api/user/config`, {
@@ -103,6 +109,7 @@ export default function useUserConfig(userId: string) {
         languagePreference: data.language_preference,
         themePreference: data.theme_preference,
         useDocument: data.use_document,
+        useVoiceMode: data.use_voice_mode,
         updatedAt: new Date().toISOString(),
       } as UserConfig;
     },

@@ -1,0 +1,1 @@
+ALTER TABLE "user_config" ADD COLUMN "use_voice_mode" boolean DEFAULT true;

@@ -15,6 +15,13 @@
       "when": 1755796299222,
       "tag": "0001_yielding_stature",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756916474797,
+      "tag": "0002_cheerful_puff_adder",
+      "breakpoints": true
     }
   ]
 }
