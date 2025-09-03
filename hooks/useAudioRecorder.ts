@@ -89,17 +89,17 @@ export const useAudioRecorder = ({
 
     // Only proceed if we have both an analyser and we're recording
     if (!analyserRef.current) {
-      console.log("No analyser available, skipping silence detection");
+      // console.log("No analyser available, skipping silence detection");
       return;
     }
 
     // Use the ref value instead of the state
     if (!isRecordingRef.current) {
-      console.log("Not recording (ref), skipping silence detection");
+      // console.log("Not recording (ref), skipping silence detection");
       return;
     }
 
-    console.log("Detecting silence...");
+    // console.log("Detecting silence...");
     const analyser = analyserRef.current;
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(dataArray);
@@ -107,19 +107,19 @@ export const useAudioRecorder = ({
     // Calculate average volume level
     const average =
       dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
-    console.log(`Average volume level: ${average}`);
+    // console.log(`Average volume level: ${average}`);
     // If sound level is below threshold, start silence timer
     if (average < silenceThreshold) {
       if (!silenceTimerRef.current) {
-        console.log(
-          `Sound level (${average}) below threshold (${silenceThreshold}), starting silence timer`
-        );
+        // console.log(
+        //   `Sound level (${average}) below threshold (${silenceThreshold}), starting silence timer`
+        // );
         silenceTimerRef.current = setTimeout(() => {
-          console.log(
-            "Silence detected for timeout period, stopping recording"
-          );
-          console.log("isRecording state:", isRecording);
-          console.log("isRecordingRef.current:", isRecordingRef.current);
+          // console.log(
+          //   "Silence detected for timeout period, stopping recording"
+          // );
+          // console.log("isRecording state:", isRecording);
+          // console.log("isRecordingRef.current:", isRecordingRef.current);
           // Use the ref value instead of the state for immediate access
           if (isRecordingRef.current) {
             stopRecording();
@@ -129,9 +129,9 @@ export const useAudioRecorder = ({
     } else {
       // If sound detected, clear silence timer
       if (silenceTimerRef.current) {
-        console.log(
-          `Sound level (${average}) above threshold, resetting silence timer`
-        );
+        // console.log(
+        //   `Sound level (${average}) above threshold, resetting silence timer`
+        // );
         clearTimeout(silenceTimerRef.current);
         silenceTimerRef.current = null;
       }
@@ -139,13 +139,13 @@ export const useAudioRecorder = ({
 
     // Continue monitoring sound levels
     if (isRecordingRef.current) {
-      console.log("Continuing silence detection...");
+      // console.log("Continuing silence detection...");
       animationFrameRef.current = requestAnimationFrame(detectSilence);
-      console.log("Animation frame requested:", animationFrameRef.current);
+      // console.log("Animation frame requested:", animationFrameRef.current);
     } else {
-      console.log(
-        "Not continuing silence detection - isRecordingRef.current is false"
-      );
+      // console.log(
+      //   "Not continuing silence detection - isRecordingRef.current is false"
+      // );
     }
   };
 
@@ -194,7 +194,7 @@ export const useAudioRecorder = ({
         }
       }
 
-      console.log(`Selected MIME type for recording: ${mimeType}`);
+      // console.log(`Selected MIME type for recording: ${mimeType}`);
 
       // Create and configure media recorder
       const recorder = new MediaRecorder(stream, { mimeType });
@@ -217,9 +217,9 @@ export const useAudioRecorder = ({
             type: mimeType,
           });
 
-          console.log(
-            `Created audio blob with MIME type: ${mimeType}, size: ${audioBlob.size} bytes`
-          );
+          // console.log(
+          //   `Created audio blob with MIME type: ${mimeType}, size: ${audioBlob.size} bytes`
+          // );
 
           // Clean up resources
           cleanupResources();
@@ -233,17 +233,17 @@ export const useAudioRecorder = ({
 
       // Start recording
       recorder.start(100); // Collect data every 100ms
-      console.log("Started recording");
+      // console.log("Started recording");
 
       // Update both the React state (for UI) and the ref (for immediate access)
       setIsRecording(true);
       isRecordingRef.current = true;
 
       // Delay silence detection by 2 seconds to give the user time to start speaking
-      console.log("Will start silence detection in 2 seconds...");
+      // console.log("Will start silence detection in 2 seconds...");
 
       setTimeout(() => {
-        console.log("Starting silence detection now");
+        // console.log("Starting silence detection now");
         if (isRecordingRef.current) {
           // Only start if still recording
           setSilenceDetectionActive(true); // Update UI state to show silence detection is active
@@ -257,11 +257,11 @@ export const useAudioRecorder = ({
   };
 
   const stopRecording = (): void => {
-    console.log("Stop recording called, current state:", {
-      mediaRecorderState: mediaRecorderRef.current?.state,
-      isRecording,
-      isRecordingRef: isRecordingRef.current,
-    });
+    // console.log("Stop recording called, current state:", {
+    //   mediaRecorderState: mediaRecorderRef.current?.state,
+    //   isRecording,
+    //   isRecordingRef: isRecordingRef.current,
+    // });
 
     // Update both the React state (for UI) and the ref (for immediate access)
     setIsRecording(false);
@@ -270,22 +270,22 @@ export const useAudioRecorder = ({
 
     // Call the onRecordingStopped callback if provided
     if (onRecordingStopped) {
-      console.log("Calling onRecordingStopped callback");
+      // console.log("Calling onRecordingStopped callback");
       onRecordingStopped();
     }
 
     // Only clean up silence detection resources, but keep mediaRecorder for transcription
     if (silenceTimerRef.current) {
-      console.log("Clearing silence timer");
+      // console.log("Clearing silence timer");
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
     }
 
     if (animationFrameRef.current) {
-      console.log("Cancelling animation frame");
+      // console.log("Cancelling animation frame");
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
-      console.log("MediaRecorder ref:", mediaRecorderRef.current);
+      // console.log("MediaRecorder ref:", mediaRecorderRef.current);
     }
 
     // Stop the mediaRecorder last, which will trigger the onstop event and transcription
@@ -293,7 +293,7 @@ export const useAudioRecorder = ({
       mediaRecorderRef.current &&
       mediaRecorderRef.current.state !== "inactive"
     ) {
-      console.log("Stopping recording manually");
+      // console.log("Stopping recording manually");
       mediaRecorderRef.current.stop();
     }
   };
@@ -306,9 +306,9 @@ export const useAudioRecorder = ({
       // This doesn't change the actual audio format, just the filename extension
       const fileExtension = "mp3";
 
-      console.log(
-        `Transcribing audio with type: ${audioBlob.type}, using extension: ${fileExtension}`
-      );
+      // console.log(
+      //   `Transcribing audio with type: ${audioBlob.type}, using extension: ${fileExtension}`
+      // );
 
       const formData = new FormData();
       formData.append("audio", audioBlob, `recording.${fileExtension}`);

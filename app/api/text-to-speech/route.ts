@@ -7,14 +7,19 @@ export async function POST(req: NextRequest) {
       apiKey: process.env.OPENAI_API_KEY,
     });
 
-    const { text, voice = "coral", model = "gpt-4o-mini-tts", streaming = false } = await req.json();
+    const {
+      text,
+      voice = "coral",
+      model = "gpt-4o-mini-tts",
+      streaming = false,
+    } = await req.json();
 
     if (!text) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 });
     }
 
-    console.log(`Generating speech for text: "${text.substring(0, 50)}..."`);
-    console.log(`Using voice: ${voice}, model: ${model}, streaming: ${streaming}`);
+    // console.log(`Generating speech for text: "${text.substring(0, 50)}..."`);
+    // console.log(`Using voice: ${voice}, model: ${model}, streaming: ${streaming}`);
 
     // Use wav format for streaming for faster response times
     const responseFormat = streaming ? "wav" : "mp3";
@@ -32,21 +37,21 @@ export async function POST(req: NextRequest) {
               response_format: responseFormat,
               instructions: "Speak in a natural and engaging tone.",
             });
-            
+
             // Get the audio data as an ArrayBuffer
             const audioData = await response.arrayBuffer();
             const data = new Uint8Array(audioData);
-            
+
             // Set chunk size (64KB)
             const CHUNK_SIZE = 64 * 1024;
             let offset = 0;
-            
+
             // Stream the audio data in chunks
             while (offset < data.length) {
               const chunk = data.slice(offset, offset + CHUNK_SIZE);
               controller.enqueue(chunk);
               offset += CHUNK_SIZE;
-              
+
               // Add small delay to prevent overwhelming the client
               await new Promise((resolve) => setTimeout(resolve, 20));
             }
@@ -64,7 +69,7 @@ export async function POST(req: NextRequest) {
         headers: {
           "Content-Type": "audio/wav",
           "Cache-Control": "no-cache",
-          "Connection": "keep-alive",
+          Connection: "keep-alive",
         },
       });
     } else {

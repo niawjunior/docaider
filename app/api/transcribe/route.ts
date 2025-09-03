@@ -25,8 +25,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Log the file type for debugging
-    console.log("Audio file type:", audioFile.type);
-    console.log("Audio file name:", audioFile.name);
+    // console.log("Audio file type:", audioFile.type);
+    // console.log("Audio file name:", audioFile.name);
 
     // Get the file extension from the MIME type
     let fileExtension = audioFile.type.split("/")[1] || "webm";
@@ -69,9 +69,9 @@ export async function POST(req: NextRequest) {
     // Force the file extension to be mp3 for maximum compatibility with OpenAI Whisper
     fileExtension = "mp3";
 
-    console.log(
-      `Processing audio file with type: ${audioFile.type}, using extension: ${fileExtension}`
-    );
+    // console.log(
+    //   `Processing audio file with type: ${audioFile.type}, using extension: ${fileExtension}`
+    // );
 
     // Convert the audio file to a format OpenAI can use
     const audioBytes = await audioFile.arrayBuffer();
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       response_format: "json",
     });
 
-    console.log("Transcription result:", transcription);
+    // console.log("Transcription result:", transcription);
 
     return NextResponse.json({
       text: transcription.text,
