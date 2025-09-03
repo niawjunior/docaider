@@ -84,6 +84,7 @@
     "recording": "Recording audio...",
     "startRecording": "Start recording",
     "stopRecording": "Stop recording",
+    "silenceDetectionActive": "Silence detection active",
     "errorMessage": "Something went wrong. Please try again.",
     "manageKnowledgeBase": "Manage Knowledge Base",
     "shareDialogTitle": "Share public link to chat",

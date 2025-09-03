@@ -16,15 +16,25 @@ export default function AudioRecorder({
   disabled = false,
 }: AudioRecorderProps) {
   const t = useTranslations("chat");
-  const { isRecording, isTranscribing, startRecording, stopRecording } =
-    useAudioRecorder({
-      onTranscriptionComplete: (text) => {
-        toast.dismiss();
-        onTranscriptionComplete(text);
-      },
-      silenceTimeout: 3000, // 3 seconds of silence
-      silenceThreshold: 15, // Adjust this value based on testing (0-255)
-    });
+  const {
+    isRecording,
+    isTranscribing,
+    silenceDetectionActive,
+    startRecording,
+    stopRecording,
+  } = useAudioRecorder({
+    onTranscriptionComplete: (text) => {
+      toast.dismiss();
+      onTranscriptionComplete(text);
+    },
+    onRecordingStopped: () => {
+      // Dismiss the recording toast when recording stops via silence detection
+      toast.dismiss();
+      toast.loading(t("transcribing"));
+    },
+    silenceTimeout: 3000, // 3 seconds of silence
+    silenceThreshold: 5, // Adjust this value based on testing (0-255)
+  });
 
   const handleMicClick = async () => {
     try {
@@ -43,17 +53,27 @@ export default function AudioRecorder({
   };
 
   return (
-    <Button
-      variant="outline"
-      onClick={handleMicClick}
-      disabled={disabled || isTranscribing}
-      className={`h-10 w-10 rounded-full border bg-background text-foreground border-border ${
-        isRecording ? "bg-red-500 text-white" : ""
-      } ${isTranscribing ? "opacity-50" : ""}`}
-      title={isRecording ? t("stopRecording") : t("startRecording")}
-      aria-label={isRecording ? t("stopRecording") : t("startRecording")}
-    >
-      {isRecording ? <MdMicOff /> : <MdMic />}
-    </Button>
+    <div className="relative">
+      <Button
+        variant="outline"
+        onClick={handleMicClick}
+        disabled={disabled || isTranscribing}
+        className={`h-10 w-10 rounded-full border bg-background text-foreground border-border ${
+          isRecording ? "bg-red-500 text-white" : ""
+        } ${isTranscribing ? "opacity-50" : ""}`}
+        title={isRecording ? t("stopRecording") : t("startRecording")}
+        aria-label={isRecording ? t("stopRecording") : t("startRecording")}
+      >
+        {isRecording ? <MdMicOff /> : <MdMic />}
+      </Button>
+
+      {/* Pulsing indicator when silence detection is active */}
+      {silenceDetectionActive && (
+        <span
+          className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-yellow-400 animate-pulse"
+          title={t("silenceDetectionActive")}
+        />
+      )}
+    </div>
   );
 }

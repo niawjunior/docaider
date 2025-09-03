@@ -85,6 +85,7 @@
     "recording": "กำลังบันทึกเสียง...",
     "startRecording": "เริ่มบันทึกเสียง",
     "stopRecording": "หยุดบันทึกเสียง",
+    "silenceDetectionActive": "กำลังตรวจจับความเงียบ",
     "errorMessage": "เกิดข้อผิดพลาด โปรดลองอีกครั้ง",
     "manageKnowledgeBase": "จัดการฐานความรู้",
     "shareDialogTitle": "แชร์ลิงก์สาธารณะไปยังการสนทนา",
