@@ -314,7 +314,7 @@ export default function EditKnowledgeBasePage() {
       <div className="px-4">
         <div className="flex flex-col gap-2">
           <div className="flex md:flex-row flex-col gap-2 w-full items-center justify-between">
-            <div className="flex w-full gap-2 flex-col md:flex-row items-center">
+            <div className="md:flex hidden w-full gap-2 flex-col md:flex-row items-center">
               <Button
                 variant="outline"
                 size="sm"
@@ -329,23 +329,33 @@ export default function EditKnowledgeBasePage() {
               </h1>
             </div>
 
-            <div className="flex justify-end w-full gap-2">
+            <div className="flex md:justify-end justify-between w-full gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleClick(params.id)}
+                onClick={() => router.push("/dashboard")}
+                className="md:hidden "
               >
-                <Eye size={16} className="mr-2" />
-                {t("view")}
+                <ArrowLeft size={16} />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShareDialogOpen(true)}
-              >
-                <Share2 size={16} className="mr-2" />
-                {t("share")}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleClick(params.id)}
+                >
+                  <Eye size={16} className="mr-2" />
+                  {t("view")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShareDialogOpen(true)}
+                >
+                  <Share2 size={16} className="mr-2" />
+                  {t("share")}
+                </Button>
+              </div>
             </div>
             <h1 className="md:text-md text-md font-bold flex md:hidden">
               {knowledgeBase.name}

@@ -269,7 +269,7 @@ export default function ViewKnowledgeBasePage() {
       <div className="px-4">
         <div className="flex flex-col gap-2">
           <div className="flex md:flex-row flex-col gap-2 w-full items-center justify-between">
-            <div className="flex w-full gap-2 flex-col md:flex-row items-center">
+            <div className="md:flex hidden w-full gap-2 flex-col md:flex-row items-center">
               <Button
                 variant="outline"
                 size="sm"
@@ -279,38 +279,48 @@ export default function ViewKnowledgeBasePage() {
                 <ArrowLeft size={16} className="mr-2" />
                 {t("backToDashboard")}
               </Button>
-              <h1 className="md:text-md text-md font-bold md:flex hidden">
+              <h1 className="md:text-md text-md font-bold">
                 {knowledgeBase.name}
               </h1>
             </div>
 
             {canEdit && (
-              <div className="flex justify-end w-full gap-2">
+              <div className="flex md:justify-end justify-between w-full gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setDeployDialogOpen(true)}
+                  onClick={() => router.push("/dashboard")}
+                  className="md:hidden "
                 >
-                  <Code size={16} className="mr-2" />
-                  {kbT("deploy")}
+                  <ArrowLeft size={16} />
                 </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDeployDialogOpen(true)}
+                  >
+                    <Code size={16} className="mr-2" />
+                    {kbT("deploy")}
+                  </Button>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push(`/knowledge/${params.id}/edit`)}
-                >
-                  <Edit size={16} className="mr-2" />
-                  {kbT("edit")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShareDialogOpen(true)}
-                >
-                  <Share2 size={16} className="mr-2" />
-                  {commonT("share")}
-                </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push(`/knowledge/${params.id}/edit`)}
+                  >
+                    <Edit size={16} className="mr-2" />
+                    {kbT("edit")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShareDialogOpen(true)}
+                  >
+                    <Share2 size={16} className="mr-2" />
+                    {commonT("share")}
+                  </Button>
+                </div>
               </div>
             )}
             <h1 className="md:text-md text-md font-bold flex md:hidden">

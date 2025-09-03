@@ -77,7 +77,7 @@ export default function ChatMessages({
       >
         {loading && (
           <div className="absolute z-100 inset-0 flex items-center justify-center w-full h-full">
-            <Loader2 className="h-6 w-6 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" />
           </div>
         )}
 
@@ -110,7 +110,10 @@ export default function ChatMessages({
                           {status === "submitted" &&
                             message.id ===
                               messages[messages.length - 1]?.id && (
-                              <Loader2 className="h-6 w-6 animate-spin absolute left-3" />
+                              <div className="absolute left-3 flex items-center gap-1">
+                                <span className="text-sm">{t("thinking")}</span>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              </div>
                             )}
                         </div>
                       );
