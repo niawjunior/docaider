@@ -66,8 +66,10 @@
   "chat": {
     "title": "Chat",
     "placeholder": "Ask me anything about your documents...",
+    "useVoiceMode": "Use voice mode",
     "send": "Send",
     "thinking": "Thinking...",
+    "speaking": "Speaking...",
     "error": "Something went wrong. Please try again.",
     "noMessages": "No messages yet. Start a conversation!",
     "selectKnowledgeBase": "Select Knowledge Base",

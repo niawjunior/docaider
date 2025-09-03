@@ -74,6 +74,8 @@ export default function ChatForm({
   });
 
   const [input, setInput] = useState("");
+  const [isUseVoiceMode, setIsUseVoiceMode] = useState(true);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const { messages, status, sendMessage, setMessages, error } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
@@ -89,7 +91,6 @@ export default function ChatForm({
       },
     }),
     id: chatId,
-
     onFinish: async ({ message }) => {
       const toolCalls =
         message.parts?.filter(
@@ -108,6 +109,61 @@ export default function ChatForm({
       }
       if (totalCreditCost > 0) {
         toast.success(`Used ${totalCreditCost} credits.`);
+      }
+
+      // Get the last message text for text-to-speech
+      const lastMessage: any = message.parts?.[message.parts?.length - 1];
+      const messageText = lastMessage?.text;
+
+      // Use the state directly instead of checking DOM
+      if (isUseVoiceMode && messageText) {
+        try {
+          // Set speaking state to true and show toast
+          setIsSpeaking(true);
+          toast.loading("Generating speech...", { id: "tts-loading" });
+
+          // Call the text-to-speech API
+          const response = await fetch("/api/text-to-speech", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              text: messageText,
+              voice: "alloy", // Updated to match the API change
+            }),
+          });
+
+          if (response.ok) {
+            // Dismiss loading toast and show success
+            toast.dismiss("tts-loading");
+            toast.success("Playing audio response");
+
+            const audioBlob = await response.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+
+            // Add event listener for when audio ends
+            audio.addEventListener("ended", () => {
+              setIsSpeaking(false);
+              toast.success("Audio playback completed");
+            });
+
+            audio.play();
+          } else {
+            // Dismiss loading toast and show error
+            toast.dismiss("tts-loading");
+            toast.error("Failed to generate speech");
+            setIsSpeaking(false);
+            console.error("Failed to generate speech");
+          }
+        } catch (error) {
+          // Dismiss loading toast and show error
+          toast.dismiss("tts-loading");
+          toast.error(`Text-to-speech error: ${error}`);
+          setIsSpeaking(false);
+          console.error("Text-to-speech error:", error);
+        }
       }
     },
     onError: (error) => {
@@ -214,6 +270,9 @@ export default function ChatForm({
                 status={status}
                 isRequiredDocument={config?.useDocument || false}
                 setIsRequiredDocument={handdleRequiredDocument}
+                isUseVoiceMode={isUseVoiceMode}
+                setIsUseVoiceMode={setIsUseVoiceMode}
+                isSpeaking={isSpeaking}
                 error={error?.message}
               />
             </div>

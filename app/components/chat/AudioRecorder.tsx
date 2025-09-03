@@ -28,7 +28,7 @@ export default function AudioRecorder({
         toast.loading(t("transcribing"));
       },
       silenceTimeout: 3000, // 3 seconds of silence
-      silenceThreshold: 5, // Adjust this value based on testing (0-255)
+      silenceThreshold: 10, // Adjust this value based on testing (0-255)
     });
 
   const handleMicClick = async () => {

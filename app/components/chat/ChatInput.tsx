@@ -16,6 +16,9 @@ interface ChatInputProps {
   status: string;
   isRequiredDocument: boolean;
   setIsRequiredDocument: (value: boolean) => void;
+  isUseVoiceMode: boolean;
+  setIsUseVoiceMode: (value: boolean) => void;
+  isSpeaking?: boolean;
   error?: string;
 }
 
@@ -26,6 +29,9 @@ export default function ChatInput({
   status,
   isRequiredDocument,
   setIsRequiredDocument,
+  isUseVoiceMode,
+  setIsUseVoiceMode,
+  isSpeaking = false,
 }: ChatInputProps) {
   const t = useTranslations("chat");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -104,8 +110,14 @@ export default function ChatInput({
             value={input}
             ref={textareaRef}
             onChange={handleInputChange}
-            placeholder={status !== "ready" ? t("thinking") : t("askAnything")}
-            disabled={status !== "ready"}
+            placeholder={
+              status !== "ready"
+                ? t("thinking")
+                : isSpeaking
+                ? t("speaking")
+                : t("askAnything")
+            }
+            disabled={status !== "ready" || isSpeaking}
             onKeyDown={handleKeyDown}
             className="flex-1 bg-card max-h-[80px] text-card-foreground px-4 py-4 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 overflow-y-auto scroll-hidden w-full"
           />
@@ -113,14 +125,14 @@ export default function ChatInput({
         <div className="right-2 absolute flex gap-2 top-1/2 transform -translate-y-1/2">
           <AudioRecorder
             onTranscriptionComplete={handleTranscriptionComplete}
-            disabled={status !== "ready"}
+            disabled={status !== "ready" || isSpeaking}
           />
 
           <Button
             ref={buttonRef}
             onClick={handleSubmit}
             variant="outline"
-            disabled={status !== "ready" || !input.trim()}
+            disabled={status !== "ready" || !input.trim() || isSpeaking}
             className="h-10 w-10 rounded-full border bg-background text-foreground border-border  "
           >
             <FaArrowUp />
@@ -129,14 +141,25 @@ export default function ChatInput({
       </div>
 
       <div className="flex justify-between items-center flex-wrap gap-2">
-        <div className="text-muted-foreground text-sm">{t("disclaimer")}</div>
+        <div className="text-muted-foreground text-xs">{t("disclaimer")}</div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex  items-center space-x-2">
+          <Switch
+            id="use-voice-mode"
+            checked={isUseVoiceMode}
+            onCheckedChange={setIsUseVoiceMode}
+          />
+          <Label htmlFor="use-voice-mode" className="text-xs">
+            {t("useVoiceMode")}
+          </Label>
+
           <Switch
             checked={isRequiredDocument}
             onCheckedChange={setIsRequiredDocument}
           />
-          <Label htmlFor="document-search">{t("alwaysSearchDocument")}</Label>
+          <Label htmlFor="document-search" className="text-xs">
+            {t("alwaysSearchDocument")}
+          </Label>
         </div>
       </div>
     </div>
