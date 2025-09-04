@@ -157,8 +157,6 @@ export const useAudioRecorder = ({
       mediaRecorderRef.current &&
       mediaRecorderRef.current.state !== "inactive"
     ) {
-      // Remove the onstop handler temporarily to prevent transcription
-      const originalOnStop = mediaRecorderRef.current.onstop;
       mediaRecorderRef.current.onstop = null;
 
       // Stop the recorder
