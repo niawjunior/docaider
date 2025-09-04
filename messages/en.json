@@ -67,6 +67,7 @@
     "title": "Chat",
     "placeholder": "Ask me anything about your documents...",
     "useVoiceMode": "Use voice mode",
+    "recordingCancelled": "Recording cancelled",
     "send": "Send",
     "thinking": "Thinking...",
     "speaking": "Speaking...",

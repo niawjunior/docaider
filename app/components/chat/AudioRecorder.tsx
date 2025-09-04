@@ -17,19 +17,24 @@ export default function AudioRecorder({
   disabled = false,
 }: AudioRecorderProps) {
   const t = useTranslations("chat");
-  const { isRecording, isTranscribing, startRecording, stopRecording, cancelRecording } =
-    useAudioRecorder({
-      onTranscriptionComplete: (text) => {
-        toast.dismiss();
-        onTranscriptionComplete(text);
-      },
-      onRecordingStopped: () => {
-        // Dismiss the recording toast when recording stops
-        toast.dismiss();
-        toast.loading(t("transcribing"));
-      },
-      maxRecordingTime: 10000, // 10 seconds maximum recording time
-    });
+  const {
+    isRecording,
+    isTranscribing,
+    startRecording,
+    stopRecording,
+    cancelRecording,
+  } = useAudioRecorder({
+    onTranscriptionComplete: (text) => {
+      toast.dismiss();
+      onTranscriptionComplete(text);
+    },
+    onRecordingStopped: () => {
+      // Dismiss the recording toast when recording stops
+      toast.dismiss();
+      toast.loading(t("transcribing"));
+    },
+    maxRecordingTime: 10000, // 10 seconds maximum recording time
+  });
 
   const handleMicClick = async () => {
     try {
@@ -65,25 +70,23 @@ export default function AudioRecorder({
         variant="outline"
         onClick={handleMicClick}
         disabled={disabled || isTranscribing}
-        className={`h-10 w-10 rounded-full border bg-background text-foreground border-border ${
-          isRecording ? "bg-red-500 text-white" : ""
-        } ${isTranscribing ? "opacity-50" : ""}`}
+        className="h-10 w-10 rounded-full border bg-background text-foreground border-border "
         title={isRecording ? t("stopRecording") : t("startRecording")}
         aria-label={isRecording ? t("stopRecording") : t("startRecording")}
       >
         {isRecording ? <MdMicOff /> : <MdMic />}
       </Button>
-      
+
       {isRecording && (
         <Button
-          variant="outline"
+          variant="destructive"
           onClick={handleCancelClick}
           disabled={isTranscribing}
-          className="h-10 w-10 rounded-full border bg-background text-foreground border-border hover:bg-red-100"
+          className="h-10 w-10 rounded-full "
           title={t("cancelRecording") || "Cancel recording"}
           aria-label={t("cancelRecording") || "Cancel recording"}
         >
-          <MdCancel className="text-red-500" />
+          <MdCancel />
         </Button>
       )}
     </div>
