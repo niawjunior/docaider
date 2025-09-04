@@ -136,10 +136,9 @@ export default function ChatForm({
   const handleTextToSpeech = async (text: string) => {
     if (!text) return;
 
-    setIsSpeaking(true);
-    toastRef.current = toast.info(t("speaking"), {
-      duration: Infinity,
-    });
+    // wait few minute
+
+    toast.info(t("pleaseWait"));
 
     try {
       // Initialize Web Audio API
@@ -164,6 +163,11 @@ export default function ChatForm({
       }
 
       const reader = response.body?.getReader();
+      toast.dismiss();
+      setIsSpeaking(true);
+      toastRef.current = toast.info(t("speaking"), {
+        duration: Infinity,
+      });
 
       if (!reader) {
         throw new Error("Failed to get stream reader");
@@ -217,6 +221,7 @@ export default function ChatForm({
         }, 300); // 300ms delay to ensure voice has completely finished
       };
     } catch (error) {
+      toast.dismiss();
       console.error("Error playing audio:", error);
       toast.error("Failed to play audio");
       setIsSpeaking(false);
