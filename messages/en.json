@@ -68,6 +68,7 @@
     "placeholder": "Ask me anything about your documents...",
     "useVoiceMode": "Use voice mode",
     "recordingCancelled": "Recording cancelled",
+    "cancelRecording": "Cancel recording",
     "send": "Send",
     "thinking": "Thinking...",
     "speaking": "Speaking...",

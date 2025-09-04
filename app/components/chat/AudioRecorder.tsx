@@ -6,6 +6,12 @@ import { MdCancel } from "react-icons/md";
 import { toast } from "sonner";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useTranslations } from "next-intl";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface AudioRecorderProps {
   onTranscriptionComplete: (text: string) => void;
@@ -66,29 +72,46 @@ export default function AudioRecorder({
 
   return (
     <div className="relative flex items-center gap-2">
-      <Button
-        variant="outline"
-        onClick={handleMicClick}
-        disabled={disabled || isTranscribing}
-        className="h-10 w-10 rounded-full border bg-background text-foreground border-border "
-        title={isRecording ? t("stopRecording") : t("startRecording")}
-        aria-label={isRecording ? t("stopRecording") : t("startRecording")}
-      >
-        {isRecording ? <MdMicOff /> : <MdMic />}
-      </Button>
-
       {isRecording && (
-        <Button
-          variant="destructive"
-          onClick={handleCancelClick}
-          disabled={isTranscribing}
-          className="h-10 w-10 rounded-full "
-          title={t("cancelRecording") || "Cancel recording"}
-          aria-label={t("cancelRecording") || "Cancel recording"}
-        >
-          <MdCancel />
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                variant="destructive"
+                onClick={handleCancelClick}
+                disabled={isTranscribing}
+                className="h-10 w-10 rounded-full "
+                aria-label={t("cancelRecording") || "Cancel recording"}
+              >
+                <MdCancel />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{t("cancelRecording")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <Button
+              variant="outline"
+              onClick={handleMicClick}
+              disabled={disabled || isTranscribing}
+              className="h-10 w-10 rounded-full border bg-background text-foreground border-border "
+              aria-label={
+                isRecording ? t("stopRecording") : t("startRecording")
+              }
+            >
+              {isRecording ? <MdMicOff /> : <MdMic />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{isRecording ? t("stopRecording") : t("startRecording")}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }

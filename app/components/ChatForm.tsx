@@ -48,6 +48,7 @@ export default function ChatForm({
   const containerRef = useRef<HTMLDivElement>(null);
   const { session } = useSupabaseSession();
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const toastRef = useRef<any>(null);
 
   const {
     data: initialMessages,
@@ -136,7 +137,9 @@ export default function ChatForm({
     if (!text) return;
 
     setIsSpeaking(true);
-    toast.info(t("speaking"));
+    toastRef.current = toast.info(t("speaking"), {
+      duration: Infinity,
+    });
 
     try {
       // Initialize Web Audio API
@@ -209,6 +212,7 @@ export default function ChatForm({
         // Add a small delay before setting isSpeaking to false
         setTimeout(() => {
           setIsSpeaking(false);
+          toast.dismiss(toastRef.current?.id);
           toast.success("Audio playback completed");
         }, 300); // 300ms delay to ensure voice has completely finished
       };
@@ -249,8 +253,6 @@ export default function ChatForm({
   }, [initialMessages, setMessages]);
 
   useEffect(() => {
-    console.log(status);
-
     if (status === "ready" && messages.length) {
       // Get the last message text for text-to-speech
       const lastMessage: any =
