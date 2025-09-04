@@ -56,7 +56,7 @@ export async function GET() {
       language_preference: userConfigData[0].languagePreference,
       theme_preference: userConfigData[0].themePreference,
       use_document: userConfigData[0].useDocument ?? false,
-      use_voice_mode: userConfigData[0].useVoiceMode ?? true,
+      use_voice_mode: userConfigData[0].useVoiceMode ?? false,
     });
   } catch (error) {
     console.error("Error in GET /api/user/config:", error);
@@ -119,23 +119,23 @@ export async function POST(request: Request) {
       const updateData: Record<string, any> = {
         updatedAt: new Date().toISOString(),
       };
-      
+
       if (body.language_preference !== undefined) {
         updateData.languagePreference = body.language_preference;
       }
-      
+
       if (body.theme_preference !== undefined) {
         updateData.themePreference = body.theme_preference;
       }
-      
+
       if (body.use_document !== undefined) {
         updateData.useDocument = body.use_document;
       }
-      
+
       if (body.use_voice_mode !== undefined) {
         updateData.useVoiceMode = body.use_voice_mode;
       }
-      
+
       // Update existing config
       result = await db
         .update(userConfig)
@@ -156,7 +156,7 @@ export async function POST(request: Request) {
           languagePreference: body.language_preference,
           themePreference: body.theme_preference,
           useDocument: body.use_document,
-          useVoiceMode: body.use_voice_mode ?? true,
+          useVoiceMode: body.use_voice_mode ?? false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         })
