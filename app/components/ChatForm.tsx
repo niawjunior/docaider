@@ -264,7 +264,7 @@ export default function ChatForm({
         handleTextToSpeech(messageText);
       }
     }
-  }, [status]);
+  }, [status, messages, config?.useVoiceMode]);
   // Scroll event listener is now handled in ChatMessages
 
   // Only show the global loader for non-knowledge base chats when loading initial data

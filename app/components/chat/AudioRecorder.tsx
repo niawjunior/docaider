@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { MdMic, MdMicOff } from "react-icons/md";
+import { MdCancel } from "react-icons/md";
 import { toast } from "sonner";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useTranslations } from "next-intl";
@@ -16,19 +17,17 @@ export default function AudioRecorder({
   disabled = false,
 }: AudioRecorderProps) {
   const t = useTranslations("chat");
-  const { isRecording, isTranscribing, startRecording, stopRecording } =
+  const { isRecording, isTranscribing, startRecording, stopRecording, cancelRecording } =
     useAudioRecorder({
       onTranscriptionComplete: (text) => {
         toast.dismiss();
         onTranscriptionComplete(text);
       },
       onRecordingStopped: () => {
-        // Dismiss the recording toast when recording stops via silence detection
+        // Dismiss the recording toast when recording stops
         toast.dismiss();
         toast.loading(t("transcribing"));
       },
-      silenceTimeout: 3000, // 3 seconds of silence
-      silenceThreshold: 10, // Adjust this value based on testing (0-255)
       maxRecordingTime: 10000, // 10 seconds maximum recording time
     });
 
@@ -48,8 +47,20 @@ export default function AudioRecorder({
     }
   };
 
+  const handleCancelClick = () => {
+    try {
+      cancelRecording();
+      toast.dismiss();
+      toast.info(t("recordingCancelled") || "Recording cancelled");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Error cancelling recording"
+      );
+    }
+  };
+
   return (
-    <div className="relative">
+    <div className="relative flex items-center gap-2">
       <Button
         variant="outline"
         onClick={handleMicClick}
@@ -62,6 +73,19 @@ export default function AudioRecorder({
       >
         {isRecording ? <MdMicOff /> : <MdMic />}
       </Button>
+      
+      {isRecording && (
+        <Button
+          variant="outline"
+          onClick={handleCancelClick}
+          disabled={isTranscribing}
+          className="h-10 w-10 rounded-full border bg-background text-foreground border-border hover:bg-red-100"
+          title={t("cancelRecording") || "Cancel recording"}
+          aria-label={t("cancelRecording") || "Cancel recording"}
+        >
+          <MdCancel className="text-red-500" />
+        </Button>
+      )}
     </div>
   );
 }

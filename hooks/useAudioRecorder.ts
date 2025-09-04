@@ -3,42 +3,32 @@ import { useState, useRef, useEffect } from "react";
 interface UseAudioRecorderProps {
   onTranscriptionComplete?: (text: string) => void;
   onRecordingStopped?: () => void; // Add callback for when recording stops
-  silenceTimeout?: number;
-  silenceThreshold?: number;
   maxRecordingTime?: number; // Maximum recording time in milliseconds
 }
 
 interface UseAudioRecorderReturn {
   isRecording: boolean;
   isTranscribing: boolean;
-  silenceDetectionActive: boolean;
   startRecording: () => Promise<void>;
   stopRecording: () => void;
+  cancelRecording: () => void;
   transcribeAudio: (audioBlob: Blob) => Promise<string>;
 }
 
 export const useAudioRecorder = ({
   onTranscriptionComplete,
   onRecordingStopped,
-  silenceTimeout = 3000,
-  silenceThreshold = 5, // Lower threshold for better silence detection (0-255)
   maxRecordingTime = 10000, // Default maximum recording time: 10 seconds
 }: UseAudioRecorderProps = {}): UseAudioRecorderReturn => {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const [silenceDetectionActive, setSilenceDetectionActive] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
     null
   );
 
   // Use refs for values that don't need to trigger re-renders
   const audioChunks = useRef<Blob[]>([]);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const maxRecordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   // Use a ref to track recording state for immediate access in callbacks
   const isRecordingRef = useRef<boolean>(false);
@@ -61,24 +51,9 @@ export const useAudioRecorder = ({
       mediaRecorderRef.current.stop();
     }
 
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = null;
-    }
-
     if (maxRecordingTimerRef.current) {
       clearTimeout(maxRecordingTimerRef.current);
       maxRecordingTimerRef.current = null;
-    }
-
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-
-    if (audioContextRef.current) {
-      audioContextRef.current.close().catch(console.error);
-      audioContextRef.current = null;
     }
 
     if (streamRef.current) {
@@ -87,75 +62,6 @@ export const useAudioRecorder = ({
     }
   };
 
-  // Function to detect silence using audio analysis
-  const detectSilence = () => {
-    // console.log("Silence detection check:", {
-    //   analyser: !!analyserRef.current,
-    //   isRecording, // React state (may be delayed)
-    //   isRecordingRef: isRecordingRef.current, // Ref value (immediate)
-    // });
-
-    // Only proceed if we have both an analyser and we're recording
-    if (!analyserRef.current) {
-      // console.log("No analyser available, skipping silence detection");
-      return;
-    }
-
-    // Use the ref value instead of the state
-    if (!isRecordingRef.current) {
-      // console.log("Not recording (ref), skipping silence detection");
-      return;
-    }
-
-    // console.log("Detecting silence...");
-    const analyser = analyserRef.current;
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(dataArray);
-
-    // Calculate average volume level
-    const average =
-      dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
-    // console.log(`Average volume level: ${average}`);
-    // If sound level is below threshold, start silence timer
-    if (average < silenceThreshold) {
-      if (!silenceTimerRef.current) {
-        // console.log(
-        //   `Sound level (${average}) below threshold (${silenceThreshold}), starting silence timer`
-        // );
-        silenceTimerRef.current = setTimeout(() => {
-          // console.log(
-          //   "Silence detected for timeout period, stopping recording"
-          // );
-          // console.log("isRecording state:", isRecording);
-          // console.log("isRecordingRef.current:", isRecordingRef.current);
-          // Use the ref value instead of the state for immediate access
-          if (isRecordingRef.current) {
-            stopRecording();
-          }
-        }, silenceTimeout);
-      }
-    } else {
-      // If sound detected, clear silence timer
-      if (silenceTimerRef.current) {
-        // console.log(
-        //   `Sound level (${average}) above threshold, resetting silence timer`
-        // );
-        clearTimeout(silenceTimerRef.current);
-        silenceTimerRef.current = null;
-      }
-    }
-
-    // Continue monitoring sound levels
-    if (isRecordingRef.current) {
-      // console.log("Continuing silence detection...");
-      animationFrameRef.current = requestAnimationFrame(detectSilence);
-      // console.log("Animation frame requested:", animationFrameRef.current);
-    } else {
-      // console.log(
-      //   "Not continuing silence detection - isRecordingRef.current is false"
-      // );
-    }
-  };
 
   const startRecording = async (): Promise<void> => {
     try {
@@ -168,18 +74,6 @@ export const useAudioRecorder = ({
       // Get microphone access
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
-
-      // Set up audio context and analyzer for silence detection
-      const audioContext = new AudioContext();
-      audioContextRef.current = audioContext;
-
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 256; // Small FFT size for better performance
-      analyserRef.current = analyser;
-
-      const source = audioContext.createMediaStreamSource(stream);
-      source.connect(analyser);
-      sourceRef.current = source;
 
       // Try to use a format that's well-supported by both browsers and Whisper API
       // Whisper supports: flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav, webm
@@ -202,8 +96,6 @@ export const useAudioRecorder = ({
         }
       }
 
-      // console.log(`Selected MIME type for recording: ${mimeType}`);
-
       // Create and configure media recorder
       const recorder = new MediaRecorder(stream, { mimeType });
       setMediaRecorder(recorder);
@@ -225,10 +117,6 @@ export const useAudioRecorder = ({
             type: mimeType,
           });
 
-          // console.log(
-          //   `Created audio blob with MIME type: ${mimeType}, size: ${audioBlob.size} bytes`
-          // );
-
           // Clean up resources
           cleanupResources();
 
@@ -241,23 +129,10 @@ export const useAudioRecorder = ({
 
       // Start recording
       recorder.start(100); // Collect data every 100ms
-      // console.log("Started recording");
 
       // Update both the React state (for UI) and the ref (for immediate access)
       setIsRecording(true);
       isRecordingRef.current = true;
-
-      // Delay silence detection by 2 seconds to give the user time to start speaking
-      // console.log("Will start silence detection in 2 seconds...");
-
-      setTimeout(() => {
-        // console.log("Starting silence detection now");
-        if (isRecordingRef.current) {
-          // Only start if still recording
-          setSilenceDetectionActive(true); // Update UI state to show silence detection is active
-          animationFrameRef.current = requestAnimationFrame(detectSilence);
-        }
-      }, 1000); // 1 second delay
 
       // Set up maximum recording time limit
       maxRecordingTimerRef.current = setTimeout(() => {
@@ -272,44 +147,51 @@ export const useAudioRecorder = ({
   };
 
   const stopRecording = (): void => {
-    // console.log("Stop recording called, current state:", {
-    //   mediaRecorderState: mediaRecorderRef.current?.state,
-    //   isRecording,
-    //   isRecordingRef: isRecordingRef.current,
-    // });
-
     // Update both the React state (for UI) and the ref (for immediate access)
     setIsRecording(false);
     isRecordingRef.current = false;
-    setSilenceDetectionActive(false); // Reset silence detection UI state
 
     // Call the onRecordingStopped callback if provided
     if (onRecordingStopped) {
-      // console.log("Calling onRecordingStopped callback");
       onRecordingStopped();
     }
 
-    // Only clean up silence detection resources, but keep mediaRecorder for transcription
-    if (silenceTimerRef.current) {
-      // console.log("Clearing silence timer");
-      clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = null;
-    }
-
-    if (animationFrameRef.current) {
-      // console.log("Cancelling animation frame");
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-      // console.log("MediaRecorder ref:", mediaRecorderRef.current);
-    }
-
-    // Stop the mediaRecorder last, which will trigger the onstop event and transcription
+    // Stop the mediaRecorder, which will trigger the onstop event and transcription
     if (
       mediaRecorderRef.current &&
       mediaRecorderRef.current.state !== "inactive"
     ) {
-      // console.log("Stopping recording manually");
       mediaRecorderRef.current.stop();
+    }
+  };
+  
+  const cancelRecording = (): void => {
+    // Update both the React state (for UI) and the ref (for immediate access)
+    setIsRecording(false);
+    isRecordingRef.current = false;
+    
+    // Clean up resources without triggering transcription
+    if (maxRecordingTimerRef.current) {
+      clearTimeout(maxRecordingTimerRef.current);
+      maxRecordingTimerRef.current = null;
+    }
+    
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      // Remove the onstop handler temporarily to prevent transcription
+      const originalOnStop = mediaRecorderRef.current.onstop;
+      mediaRecorderRef.current.onstop = null;
+      
+      // Stop the recorder
+      mediaRecorderRef.current.stop();
+      
+      // Reset the audio chunks
+      audioChunks.current = [];
+    }
+    
+    // Stop all tracks in the stream
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
     }
   };
 
@@ -358,9 +240,9 @@ export const useAudioRecorder = ({
   return {
     isRecording,
     isTranscribing,
-    silenceDetectionActive,
     startRecording,
     stopRecording,
+    cancelRecording,
     transcribeAudio,
   };
 };
