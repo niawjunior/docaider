@@ -1,11 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { MdMic, MdMicOff } from "react-icons/md";
+import { MdMic } from "react-icons/md";
 import { MdCancel } from "react-icons/md";
 import { toast } from "sonner";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useTranslations } from "next-intl";
+import { FaCheck } from "react-icons/fa6";
+
 import {
   Tooltip,
   TooltipContent,
@@ -104,7 +106,7 @@ export default function AudioRecorder({
                 isRecording ? t("stopRecording") : t("startRecording")
               }
             >
-              {isRecording ? <MdMicOff /> : <MdMic />}
+              {isRecording ? <FaCheck /> : <MdMic />}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
