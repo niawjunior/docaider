@@ -22,9 +22,6 @@ export const useAudioRecorder = ({
 }: UseAudioRecorderProps = {}): UseAudioRecorderReturn => {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
-    null
-  );
 
   // Use refs for values that don't need to trigger re-renders
   const audioChunks = useRef<Blob[]>([]);
@@ -62,7 +59,6 @@ export const useAudioRecorder = ({
     }
   };
 
-
   const startRecording = async (): Promise<void> => {
     try {
       // Clean up any existing resources first
@@ -78,27 +74,8 @@ export const useAudioRecorder = ({
       // Try to use a format that's well-supported by both browsers and Whisper API
       // Whisper supports: flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav, webm
       let mimeType = "audio/webm";
-
-      // Check if the browser supports different audio formats in order of preference
-      // Prioritize mp3 as it's most widely supported by Whisper API
-      const supportedMimeTypes = [
-        "audio/mpeg", // mp3
-        "audio/mp3",
-        "audio/wav",
-        "audio/webm",
-        "audio/ogg",
-      ];
-
-      for (const type of supportedMimeTypes) {
-        if (MediaRecorder.isTypeSupported(type)) {
-          mimeType = type;
-          break;
-        }
-      }
-
       // Create and configure media recorder
       const recorder = new MediaRecorder(stream, { mimeType });
-      setMediaRecorder(recorder);
       mediaRecorderRef.current = recorder; // Store in ref for access in async callbacks
 
       recorder.ondataavailable = (e) => {
@@ -164,30 +141,33 @@ export const useAudioRecorder = ({
       mediaRecorderRef.current.stop();
     }
   };
-  
+
   const cancelRecording = (): void => {
     // Update both the React state (for UI) and the ref (for immediate access)
     setIsRecording(false);
     isRecordingRef.current = false;
-    
+
     // Clean up resources without triggering transcription
     if (maxRecordingTimerRef.current) {
       clearTimeout(maxRecordingTimerRef.current);
       maxRecordingTimerRef.current = null;
     }
-    
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
       // Remove the onstop handler temporarily to prevent transcription
       const originalOnStop = mediaRecorderRef.current.onstop;
       mediaRecorderRef.current.onstop = null;
-      
+
       // Stop the recorder
       mediaRecorderRef.current.stop();
-      
+
       // Reset the audio chunks
       audioChunks.current = [];
     }
-    
+
     // Stop all tracks in the stream
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
