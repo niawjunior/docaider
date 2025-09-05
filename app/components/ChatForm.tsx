@@ -96,20 +96,26 @@ export default function ChatForm({
         message.parts?.filter(
           (part: any) => part.type === "tool-askQuestion"
         ) || [];
-      const totalCreditCost = toolCalls.length;
+
       onFinished?.();
-      await queryClient.invalidateQueries({
-        queryKey: ["credit", session?.user?.id],
-      });
 
       if (!isKnowledgeBase) {
         await queryClient.invalidateQueries({
           queryKey: ["chats"],
         });
       }
-      if (totalCreditCost > 0) {
-        toast.success(`Used ${totalCreditCost} credits.`);
+
+      if (
+        toolCalls?.length &&
+        toolCalls[0].type === "tool-askQuestion" &&
+        config?.useVoiceMode
+      ) {
+        const messageText = toolCalls[0].output as string;
+        handleTextToSpeech(messageText);
       }
+      await queryClient.invalidateQueries({
+        queryKey: ["credit", session?.user?.id],
+      });
     },
     onError: (error) => {
       console.log("onError", error);
@@ -217,7 +223,8 @@ export default function ChatForm({
         setTimeout(() => {
           setIsSpeaking(false);
           toast.dismiss(toastRef.current?.id);
-          toast.success("Audio playback completed");
+          toast.success("Audio playback completed", { duration: 1000 });
+          toast.success(`Used 1 credit.`, { duration: 1000 });
         }, 300); // 300ms delay to ensure voice has completely finished
       };
     } catch (error) {
@@ -258,7 +265,7 @@ export default function ChatForm({
   }, [initialMessages, setMessages]);
 
   useEffect(() => {
-    if (status === "ready" && messages.length) {
+    if (status === "ready" && messages.length && config?.useVoiceMode) {
       // Get the last message text for text-to-speech
       const lastMessage: any =
         messages[messages.length - 1].parts?.[
@@ -267,7 +274,7 @@ export default function ChatForm({
       const messageText = lastMessage?.text;
 
       // Use the state directly instead of checking DOM
-      if (config?.useVoiceMode && messageText) {
+      if (messageText) {
         handleTextToSpeech(messageText);
       }
     }

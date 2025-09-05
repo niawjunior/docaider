@@ -124,14 +124,12 @@ export default function ChatMessages({
                         return (
                           <div
                             key={message.id}
-                            className="flex items-center gap-2"
+                            className="absolute left-3 flex items-center gap-1"
                           >
-                            <p className="text-foreground text-sm">
+                            <span className="text-sm">
                               {t("searchingDocument")}
-                            </p>
-                            <div className="flex items-center justify-center py-4">
-                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                            </div>
+                            </span>
+                            <Loader2 className="h-4 w-4 animate-spin" />
                           </div>
                         );
                       }
