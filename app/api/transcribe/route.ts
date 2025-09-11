@@ -39,9 +39,11 @@ export async function POST(req: NextRequest) {
         type: audio.type || "audio/webm", // Use the original type if available
       }),
       model: "gpt-4o-mini-transcribe",
-      language: language,
+      language: "th",
       response_format: "text",
       stream: true,
+      prompt:
+        "You are a Thai assistant. Transcribe the audio to Thai text. Only output the transcribed text, no additional explanation.",
     });
     // Create a readable stream to send the transcription chunks to the client
     const readable = new ReadableStream({

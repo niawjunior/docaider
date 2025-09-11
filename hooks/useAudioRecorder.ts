@@ -136,7 +136,7 @@ export const useAudioRecorder = ({
         }
       };
 
-      recorder.start(500); // gather data every 500ms
+      recorder.start(800); // gather data every 500ms
 
       setIsRecording(true);
       isRecordingRef.current = true;
@@ -160,7 +160,7 @@ export const useAudioRecorder = ({
             preview: true,
           });
         }
-      }, 800);
+      }, 1000);
     } catch (error) {
       console.error("Error accessing microphone:", error);
       throw new Error("Could not access microphone. Please check permissions.");

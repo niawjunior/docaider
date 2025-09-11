@@ -189,7 +189,6 @@ export async function POST(req: NextRequest) {
     - When replying in Thai:
       • Use **ค่ะ** at the end of **statements**.  
       • Use **คะ** at the end of **questions**.  
-      • **Never use "ครับ".**    
     - Always prioritize understanding user intent.
     - Focus on knowledge extraction, organization, and retrieval from documents.
     - If user intent is ambiguous, ask clarifying questions instead of guessing.
