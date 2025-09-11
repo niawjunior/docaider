@@ -32,7 +32,7 @@ function mapStripeStatusToDbStatus(stripeStatus: string): SubscriptionStatus {
 
 // Initialize Stripe with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-07-30.basil" as any, // Type assertion to fix API version mismatch
+  apiVersion: "2025-08-27.basil" as any, // Type assertion to fix API version mismatch
 });
 
 // This is your Stripe webhook secret for testing your endpoint locally

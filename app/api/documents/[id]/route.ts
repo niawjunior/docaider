@@ -10,10 +10,18 @@ import { eq } from "drizzle-orm";
  */
 
 export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: Promise<{ documentId: string; documentName: string }> }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { documentId, documentName } = await params;
+  const { id } = await params;
+  // Get document name from the database
+  const document = await db.query.documents.findFirst({
+    where: eq(documents.documentId, id),
+  });
+
+  if (!document) {
+    return NextResponse.json({ error: "Document not found" }, { status: 404 });
+  }
 
   try {
     // Create server-side Supabase client
@@ -31,7 +39,7 @@ export async function DELETE(
     // 1. Delete the file from Supabase storage
     const { error: storageError } = await supabase.storage
       .from("documents")
-      .remove([`user_${user.id}/${documentName}`]);
+      .remove([`user_${user.id}/${document.documentName}`]);
 
     if (storageError) {
       console.error("Storage error:", storageError);
@@ -41,26 +49,13 @@ export async function DELETE(
       );
     }
 
-    // get document from database using Drizzle ORM
-    const [document] = await db
-      .select()
-      .from(documents)
-      .where(eq(documents.documentId, documentId));
-
-    if (!document) {
-      return NextResponse.json(
-        { error: "Document not found" },
-        { status: 404 }
-      );
-    }
+    // We already have the document details from earlier, no need to query again
 
     // 3. Delete document chunks from database using Drizzle ORM
-    await db
-      .delete(documentChunks)
-      .where(eq(documentChunks.documentId, documentId));
+    await db.delete(documentChunks).where(eq(documentChunks.documentId, id));
 
     // 2. Delete document from database using Drizzle ORM
-    await db.delete(documents).where(eq(documents.documentId, documentId));
+    await db.delete(documents).where(eq(documents.documentId, id));
 
     return NextResponse.json({ success: true });
   } catch (error) {

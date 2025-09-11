@@ -76,6 +76,8 @@ export default function ChatForm({
 
   const [input, setInput] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [currentTranscription, setCurrentTranscription] = useState("");
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const { messages, status, sendMessage, setMessages, error } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
@@ -142,15 +144,13 @@ export default function ChatForm({
   const handleTextToSpeech = async (text: string) => {
     if (!text) return;
 
-    // wait few minute
-
-    toast.info(t("pleaseWait"));
+    toast.dismiss();
+    setIsSpeaking(true);
+    toastRef.current = toast.info(t("speaking"), {
+      duration: Infinity,
+    });
 
     try {
-      // Initialize Web Audio API
-      const audioContext = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
-
       const response = await fetch("/api/text-to-speech", {
         method: "POST",
         headers: {
@@ -158,9 +158,8 @@ export default function ChatForm({
         },
         body: JSON.stringify({
           text,
-          voice: "coral",
+          voice: "sage",
           model: "gpt-4o-mini-tts",
-          streaming: true,
         }),
       });
 
@@ -168,65 +167,13 @@ export default function ChatForm({
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const reader = response.body?.getReader();
-      toast.dismiss();
-      setIsSpeaking(true);
-      toastRef.current = toast.info(t("speaking"), {
-        duration: Infinity,
-      });
-
-      if (!reader) {
-        throw new Error("Failed to get stream reader");
-      }
-
-      // Store chunks to combine them later
-      const chunks: Uint8Array[] = [];
-
-      // Read stream
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-
-        chunks.push(value);
-      }
-
-      // Combine all chunks into a single array
-      let totalLength = 0;
-      chunks.forEach((chunk) => {
-        totalLength += chunk.length;
-      });
-
-      const combinedChunks = new Uint8Array(totalLength);
-
-      let offset = 0;
-      chunks.forEach((chunk) => {
-        combinedChunks.set(chunk, offset);
-        offset += chunk.length;
-      });
-
-      // Decode audio data
-      const audioBuffer = await audioContext.decodeAudioData(
-        combinedChunks.buffer
-      );
-
-      // Create and start audio source
-      const source = audioContext.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(audioContext.destination);
-
-      // Start playing
-      source.start(0);
-
-      // Handle completion - add a small delay to ensure the voice has completely finished
-      source.onended = () => {
-        // Add a small delay before setting isSpeaking to false
-        setTimeout(() => {
-          setIsSpeaking(false);
-          toast.dismiss(toastRef.current?.id);
-          toast.success("Audio playback completed", { duration: 1000 });
-          toast.success(`Used 1 credit.`, { duration: 1000 });
-        }, 300); // 300ms delay to ensure voice has completely finished
-      };
+      // Add a small delay before setting isSpeaking to false
+      setTimeout(() => {
+        setIsSpeaking(false);
+        toast.dismiss(toastRef.current?.id);
+        toast.success("Audio playback completed", { duration: 1000 });
+        toast.success(`Used 1 credit.`, { duration: 1000 });
+      }, 300); // 300ms delay to ensure voice has completely finished
     } catch (error) {
       toast.dismiss();
       console.error("Error playing audio:", error);
@@ -241,6 +188,8 @@ export default function ChatForm({
       useVoiceMode: value,
     });
     toast.success(settingsT("saveSuccess"));
+
+    queryClient.invalidateQueries({ queryKey: ["config", session?.user?.id] });
   };
 
   const handdleRequiredDocument = async () => {
@@ -278,7 +227,7 @@ export default function ChatForm({
         handleTextToSpeech(messageText);
       }
     }
-  }, [status]);
+  }, [status, config?.useVoiceMode, handleTextToSpeech]);
   // Scroll event listener is now handled in ChatMessages
 
   // Only show the global loader for non-knowledge base chats when loading initial data
@@ -330,9 +279,23 @@ export default function ChatForm({
               error={error?.message}
             />
           </div>
-
           <div className="flex flex-col">
             <div className="sticky bottom-0 flex-col w-full py-2 px-2 flex gap-3">
+              {/* Real-time transcription display */}
+              <div className="relative w-full flex justify-center">
+                {currentTranscription && (
+                  <div className="max-w-[80%] rounded-lg bg-muted p-3 text-sm text-muted-foreground absolute bottom-full mb-2">
+                    <p className="whitespace-pre-wrap break-words">
+                      {currentTranscription}
+                      {isTranscribing && (
+                        <span className="ml-1 inline-block animate-pulse">
+                          ▌
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                )}
+              </div>
               <ChatInput
                 input={input}
                 setInput={setInput}
@@ -344,6 +307,8 @@ export default function ChatForm({
                 setIsUseVoiceMode={handleVoiceModeToggle}
                 isSpeaking={isSpeaking}
                 error={error?.message}
+                onTranscriptionUpdate={(text) => setCurrentTranscription(text)}
+                onTranscribingStateChange={(state) => setIsTranscribing(state)}
               />
             </div>
 

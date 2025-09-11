@@ -1,9 +1,12 @@
+import { debounce, pickMimeType } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
 
 interface UseAudioRecorderProps {
   onTranscriptionComplete?: (text: string) => void;
-  onRecordingStopped?: () => void; // Add callback for when recording stops
-  maxRecordingTime?: number; // Maximum recording time in milliseconds
+  onTranscriptionUpdate?: (text: string) => void;
+  onRecordingStopped?: () => void;
+  maxRecordingTime?: number; // ms
+  language?: string;
 }
 
 interface UseAudioRecorderReturn {
@@ -12,111 +15,152 @@ interface UseAudioRecorderReturn {
   startRecording: () => Promise<void>;
   stopRecording: () => void;
   cancelRecording: () => void;
+  /** kept for external callers; internally we use transcribeBlob */
   transcribeAudio: (audioBlob: Blob) => Promise<string>;
+  currentTranscription: string;
 }
 
 export const useAudioRecorder = ({
   onTranscriptionComplete,
+  onTranscriptionUpdate,
   onRecordingStopped,
-  maxRecordingTime = 10000, // Default maximum recording time: 10 seconds
+  maxRecordingTime = 10000,
+  language = "th",
 }: UseAudioRecorderProps = {}): UseAudioRecorderReturn => {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [currentTranscription, setCurrentTranscription] = useState("");
 
-  // Use refs for values that don't need to trigger re-renders
+  const debouncedSetCurrentTranscription = useRef(
+    debounce((text: string) => setCurrentTranscription(text), 100)
+  ).current;
+
+  const latestTranscriptionRef = useRef("");
+
+  // runtime refs
   const audioChunks = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
-  const maxRecordingTimerRef = useRef<NodeJS.Timeout | null>(null);
-  // Use a ref to track recording state for immediate access in callbacks
-  const isRecordingRef = useRef<boolean>(false);
-  // Use a ref to maintain reference to mediaRecorder across async callbacks
+  const maxRecordingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+  const transcriptionTimerRef = useRef<ReturnType<typeof setInterval> | null>(
+    null
+  );
+  const isRecordingRef = useRef(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
-  // Clean up on unmount
+  // track concurrent streaming ops to avoid flicker
+  const activeTranscriptionsRef = useRef(0);
+
   useEffect(() => {
     return () => {
       cleanupResources();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Function to clean up all resources
   const cleanupResources = () => {
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state !== "inactive"
-    ) {
-      mediaRecorderRef.current.stop();
-    }
+    try {
+      if (
+        mediaRecorderRef.current &&
+        mediaRecorderRef.current.state !== "inactive"
+      ) {
+        mediaRecorderRef.current.stop();
+      }
+    } catch {}
 
     if (maxRecordingTimerRef.current) {
       clearTimeout(maxRecordingTimerRef.current);
       maxRecordingTimerRef.current = null;
     }
 
+    if (transcriptionTimerRef.current) {
+      clearInterval(transcriptionTimerRef.current);
+      transcriptionTimerRef.current = null;
+    }
+
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     }
   };
 
   const startRecording = async (): Promise<void> => {
     try {
-      // Clean up any existing resources first
       cleanupResources();
 
-      // Reset audio chunks
       audioChunks.current = [];
+      setCurrentTranscription("");
+      latestTranscriptionRef.current = "";
 
-      // Get microphone access
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
-      // Try to use a format that's well-supported by both browsers and Whisper API
-      // Whisper supports: flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav, webm
-      let mimeType = "audio/webm";
-      // Create and configure media recorder
+      const mimeType = pickMimeType();
       const recorder = new MediaRecorder(stream, { mimeType });
-      mediaRecorderRef.current = recorder; // Store in ref for access in async callbacks
+      mediaRecorderRef.current = recorder;
 
       recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
+        if (e.data && e.data.size > 0) {
           audioChunks.current.push(e.data);
         }
       };
 
       recorder.onstop = async () => {
         try {
-          // Create a blob from the audio chunks
-          const mimeType = recorder.mimeType || "audio/webm";
-
-          // Ensure we're using a supported format
-          const audioBlob = new Blob(audioChunks.current, {
-            type: mimeType,
+          const blob = new Blob(audioChunks.current, {
+            type: recorder.mimeType || mimeType,
           });
 
-          // Clean up resources
-          cleanupResources();
+          // stop stream + timers now that we've ended
+          if (streamRef.current) {
+            streamRef.current.getTracks().forEach((t) => t.stop());
+            streamRef.current = null;
+          }
+          if (maxRecordingTimerRef.current) {
+            clearTimeout(maxRecordingTimerRef.current);
+            maxRecordingTimerRef.current = null;
+          }
+          if (transcriptionTimerRef.current) {
+            clearInterval(transcriptionTimerRef.current);
+            transcriptionTimerRef.current = null;
+          }
 
-          // Transcribe the audio
-          await transcribeAudio(audioBlob);
-        } catch (error) {
-          console.error("Error in recorder.onstop:", error);
+          await transcribeBlob(blob, {
+            filename: "recording.webm",
+            preview: false,
+          });
+        } catch (err) {
+          console.error("Error in recorder.onstop:", err);
+          setIsTranscribing(false);
         }
       };
 
-      // Start recording
-      recorder.start(100); // Collect data every 100ms
+      recorder.start(500); // gather data every 500ms
 
-      // Update both the React state (for UI) and the ref (for immediate access)
       setIsRecording(true);
       isRecordingRef.current = true;
 
-      // Set up maximum recording time limit
       maxRecordingTimerRef.current = setTimeout(() => {
-        if (isRecordingRef.current) {
-          stopRecording();
-        }
+        if (isRecordingRef.current) stopRecording();
       }, maxRecordingTime);
+
+      // light periodic streaming (approx every 0.8s)
+      transcriptionTimerRef.current = setInterval(async () => {
+        if (!isRecordingRef.current || audioChunks.current.length === 0) return;
+
+        // snapshot current buffer for preview; do not clear source chunks
+        const mime = mediaRecorderRef.current?.mimeType || "audio/webm";
+        const previewBlob = new Blob([...audioChunks.current], { type: mime });
+
+        // fire-and-forget; guard to avoid overlapping too much
+        if (activeTranscriptionsRef.current === 0) {
+          void transcribeBlob(previewBlob, {
+            filename: "recording-chunk.webm",
+            preview: true,
+          });
+        }
+      }, 800);
     } catch (error) {
       console.error("Error accessing microphone:", error);
       throw new Error("Could not access microphone. Please check permissions.");
@@ -124,85 +168,140 @@ export const useAudioRecorder = ({
   };
 
   const stopRecording = (): void => {
-    // Update both the React state (for UI) and the ref (for immediate access)
     setIsRecording(false);
     isRecordingRef.current = false;
 
-    // Call the onRecordingStopped callback if provided
-    if (onRecordingStopped) {
-      onRecordingStopped();
-    }
+    onRecordingStopped?.();
 
-    // Stop the mediaRecorder, which will trigger the onstop event and transcription
     if (
       mediaRecorderRef.current &&
       mediaRecorderRef.current.state !== "inactive"
     ) {
-      mediaRecorderRef.current.stop();
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (e) {
+        console.warn("stopRecording error:", e);
+      }
     }
   };
 
   const cancelRecording = (): void => {
-    // Update both the React state (for UI) and the ref (for immediate access)
     setIsRecording(false);
     isRecordingRef.current = false;
+    setCurrentTranscription("");
+    latestTranscriptionRef.current = "";
+    audioChunks.current = [];
 
-    // Clean up resources without triggering transcription
     if (maxRecordingTimerRef.current) {
       clearTimeout(maxRecordingTimerRef.current);
       maxRecordingTimerRef.current = null;
+    }
+    if (transcriptionTimerRef.current) {
+      clearInterval(transcriptionTimerRef.current);
+      transcriptionTimerRef.current = null;
     }
 
     if (
       mediaRecorderRef.current &&
       mediaRecorderRef.current.state !== "inactive"
     ) {
-      mediaRecorderRef.current.onstop = null;
-
-      // Stop the recorder
-      mediaRecorderRef.current.stop();
-
-      // Reset the audio chunks
-      audioChunks.current = [];
+      try {
+        // prevent onstop -> final transcription
+        mediaRecorderRef.current.onstop = null;
+        mediaRecorderRef.current.stop();
+      } catch {}
     }
 
-    // Stop all tracks in the stream
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     }
   };
 
-  const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
+  /**
+   * Unified transcription (used for both preview & final).
+   * - preview=true: emits deltas, may emit final from backend but won’t call onTranscriptionComplete.
+   * - preview=false: streams deltas and calls onTranscriptionComplete on final.
+   */
+  const transcribeBlob = async (
+    audioBlob: Blob,
+    opts: { filename: string; preview: boolean }
+  ): Promise<string> => {
+    let finalText = "";
+    let streamingText = opts.preview ? latestTranscriptionRef.current : "";
+
     try {
+      // track active ops to manage isTranscribing without flicker
+      activeTranscriptionsRef.current += 1;
       setIsTranscribing(true);
 
-      // Always use mp3 extension for maximum compatibility with OpenAI Whisper
-      // This doesn't change the actual audio format, just the filename extension
-      const fileExtension = "mp3";
-
-      // console.log(
-      //   `Transcribing audio with type: ${audioBlob.type}, using extension: ${fileExtension}`
-      // );
-
       const formData = new FormData();
-      formData.append("audio", audioBlob, `recording.${fileExtension}`);
+      formData.append("audio", audioBlob, opts.filename);
+      formData.append("language", language);
 
       const response = await fetch("/api/transcribe", {
         method: "POST",
         body: formData,
       });
 
-      const data = await response.json();
-
-      if (data.success && data.text) {
-        if (onTranscriptionComplete) {
-          onTranscriptionComplete(data.text);
-        }
-        return data.text;
-      } else {
-        throw new Error(data.error || "Failed to transcribe audio");
+      if (!response.ok) {
+        let message = "Failed to transcribe audio";
+        try {
+          const err = await response.json();
+          if (err?.error) message = err.error;
+        } catch {}
+        throw new Error(message);
       }
+      if (!response.body) {
+        throw new Error("No response body for streaming transcription");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n\n");
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+
+          try {
+            const data = JSON.parse(line.slice(6));
+
+            if (data.type === "transcript.text.delta") {
+              streamingText += data.delta;
+              latestTranscriptionRef.current = streamingText;
+
+              // debounced for UI smoothness
+              debouncedSetCurrentTranscription(streamingText);
+              onTranscriptionUpdate?.(streamingText);
+            } else if (
+              data.type === "final" ||
+              data.type === "transcript.text.done"
+            ) {
+              finalText = String(data.text ?? "");
+              latestTranscriptionRef.current = finalText;
+              setCurrentTranscription(finalText);
+
+              if (!opts.preview) {
+                onTranscriptionComplete?.(finalText);
+              } else {
+                // for preview, treat as an update
+                onTranscriptionUpdate?.(finalText);
+              }
+            }
+          } catch (e) {
+            console.error("Error parsing SSE data:", e);
+          }
+        }
+      }
+
+      reader.releaseLock();
+      return finalText || streamingText;
     } catch (error) {
       console.error("Error transcribing audio:", error);
       throw new Error(
@@ -211,9 +310,19 @@ export const useAudioRecorder = ({
         }`
       );
     } finally {
-      setIsTranscribing(false);
+      activeTranscriptionsRef.current = Math.max(
+        0,
+        activeTranscriptionsRef.current - 1
+      );
+      if (activeTranscriptionsRef.current === 0) {
+        setIsTranscribing(false);
+      }
     }
   };
+
+  /** Back-compat: expose a single-call final transcription API */
+  const transcribeAudio = (audioBlob: Blob) =>
+    transcribeBlob(audioBlob, { filename: "recording.webm", preview: false });
 
   return {
     isRecording,
@@ -222,5 +331,6 @@ export const useAudioRecorder = ({
     stopRecording,
     cancelRecording,
     transcribeAudio,
+    currentTranscription,
   };
 };

@@ -20,6 +20,8 @@ interface ChatInputProps {
   setIsUseVoiceMode: (value: boolean) => void;
   isSpeaking?: boolean;
   error?: string;
+  onTranscriptionUpdate?: (text: string) => void;
+  onTranscribingStateChange?: (isTranscribing: boolean) => void;
 }
 
 export default function ChatInput({
@@ -32,6 +34,8 @@ export default function ChatInput({
   isUseVoiceMode,
   setIsUseVoiceMode,
   isSpeaking = false,
+  onTranscriptionUpdate,
+  onTranscribingStateChange,
 }: ChatInputProps) {
   const t = useTranslations("chat");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -95,11 +99,30 @@ export default function ChatInput({
 
   const handleTranscriptionComplete = (text: string) => {
     setInput(text);
+    // Clear the transcription display
+    if (onTranscriptionUpdate) {
+      onTranscriptionUpdate("");
+    }
+    if (onTranscribingStateChange) {
+      onTranscribingStateChange(false);
+    }
     // focus on textarea after transcription
     textareaRef.current?.focus();
     setTimeout(() => {
       buttonRef.current?.click();
     }, 100);
+  };
+
+  const handleTranscriptionUpdate = (text: string) => {
+    if (onTranscriptionUpdate) {
+      onTranscriptionUpdate(text);
+    }
+  };
+
+  const handleTranscribingStateChange = (isTranscribing: boolean) => {
+    if (onTranscribingStateChange) {
+      onTranscribingStateChange(isTranscribing);
+    }
   };
 
   return (
@@ -125,6 +148,8 @@ export default function ChatInput({
         <div className="right-2 absolute flex gap-2 top-1/2 transform -translate-y-1/2">
           <AudioRecorder
             onTranscriptionComplete={handleTranscriptionComplete}
+            onTranscriptionUpdate={handleTranscriptionUpdate}
+            onTranscribingStateChange={handleTranscribingStateChange}
             disabled={status !== "ready" || isSpeaking}
           />
 

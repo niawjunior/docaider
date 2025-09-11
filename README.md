@@ -130,9 +130,8 @@ cp .env.example .env.local
 NEXT_PUBLIC_SITE_URL=<your_site_url>
 NEXT_PUBLIC_SUPABASE_URL=<your_supabase_url>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your_supabase_anon_key>
+SUPABASE_SERVICE_ROLE_KEY=<your_supabase_service_role_key>
 OPENAI_API_KEY=<your_openai_api_key>
-STRIPE_SECRET_KEY=<your_stripe_secret_key>
-STRIPE_WEBHOOK_SECRET=<your_stripe_webhook_secret>
 ```
 
 5. Run database migrations (if applicable)

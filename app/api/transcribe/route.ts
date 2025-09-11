@@ -1,5 +1,8 @@
+// app/api/transcribe/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+
+export const runtime = "nodejs"; // ensure Node runtime (not edge)
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,96 +13,85 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const formData = await req.formData();
-    const audioFile = formData.get("audio") as File;
+    const audio = formData.get("audio");
+    // Get language from form data or default to "th"
+    const language = formData.get("language")?.toString() || "th";
 
-    if (!audioFile) {
+    if (!(audio instanceof File)) {
       return NextResponse.json(
-        { error: "Audio file is required" },
+        {
+          error: "Audio file is required (multipart/form-data, field 'audio')",
+        },
         { status: 400 }
       );
     }
 
-    // Log the file type for debugging
-    // console.log("Audio file type:", audioFile.type);
-    // console.log("Audio file name:", audioFile.name);
+    // Ensure filename & extension are present
+    const filename =
+      audio.name && audio.name.includes(".") ? audio.name : "audio.webm";
 
-    // Get the file extension from the MIME type
-    let fileExtension = audioFile.type.split("/")[1] || "webm";
-
-    // Ensure we're using a supported extension for OpenAI Whisper
-    // Supported formats: flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav, webm
-    const supportedExtensions = [
-      "flac",
-      "m4a",
-      "mp3",
-      "mp4",
-      "mpeg",
-      "mpga",
-      "oga",
-      "ogg",
-      "wav",
-      "webm",
-    ];
-
-    // Map MIME subtypes to supported extensions
-    const mimeToExtension: Record<string, string> = {
-      webm: "webm",
-      ogg: "ogg",
-      mpeg: "mp3",
-      mp4: "mp4",
-      "x-m4a": "m4a",
-      wav: "wav",
-      "x-wav": "wav",
-      flac: "flac",
-    };
-
-    // Use the mapped extension if available
-    if (mimeToExtension[fileExtension]) {
-      fileExtension = mimeToExtension[fileExtension];
-    } else if (!supportedExtensions.includes(fileExtension)) {
-      // Default to mp3 if not supported (more widely supported than webm)
-      fileExtension = "mp3";
-    }
-
-    // Force the file extension to be mp3 for maximum compatibility with OpenAI Whisper
-    fileExtension = "mp3";
-
-    // console.log(
-    //   `Processing audio file with type: ${audioFile.type}, using extension: ${fileExtension}`
-    // );
-
-    // Convert the audio file to a format OpenAI can use
-    const audioBytes = await audioFile.arrayBuffer();
-
-    // Create a file-like object that OpenAI's SDK can use
-    // Make sure the filename has the correct extension that matches the actual format
-    const file = new File([audioBytes], `audio.${fileExtension}`, {
-      type: audioFile.type,
-    });
-
-    // Use the OpenAI SDK to transcribe the audio
-    // According to the docs, whisper-1 supports: mp3, mp4, mpeg, mpga, m4a, wav, and webm
+    // Pass the original File/Blob directly to the SDK
     const transcription = await openai.audio.transcriptions.create({
-      file: file,
-      model: "whisper-1",
-      response_format: "json",
+      file: new File([await audio.arrayBuffer()], filename, {
+        type: audio.type || "audio/webm", // Use the original type if available
+      }),
+      model: "gpt-4o-mini-transcribe",
+      language: language,
+      response_format: "text",
+      stream: true,
+    });
+    // Create a readable stream to send the transcription chunks to the client
+    const readable = new ReadableStream({
+      start(controller) {
+        (async () => {
+          try {
+            for await (const chunk of transcription) {
+              // Format the chunk for SSE
+              const formattedChunk = `data: ${JSON.stringify(chunk)}\n\n`;
+              controller.enqueue(new TextEncoder().encode(formattedChunk));
+
+              // For final chunks, send a special message
+              if (chunk.type === "transcript.text.done") {
+                const finalMessage = `data: ${JSON.stringify({
+                  type: "final",
+                  text: chunk.text,
+                })}\n\n`;
+                controller.enqueue(new TextEncoder().encode(finalMessage));
+              }
+            }
+          } catch (error) {
+            console.error("Error processing transcription stream:", error);
+            const errorMessage = `data: ${JSON.stringify({
+              type: "error",
+              message: error instanceof Error ? error.message : "Unknown error",
+            })}\n\n`;
+            controller.enqueue(new TextEncoder().encode(errorMessage));
+          } finally {
+            controller.close();
+          }
+        })();
+      },
     });
 
-    // console.log("Transcription result:", transcription);
-
-    return NextResponse.json({
-      text: transcription.text,
-      success: true,
+    return new NextResponse(readable, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no", // Prevents Nginx from buffering the response
+        "Transfer-Encoding": "chunked",
+      },
     });
-  } catch (error) {
-    console.error("Transcription error:", error);
+  } catch (err: any) {
+    console.error("Transcription error:", err);
     return NextResponse.json(
-      { error: "Failed to transcribe audio", details: String(error) },
+      {
+        error: "Failed to transcribe audio",
+        details: err?.message ?? String(err),
+      },
       { status: 500 }
     );
   }
