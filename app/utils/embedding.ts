@@ -1,12 +1,8 @@
-import { embed, embedMany } from "ai";
-import { openai } from "@ai-sdk/openai";
-import { createClient } from "./supabase/client";
 import { createServiceClient } from "./supabase/server";
 import { db } from "../../db/config";
 import { documents, knowledgeBases } from "../../db/schema";
 import { and, inArray, eq } from "drizzle-orm";
-
-const embeddingModel = openai.embedding("text-embedding-3-large");
+import { OpenAIEmbeddings } from "@langchain/openai";
 
 const cleanText = (input: string): string => {
   return input
@@ -32,21 +28,30 @@ export const generateEmbeddings = async (
   const cleanedText = cleanText(value);
 
   const chunks = generateChunks(cleanedText);
-  const { embeddings } = await embedMany({
-    model: embeddingModel,
-    values: chunks,
+
+  const embeddings = new OpenAIEmbeddings({
+    model: "text-embedding-3-large",
+    dimensions: 1536,
   });
-  return embeddings.map((e, i) => ({ content: chunks[i], embedding: e }));
+
+  const embeddingVectors = await embeddings.embedDocuments(chunks);
+
+  return chunks.map((content, i) => ({
+    content,
+    embedding: embeddingVectors[i],
+  }));
 };
 
 export const generateEmbedding = async (value: string): Promise<number[]> => {
   // Clean and normalize Thai text before generating embeddings
   const cleanedText = cleanText(value);
 
-  const { embedding } = await embed({
-    model: embeddingModel,
-    value: cleanedText,
+  const embeddings = new OpenAIEmbeddings({
+    model: "text-embedding-3-large",
+    dimensions: 1536,
   });
+
+  const [embedding] = await embeddings.embedDocuments([cleanedText]);
   return embedding;
 };
 
@@ -56,109 +61,38 @@ interface DatabaseChunk {
   [key: string]: unknown;
 }
 
-export const findRelevantContent = async (
-  userId: string,
-  question: string,
-  selectedDocumentNames?: string[]
-): Promise<DatabaseChunk[]> => {
-  try {
-    const questionEmbedding = await generateEmbedding(question);
+// -- Create a named HNSW index on the public.document_chunks.embedding column
+// CREATE INDEX IF NOT EXISTS idx_document_chunks_embedding_hnsw
+// ON public.document_chunks USING hnsw (embedding vector_cosine_ops);
 
-    // Create Supabase client
-    const supabase = await createClient();
+// DROP FUNCTION IF EXISTS match_document_chunks(vector, double precision, integer);
+// DROP FUNCTION IF EXISTS match_document_chunks(vector, double precision, integer, jsonb);
+// DROP FUNCTION IF EXISTS match_selected_document_chunks(vector, double precision, integer, jsonb);
+// DROP FUNCTION IF EXISTS match_selected_document_chunks(vector, double precision, integer, jsonb, jsonb);
+// DROP FUNCTION IF EXISTS public.match_selected_document_chunks(vector, double precision, integer, jsonb);
+// DROP FUNCTION IF EXISTS public.match_selected_document_chunks(vector, double precision, integer, text[]);
 
-    // Get document_id from document_name using Drizzle ORM
-    let documentIds: { id: number | null }[] = [];
-    if (selectedDocumentNames && selectedDocumentNames.length > 0) {
-      documentIds = await db
-        .select({ id: documents.id })
-        .from(documents)
-        .where(and(inArray(documents.title, selectedDocumentNames)));
-
-      if (documentIds.length === 0) {
-        console.log("No matching documents found for the selected names");
-        return [];
-      }
-    }
-
-    // DROP FUNCTION IF EXISTS match_document_chunks(vector, double precision, integer);
-    // DROP FUNCTION IF EXISTS match_document_chunks(vector, double precision, integer, jsonb);
-    // DROP FUNCTION IF EXISTS match_selected_document_chunks(vector, double precision, integer, jsonb);
-    // DROP FUNCTION IF EXISTS match_selected_document_chunks(vector, double precision, integer, jsonb, jsonb);
-    // DROP FUNCTION IF EXISTS public.match_selected_document_chunks(vector, double precision, integer, jsonb);
-    // DROP FUNCTION IF EXISTS public.match_selected_document_chunks(vector, double precision, integer, text[]);
-
-    // CREATE OR REPLACE FUNCTION match_document_chunks(
-    //   query_embedding vector(3072),
-    //   match_threshold float,
-    //   match_count int
-    // )
-    // RETURNS SETOF document_chunks
-    // LANGUAGE sql SECURITY DEFINER
-    // AS $$
-    //   SELECT *
-    //   FROM document_chunks
-    //   WHERE document_chunks.embedding <=> query_embedding < 1 - match_threshold
-    //   ORDER BY document_chunks.embedding <=> query_embedding ASC
-    //   LIMIT LEAST(match_count, 200);
-    // $$;
-
-    // CREATE OR REPLACE FUNCTION match_selected_document_chunks(
-    //   query_embedding vector(3072),
-    //   match_threshold float,
-    //   match_count int,
-    //   document_ids jsonb  -- Array of document IDs to filter by
-    // )
-    // RETURNS SETOF document_chunks
-    // LANGUAGE sql SECURITY DEFINER
-    // AS $$
-    //   SELECT *
-    //   FROM document_chunks
-    //   WHERE document_chunks.document_id IN (
-    //     SELECT value FROM jsonb_array_elements_text(document_ids)
-    //   )
-    //   AND document_chunks.embedding <=> query_embedding < 1 - match_threshold
-    //   ORDER BY document_chunks.embedding <=> query_embedding ASC
-    //   LIMIT LEAST(match_count, 200);
-    // $$;
-
-    // Use Supabase RPC for vector similarity search
-    const { data: relevantChunks, error } = await supabase.rpc(
-      documentIds && documentIds.length > 0
-        ? "match_selected_document_chunks"
-        : "match_document_chunks",
-      {
-        query_embedding: questionEmbedding,
-        match_threshold: 0.1,
-        match_count: 1000,
-        ...(documentIds &&
-          documentIds.length > 0 && {
-            document_ids: documentIds
-              .filter((d) => d.id != null)
-              .map((d) => String(d.id)), // -> becomes a JSON array automatically
-          }),
-      }
-    );
-
-    if (error) {
-      console.error("Error in vector search:", error);
-      throw new Error(`Vector search failed: ${error.message}`);
-    }
-
-    if (!relevantChunks || relevantChunks.length === 0) {
-      console.log("No relevant content found");
-      return [];
-    }
-
-    return relevantChunks as DatabaseChunk[];
-  } catch (error) {
-    console.error("Error finding relevant content:", error);
-    throw error;
-  }
-};
+// CREATE OR REPLACE FUNCTION match_selected_document_chunks(
+//   query_embedding vector(1536),
+//   match_threshold float,
+//   match_count int,
+//   document_ids jsonb  -- Array of document IDs to filter by
+// )
+// RETURNS SETOF document_chunks
+// LANGUAGE sql SECURITY DEFINER
+// AS $$
+//   SELECT *
+//   FROM document_chunks
+//   WHERE document_chunks.document_id IN (
+//     SELECT value FROM jsonb_array_elements_text(document_ids)
+//   )
+//   AND document_chunks.embedding <=> query_embedding < 1 - match_threshold
+//   ORDER BY document_chunks.embedding <=> query_embedding ASC
+//   LIMIT LEAST(match_count, 200);
+// $$;
 
 // Special version of findRelevantContent for embed context that doesn't require user authentication
-export const findEmbedRelevantContent = async (
+export const findRelevantContent = async (
   knowledgeBaseId: string,
   question: string,
   selectedDocumentNames?: string[]
@@ -168,7 +102,7 @@ export const findEmbedRelevantContent = async (
 
     // Create Supabase service client (no user auth required)
     const supabase = createServiceClient();
-    
+
     // Get the knowledge base to access its documentIds
     const [knowledgeBase] = await db
       .select()
@@ -179,10 +113,10 @@ export const findEmbedRelevantContent = async (
       console.error("Knowledge base not found");
       return [];
     }
-    
+
     // Get document_id from document_name using Drizzle ORM
     let documentIds: { id: number | null }[] = [];
-    
+
     if (selectedDocumentNames && selectedDocumentNames.length > 0) {
       // Filter by both knowledge base documentIds and selected document names
       documentIds = await db
@@ -196,7 +130,10 @@ export const findEmbedRelevantContent = async (
               : eq(documents.id, -1) // No matching documents if empty array
           )
         );
-    } else if (knowledgeBase.documentIds && knowledgeBase.documentIds.length > 0) {
+    } else if (
+      knowledgeBase.documentIds &&
+      knowledgeBase.documentIds.length > 0
+    ) {
       // Just filter by knowledge base documentIds
       documentIds = await db
         .select({ id: documents.id })
@@ -208,14 +145,13 @@ export const findEmbedRelevantContent = async (
       console.log("No matching documents found for the knowledge base");
       return [];
     }
-
     // Use Supabase RPC for vector similarity search
     const { data: relevantChunks, error } = await supabase.rpc(
       "match_selected_document_chunks",
       {
         query_embedding: questionEmbedding,
         match_threshold: 0.1,
-        match_count: 1000,
+        match_count: 10,
         document_ids: documentIds
           .filter((d) => d.id != null)
           .map((d) => String(d.id)),

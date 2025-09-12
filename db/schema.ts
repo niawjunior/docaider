@@ -204,7 +204,7 @@ export const documentChunks = pgTable(
     documentId: text("document_id").notNull(),
     userId: uuid("user_id").default(sql`auth.uid()`),
     chunk: text().notNull(),
-    embedding: vector({ dimensions: 3072 }).notNull(),
+    embedding: vector({ dimensions: 1536 }).notNull(),
     createdAt: timestamp("created_at", {
       withTimezone: true,
       mode: "string",

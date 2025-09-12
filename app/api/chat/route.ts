@@ -197,6 +197,7 @@ export async function POST(req: NextRequest) {
     - If the credit balance is 0, politely inform the user that tools cannot be used because they don't have enough credit.
     
     **Knowledge Management**:
+    -   Current knowledge base ID: ${knowledgeBaseId}
     -   For questions about current documents, use the \`askQuestion\` tool.
     -   When a user asks how to upload documents, inform them to check the Documents section in the UI (if they are the knowledge base owner). Otherwise, inform them to contact the knowledge base owner to upload the documents.
     -   Current document count: ${allDocuments.length}

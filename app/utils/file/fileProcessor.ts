@@ -102,6 +102,7 @@ export async function processFile(
 
     const embeddings = new OpenAIEmbeddings({
       model: "text-embedding-3-large",
+      dimensions: 1536,
     });
 
     const chunkEmbeddings = await embeddings.embedDocuments(

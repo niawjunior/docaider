@@ -1,0 +1,1 @@
+ALTER TABLE "document_chunks" ALTER COLUMN "embedding" SET DATA TYPE vector(1536);

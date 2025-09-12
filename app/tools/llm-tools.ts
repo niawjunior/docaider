@@ -21,6 +21,7 @@ export const askQuestionTool = tool({
   `,
   inputSchema: z.object({
     question: z.string().describe("Question to ask about the documents"),
+    knowledgeBaseId: z.string().describe("Knowledge base ID"),
     language: z
       .string()
       .describe("The language to ask the question. Example: en, th"),
@@ -28,7 +29,12 @@ export const askQuestionTool = tool({
       .array(z.string())
       .describe("Must ask for document names to filter the search"),
   }),
-  execute: async ({ question, language, selectedDocumentNames }) => {
+  execute: async ({
+    question,
+    knowledgeBaseId,
+    language,
+    selectedDocumentNames,
+  }) => {
     try {
       const supabase = await createClient();
       const { data: user } = await supabase.auth.getUser();
@@ -39,7 +45,7 @@ export const askQuestionTool = tool({
 
       // Get relevant chunks using our utility function
       const relevantChunks = await findRelevantContent(
-        user.user.id,
+        knowledgeBaseId,
         question,
         selectedDocumentNames
       );
