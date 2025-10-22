@@ -123,6 +123,16 @@ body {
 - ✅ Widget works with different CSS frameworks
 - ✅ Widget maintains proper z-index layering
 
+## Important Fix (Post-Implementation)
+
+**Issue**: Initial implementation used `all: initial` which reset the `display` property, making the chatbox invisible.
+
+**Fix**: Removed `all: initial` and `all: revert` in favor of targeted CSS resets with `!important` flags. This ensures:
+- The container remains visible (`display: block !important`)
+- All critical properties are explicitly set
+- Host website styles don't interfere
+- The widget displays correctly
+
 ## Breaking Changes
 None - This is a backward-compatible fix that only affects CSS isolation.
 

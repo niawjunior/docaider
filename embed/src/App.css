@@ -14,30 +14,39 @@
 
 /* Comprehensive CSS reset for embed container to prevent host website interference */
 #docaider-embed-container {
-  /* Reset positioning and display */
-  all: initial;
+  /* Positioning and display - DO NOT use 'all: initial' as it breaks display */
   position: fixed !important;
   z-index: 2147483647 !important; /* Maximum z-index */
+  display: block !important;
   
   /* Base styles */
-  margin: 0;
-  padding: 0;
-  line-height: 1.5;
-  font-size: 14px;
-  color: #000;
-  background: transparent;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.5 !important;
+  font-size: 14px !important;
+  color: #000 !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   
   /* Prevent inheritance from host website */
   font-family: "Prompt", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-  font-weight: 400;
-  font-style: normal;
-  text-align: left;
-  text-decoration: none;
-  text-transform: none;
-  letter-spacing: normal;
-  word-spacing: normal;
-  white-space: normal;
-  direction: ltr;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  text-align: left !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  white-space: normal !important;
+  direction: ltr !important;
+  
+  /* Prevent transforms and filters from host */
+  transform: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 /* Reset all child elements to prevent host website CSS interference */
@@ -54,7 +63,7 @@
   background: transparent;
 }
 
-/* Reset specific elements */
+/* Reset specific elements - prevent host website styles from bleeding in */
 #docaider-embed-container div,
 #docaider-embed-container span,
 #docaider-embed-container p,
@@ -71,8 +80,12 @@
 #docaider-embed-container ul,
 #docaider-embed-container ol,
 #docaider-embed-container li {
-  all: revert;
   font-family: "Prompt", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  line-height: inherit;
+  color: inherit;
+  text-decoration: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
 }
 
 /* Scroll area styles - scoped to embed container */
