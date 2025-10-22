@@ -2,8 +2,8 @@
 /* Font is now loaded via JavaScript in main.tsx */
 @import "tailwindcss";
 
-/* CSS variables for dynamic colors */
-:root {
+/* CSS variables for dynamic colors - scoped to embed container */
+#docaider-embed-container {
   --primary-color: #7c3aed;
   --text-color: #ffffff;
   --background-color: #ffffff;
@@ -12,39 +12,91 @@
   --muted-foreground: #6b7280;
 }
 
-/* Basic reset and font settings */
-#docaider-embed-container * {
-  box-sizing: border-box;
-  font-family: "Prompt" !important;
-}
-
+/* Comprehensive CSS reset for embed container to prevent host website interference */
 #docaider-embed-container {
+  /* Reset positioning and display */
+  all: initial;
+  position: fixed !important;
+  z-index: 2147483647 !important; /* Maximum z-index */
+  
+  /* Base styles */
   margin: 0;
   padding: 0;
   line-height: 1.5;
   font-size: 14px;
+  color: #000;
+  background: transparent;
+  
+  /* Prevent inheritance from host website */
+  font-family: "Prompt", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 400;
+  font-style: normal;
+  text-align: left;
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: normal;
+  word-spacing: normal;
+  white-space: normal;
+  direction: ltr;
 }
 
-/* Scroll area styles that might not be in Tailwind by default */
-.scroll-area {
+/* Reset all child elements to prevent host website CSS interference */
+#docaider-embed-container *,
+#docaider-embed-container *::before,
+#docaider-embed-container *::after {
+  box-sizing: border-box !important;
+  font-family: "Prompt", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent;
+}
+
+/* Reset specific elements */
+#docaider-embed-container div,
+#docaider-embed-container span,
+#docaider-embed-container p,
+#docaider-embed-container a,
+#docaider-embed-container button,
+#docaider-embed-container input,
+#docaider-embed-container textarea,
+#docaider-embed-container h1,
+#docaider-embed-container h2,
+#docaider-embed-container h3,
+#docaider-embed-container h4,
+#docaider-embed-container h5,
+#docaider-embed-container h6,
+#docaider-embed-container ul,
+#docaider-embed-container ol,
+#docaider-embed-container li {
+  all: revert;
+  font-family: "Prompt", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* Scroll area styles - scoped to embed container */
+#docaider-embed-container .scroll-area {
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--muted-foreground) transparent;
 }
 
-.scroll-area::-webkit-scrollbar {
+#docaider-embed-container .scroll-area::-webkit-scrollbar {
   width: 6px;
 }
-.scroll-area::-webkit-scrollbar-track {
+
+#docaider-embed-container .scroll-area::-webkit-scrollbar-track {
   background: transparent;
 }
-.scroll-area::-webkit-scrollbar-thumb {
+
+#docaider-embed-container .scroll-area::-webkit-scrollbar-thumb {
   background-color: var(--muted-foreground);
   border-radius: 3px;
 }
 
-/* Animation for pulse that might not be in Tailwind by default */
-@keyframes pulse {
+/* Animation for pulse - scoped to embed container */
+@keyframes docaider-pulse {
   0%,
   100% {
     opacity: 1;
@@ -54,6 +106,6 @@
   }
 }
 
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+#docaider-embed-container .animate-pulse {
+  animation: docaider-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

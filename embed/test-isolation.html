@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS Isolation Test - Docaider Embed</title>
+    <style>
+      /* Host website styles that should NOT be affected by the embed */
+      :root {
+        --primary-color: #ff0000;
+        --background: #000000;
+        --foreground: #ffffff;
+      }
+
+      body {
+        font-family: "Comic Sans MS", cursive;
+        background-color: #f0f0f0;
+        color: #333;
+        padding: 20px;
+        line-height: 2;
+      }
+
+      h1 {
+        color: #ff0000;
+        font-size: 48px;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+
+      p {
+        font-size: 20px;
+        margin: 20px 0;
+      }
+
+      button {
+        background-color: #ff0000;
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 5px;
+        font-size: 18px;
+        cursor: pointer;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Intentionally conflicting styles */
+      * {
+        box-sizing: content-box !important;
+      }
+
+      div {
+        border: 2px solid red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>CSS Isolation Test Page</h1>
+
+      <p>
+        This page has intentionally conflicting CSS styles to test if the
+        Docaider embed widget is properly isolated and doesn't affect (or get
+        affected by) the host website's styles.
+      </p>
+
+      <h2>Host Website Styles:</h2>
+      <ul>
+        <li>Font: Comic Sans MS</li>
+        <li>Primary Color: Red (#ff0000)</li>
+        <li>All divs have red borders</li>
+        <li>All elements use content-box sizing</li>
+        <li>Large line-height and font-sizes</li>
+      </ul>
+
+      <h2>Expected Behavior:</h2>
+      <ul>
+        <li>✅ Host website styles remain unchanged</li>
+        <li>✅ Embed widget uses Prompt font (not Comic Sans)</li>
+        <li>✅ Embed widget uses its own colors (not red)</li>
+        <li>✅ Embed widget has no red borders</li>
+        <li>✅ Embed widget uses border-box sizing</li>
+      </ul>
+
+      <button onclick="alert('Host website button works!')">
+        Test Host Button
+      </button>
+
+      <div style="margin-top: 40px; padding: 20px; background: #fffacd">
+        <h3>Instructions:</h3>
+        <ol>
+          <li>Open the browser console to check for errors</li>
+          <li>Click the chat widget button in the bottom-right corner</li>
+          <li>Verify the widget opens with correct styling</li>
+          <li>Verify this page's styles are NOT affected</li>
+          <li>Type a message and send it</li>
+          <li>
+            Check that fonts, colors, and spacing are correct in both the widget
+            and the page
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Docaider Embed Script -->
+    <script
+      src="http://localhost:3000/embed.js"
+      data-kb-id="f07a5428-6356-4b77-b08b-55999079d3ad"
+      data-primary-color="#7c3aed"
+      data-text-color="#FFFFFF"
+      data-position="bottom-right"
+      data-welcome-message="Hello! I'm here to help test CSS isolation."
+      data-title="Test Assistant"
+      data-placeholder="Type your message..."
+    ></script>
+  </body>
+</html>

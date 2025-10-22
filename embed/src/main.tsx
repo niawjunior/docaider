@@ -40,21 +40,18 @@ import App from "../src/App";
     return;
   }
 
-  // Set CSS variables for dynamic colors and Tailwind config
+  // Set CSS variables for dynamic colors - scoped to embed container only
   const style = document.createElement("style");
   style.textContent = `
-    :root {
+    /* Scoped CSS variables for Docaider embed - won't affect host website */
+    #docaider-embed-container {
       --primary-color: ${config.primaryColor};
       --text-color: ${config.textColor};
-    }
-    
-    /* Force light mode for Tailwind CSS */
-    :root {
       color-scheme: light;
     }
     
-    /* Ensure no dark mode is applied */
-    .dark {
+    /* Ensure no dark mode is applied to embed */
+    #docaider-embed-container.dark {
       color-scheme: light !important;
     }
   `;
@@ -93,7 +90,7 @@ import App from "../src/App";
   document.body.appendChild(container);
 
   // Set window config for the App component to access
-  window.DocaiderChatConfig = config as any;
+  window.DocaiderChatConfig = config as never;
 
   // Render the App component into the container
   createRoot(container).render(
