@@ -40,23 +40,6 @@ import App from "../src/App";
     return;
   }
 
-  // Set CSS variables for dynamic colors - scoped to embed container only
-  const style = document.createElement("style");
-  style.textContent = `
-    /* Scoped CSS variables for Docaider embed - won't affect host website */
-    #docaider-embed-container {
-      --primary-color: ${config.primaryColor};
-      --text-color: ${config.textColor};
-      color-scheme: light;
-    }
-    
-    /* Ensure no dark mode is applied to embed */
-    #docaider-embed-container.dark {
-      color-scheme: light !important;
-    }
-  `;
-  document.head.appendChild(style);
-
   // Tailwind CSS is now bundled directly into the embed.js file
   // No need to load it externally
 
@@ -66,33 +49,77 @@ import App from "../src/App";
   fontPreconnect1.href = "https://fonts.googleapis.com";
   document.head.appendChild(fontPreconnect1);
 
-  const embedLink = document.createElement("link");
-  embedLink.rel = "stylesheet";
-  embedLink.href = origin + "/embed.css";
-  document.head.appendChild(embedLink);
-
   const fontPreconnect2 = document.createElement("link");
   fontPreconnect2.rel = "preconnect";
   fontPreconnect2.href = "https://fonts.gstatic.com";
   fontPreconnect2.setAttribute("crossorigin", "");
   document.head.appendChild(fontPreconnect2);
 
+  // Create a Shadow DOM host for complete CSS isolation
+  const shadowHost = document.createElement("div");
+  shadowHost.id = "docaider-embed-container";
+  document.body.appendChild(shadowHost);
+
+  // Create shadow root for complete isolation
+  const shadowRoot = shadowHost.attachShadow({ mode: "open" });
+
+  // Set CSS variables for dynamic colors - scoped to shadow DOM only
+  const style = document.createElement("style");
+  style.textContent = `
+    /* Scoped CSS variables for Docaider embed - won't affect host website */
+    :host {
+      --primary: ${config.primaryColor};
+      --primary-foreground: ${config.textColor};
+      --background: oklch(1 0 0);
+      --foreground: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --card-foreground: oklch(0.145 0 0);
+      --border: oklch(0.922 0 0);
+      --input: oklch(0.922 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-foreground: oklch(0.556 0 0);
+      --accent: oklch(0.97 0 0);
+      --accent-foreground: oklch(0.205 0 0);
+      --radius: 0.625rem;
+      color-scheme: light;
+      all: initial;
+      font-family: var(--font-prompt), sans-serif;
+    }
+    
+    /* Ensure no dark mode is applied to embed */
+    :host.dark {
+      color-scheme: light !important;
+    }
+    
+    /* Reset all elements inside shadow DOM */
+    * {
+      box-sizing: border-box;
+    }
+  `;
+  shadowRoot.appendChild(style);
+
+  // Create container inside shadow root
+  const container = document.createElement("div");
+  container.id = "shadow-container";
+  shadowRoot.appendChild(container);
+
+  // Load CSS inside shadow DOM
+  const embedLink = document.createElement("link");
+  embedLink.rel = "stylesheet";
+  embedLink.href = origin + "/embed.css";
+  shadowRoot.appendChild(embedLink);
+
+  // Load Google Fonts inside shadow DOM
   const fontLink = document.createElement("link");
   fontLink.rel = "stylesheet";
-  fontLink.setAttribute("defer", "true");
   fontLink.href =
     "https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap";
-  document.head.appendChild(fontLink);
-
-  // Create a container for the chat widget
-  const container = document.createElement("div");
-  container.id = "docaider-embed-container";
-  document.body.appendChild(container);
+  shadowRoot.appendChild(fontLink);
 
   // Set window config for the App component to access
   window.DocaiderChatConfig = config as never;
 
-  // Render the App component into the container
+  // Render the App component into the shadow container
   createRoot(container).render(
     <StrictMode>
       <App />

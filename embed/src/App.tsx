@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { EmbedChatBox } from "./components/EmbedChatBox";
 import "./App.css";
-import "./index.css";
 
 function App() {
   const [config, setConfig] = useState<any | null>(null);
@@ -64,7 +63,6 @@ function App() {
       knowledgeBaseId={config.knowledgeBaseId}
       chatId={chatId}
       chatboxTitle={config.chatboxTitle}
-      primaryColor={config.primaryColor}
       position={config.position}
       width={config.width}
       height={config.height}
@@ -73,7 +71,6 @@ function App() {
       placeholder={config.placeholder}
       buttonText={config.buttonText}
       showButtonText={config.showButtonText}
-      textColor={config.textColor}
       isInitializing={isInitializing}
       initError={initError}
     />

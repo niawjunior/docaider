@@ -2,8 +2,8 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
-  // Important: Scope all Tailwind utilities to the embed container
-  important: "#docaider-embed-container",
+  // Important: Use :host for Shadow DOM scoping
+  important: ":host",
   theme: {
     extend: {
       fontFamily: {
@@ -12,7 +12,7 @@ const config: Config = {
     },
   },
   // Disable dark mode to prevent conflicts with host website
-  darkMode: ["class", "#docaider-embed-container.dark"],
+  darkMode: ["class", ":host.dark"],
   plugins: [],
 };
 

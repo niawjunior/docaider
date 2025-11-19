@@ -27,7 +27,6 @@ interface EmbedChatBoxProps {
   src: string;
   chatId: string | null;
   chatboxTitle?: string;
-  primaryColor?: string;
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
   width?: string;
   height?: string;
@@ -36,7 +35,6 @@ interface EmbedChatBoxProps {
   placeholder?: string;
   buttonText?: string;
   showButtonText?: boolean;
-  textColor?: string;
   isInitializing?: boolean;
   initError?: Error | null;
 }
@@ -46,7 +44,6 @@ export function EmbedChatBox({
   src,
   chatId,
   chatboxTitle = "AI Assistant",
-  primaryColor = "#0091ff",
   position = "bottom-right",
   width = "350px",
   height = "500px",
@@ -55,7 +52,6 @@ export function EmbedChatBox({
   placeholder = "Ask a question...",
   buttonText = "Chat with AI",
   showButtonText = false,
-  textColor = "#FFFFFF",
   isInitializing = false,
   initError = null,
 }: EmbedChatBoxProps) {
@@ -148,27 +144,35 @@ export function EmbedChatBox({
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="bg-white  border border-gray-200  rounded-lg shadow-lg mb-2 overflow-hidden flex flex-col"
+            className="bg-white rounded-lg shadow-lg mb-2 overflow-hidden flex flex-col"
             style={{
               width,
               height,
               boxShadow: "0 5px 20px rgba(0, 0, 0, 0.15)",
+              border: "1px solid #e5e7eb",
             }}
           >
             {/* Chat header */}
             <div
-              className="p-3 border-b flex items-center justify-between"
-              style={{ backgroundColor: primaryColor, color: textColor }}
+              className="p-3 flex items-center justify-between"
+              style={{
+                backgroundColor: "var(--primary)",
+                color: "var(--primary-foreground)",
+                borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
+              }}
             >
               <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5" style={{ color: textColor }} />
+                <Bot
+                  className="h-5 w-5"
+                  style={{ color: "var(--primary-foreground)" }}
+                />
                 <h3 className="font-medium">{chatboxTitle}</h3>
               </div>
               <div className="flex gap-1">
                 <button
                   className="h-8 w-8 hover:bg-white/10 rounded-md flex items-center justify-center transition-colors border-none outline-none"
                   onClick={() => setIsOpen(false)}
-                  style={{ color: textColor }}
+                  style={{ color: "var(--primary-foreground)" }}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -178,10 +182,10 @@ export function EmbedChatBox({
             {/* Chat messages */}
             <Conversation className="flex-1 overflow-y-auto">
               <ConversationContent className="flex flex-col">
-                {displayMessages.map((msg: any) => (
+                {displayMessages.map((msg) => (
                   <Message
                     key={msg.id}
-                    from={msg.role}
+                    from={msg.role as "user" | "assistant" | "system"}
                     className={clsx(
                       "relative",
                       msg.role === "user" ? "justify-end" : "justify-start"
@@ -206,18 +210,20 @@ export function EmbedChatBox({
                       style={
                         msg.role === "user"
                           ? {
-                              backgroundColor: primaryColor,
-                              color: textColor,
+                              backgroundColor: "var(--primary)",
+                              color: "var(--primary-foreground)",
                             }
                           : {}
                       }
                     >
-                      {msg.parts.map((part: any, index: number) => {
+                      {msg.parts.map((part, index: number) => {
                         switch (part.type) {
                           case "text":
                             return (
                               <Response key={`${msg.id}-${index}`}>
-                                {part.text}
+                                {part.type === "text"
+                                  ? (part as { text?: string }).text || ""
+                                  : ""}
                               </Response>
                             );
                           case "tool-askQuestion":
@@ -225,7 +231,11 @@ export function EmbedChatBox({
                               <Markdown
                                 key={`${msg.id}-${index}`}
                                 isUser={msg.role === "user"}
-                                text={part.output}
+                                text={
+                                  part.type === "tool-askQuestion"
+                                    ? (part as { output?: string }).output || ""
+                                    : ""
+                                }
                               />
                             );
                           default:
@@ -298,8 +308,8 @@ export function EmbedChatBox({
               {/* Chat input */}
               <PromptInput
                 onSubmit={handleSendMessage}
-                className="p-3 border-t"
-                style={{ borderColor: primaryColor || "black" }}
+                className="p-3"
+                style={{ borderTop: "1px solid var(--border)" }}
               >
                 <div className="flex gap-2">
                   <PromptInputTextarea
@@ -307,7 +317,10 @@ export function EmbedChatBox({
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder={placeholder}
-                    className="min-h-10  resize-none w-full rounded-md border border-gray-300 p-2 outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 transition-colors "
+                    className="min-h-10 resize-none w-full rounded-md p-2 outline-none transition-colors"
+                    style={{
+                      border: "1px solid #d1d5db",
+                    }}
                     disabled={status === "streaming" || status === "submitted"}
                   />
                   <PromptInputSubmit
@@ -323,7 +336,10 @@ export function EmbedChatBox({
                       status === "streaming" ||
                       status === "submitted"
                     }
-                    style={{ backgroundColor: primaryColor, color: textColor }}
+                    style={{
+                      backgroundColor: "var(--primary)",
+                      color: "var(--primary-foreground)",
+                    }}
                     className="w-10 h-10 rounded-md flex items-center justify-center transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
@@ -357,8 +373,8 @@ export function EmbedChatBox({
             showButtonText ? "rounded-lg px-4 py-2" : "rounded-full"
           } flex items-center justify-center transition-opacity hover:opacity-90 border-none outline-none`}
           style={{
-            backgroundColor: primaryColor,
-            color: textColor,
+            backgroundColor: "var(--primary)",
+            color: "var(--primary-foreground)",
             width: showButtonText ? "auto" : iconSize,
             height: showButtonText ? "auto" : iconSize,
           }}
