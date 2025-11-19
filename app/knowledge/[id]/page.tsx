@@ -37,7 +37,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import MainLayout from "@/app/components/MainLayout";
 import ShareKnowledgeBaseDialog from "@/app/components/ShareKnowledgeBaseDialog";
-import EmbedDialog from "@/app/components/knowledge/EmbedDialog";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import {
@@ -65,7 +64,6 @@ export default function ViewKnowledgeBasePage() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
-  const [deployDialogOpen, setDeployDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
 
   // Connected sources data array
@@ -255,17 +253,6 @@ export default function ViewKnowledgeBasePage() {
         isPublic={knowledgeBase?.isPublic || false}
       />
 
-      {canEdit && (
-        <EmbedDialog
-          open={deployDialogOpen}
-          onOpenChange={setDeployDialogOpen}
-          knowledgeBaseId={params.id}
-          isPublic={knowledgeBase?.isPublic || false}
-          allowEmbedding={knowledgeBase?.allowEmbedding || false}
-          embedConfig={knowledgeBase?.embedConfig || {}}
-        />
-      )}
-
       <div className="px-4">
         <div className="flex flex-col gap-2">
           <div className="flex md:flex-row flex-col gap-2 w-full items-center justify-between">
@@ -298,7 +285,9 @@ export default function ViewKnowledgeBasePage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setDeployDialogOpen(true)}
+                    onClick={() =>
+                      router.push(`/knowledge/${params.id}/deploy`)
+                    }
                   >
                     <Code size={16} className="mr-2" />
                     {kbT("deploy")}

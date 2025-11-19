@@ -34,6 +34,7 @@
     "failedToCopy": "ไม่สามารถคัดลอกลิงก์ได้",
     "settings": "ตั้งค่า",
     "backToDashboard": "กลับไปที่แดชบอร์ด",
+    "backToKnowledgeBase": "กลับไปที่คลังความรู้",
     "theme": "ธีม",
     "selectTheme": "เลือกธีม",
     "light": "สว่าง",
@@ -49,7 +50,8 @@
     "noPermission": "คุณไม่มีสิทธิ์ในการเชื่อมต่อแหล่งข้อมูล",
     "openSidebar": "เปิดแถบด้านข้าง",
     "closeSidebar": "ปิดแถบด้านข้าง",
-    "deploy": "นำไปติดบนเว็บไซต์"
+    "deploy": "นำไปติดบนเว็บไซต์",
+    "preview": "ตัวอย่าง"
   },
   "navigation": {
     "home": "หน้าแรก",

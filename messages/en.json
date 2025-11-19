@@ -34,6 +34,7 @@
     "failedToCopy": "Failed to copy link",
     "settings": "Settings",
     "backToDashboard": "Back to Dashboard",
+    "backToKnowledgeBase": "Back to Knowledge Base",
     "theme": "Theme",
     "selectTheme": "Select theme",
     "light": "Light",
@@ -49,7 +50,8 @@
     "noPermission": "You don’t have permission to connect to data sources",
     "openSidebar": "Open Sidebar",
     "closeSidebar": "Close Sidebar",
-    "deploy": "Deploy"
+    "deploy": "Deploy",
+    "preview": "Preview"
   },
   "navigation": {
     "home": "Home",
