@@ -45,7 +45,9 @@ export function useDocaiderChat(config: ChatConfig): UseDocaiderChatReturn {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Accept: "application/json",
           },
+          mode: "cors",
           body: JSON.stringify({
             knowledgeBaseId: config.knowledgeBaseId,
             referrer: window.location.href,
@@ -82,6 +84,10 @@ export function useDocaiderChat(config: ChatConfig): UseDocaiderChatReturn {
   const { messages, sendMessage, status, error, stop } = useChat({
     transport: new DefaultChatTransport({
       api: `${config.apiEndpoint}/api/embed/chat`,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
       body: {
         chatId: chatState.chatId!,
         knowledgeBaseId: config.knowledgeBaseId,

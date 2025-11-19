@@ -165,7 +165,10 @@ export async function POST(req: NextRequest) {
       JSON.stringify({ error: "Failed to process chat message" }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
       }
     );
   }
