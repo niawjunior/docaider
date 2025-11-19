@@ -1,0 +1,1 @@
+{"version":3,"file":"ChatButton.d.ts","sourceRoot":"","sources":["../../src/components/ChatButton.tsx"],"names":[],"mappings":"AAEA,OAAO,EAAE,UAAU,EAAE,MAAM,UAAU,CAAC;AAEtC,UAAU,eAAe;IACvB,MAAM,EAAE,OAAO,CAAC;IAChB,MAAM,EAAE,UAAU,CAAC;IACnB,QAAQ,EAAE,MAAM,IAAI,CAAC;CACtB;AAED,wBAAgB,UAAU,CAAC,EAAE,MAAM,EAAE,MAAM,EAAE,QAAQ,EAAE,EAAE,eAAe,2CAyCvE"}
