@@ -21,6 +21,9 @@ import {
 import { Response } from "./ai-elements/response";
 import Markdown from "./Markdown";
 import clsx from "clsx";
+import { Toggle } from "@/components/ui/toggle";
+import { Label } from "./ui/label";
+import { Search } from "lucide-react";
 
 interface EmbedChatBoxProps {
   knowledgeBaseId: string;
@@ -57,6 +60,13 @@ export function EmbedChatBox({
 }: EmbedChatBoxProps) {
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [alwaysUseDocument, setAlwaysUseDocument] = useState(false);
+  const alwaysUseDocumentRef = useRef(alwaysUseDocument);
+
+  // Update ref when alwaysUseDocument changes
+  useEffect(() => {
+    alwaysUseDocumentRef.current = alwaysUseDocument;
+  }, [alwaysUseDocument]);
 
   const [isToolCall, setIsToolCall] = useState(false);
 
@@ -64,10 +74,11 @@ export function EmbedChatBox({
   const { messages, sendMessage, status, error, stop } = useChat({
     transport: new DefaultChatTransport({
       api: `${src}/api/embed/chat`,
-      body: {
+      body: () => ({
         chatId: chatId!,
         knowledgeBaseId,
-      },
+        alwaysUseDocument: alwaysUseDocumentRef.current,
+      }),
     }),
     onToolCall: () => {
       setIsToolCall(true);
@@ -306,23 +317,23 @@ export function EmbedChatBox({
 
             <div className="px-4">
               {/* Chat input */}
-              <PromptInput
-                onSubmit={handleSendMessage}
-                className="p-3"
-                style={{ borderTop: "1px solid var(--border)" }}
-              >
-                <div className="flex gap-2">
-                  <PromptInputTextarea
-                    ref={inputRef}
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder={placeholder}
-                    className="min-h-10 resize-none w-full rounded-md p-2 outline-none transition-colors"
-                    style={{
-                      border: "1px solid #d1d5db",
-                    }}
-                    disabled={status === "streaming" || status === "submitted"}
-                  />
+              <PromptInput onSubmit={handleSendMessage} className="py-3">
+                <div className="flex gap-2 items-end">
+                  <div className="flex-1">
+                    <PromptInputTextarea
+                      ref={inputRef}
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      placeholder={placeholder}
+                      className="min-h-10 resize-none w-full rounded-md p-2 outline-none transition-colors"
+                      style={{
+                        border: "1px solid #d1d5db",
+                      }}
+                      disabled={
+                        status === "streaming" || status === "submitted"
+                      }
+                    />
+                  </div>
                   <PromptInputSubmit
                     status={
                       status === "streaming"
@@ -344,6 +355,25 @@ export function EmbedChatBox({
                   />
                 </div>
               </PromptInput>
+
+              {/* Document Search Toggle */}
+              <div className="pb-3 flex items-center">
+                <div className="flex items-center gap-2">
+                  <Toggle
+                    pressed={alwaysUseDocument}
+                    onPressedChange={setAlwaysUseDocument}
+                    variant="outline"
+                    size="sm"
+                    aria-label="Toggle document search"
+                    className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                  >
+                    <Search className="h-4 w-4" />
+                  </Toggle>
+                  <Label htmlFor="always-use-document" className="text-xs">
+                    Always search through documents
+                  </Label>
+                </div>
+              </div>
             </div>
             {/* Powered by footer */}
             <div className="text-center text-xs p-1 text-gray-500 ">

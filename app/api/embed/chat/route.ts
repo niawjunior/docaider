@@ -13,8 +13,15 @@ export async function POST(req: NextRequest) {
       messages,
       chatId,
       knowledgeBaseId,
-    }: { messages: any[]; chatId: string; knowledgeBaseId: string } =
-      await req.json();
+      alwaysUseDocument,
+    }: {
+      messages: any[];
+      chatId: string;
+      knowledgeBaseId: string;
+      alwaysUseDocument: boolean;
+    } = await req.json();
+
+    console.log("alwaysUseDocument: ", alwaysUseDocument);
 
     if (!chatId || !knowledgeBaseId) {
       return new Response(
@@ -88,7 +95,12 @@ export async function POST(req: NextRequest) {
     // Create the stream response
     const result = streamText({
       model: openai("gpt-4o-mini"),
-      toolChoice: allDocuments.length === 0 ? "none" : "auto",
+      toolChoice:
+        allDocuments.length === 0
+          ? "none"
+          : alwaysUseDocument
+          ? "required"
+          : "auto",
       tools,
       system: `
        - When replying in Thai:
