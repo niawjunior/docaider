@@ -33,7 +33,7 @@ CREATE TABLE "document_chunks" (
 	"document_id" text NOT NULL,
 	"user_id" uuid DEFAULT auth.uid(),
 	"chunk" text NOT NULL,
-	"embedding" vector(3072) NOT NULL,
+	"embedding" vector(1536) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT timezone('utc'::text, now()),
 	"updated_at" timestamp with time zone DEFAULT timezone('utc'::text, now()),
 	"active" boolean DEFAULT true,

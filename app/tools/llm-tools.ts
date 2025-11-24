@@ -4,7 +4,10 @@ import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 
 import { createClient } from "../utils/supabase/server";
-import { findRelevantContent } from "../utils/embedding";
+import {
+  findRelevantContent,
+  findRelevantDocumentsByDetail,
+} from "../utils/embedding";
 export const askQuestionTool = tool({
   description: `Use this tool to **answer questions based on current documents**, acting as your intelligent knowledge base.
 
@@ -12,7 +15,6 @@ export const askQuestionTool = tool({
   - Any question related to the content of current documents.
   - Retrieving specific information from your knowledge base.
 
-  - If current document count is more than 1, you **MUST** Ask user to specify the document name to filter the search.
   🧠 **Behavior**:
   - Only respond to questions using information directly from tool calls.
   - If no relevant information is found, respond with "No relevant documents found for this question."
@@ -25,16 +27,8 @@ export const askQuestionTool = tool({
     language: z
       .string()
       .describe("The language to ask the question. Example: en, th"),
-    selectedDocumentNames: z
-      .array(z.string())
-      .describe("Must ask for document names to filter the search"),
   }),
-  execute: async ({
-    question,
-    knowledgeBaseId,
-    language,
-    selectedDocumentNames,
-  }) => {
+  execute: async ({ question, knowledgeBaseId, language }) => {
     try {
       const supabase = await createClient();
       const { data: user } = await supabase.auth.getUser();
@@ -43,26 +37,54 @@ export const askQuestionTool = tool({
         throw new Error("User not authenticated");
       }
 
-      // Get relevant chunks using our utility function
-      const relevantChunks = await findRelevantContent(
-        knowledgeBaseId,
-        question,
-        selectedDocumentNames
-      );
+      // Get relevant chunks from both document content and detail field
+      const [relevantChunks, relevantDocuments] = await Promise.all([
+        findRelevantContent(knowledgeBaseId, question),
+        findRelevantDocumentsByDetail(knowledgeBaseId, question),
+      ]);
 
-      if (!relevantChunks || relevantChunks.length === 0) {
+      // Combine results - prioritize detail matches if they have high similarity
+      let combinedContext = "";
+      let hasResults = false;
+
+      // Add detail field results first (they're more specific for compliance/keyword searches)
+      if (relevantDocuments && relevantDocuments.length > 0) {
+        const detailContext = relevantDocuments
+          .filter((doc) => doc.similarity > 0.7) // Only include high similarity matches
+          .map(
+            (doc) =>
+              `Document: ${doc.title}\nDetails: ${
+                doc.detail
+              }\nSimilarity: ${doc.similarity.toFixed(3)}`
+          )
+          .join("\n\n---\n\n");
+
+        if (detailContext) {
+          combinedContext +=
+            "=== DOCUMENT DETAILS MATCH ===\n" + detailContext + "\n\n";
+          hasResults = true;
+        }
+      }
+
+      // Add content chunks results
+      if (relevantChunks && relevantChunks.length > 0) {
+        const chunkContext = relevantChunks
+          .map((chunk) => chunk.chunk)
+          .join("\n\n---\n\n");
+        combinedContext += "=== DOCUMENT CONTENT MATCH ===\n" + chunkContext;
+        hasResults = true;
+      }
+
+      if (!hasResults) {
         return "No relevant documents found for this question.";
       }
 
-      // Combine relevant chunks into a single context
-      const context = relevantChunks.map((chunk) => chunk.chunk).join("\n\n");
-
-      // Create a prompt with the context
+      // Create a prompt with the combined context
       const prompt = `Answer the following question based on the provided context:
       Question: ${question}
 
       Context:
-      ${context}
+      ${combinedContext}
 
       Answer:`;
 

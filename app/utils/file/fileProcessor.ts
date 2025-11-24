@@ -83,6 +83,7 @@ const mdLoader = async (file: File): Promise<string> => {
 export async function processFile(
   file: File,
   title: string,
+  detail?: string,
   userId?: string,
   documentId?: string,
   fileName?: string,
@@ -109,12 +110,20 @@ export async function processFile(
       chunks.map((d) => d)
     );
 
+    // Generate embedding for detail field if provided
+    let detailEmbedding: number[] | undefined;
+    if (detail && detail.trim()) {
+      detailEmbedding = await embeddings.embedQuery(detail.trim());
+    }
+
     // First, insert the main document record
     try {
       const result = await db
         .insert(documents)
         .values({
           title,
+          detail: detail?.trim() || null,
+          detailEmbedding: detailEmbedding || null,
           documentName: fileName,
           documentId: documentId, // This is the knowledge base ID if applicable
           userId,
@@ -155,6 +164,7 @@ export async function processFile(
 export async function uploadFile(
   file: File,
   title: string,
+  detail?: string,
   userId?: string,
   isKnowledgeBase = false
 ): Promise<{ success: boolean; message: string; documentId: string }> {
@@ -186,6 +196,7 @@ export async function uploadFile(
     await processFile(
       file,
       title,
+      detail,
       userId,
       storageData.id,
       fileName,

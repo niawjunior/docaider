@@ -11,9 +11,6 @@ export const embedAskQuestionTool = tool({
   ✅ **Required for**:
   - Any question related to the content of current documents.
   - Retrieving specific information from your knowledge base.
-
-  - If current document count is more than 1, you **MUST** Ask user to specify the document name to filter the search.
-  🧠 **Behavior**:
   - Only respond to questions using information directly from tool calls.
   - If no relevant information is found, respond with "No relevant documents found for this question."
   - Responses will be formatted using markdown, including headings, bullet points, and chronological order for date/time questions.
@@ -27,16 +24,8 @@ export const embedAskQuestionTool = tool({
     knowledgeBaseId: z
       .string()
       .describe("The ID of the knowledge base to search"),
-    selectedDocumentNames: z
-      .array(z.string())
-      .describe("Must ask for document names to filter the search"),
   }),
-  execute: async ({
-    question,
-    language,
-    knowledgeBaseId,
-    selectedDocumentNames,
-  }) => {
+  execute: async ({ question, language, knowledgeBaseId }) => {
     try {
       // Validate knowledgeBaseId is a UUID
       const uuidRegex =
@@ -49,8 +38,7 @@ export const embedAskQuestionTool = tool({
       // Get relevant chunks using a modified utility function for embed context
       const relevantChunks = await findRelevantContent(
         knowledgeBaseId,
-        question,
-        selectedDocumentNames
+        question
       );
 
       if (!relevantChunks || relevantChunks.length === 0) {

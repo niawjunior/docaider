@@ -80,6 +80,7 @@ interface Document {
   id: string;
   documentId: string;
   documentName: string;
+  detail?: string;
 }
 
 export default function EditKnowledgeBasePage() {
@@ -496,6 +497,11 @@ export default function EditKnowledgeBasePage() {
                             >
                               <div>
                                 <p className="font-medium">{doc.title}</p>
+                                {doc.detail && (
+                                  <p className="text-xs text-blue-600 mt-1 line-clamp-2">
+                                    {doc.detail}
+                                  </p>
+                                )}
                                 <p className="text-xs text-muted-foreground">
                                   {doc.documentId} •{" "}
                                   {t("addedOn", {

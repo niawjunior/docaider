@@ -18,15 +18,20 @@ export const useDocumentUpload = () => {
     mutationFn: async ({
       file,
       title,
+      detail,
       isKnowledgeBase = false,
     }: {
       file: File;
       title: string;
+      detail?: string;
       isKnowledgeBase?: boolean;
     }) => {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("title", title);
+      if (detail) {
+        formData.append("detail", detail);
+      }
       formData.append("isKnowledgeBase", isKnowledgeBase ? "true" : "false");
 
       const response = await fetch("/api/upload", {

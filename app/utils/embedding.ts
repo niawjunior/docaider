@@ -1,7 +1,7 @@
 import { createServiceClient } from "./supabase/server";
 import { db } from "../../db/config";
 import { documents, knowledgeBases } from "../../db/schema";
-import { and, inArray, eq } from "drizzle-orm";
+import { and, inArray, eq, sql } from "drizzle-orm";
 import { OpenAIEmbeddings } from "@langchain/openai";
 
 const cleanText = (input: string): string => {
@@ -31,7 +31,7 @@ export const generateEmbeddings = async (
 
   const embeddings = new OpenAIEmbeddings({
     model: "text-embedding-3-large",
-    dimensions: 1536,
+    dimensions: 1536, // Updated to match SQL function vector dimensions
   });
 
   const embeddingVectors = await embeddings.embedDocuments(chunks);
@@ -60,36 +60,99 @@ interface DatabaseChunk {
   embedding: number[];
   [key: string]: unknown;
 }
+// Search function for document detail field using vector similarity
+export const findRelevantDocumentsByDetail = async (
+  knowledgeBaseId: string,
+  question: string
+): Promise<
+  { title: string; detail: string; documentId: string; similarity: number }[]
+> => {
+  try {
+    const questionEmbedding = await generateEmbedding(question);
 
-// -- Create a named HNSW index on the public.document_chunks.embedding column
-// CREATE INDEX IF NOT EXISTS idx_document_chunks_embedding_hnsw
-// ON public.document_chunks USING hnsw (embedding vector_cosine_ops);
+    // Get knowledge base to access its documentIds
+    const [knowledgeBase] = await db
+      .select()
+      .from(knowledgeBases)
+      .where(eq(knowledgeBases.id, knowledgeBaseId));
 
-// DROP FUNCTION IF EXISTS match_document_chunks(vector, double precision, integer);
-// DROP FUNCTION IF EXISTS match_document_chunks(vector, double precision, integer, jsonb);
-// DROP FUNCTION IF EXISTS match_selected_document_chunks(vector, double precision, integer, jsonb);
-// DROP FUNCTION IF EXISTS match_selected_document_chunks(vector, double precision, integer, jsonb, jsonb);
-// DROP FUNCTION IF EXISTS public.match_selected_document_chunks(vector, double precision, integer, jsonb);
-// DROP FUNCTION IF EXISTS public.match_selected_document_chunks(vector, double precision, integer, text[]);
+    if (!knowledgeBase) {
+      console.error("Knowledge base not found");
+      return [];
+    }
 
-// CREATE OR REPLACE FUNCTION match_selected_document_chunks(
-//   query_embedding vector(1536),
-//   match_threshold float,
-//   match_count int,
-//   document_ids jsonb  -- Array of document IDs to filter by
-// )
-// RETURNS SETOF document_chunks
-// LANGUAGE sql SECURITY DEFINER
-// AS $$
-//   SELECT *
-//   FROM document_chunks
-//   WHERE document_chunks.document_id IN (
-//     SELECT value FROM jsonb_array_elements_text(document_ids)
-//   )
-//   AND document_chunks.embedding <=> query_embedding < 1 - match_threshold
-//   ORDER BY document_chunks.embedding <=> query_embedding ASC
-//   LIMIT LEAST(match_count, 200);
-// $$;
+    // Create Supabase service client
+    const supabase = createServiceClient();
+
+    // Use the SQL function for vector similarity search
+    const { data: relevantChunks, error } = await supabase.rpc(
+      "match_document_chunks",
+      {
+        query_embedding: questionEmbedding,
+        match_threshold: 0.1, // Only include high similarity matches
+        match_count: 100,
+        document_ids: knowledgeBase.documentIds || [], // Pass array directly
+      }
+    );
+
+    if (error) {
+      console.error("Error in vector search:", error);
+      throw new Error(`Vector search failed: ${error.message}`);
+    }
+
+    if (!relevantChunks || relevantChunks.length === 0) {
+      console.log("No relevant content found");
+      return [];
+    }
+
+    // Get document details for the matching chunks
+    const documentIds = [
+      ...new Set(relevantChunks.map((chunk: any) => chunk.document_id)),
+    ];
+
+    const documentsDetails = await db
+      .select({
+        title: documents.title,
+        detail: documents.detail,
+        documentId: documents.documentId,
+      })
+      .from(documents)
+      .where(
+        and(
+          eq(documents.active, true),
+          eq(documents.isKnowledgeBase, true),
+          // Use sql template for inArray to avoid type issues
+          sql`${documents.documentId} = ANY(${documentIds})`
+        )
+      );
+
+    // Combine document details with similarity scores
+    // Since the SQL function already sorts by similarity, we'll use the order of appearance
+    // as a proxy for similarity (higher similarity = appears first)
+    const documentRanks = new Map<string, number>();
+    relevantChunks.forEach((chunk: any, index: number) => {
+      const docId = chunk.document_id;
+      if (!documentRanks.has(docId)) {
+        documentRanks.set(docId, index);
+      }
+    });
+
+    return documentsDetails.map((doc: any) => {
+      const rank = documentRanks.get(doc.documentId) || 0;
+      // Convert rank to similarity score (lower rank = higher similarity)
+      const similarity = Math.max(0, 1 - rank / relevantChunks.length);
+      return {
+        title: doc.title,
+        detail: doc.detail,
+        documentId: doc.documentId,
+        similarity,
+      };
+    });
+  } catch (error) {
+    console.error("Error finding relevant documents by detail:", error);
+    return [];
+  }
+};
 
 // Special version of findRelevantContent for embed context that doesn't require user authentication
 export const findRelevantContent = async (
@@ -147,14 +210,14 @@ export const findRelevantContent = async (
     }
     // Use Supabase RPC for vector similarity search
     const { data: relevantChunks, error } = await supabase.rpc(
-      "match_selected_document_chunks",
+      "match_document_chunks",
       {
         query_embedding: questionEmbedding,
         match_threshold: 0.1,
         match_count: 10,
         document_ids: documentIds
           .filter((d) => d.id != null)
-          .map((d) => String(d.id)),
+          .map((d) => String(d.id)), // Pass array directly
       }
     );
 

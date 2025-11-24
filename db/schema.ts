@@ -176,6 +176,8 @@ export const documents = pgTable("documents", {
     .primaryKey()
     .notNull(),
   title: text().notNull(),
+  detail: text(), // New field for document details/keywords
+  detailEmbedding: vector({ dimensions: 1536 }), // Embedding for the detail field
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "string",

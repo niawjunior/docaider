@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Upload } from "lucide-react";
 import DocumentsList from "./DocumentList";
 import { formatBytes } from "../utils/formatBytes";
@@ -50,6 +51,7 @@ export default function DocumentUpload({
   knowledgeBaseId,
 }: DocumentUploadProps) {
   const [title, setTitle] = useState("");
+  const [detail, setDetail] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [fileSizeError, setFileSizeError] = useState<string | null>(null);
   const [titleError, setTitleError] = useState<string | null>(null);
@@ -90,6 +92,7 @@ export default function DocumentUpload({
       {
         file,
         title,
+        detail,
         isKnowledgeBase: isKnowledgeBase || false,
       },
       {
@@ -113,6 +116,7 @@ export default function DocumentUpload({
 
                 // // Reset form
                 setTitle("");
+                setDetail("");
                 setFile(null);
 
                 // Handle callbacks
@@ -196,6 +200,23 @@ export default function DocumentUpload({
             {titleError && (
               <div className="text-red-500 text-sm mt-1">{titleError}</div>
             )}
+          </div>
+          <div className="space-y-2">
+            <Label>{t("documentDetail") || "Document Details/Keywords"}</Label>
+            <Textarea
+              value={detail}
+              onChange={(e) => setDetail(e.target.value)}
+              placeholder={
+                t("enterDocumentDetail") ||
+                "Enter details, keywords, or compliance information (e.g., CIS 2.1 Establish and Maintain a Software Inventory)"
+              }
+              rows={3}
+              disabled={isUploading}
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("documentDetailHint") ||
+                "Add details, keywords, or compliance references to help find this document when searching"}
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="file">{t("supportedFileTypes")}</Label>

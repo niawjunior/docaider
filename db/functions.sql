@@ -21,7 +21,7 @@ $$;
 
 -- 2️⃣ Match document_chunks across all user's documents (with optional public access)
 CREATE OR REPLACE FUNCTION match_document_chunks(
-  query_embedding vector(3072),
+  query_embedding vector(1536),
   match_threshold float,
   match_count int,
   user_id text,  -- Using text to match what we pass from TypeScript
@@ -42,7 +42,7 @@ $$;
 
 -- 3️⃣ Match document_chunks from a selected list of document IDs (with optional public access)
 CREATE OR REPLACE FUNCTION match_selected_document_chunks(
-  query_embedding vector(3072),
+  query_embedding vector(1536),
   match_threshold float,
   match_count int,
   user_id text,  -- Using text to match what we pass from TypeScript

@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("file");
     const title = formData.get("title") as string;
+    const detail = formData.get("detail") as string;
     const isKnowledgeBase = formData.get("isKnowledgeBase") === "true";
     if (!file || !(file instanceof Blob) || !title) {
       return new Response(
@@ -32,7 +33,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if a document with the same title already exists for this user
-    const isDuplicate = await checkDuplicateTitle(title, user.id, isKnowledgeBase);
+    const isDuplicate = await checkDuplicateTitle(
+      title,
+      user.id,
+      isKnowledgeBase
+    );
     if (isDuplicate) {
       return new Response(
         JSON.stringify({
@@ -53,7 +58,13 @@ export async function POST(req: NextRequest) {
     });
     const userId = user?.id;
 
-    const result = await uploadFile(nodeFile, title, userId, isKnowledgeBase);
+    const result = await uploadFile(
+      nodeFile,
+      title,
+      detail,
+      userId,
+      isKnowledgeBase
+    );
 
     return new Response(JSON.stringify(result), {
       status: 200,

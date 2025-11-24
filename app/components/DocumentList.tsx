@@ -9,7 +9,7 @@ const DocumentsList = () => {
   const { useGetDocuments } = useDocuments();
   const { data: documents = [] } = useGetDocuments({ isKnowledgeBase: false });
   const { deleteDocument } = useDocuments();
-  const t = useTranslations('documents');
+  const t = useTranslations("documents");
   const handleDelete = async (doc: {
     title: string;
     url: string;
@@ -18,6 +18,7 @@ const DocumentsList = () => {
     document_name: string;
     created_at: string;
     updated_at: string;
+    detail?: string;
   }) => {
     try {
       deleteDocument.mutate(
@@ -27,15 +28,15 @@ const DocumentsList = () => {
         },
         {
           onSuccess: () => {
-            toast(t('documentDeletedSuccess'), {
+            toast(t("documentDeletedSuccess"), {
               duration: 3000,
             });
           },
           onError: (error) => {
             console.error("Error deleting document:", error);
-            toast(t('errorDeletingDocument'), {
+            toast(t("errorDeletingDocument"), {
               duration: 5000,
-              description: t('failedToDeleteDocument'),
+              description: t("failedToDeleteDocument"),
             });
           },
         }
@@ -47,11 +48,11 @@ const DocumentsList = () => {
 
   return (
     <div className="mt-4">
-      <h3 className="text-sm font-medium mb-2">{t('yourKnowledgeBase')}</h3>
+      <h3 className="text-sm font-medium mb-2">{t("yourKnowledgeBase")}</h3>
       <div className="space-y-2 overflow-y-auto max-h-[200px]">
         {documents?.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            {t('emptyKnowledgeBase')}
+            {t("emptyKnowledgeBase")}
           </p>
         ) : (
           documents?.map((doc) => {
@@ -63,8 +64,14 @@ const DocumentsList = () => {
                 <div className="flex items-center gap-2">
                   <div>
                     <p className="text-sm font-medium">{doc.title}</p>
+                    {doc.detail && (
+                      <p className="text-xs text-blue-600 mt-1 line-clamp-2">
+                        {doc.detail}
+                      </p>
+                    )}
                     <p className="text-xs text-muted-foreground">
-                      {t('added')}: {new Date(doc.created_at).toLocaleDateString()}
+                      {t("added")}:{" "}
+                      {new Date(doc.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>

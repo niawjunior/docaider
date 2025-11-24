@@ -207,7 +207,6 @@ export async function POST(req: NextRequest) {
             : "No documents available."
         } **
      -  **First check if there are documents available. Inform the user to check the Documents section in the UI**
-    -   **If current document count is more than 1, you **MUST** Ask user to specify the document name to filter the search.**
     -   * Always ask the user to specify the language to ask the question. Example: en, th*
     
     -   If a document-related tool is requested but document count is 0, politely inform the user: "No documents available."
