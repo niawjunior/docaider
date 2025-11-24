@@ -69,10 +69,7 @@ export async function POST(req: NextRequest) {
       }),
       {
         status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {

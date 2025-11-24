@@ -137,13 +137,6 @@ export default function ViewKnowledgeBasePage() {
     const checkPermissions = async () => {
       if (!knowledgeBase) return;
 
-      // If knowledge base is not public and user is not authenticated, redirect to login
-      if (!knowledgeBase.isPublic && !session) {
-        toast(t("unauthorized"));
-        router.push("/login");
-        return;
-      }
-
       // If knowledge base is not public, check if user has access
       if (!knowledgeBase.isPublic && session) {
         // Check if user owns the knowledge base

@@ -113,49 +113,6 @@ export default function DeployKnowledgeBasePage() {
     }
   }, [error, router]);
 
-  // Handle kbError
-  useEffect(() => {
-    if (kbError) {
-      console.error("Error fetching knowledge base:", kbError);
-      if (kbError instanceof Error) {
-        if (kbError.message.includes("404")) {
-          toast("Knowledge base not found");
-          router.push("/dashboard");
-        } else if (kbError.message.includes("401")) {
-          toast("Unauthorized");
-          router.push("/login");
-        }
-      }
-    }
-  }, [kbError, router]);
-
-  // Permission check
-  useEffect(() => {
-    const checkPermissions = async () => {
-      if (!knowledgeBase) return;
-
-      // If knowledge base is not public and user is not authenticated, redirect to login
-      if (!knowledgeBase.isPublic && !session) {
-        toast("Unauthorized");
-        router.push("/login");
-        return;
-      }
-
-      // If knowledge base is not public, check if user has access
-      if (!knowledgeBase.isPublic && session) {
-        // Check if user owns the knowledge base
-        const isOwner = knowledgeBase.userId === session.user.id;
-
-        if (!isOwner) {
-          toast("Unauthorized");
-          router.push("/dashboard");
-        }
-      }
-    };
-
-    checkPermissions();
-  }, [knowledgeBase, session, router]);
-
   // Generate embed code based on current settings
   const generateEmbedCode = () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";

@@ -191,20 +191,9 @@ export function EmbedChatBox({
                       msg.role === "user" ? "justify-end" : "justify-start"
                     )}
                   >
-                    {status === "submitted" &&
-                      msg.id === messages[messages.length - 1]?.id && (
-                        <div className="flex items-center gap-2 absolute left-0 top-[60px]">
-                          <div className="px-3 py-1 text-xs text-gray-500 flex items-center gap-2">
-                            <div className="animate-pulse h-2 w-2 rounded-full bg-purple-600"></div>
-                            <span className="flex items-center gap-2">
-                              AI is thinking... <Loader />
-                            </span>
-                          </div>
-                        </div>
-                      )}
                     <MessageContent
                       className={clsx(
-                        "relative",
+                        "relative pb-4",
                         msg.role !== "user" && "min-w-[100%]"
                       )}
                       style={
@@ -243,6 +232,17 @@ export function EmbedChatBox({
                         }
                       })}
                     </MessageContent>
+                    {status === "submitted" &&
+                      msg.id === messages[messages.length - 1]?.id && (
+                        <div className="flex items-center  gap-2 absolute left-[-20px] top-[100px] h-full">
+                          <div className="px-3 py-1 text-xs text-gray-500 flex items-center gap-2">
+                            <div className="animate-pulse h-2 w-2 rounded-full bg-purple-600"></div>
+                            <span className="flex items-center gap-2">
+                              AI is thinking... <Loader />
+                            </span>
+                          </div>
+                        </div>
+                      )}
                   </Message>
                 ))}
                 <div ref={messagesEndRef} />
