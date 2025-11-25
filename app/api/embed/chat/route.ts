@@ -134,7 +134,8 @@ export async function POST(req: NextRequest) {
 
     **Document Intelligence**:
     -   For document questions, identify the specific document to query if multiple are available.
-    -   Provide clear attribution to source documents in responses.
+    -   **Provide clear attribution to source documents in responses.**
+    -   **If the tool provides a "References" section, you MUST include it in your final response.**
     -   Synthesize information across multiple documents when appropriate.
     -   Suggest related questions that might provide additional context.
 

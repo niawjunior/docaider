@@ -45,15 +45,37 @@ export const embedAskQuestionTool = tool({
         return "No relevant documents found for this question.";
       }
 
-      // Combine relevant chunks into a single context
-      const context = relevantChunks.map((chunk) => chunk.content || chunk.detail).join("\n\n");
+      // Combine relevant chunks into a single context with labels
+      const context = relevantChunks
+        .map((chunk) => {
+          const isKB = chunk.title.startsWith("Knowledge Base:");
+          const label = isKB ? "Context" : "Document";
+          return `${label}: ${chunk.title}\nContent: ${
+            chunk.content || chunk.detail
+          }`;
+        })
+        .join("\n\n---\n\n");
+
+      // Create deduplicated reference list (excluding KB context)
+      const documentReferences = [
+        ...new Set(
+          relevantChunks
+            .filter((doc) => !doc.title.startsWith("Knowledge Base:"))
+            .map((doc) => doc.title)
+        ),
+      ];
+
+      let finalContext = context;
+      if (documentReferences.length > 0) {
+        finalContext += "\n\n=== DOCUMENT REFERENCES ===\n" + documentReferences.join("\n");
+      }
 
       // Create a prompt with the context
       const prompt = `Answer the following question based on the provided context:
       Question: ${question}
 
       Context:
-      ${context}
+      ${finalContext}
 
       Answer:`;
 
@@ -68,6 +90,17 @@ export const embedAskQuestionTool = tool({
         }),
         prompt,
         system: `You are a helpful assistant that can answer questions based on current documents. Format your responses clearly and professionally:
+      
+      IMPORTANT:
+      - If the user asks for documents (e.g., "which documents...", "documents that..."), you MUST list the titles of the documents found in the "Document:" sections of the context.
+      - Do NOT just explain the concept from the "Context:" section. You must link it to the specific "Document:".
+      
+      IMPORTANT: You must cite your sources.
+      - At the end of your answer, include a section titled "References" or "เอกสารอ้างอิง" (depending on language).
+      - List the document titles used to answer the question.
+      - Use the titles exactly as provided in the "Document:" field of the context.
+      - Do NOT cite sources labeled as "Context:". Only cite "Document:".
+
       Please:
         - Must return the article in ${language} language.
       `,
