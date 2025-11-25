@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 export interface KnowledgeBase {
   id: string;
   name: string;
-  description: string;
+  detail?: string;
   is_public: boolean;
   is_pinned: boolean;
   document_ids: string[];
@@ -127,12 +127,12 @@ export const useKnowledgeBases = () => {
     mutationFn: async ({
       id,
       name,
-      description,
+      detail,
       isPublic,
     }: {
       id: string;
       name: string;
-      description: string;
+      detail?: string;
       isPublic: boolean;
     }) => {
       try {
@@ -143,7 +143,7 @@ export const useKnowledgeBases = () => {
           },
           body: JSON.stringify({
             name,
-            description,
+            detail,
             isPublic,
           }),
         });
@@ -184,12 +184,12 @@ export const useKnowledgeBases = () => {
   const createKnowledgeBase = useMutation({
     mutationFn: async ({
       name,
-      description,
+      detail,
       isPublic,
       userId,
     }: {
       name: string;
-      description: string;
+      detail?: string;
       isPublic: boolean;
       userId: string;
     }) => {
@@ -199,7 +199,7 @@ export const useKnowledgeBases = () => {
           .from("knowledge_bases")
           .insert({
             name: name.trim(),
-            description: description.trim(),
+            detail: detail?.trim(),
             is_public: isPublic,
             user_id: userId,
           })

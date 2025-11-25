@@ -6,7 +6,7 @@ import { toast } from "sonner";
 interface PinnedKnowledgeBase {
   id: string;
   name: string;
-  description: string;
+  detail?: string;
   isPublic: boolean;
   documentIds: string[];
   createdAt: string;

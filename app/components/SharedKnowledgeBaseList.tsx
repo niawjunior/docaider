@@ -84,7 +84,7 @@ export default function SharedKnowledgeBaseList({
                   </span>
                 </CardTitle>
                 <CardDescription className="line-clamp-2 mt-1">
-                  {kb.description || t("noDescriptionAvailable")}
+                  {kb.detail || t("noDescriptionAvailable")}
                 </CardDescription>
               </div>
               {kb.isPublic && (

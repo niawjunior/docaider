@@ -20,7 +20,7 @@ export async function GET() {
       .select({
         id: knowledgeBases.id,
         name: knowledgeBases.name,
-        description: knowledgeBases.description,
+        detail: knowledgeBases.detail,
         isPublic: knowledgeBases.isPublic,
         documentIds: knowledgeBases.documentIds,
         createdAt: knowledgeBases.createdAt,

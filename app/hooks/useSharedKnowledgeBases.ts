@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 export interface SharedKnowledgeBase {
   id: string;
   title: string;
-  description: string;
+  detail?: string;
   isPublic: boolean;
   createdAt: string;
   updatedAt: string;

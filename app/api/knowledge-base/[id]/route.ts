@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from "@/app/utils/supabase/server";
 import { db } from "@/db/config";
 import { documentChunks, knowledgeBases, documents } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
+import { processKnowledgeBaseDetail } from "@/app/utils/embedding";
 
 export async function GET(
   request: Request,
@@ -104,7 +105,7 @@ export async function PUT(
       );
     }
 
-    const { name, description, isPublic } = await request.json();
+    const { name, detail, isPublic } = await request.json();
 
     if (!name || name.trim() === "") {
       return NextResponse.json(
@@ -118,13 +119,20 @@ export async function PUT(
       .update(knowledgeBases)
       .set({
         name: name.trim(),
-        description: description?.trim(),
+        detail: detail?.trim(),
         isPublic: isPublic || false,
         updatedAt: new Date().toISOString(),
         // Preserve isPinned status
       })
       .where(eq(knowledgeBases.id, id))
       .returning();
+    console.log("Updated knowledge base:", updatedKnowledgeBase);
+    // Generate embedding for detail if provided and changed
+    if (updatedKnowledgeBase.detail && updatedKnowledgeBase.detail !== existingKnowledgeBase.detail) {
+      console.log("Generating embedding for knowledge base:", updatedKnowledgeBase.id);
+      // Run in background
+      processKnowledgeBaseDetail(updatedKnowledgeBase.id).catch(console.error);
+    }
 
     return NextResponse.json({ knowledgeBase: updatedKnowledgeBase });
   } catch (error: any) {
@@ -171,7 +179,7 @@ export async function PATCH(
       );
     }
 
-    const { name, description, isPublic, documentIds } = await request.json();
+    const { name, detail, isPublic, documentIds } = await request.json();
 
     // Prepare update data
     const updateData: Record<string, any> = {
@@ -189,8 +197,10 @@ export async function PATCH(
       updateData.name = name.trim();
     }
 
-    if (description !== undefined) {
-      updateData.description = description?.trim();
+
+
+    if (detail !== undefined) {
+      updateData.detail = detail?.trim();
     }
 
     if (isPublic !== undefined) {
@@ -207,6 +217,12 @@ export async function PATCH(
       .set(updateData)
       .where(eq(knowledgeBases.id, id))
       .returning();
+
+    // Generate embedding for detail if provided and changed
+    if (updatedKnowledgeBase.detail && updatedKnowledgeBase.detail !== existingKnowledgeBase.detail) {
+      // Run in background
+      processKnowledgeBaseDetail(updatedKnowledgeBase.id).catch(console.error);
+    }
 
     return NextResponse.json({ knowledgeBase: updatedKnowledgeBase });
   } catch (error: any) {

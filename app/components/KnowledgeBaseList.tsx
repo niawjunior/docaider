@@ -158,7 +158,7 @@ export default function KnowledgeBaseList({
                 </div>
               </div>
               <p className="text-muted-foreground text-sm mb-2 line-clamp-2">
-                {kb.description}
+                {kb.detail}
               </p>
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>

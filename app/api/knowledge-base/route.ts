@@ -4,6 +4,7 @@ import { db } from "@/db/config";
 import { knowledgeBases, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
+import { processKnowledgeBaseDetail } from "@/app/utils/embedding";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, description, isPublic } = await request.json();
+    const { name, detail, isPublic } = await request.json();
 
     if (!name || name.trim() === "") {
       return NextResponse.json(
@@ -29,11 +30,17 @@ export async function POST(request: NextRequest) {
       .insert(knowledgeBases)
       .values({
         name: name.trim(),
-        description: description?.trim(),
+        detail: detail?.trim(),
         isPublic: isPublic || false,
         userId: session.user.id,
       })
       .returning();
+
+    // Generate embedding for detail if provided
+    if (knowledgeBase.detail) {
+      // Run in background
+      processKnowledgeBaseDetail(knowledgeBase.id).catch(console.error);
+    }
 
     return NextResponse.json({ knowledgeBase }, { status: 201 });
   } catch (error: any) {
@@ -57,7 +64,7 @@ export async function GET(request: NextRequest) {
         .select({
           id: knowledgeBases.id,
           name: knowledgeBases.name,
-          description: knowledgeBases.description,
+          detail: knowledgeBases.detail,
           isPublic: knowledgeBases.isPublic,
           documentIds: knowledgeBases.documentIds,
           createdAt: knowledgeBases.createdAt,
@@ -88,7 +95,7 @@ export async function GET(request: NextRequest) {
       .select({
         id: knowledgeBases.id,
         name: knowledgeBases.name,
-        description: knowledgeBases.description,
+        detail: knowledgeBases.detail,
         isPublic: knowledgeBases.isPublic,
         documentIds: knowledgeBases.documentIds,
         createdAt: knowledgeBases.createdAt,

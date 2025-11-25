@@ -1,4 +1,4 @@
--- Add detail and detailEmbedding fields to documents table
+-- Add detail and detail_embedding fields to documents table
 ALTER TABLE documents 
 ADD COLUMN detail text,
 ADD COLUMN detail_embedding vector(1536);

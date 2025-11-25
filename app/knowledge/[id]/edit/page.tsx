@@ -61,14 +61,14 @@ const getFormSchema = (
     name: z
       .string()
       .min(1, { message: t("name") + " " + commonT("isRequired") }),
-    description: z.string().optional(),
+    detail: z.string().optional(),
     isPublic: z.boolean(),
   });
 
 // Define the form values type
 type FormValues = {
   name: string;
-  description?: string;
+  detail?: string;
   isPublic: boolean;
 };
 
@@ -107,7 +107,7 @@ export default function EditKnowledgeBasePage() {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: "",
-      description: "",
+      detail: "",
       isPublic: false,
     },
   });
@@ -162,7 +162,7 @@ export default function EditKnowledgeBasePage() {
 
         form.reset({
           name: knowledgeBase.name,
-          description: knowledgeBase.description || "",
+          detail: knowledgeBase.detail || "",
           isPublic: knowledgeBase.isPublic,
         });
       } else {
@@ -209,7 +209,7 @@ export default function EditKnowledgeBasePage() {
       await kbHooks.updateKnowledgeBase.mutateAsync({
         id: params.id as string,
         name: values.name,
-        description: values.description || "",
+        detail: values.detail || "",
         isPublic: values.isPublic,
       });
 
@@ -392,19 +392,25 @@ export default function EditKnowledgeBasePage() {
                         )}
                       />
 
+
+
                       <FormField
                         control={form.control}
-                        name="description"
+                        name="detail"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>{t("description")}</FormLabel>
+                            <FormLabel>{t("detail") || "Detail"}</FormLabel>
                             <FormControl>
                               <Textarea
-                                placeholder={t("descriptionPlaceholder")}
-                                rows={3}
+                                placeholder={t("detailPlaceholder")}
+                                rows={5}
+                                className="min-h-[100px] max-h-[200px] overflow-y-auto"
                                 {...field}
                               />
                             </FormControl>
+                            <FormDescription>
+                              {t("detailHelp") || "This content will be embedded and used for semantic search."}
+                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}

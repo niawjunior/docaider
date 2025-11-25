@@ -3,7 +3,7 @@ import { z } from "zod";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 
-import { findRelevantContent } from "../utils/embedding";
+import { findRelevantDocumentsByDetail } from "../utils/embedding";
 
 export const embedAskQuestionTool = tool({
   description: `Use this tool to **answer questions based on current documents**, acting as your intelligent knowledge base.
@@ -36,7 +36,7 @@ export const embedAskQuestionTool = tool({
       }
 
       // Get relevant chunks using a modified utility function for embed context
-      const relevantChunks = await findRelevantContent(
+      const relevantChunks = await findRelevantDocumentsByDetail(
         knowledgeBaseId,
         question
       );
@@ -46,7 +46,7 @@ export const embedAskQuestionTool = tool({
       }
 
       // Combine relevant chunks into a single context
-      const context = relevantChunks.map((chunk) => chunk.chunk).join("\n\n");
+      const context = relevantChunks.map((chunk) => chunk.content || chunk.detail).join("\n\n");
 
       // Create a prompt with the context
       const prompt = `Answer the following question based on the provided context:

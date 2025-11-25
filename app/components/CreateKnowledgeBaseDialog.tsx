@@ -34,7 +34,7 @@ import {
 const getFormSchema = (t: any) =>
   z.object({
     name: z.string().min(1, { message: t("knowledgeBase.nameRequired") }),
-    description: z.string().optional(),
+    detail: z.string().optional(),
     isPublic: z.boolean(),
   });
 
@@ -63,7 +63,7 @@ export default function CreateKnowledgeBaseDialog({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: "",
-      description: "",
+      detail: "",
       isPublic: false,
     },
   });
@@ -76,7 +76,7 @@ export default function CreateKnowledgeBaseDialog({
       // Use the createKnowledgeBase mutation from our hook
       await kbHooks.createKnowledgeBase.mutateAsync({
         name: data.name,
-        description: data.description || "",
+        detail: data.detail || "",
         isPublic: data.isPublic,
         userId,
       });
@@ -129,22 +129,25 @@ export default function CreateKnowledgeBaseDialog({
               )}
             />
 
+  
+
             <FormField
               control={form.control}
-              name="description"
+              name="detail"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("knowledgeBase.description")}</FormLabel>
+                  <FormLabel>{t("knowledgeBase.detail") || "Detail"}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder={t("knowledgeBase.descriptionPlaceholder")}
+                      placeholder={t("knowledgeBase.detailPlaceholder") || "Enter detailed context for vector search..."}
                       disabled={isLoading}
-                      rows={3}
+                      rows={5}
+                      className="min-h-[100px] max-h-[200px] overflow-y-auto"
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    {t("knowledgeBase.descriptionHelp")}
+                    {t("knowledgeBase.detailHelp") || "This content will be embedded and used for semantic search."}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

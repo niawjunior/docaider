@@ -1,8 +1,32 @@
 import { createServiceClient } from "./supabase/server";
 import { db } from "../../db/config";
-import { documents, knowledgeBases } from "../../db/schema";
-import { and, inArray, eq, sql } from "drizzle-orm";
+import { knowledgeBases } from "../../db/schema";
+import { eq } from "drizzle-orm";
 import { OpenAIEmbeddings } from "@langchain/openai";
+
+import { encodingForModel, getEncoding } from "js-tiktoken";
+
+const MAX_TOKENS = 8191; // Leave a small buffer
+
+const truncateTextToTokens = (text: string, maxTokens: number = MAX_TOKENS): string => {
+  try {
+    // text-embedding-3-large uses cl100k_base encoding
+    const enc = getEncoding("cl100k_base");
+    const tokens = enc.encode(text);
+    
+    if (tokens.length <= maxTokens) {
+      return text;
+    }
+    
+    const truncatedTokens = tokens.slice(0, maxTokens);
+    return enc.decode(truncatedTokens);
+  } catch (e) {
+    console.error("Error truncating text:", e);
+    // Fallback to character truncation if tokenization fails
+    // Approx 4 chars per token
+    return text.slice(0, maxTokens * 4);
+  }
+};
 
 const cleanText = (input: string): string => {
   return input
@@ -27,7 +51,7 @@ export const generateEmbeddings = async (
   // Clean and normalize Thai text before generating embeddings
   const cleanedText = cleanText(value);
 
-  const chunks = generateChunks(cleanedText);
+  const chunks = generateChunks(cleanedText).map(chunk => truncateTextToTokens(chunk));
 
   const embeddings = new OpenAIEmbeddings({
     model: "text-embedding-3-large",
@@ -44,7 +68,7 @@ export const generateEmbeddings = async (
 
 export const generateEmbedding = async (value: string): Promise<number[]> => {
   // Clean and normalize Thai text before generating embeddings
-  const cleanedText = cleanText(value);
+  const cleanedText = truncateTextToTokens(cleanText(value));
 
   const embeddings = new OpenAIEmbeddings({
     model: "text-embedding-3-large",
@@ -55,22 +79,23 @@ export const generateEmbedding = async (value: string): Promise<number[]> => {
   return embedding;
 };
 
-interface DatabaseChunk {
-  chunk: string;
-  embedding: number[];
-  [key: string]: unknown;
+interface SearchResult {
+  title: string;
+  detail: string;
+  documentId: string;
+  content: string | null;
+  similarity: number;
 }
-// Search function for document detail field using vector similarity
-export const findRelevantDocumentsByDetail = async (
+
+// Internal helper function to perform the vector search
+const searchVectors = async (
   knowledgeBaseId: string,
   question: string
-): Promise<
-  { title: string; detail: string; documentId: string; similarity: number }[]
-> => {
+): Promise<SearchResult[]> => {
   try {
     const questionEmbedding = await generateEmbedding(question);
 
-    // Get knowledge base to access its documentIds
+    // Get knowledge base to access its documentIds and check its own detail
     const [knowledgeBase] = await db
       .select()
       .from(knowledgeBases)
@@ -83,157 +108,166 @@ export const findRelevantDocumentsByDetail = async (
 
     // Create Supabase service client
     const supabase = createServiceClient();
+    const results: SearchResult[] = [];
 
-    // Use the SQL function for vector similarity search
-    const { data: relevantChunks, error } = await supabase.rpc(
-      "match_document_chunks",
+    // 1. Check Knowledge Base Detail Match
+    // If the KB has a detail embedding, check similarity with the question
+    if (knowledgeBase.detail && knowledgeBase.detailEmbedding) {
+      // Calculate cosine similarity manually or via a simple query if possible
+      // Since we can't easily do vector math in JS on raw arrays without a library,
+      // and we want to use the database's optimized index, we'll query the KB table.
+      
+      // Note: We need a way to search the KB table itself. 
+      // For now, we'll assume we can use a direct query to check THIS specific KB's similarity.
+      const { data: kbMatch, error: kbError } = await supabase.rpc(
+        "match_knowledge_base_detail", 
+        {
+          query_embedding: questionEmbedding,
+          match_threshold: 0.01,
+          kb_id: knowledgeBaseId
+        }
+      );
+      
+      if (!kbError && kbMatch && kbMatch.length > 0) {
+        results.push({
+          title: `Knowledge Base: ${knowledgeBase.name}`,
+          detail: knowledgeBase.detail,
+          documentId: knowledgeBaseId,
+          content: `Knowledge Base Context: ${knowledgeBase.detail}`,
+          similarity: kbMatch[0].similarity
+        });
+      }
+    }
+
+    // 2. Search Documents and Chunks
+    const { data: docResults, error } = await supabase.rpc(
+      "match_documents_by_detail_and_content",
       {
         query_embedding: questionEmbedding,
-        match_threshold: 0.1, // Only include high similarity matches
+        match_threshold: 0.01, // Very low threshold to ensure we get results
         match_count: 100,
         document_ids: knowledgeBase.documentIds || [], // Pass array directly
       }
     );
 
+    console.log("KB Document IDs:", knowledgeBase.documentIds);
+    console.log("Doc Results Count:", docResults?.length);
+    if (error) console.error("Doc Search Error:", error);
+
     if (error) {
       console.error("Error in vector search:", error);
-      throw new Error(`Vector search failed: ${error.message}`);
+      // Don't throw here, just return what we have (maybe KB match)
+    } else if (docResults && docResults.length > 0) {
+      // Transform results to match expected format
+      const transformedResults = docResults.map((row: any) => ({
+        title: row.title,
+        detail: row.detail,
+        documentId: row.document_id,
+        content: row.chunk_content,
+        similarity: row.similarity,
+      }));
+      results.push(...transformedResults);
     }
 
-    if (!relevantChunks || relevantChunks.length === 0) {
-      console.log("No relevant content found");
-      return [];
-    }
+    // Sort combined results by similarity
+    return results.sort((a, b) => b.similarity - a.similarity);
 
-    // Get document details for the matching chunks
-    const documentIds = [
-      ...new Set(relevantChunks.map((chunk: any) => chunk.document_id)),
-    ];
-
-    const documentsDetails = await db
-      .select({
-        title: documents.title,
-        detail: documents.detail,
-        documentId: documents.documentId,
-      })
-      .from(documents)
-      .where(
-        and(
-          eq(documents.active, true),
-          eq(documents.isKnowledgeBase, true),
-          // Use sql template for inArray to avoid type issues
-          sql`${documents.documentId} = ANY(${documentIds})`
-        )
-      );
-
-    // Combine document details with similarity scores
-    // Since the SQL function already sorts by similarity, we'll use the order of appearance
-    // as a proxy for similarity (higher similarity = appears first)
-    const documentRanks = new Map<string, number>();
-    relevantChunks.forEach((chunk: any, index: number) => {
-      const docId = chunk.document_id;
-      if (!documentRanks.has(docId)) {
-        documentRanks.set(docId, index);
-      }
-    });
-
-    return documentsDetails.map((doc: any) => {
-      const rank = documentRanks.get(doc.documentId) || 0;
-      // Convert rank to similarity score (lower rank = higher similarity)
-      const similarity = Math.max(0, 1 - rank / relevantChunks.length);
-      return {
-        title: doc.title,
-        detail: doc.detail,
-        documentId: doc.documentId,
-        similarity,
-      };
-    });
-  } catch (error) {
-    console.error("Error finding relevant documents by detail:", error);
+  } catch (error: any) {
+    console.error("Error in searchVectors:", error);
     return [];
   }
 };
 
-// Special version of findRelevantContent for embed context that doesn't require user authentication
-export const findRelevantContent = async (
+// Search function for document detail field using vector similarity
+export const findRelevantDocumentsByDetail = async (
   knowledgeBaseId: string,
-  question: string,
-  selectedDocumentNames?: string[]
-): Promise<DatabaseChunk[]> => {
-  try {
-    const questionEmbedding = await generateEmbedding(question);
+  question: string
+): Promise<SearchResult[]> => {
+  return searchVectors(knowledgeBaseId, question);
+};
 
-    // Create Supabase service client (no user auth required)
+// Function to process a document that's missing embeddings or chunks
+export const processDocumentForSearch = async (
+  documentId: string
+): Promise<boolean> => {
+  try {
+    console.log("Processing document for search:", documentId);
     const supabase = createServiceClient();
 
-    // Get the knowledge base to access its documentIds
-    const [knowledgeBase] = await db
+    // Get document
+    const { data: document, error: docError } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("document_id", documentId)
+      .single();
+
+    if (docError || !document) {
+      console.error("Document not found:", docError);
+      return false;
+    }
+
+    // Generate detail embedding if missing
+    if (!document.detail_embedding && document.detail) {
+      console.log("Generating detail embedding...");
+      const detailEmbedding = await generateEmbedding(document.detail);
+
+      const { error: updateError } = await supabase
+        .from("documents")
+        .update({ detail_embedding: detailEmbedding })
+        .eq("document_id", documentId);
+
+      if (updateError) {
+        console.error("Error updating detail embedding:", updateError);
+        return false;
+      } else {
+        console.log("Detail embedding updated successfully");
+      }
+    }
+
+    return true;
+  } catch (error: any) {
+    console.error("Error processing document:", error);
+    return false;
+  }
+};
+
+// Function to generate embedding for a Knowledge Base detail
+export const processKnowledgeBaseDetail = async (
+  knowledgeBaseId: string
+): Promise<boolean> => {
+  try {
+    console.log("Processing KB detail for search:", knowledgeBaseId);
+
+    // Get KB
+    const [kb] = await db
       .select()
       .from(knowledgeBases)
       .where(eq(knowledgeBases.id, knowledgeBaseId));
 
-    if (!knowledgeBase) {
-      console.error("Knowledge base not found");
-      return [];
+    if (!kb) {
+      console.error("Knowledge Base not found");
+      return false;
     }
 
-    // Get document_id from document_name using Drizzle ORM
-    let documentIds: { id: number | null }[] = [];
+    console.log("Knowledge Base detail:", kb.detail);
+    // Generate detail embedding if missing or if detail exists
+    if (kb.detail) {
+      console.log("Generating KB detail embedding...");
+      const detailEmbedding = await generateEmbedding(kb.detail);
 
-    if (selectedDocumentNames && selectedDocumentNames.length > 0) {
-      // Filter by both knowledge base documentIds and selected document names
-      documentIds = await db
-        .select({ id: documents.id })
-        .from(documents)
-        .where(
-          and(
-            inArray(documents.title, selectedDocumentNames),
-            knowledgeBase.documentIds && knowledgeBase.documentIds.length > 0
-              ? inArray(documents.documentId, knowledgeBase.documentIds)
-              : eq(documents.id, -1) // No matching documents if empty array
-          )
-        );
-    } else if (
-      knowledgeBase.documentIds &&
-      knowledgeBase.documentIds.length > 0
-    ) {
-      // Just filter by knowledge base documentIds
-      documentIds = await db
-        .select({ id: documents.id })
-        .from(documents)
-        .where(inArray(documents.documentId, knowledgeBase.documentIds));
+      // Update using Drizzle since we have the schema
+      await db
+        .update(knowledgeBases)
+        .set({ detailEmbedding: detailEmbedding })
+        .where(eq(knowledgeBases.id, knowledgeBaseId));
+        
+      console.log("KB detail embedding updated successfully");
+      return true;
     }
-
-    if (documentIds.length === 0) {
-      console.log("No matching documents found for the knowledge base");
-      return [];
-    }
-    // Use Supabase RPC for vector similarity search
-    const { data: relevantChunks, error } = await supabase.rpc(
-      "match_document_chunks",
-      {
-        query_embedding: questionEmbedding,
-        match_threshold: 0.1,
-        match_count: 10,
-        document_ids: documentIds
-          .filter((d) => d.id != null)
-          .map((d) => String(d.id)), // Pass array directly
-      }
-    );
-
-    if (error) {
-      console.error("Error in vector search:", error);
-      throw new Error(`Vector search failed: ${error.message}`);
-    }
-
-    if (!relevantChunks || relevantChunks.length === 0) {
-      console.log("No relevant content found");
-      return [];
-    }
-
-    return relevantChunks as DatabaseChunk[];
-  } catch (error) {
-    console.error("Error finding relevant content for embed:", error);
-    throw error;
+    
+    return false;
+  } catch (error: any) {
+    console.error("Error processing KB detail:", error);
+    return false;
   }
 };

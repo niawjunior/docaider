@@ -17,7 +17,7 @@ Docaider is an AI-powered knowledge management and RAG (Retrieval-Augmented Gene
 ## Core Features & How to Use Them
 
 ### 1. Knowledge Base Management
-- **Creating Knowledge Bases**: Users can create knowledge bases via the dashboard by clicking the "Create Knowledge Base" button. Each knowledge base can have a name, description, and privacy setting (public/private).
+- **Creating Knowledge Bases**: Users can create knowledge bases via the dashboard by clicking the "Create Knowledge Base" button. Each knowledge base can have a name, detail, and privacy setting (public/private).
 - **Managing Knowledge Bases**: Users can view, edit, delete, and organize their knowledge bases from the dashboard.
 - **Knowledge Base Types**: Users have access to "My Knowledge Bases" (created by them), "Shared With You" (shared by others), and "Public Knowledge Bases" (visible to all users).
 - **Search & Filter**: Users can search knowledge bases by name and filter by status (Recently Updated, Name A-Z/Z-A, Created Date, Active, Has Documents, Empty).

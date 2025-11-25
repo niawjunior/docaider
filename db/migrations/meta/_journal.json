@@ -43,6 +43,34 @@
       "when": 1763959885018,
       "tag": "0005_handy_rogue",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1764042720239,
+      "tag": "0006_adorable_domino",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1764042948456,
+      "tag": "0007_certain_ken_ellis",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1764043151026,
+      "tag": "0008_plain_valkyrie",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1764053094081,
+      "tag": "0009_grey_sister_grimm",
+      "breakpoints": true
     }
   ]
 }

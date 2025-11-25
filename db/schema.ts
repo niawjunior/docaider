@@ -177,7 +177,7 @@ export const documents = pgTable("documents", {
     .notNull(),
   title: text().notNull(),
   detail: text(), // New field for document details/keywords
-  detailEmbedding: vector({ dimensions: 1536 }), // Embedding for the detail field
+  detailEmbedding: vector("detail_embedding", { dimensions: 1536 }), // Embedding for the detail field
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "string",
@@ -326,7 +326,8 @@ export const knowledgeBases = pgTable(
   {
     id: uuid().defaultRandom().primaryKey().notNull(),
     name: text().notNull(),
-    description: text(),
+    detail: text(), // Detailed description for vector search
+    detailEmbedding: vector("detail_embedding", { dimensions: 1536 }), // Embedding for the detail field
     isPublic: boolean("is_public").default(false),
     // Embedding configuration
     allowEmbedding: boolean("allow_embedding").default(false),

@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       .select({
         id: knowledgeBases.id,
         title: knowledgeBases.name,
-        description: knowledgeBases.description,
+        detail: knowledgeBases.detail,
         isPublic: knowledgeBases.isPublic,
         createdAt: knowledgeBases.createdAt,
         updatedAt: knowledgeBases.updatedAt,

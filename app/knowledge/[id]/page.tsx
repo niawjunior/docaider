@@ -44,6 +44,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Textarea } from "@/components/ui/textarea";
 
 // Define connected sources data structure
 interface ConnectedSource {
@@ -328,8 +329,13 @@ export default function ViewKnowledgeBasePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-1">
-                      {knowledgeBase.description && (
-                        <p className="text-sm">{knowledgeBase.description}</p>
+                      {knowledgeBase.detail && (
+                        <Textarea
+                        value={knowledgeBase.detail}
+                        readOnly
+                        className="max-h-[100px] overflow-y-auto scroll-hidden"
+                        />
+                        
                       )}
 
                       <div className="border-t pt-2  overflow-y-auto scroll-hidden">
