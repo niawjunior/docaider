@@ -5,7 +5,7 @@ import { SharedKnowledgeBase } from "./useSharedKnowledgeBases";
 type KnowledgeBase = {
   id: string;
   name: string;
-  description: string;
+  detail: string;
   isPublic: boolean;
   isPinned?: boolean;
   is_pinned?: boolean; // For API responses that use snake_case
@@ -65,7 +65,7 @@ export const useSearchAndFilter = ({
     return {
       id: apiKb.id,
       name: apiKb.name,
-      description: apiKb.description || "",
+      detail: apiKb.detail || "",
       isPublic: apiKb.isPublic ?? false,
       isPinned: apiKb.isPinned ?? false,
       createdAt: apiKb.createdAt || new Date().toISOString(),
@@ -88,7 +88,7 @@ export const useSearchAndFilter = ({
         filtered = filtered.filter(
           (item) =>
             item.name.toLowerCase().includes(query) ||
-            (item.description && item.description.toLowerCase().includes(query))
+            (item.detail && item.detail.toLowerCase().includes(query))
         );
       }
 
@@ -146,7 +146,7 @@ export const useSearchAndFilter = ({
         filtered = filtered.filter(
           (item) =>
             item.title.toLowerCase().includes(query) ||
-            (item.description && item.description.toLowerCase().includes(query))
+            (item.detail && item.detail.toLowerCase().includes(query))
         );
       }
 
