@@ -1,6 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
-import { generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 
 import { createClient } from "../utils/supabase/server";
@@ -68,7 +68,7 @@ export const askQuestionTool = tool({
             const label = isKB ? "Context" : "Document";
             return `${label}: ${doc.title}\nContent: ${
               doc.content || doc.detail
-            }\nSimilarity: ${doc.similarity.toFixed(3)}`;
+            }`;
           })
           .join("\n\n---\n\n");
 
@@ -103,15 +103,8 @@ export const askQuestionTool = tool({
 
       Answer:`;
 
-      const { object } = await generateObject({
+      const { text } = await generateText({
         model: openai("gpt-4o-mini"),
-        schema: z.object({
-          answer: z
-            .string()
-            .describe(
-              "Answer to the question. Use markdown formatting with clear headings and bullet points. For date/time questions, provide accurate dates and maintain chronological order. Reference the documents used to answer the question."
-            ),
-        }),
         prompt,
         system: `You are a helpful assistant that can answer questions based on current documents. Format your responses clearly and professionally:
       
@@ -124,13 +117,13 @@ export const askQuestionTool = tool({
       - List the document titles used to answer the question.
       - Use the titles exactly as provided in the "Document:" field of the context.
       - Do NOT cite sources labeled as "Context:". Only cite "Document:".
-      
+
       Please:
         - Must return the article in ${language} language.
       `,
       });
 
-      return object.answer;
+      return text;
     } catch (error: any) {
       console.error("Error in askQuestionTool:", error);
       throw new Error("Failed to process question: " + error.message);

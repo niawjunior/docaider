@@ -1,6 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
-import { generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 
 import { findRelevantDocumentsByDetail } from "../utils/embedding";
@@ -79,15 +79,8 @@ export const embedAskQuestionTool = tool({
 
       Answer:`;
 
-      const { object } = await generateObject({
+      const { text } = await generateText({
         model: openai("gpt-4o-mini"),
-        schema: z.object({
-          answer: z
-            .string()
-            .describe(
-              "Answer to the question. Use markdown formatting with clear headings and bullet points. For date/time questions, provide accurate dates and maintain chronological order."
-            ),
-        }),
         prompt,
         system: `You are a helpful assistant that can answer questions based on current documents. Format your responses clearly and professionally:
       
@@ -106,7 +99,7 @@ export const embedAskQuestionTool = tool({
       `,
       });
 
-      return object.answer;
+      return text;
     } catch (error: any) {
       console.error("Error in embedAskQuestionTool:", error);
       throw new Error("Failed to process question: " + error.message);

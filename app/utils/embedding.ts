@@ -1,8 +1,9 @@
 import { createServiceClient } from "./supabase/server";
 import { db } from "../../db/config";
 import { knowledgeBases } from "../../db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { OpenAIEmbeddings } from "@langchain/openai";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 import { encodingForModel, getEncoding } from "js-tiktoken";
 
@@ -108,69 +109,66 @@ const searchVectors = async (
 
     // Create Supabase service client
     const supabase = createServiceClient();
-    const results: SearchResult[] = [];
+    // 1. (Legacy) Knowledge Base Detail Match removed in favor of chunking
+    // We now search knowledge_base_chunks directly in step 3.
 
-    // 1. Check Knowledge Base Detail Match
-    // If the KB has a detail embedding, check similarity with the question
-    if (knowledgeBase.detail && knowledgeBase.detailEmbedding) {
-      // Calculate cosine similarity manually or via a simple query if possible
-      // Since we can't easily do vector math in JS on raw arrays without a library,
-      // and we want to use the database's optimized index, we'll query the KB table.
-      
-      // Note: We need a way to search the KB table itself. 
-      // For now, we'll assume we can use a direct query to check THIS specific KB's similarity.
-      const { data: kbMatch, error: kbError } = await supabase.rpc(
-        "match_knowledge_base_detail", 
-        {
-          query_embedding: questionEmbedding,
-          match_threshold: 0.01,
-          kb_id: knowledgeBaseId
-        }
-      );
-      
-      if (!kbError && kbMatch && kbMatch.length > 0) {
-        results.push({
-          title: `Knowledge Base: ${knowledgeBase.name}`,
-          detail: knowledgeBase.detail,
-          documentId: knowledgeBaseId,
-          content: `Knowledge Base Context: ${knowledgeBase.detail}`,
-          similarity: kbMatch[0].similarity
-        });
-      }
-    }
-
-    // 2. Search Documents and Chunks
-    const { data: docResults, error } = await supabase.rpc(
+    // 2. Search for relevant document chunks
+    const { data: docResults, error: docError } = await supabase.rpc(
       "match_documents_by_detail_and_content",
       {
         query_embedding: questionEmbedding,
-        match_threshold: 0.01, // Very low threshold to ensure we get results
-        match_count: 100,
-        document_ids: knowledgeBase.documentIds || [], // Pass array directly
+        match_threshold: 0.01,
+        match_count: 15, // Increased to 15 to ensure better context
+        document_ids: knowledgeBase.documentIds || [],
       }
     );
 
-    console.log("KB Document IDs:", knowledgeBase.documentIds);
-    console.log("Doc Results Count:", docResults?.length);
-    if (error) console.error("Doc Search Error:", error);
-
-    if (error) {
-      console.error("Error in vector search:", error);
-      // Don't throw here, just return what we have (maybe KB match)
-    } else if (docResults && docResults.length > 0) {
-      // Transform results to match expected format
-      const transformedResults = docResults.map((row: any) => ({
-        title: row.title,
-        detail: row.detail,
-        documentId: row.document_id,
-        content: row.chunk_content,
-        similarity: row.similarity,
-      }));
-      results.push(...transformedResults);
+    if (docError) {
+      console.error("Error searching document vectors:", docError);
+      throw docError;
     }
 
-    // Sort combined results by similarity
-    return results.sort((a, b) => b.similarity - a.similarity);
+    // 3. Search for relevant Knowledge Base detail chunks
+    const { data: kbResults, error: kbError } = await supabase.rpc(
+      "match_knowledge_base_chunks",
+      {
+        query_embedding: questionEmbedding,
+        match_threshold: 0.01,
+        match_count: 5, // Increased to 5 to ensure better context
+        kb_id: knowledgeBaseId,
+      }
+    );
+
+    if (kbError) {
+      console.error("Error searching KB chunks:", kbError);
+      // Don't throw, just log and continue with doc results
+    }
+
+    // Format results
+    const formattedDocResults = (docResults || []).map((doc: any) => ({
+      id: doc.id,
+      content: doc.chunk_content || doc.chunk, // Handle both field names
+      similarity: doc.similarity,
+      title: doc.title || doc.document_name || "Document", // Use title from SQL return
+      url: doc.url,
+      documentId: doc.document_id,
+    }));
+
+    const formattedKbResults = (kbResults || []).map((kb: any) => ({
+      id: kb.id,
+      content: kb.chunk,
+      similarity: kb.similarity,
+      title: `Knowledge Base: ${knowledgeBase.name}`, // Label as KB
+      url: null,
+      documentId: null,
+    }));
+
+    // Combine and sort by similarity
+    const allResults = [...formattedDocResults, ...formattedKbResults].sort(
+      (a, b) => b.similarity - a.similarity
+    );
+
+    return allResults;
 
   } catch (error: any) {
     console.error("Error in searchVectors:", error);
@@ -252,16 +250,46 @@ export const processKnowledgeBaseDetail = async (
     console.log("Knowledge Base detail:", kb.detail);
     // Generate detail embedding if missing or if detail exists
     if (kb.detail) {
-      console.log("Generating KB detail embedding...");
-      const detailEmbedding = await generateEmbedding(kb.detail);
+      console.log("Processing KB detail chunks...");
+      
+      // 1. Generate chunks from the detail text
+      // Use RecursiveCharacterTextSplitter for better semantic chunks
+      const splitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 1000,
+        chunkOverlap: 200,
+      });
+      
+      const chunks = await splitter.splitText(kb.detail);
+      console.log(`Generated ${chunks.length} chunks from KB detail`);
 
-      // Update using Drizzle since we have the schema
-      await db
-        .update(knowledgeBases)
-        .set({ detailEmbedding: detailEmbedding })
-        .where(eq(knowledgeBases.id, knowledgeBaseId));
+      // 2. Generate embeddings for all chunks
+      const embeddings = new OpenAIEmbeddings({
+        model: "text-embedding-3-large",
+        dimensions: 1536,
+      });
+      
+      const embeddingVectors = await embeddings.embedDocuments(chunks);
+
+      // 3. Store chunks in knowledge_base_chunks table
+      // First, delete existing chunks for this KB to avoid duplicates
+      try {
+        await db.execute(sql`
+          DELETE FROM knowledge_base_chunks WHERE knowledge_base_id = ${knowledgeBaseId}
+        `);
+      } catch (deleteError) {
+        console.error("Error deleting old KB chunks:", deleteError);
+        // Continue anyway
+      }
+
+      // Insert new chunks
+      for (let i = 0; i < chunks.length; i++) {
+        await db.execute(sql`
+          INSERT INTO knowledge_base_chunks (knowledge_base_id, chunk, embedding)
+          VALUES (${knowledgeBaseId}, ${chunks[i]}, ${JSON.stringify(embeddingVectors[i])}::vector)
+        `);
+      }
         
-      console.log("KB detail embedding updated successfully");
+      console.log("KB detail chunks stored successfully");
       return true;
     }
     

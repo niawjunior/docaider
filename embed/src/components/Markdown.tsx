@@ -31,7 +31,7 @@ const Markdown = ({ isUser, text }: MarkdownProps) => {
           p: ({ children }) => (
             <p
               className={clsx(
-                "px-4 py-1 leading-relaxed whitespace-pre-wrap rounded-2xl text-[12px] text-foreground",
+                "px-4 py-1 leading-relaxed whitespace-pre-wrap rounded-2xl text-[14px] text-foreground",
                 isUser ? "bg-primary text-primary-foreground inline-block" : ""
               )}
             >
@@ -61,7 +61,7 @@ const Markdown = ({ isUser, text }: MarkdownProps) => {
           code({ className, children, ...props }) {
             const language = className?.replace("language-", "") ?? "";
             return (
-              <pre className="rounded-lg p-4 overflow-x-auto bg-muted text-[12px]">
+              <pre className="rounded-lg p-4 overflow-x-auto bg-muted text-[14px]">
                 <code className={`language-${language}`} {...props}>
                   {children}
                 </code>

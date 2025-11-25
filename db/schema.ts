@@ -715,3 +715,31 @@ export const embedMessageLogs = pgTable(
     }),
   ]
 );
+
+// Knowledge Base chunks table - stores chunks of the knowledge base detail
+export const knowledgeBaseChunks = pgTable(
+  "knowledge_base_chunks",
+  {
+    id: bigint({ mode: "number" })
+      .generatedByDefaultAsIdentity()
+      .primaryKey()
+      .notNull(),
+    knowledgeBaseId: uuid("knowledge_base_id")
+      .notNull()
+      .references(() => knowledgeBases.id, { onDelete: "cascade" }),
+    chunk: text().notNull(),
+    embedding: vector({ dimensions: 1536 }).notNull(),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    }).default(sql`timezone('utc'::text, now())`),
+  },
+  (table) => [
+    pgPolicy("Public read access for chunks", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`true`,
+    }),
+  ]
+);
