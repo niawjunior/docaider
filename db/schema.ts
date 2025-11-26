@@ -289,37 +289,7 @@ export const credits = pgTable(
   ]
 );
 
-export const chatShares = pgTable(
-  "chat_shares",
-  {
-    id: uuid().defaultRandom().primaryKey().notNull(),
-    chatId: text("chat_id").notNull(),
-    shareId: text("share_id").notNull(),
-    createdAt: timestamp("created_at", {
-      withTimezone: true,
-      mode: "string",
-    }).default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: timestamp("updated_at", {
-      withTimezone: true,
-      mode: "string",
-    }).default(sql`CURRENT_TIMESTAMP`),
-    messages: jsonb(),
-  },
-  (table) => [
-    unique("chat_shares_share_id_key").on(table.shareId),
-    pgPolicy("Authenticated users can create shares", {
-      as: "permissive",
-      for: "insert",
-      to: ["authenticated"],
-      withCheck: sql`true`,
-    }),
-    pgPolicy("Enable read access for all users", {
-      as: "permissive",
-      for: "select",
-      to: ["public"],
-    }),
-  ]
-);
+
 
 export const knowledgeBases = pgTable(
   "knowledge_bases",

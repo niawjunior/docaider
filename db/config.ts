@@ -7,7 +7,6 @@ import {
   creditsRelations,
   chatsRelations,
   documentsRelations,
-  chatSharesRelations,
 } from "./relations";
 
 // Next.js automatically loads .env files
@@ -36,7 +35,6 @@ export const db = drizzle(queryClient, {
     creditsRelations,
     chatsRelations,
     documentsRelations,
-    chatSharesRelations,
   },
 });
 

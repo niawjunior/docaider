@@ -70,7 +70,7 @@ export function EmbedChatBoxPreview({
   // Use the AI SDK's useChat hook
   const { messages, sendMessage, status, error, stop } = useChat({
     transport: new DefaultChatTransport({
-      api: `/api/embed/chat`,
+      api: `/api/chat`,
       prepareSendMessagesRequest: ({ id, messages }) => {
         console.log(chatId, knowledgeBaseId);
         return {
@@ -79,6 +79,7 @@ export function EmbedChatBoxPreview({
             messages,
             chatId: chatId!,
             knowledgeBaseId,
+            isEmbed: true,
           },
         };
       },
