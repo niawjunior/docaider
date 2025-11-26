@@ -4,8 +4,8 @@ import { openai } from "@ai-sdk/openai";
 import { NextRequest } from "next/server";
 
 import { createClient, createServiceClient } from "../../utils/supabase/server";
-import { askQuestionTool } from "@/app/tools/llm-tools";
-import { embedAskQuestionTool, createReadCurrentPageTool } from "@/app/tools/embed-tools";
+import { askQuestionTool, createAskQuestionTool } from "@/app/tools/llm-tools";
+import { createReadCurrentPageTool } from "@/app/tools/embed-tools";
 import { db } from "../../../db/config";
 import {
   credits,
@@ -212,13 +212,21 @@ export async function POST(req: NextRequest) {
 
   // --- Tool Selection ---
   let tools: any = isEmbed
-    ? { askQuestion: embedAskQuestionTool }
+    ? {
+        askQuestion: createAskQuestionTool({
+          knowledgeBaseId,
+          isEmbed: true,
+        }),
+      }
     : { askQuestion: askQuestionTool };
   if (isEmbed && (activeTool === "current-page" || activeTool === "auto") && pageContent) {
     if (activeTool === "auto") {
       // If auto, allow both tools
       tools = {
-        askQuestion: embedAskQuestionTool,
+        askQuestion: createAskQuestionTool({
+          knowledgeBaseId,
+          isEmbed: true,
+        }),
         readCurrentPage: createReadCurrentPageTool(pageContent),
       };
     } else {
@@ -245,7 +253,8 @@ export async function POST(req: NextRequest) {
       The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines. viewing a specific web page. Your primary goal is to answer questions about the content of this page.
       
       - You have access to a tool called \`readCurrentPage\`.
-      - **YOU MUST USE THIS TOOL** to retrieve the content of the page the user is viewing.
+      - **YOU MUST USE THIS TOOL** to retrieve the content of the page the user is viewing, **UNLESS** you have already called it in this conversation turn.
+      - **DO NOT** call \`readCurrentPage\` more than once.
       - Once you have the content, answer the user's question based on that content.
       
       **BEHAVIOR**:
@@ -360,7 +369,9 @@ export async function POST(req: NextRequest) {
     3.  If multiple tools could apply, prioritize the most specific and relevant one.
     4.  If no tool is suitable, respond directly using natural language.
     ‼️ **IMPORTANT Tool Usage Rules**:
-    * **Document Questions (askQuestion)**: If the user asks about a document AND documents are available, you **MUST** call the \`askQuestion\` tool.Do NOT provide a generic response or suggest enabling tools if all conditions are met.
+    * **Document Questions (askQuestion)**: If the user asks about a document AND documents are available, you **MUST** call the \`askQuestion\` tool.
+    * **No Loops**: If a tool call returns "No relevant documents found" or a similar error, **DO NOT** call the same tool again with the same parameters. Instead, politely inform the user that the information is not available.
+    * **"This Page" Questions**: If the user asks about "this page", "current page", or "what is on the screen", and the \`readCurrentPage\` tool is available, you **MUST** use \`readCurrentPage\` instead of \`askQuestion\`.
     * **Credit Unavailability**: If the credit balance is 0, politely inform the user that tools cannot be used because they don't have enough credit.
     ---
 
@@ -488,14 +499,21 @@ export async function POST(req: NextRequest) {
   // --- Tool Choice Logic ---
   let toolChoice: "auto" | "none" | "required" = "auto";
   if (isEmbed) {
-    if ((activeTool === "current-page" || activeTool === "auto") && pageContent) {
+    console.log("Embed Mode Debug:", { activeTool, pageContent: !!pageContent, allDocsLen: allDocuments.length });
+    if (activeTool === "auto") {
+      toolChoice = "auto";
+    } else if (activeTool === "current-page" && pageContent) {
+      // Use auto to prevent forced loops in multi-step generation
+      toolChoice = "auto";
+    } else if (activeTool === "knowledge-base" && allDocuments.length > 0) {
+      // Use auto to prevent forced loops in multi-step generation
       toolChoice = "auto";
     } else {
       toolChoice =
         allDocuments.length === 0
           ? "none"
           : alwaysUseDocument
-          ? "required"
+          ? "auto" // Changed from required to auto
           : "auto";
     }
   } else {

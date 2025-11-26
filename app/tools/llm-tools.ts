@@ -5,8 +5,12 @@ import { openai } from "@ai-sdk/openai";
 
 import { createClient } from "../utils/supabase/server";
 import { findRelevantDocumentsByDetail } from "../utils/embedding";
-export const askQuestionTool = tool({
-  description: `Use this tool to **answer questions based on current documents**, acting as your intelligent knowledge base.
+export const createAskQuestionTool = (config?: {
+  knowledgeBaseId?: string;
+  isEmbed?: boolean;
+}) =>
+  tool({
+    description: `Use this tool to **answer questions based on current documents**, acting as your intelligent knowledge base.
 
   ✅ **Required for**:
   - Any question related to the content of current documents.
@@ -18,84 +22,95 @@ export const askQuestionTool = tool({
   - Responses will be formatted using markdown, including headings, bullet points, and chronological order for date/time questions.
   - **Always ask for document names to filter the search**.
   `,
-  inputSchema: z.object({
-    question: z.string().describe("Question to ask about the documents"),
-    knowledgeBaseId: z.string().describe("Knowledge base ID"),
-    language: z
-      .string()
-      .describe("The language to ask the question. Example: en, th"),
-  }),
-  execute: async ({ question, knowledgeBaseId, language }) => {
-    try {
-      const supabase = await createClient();
-      const { data: user } = await supabase.auth.getUser();
+    inputSchema: z.object({
+      question: z.string().describe("Question to ask about the documents"),
+      knowledgeBaseId: config?.knowledgeBaseId
+        ? z.string().optional().describe("Knowledge base ID (optional if already provided)")
+        : z.string().describe("Knowledge base ID"),
+      language: z
+        .string()
+        .describe("The language to ask the question. Example: en, th"),
+    }),
+    execute: async ({ question, knowledgeBaseId, language }) => {
+      try {
+        // Use provided config ID if available, otherwise use input ID
+        const targetKbId = config?.knowledgeBaseId || knowledgeBaseId;
 
-      if (!user?.user?.id) {
-        throw new Error("User not authenticated");
-      }
+        if (!targetKbId) {
+          throw new Error("Knowledge Base ID is required");
+        }
 
-      // Get relevant chunks from both document content and detail field
-      const relevantDocuments = await findRelevantDocumentsByDetail(
-        knowledgeBaseId,
-        question
-      );
+        if (!config?.isEmbed) {
+          const supabase = await createClient();
+          const { data: user } = await supabase.auth.getUser();
 
-      // Combine results - prioritize detail matches if they have high similarity
-      let combinedContext = "";
-      let hasResults = false;
+          if (!user?.user?.id) {
+            throw new Error("User not authenticated");
+          }
+        }
 
-      // Store document references for the final answer
-      let documentReferences: string[] = [];
-
-      // Add detail field results first (they're more specific for compliance/keyword searches)
-      if (relevantDocuments && relevantDocuments.length > 0) {
-        const filteredDocs = relevantDocuments.filter(
-          (doc) => doc.similarity > 0.3 // Increased from 0.1 to filter out noise
+        // Get relevant chunks from both document content and detail field
+        const relevantDocuments = await findRelevantDocumentsByDetail(
+          targetKbId,
+          question
         );
 
-        // Store document titles for reference section
-        documentReferences = [
-          ...new Set(
-            filteredDocs
-              .filter((doc) => !doc.title.startsWith("Knowledge Base:"))
-              .map((doc) => doc.title)
-          ),
-        ];
+        // Combine results - prioritize detail matches if they have high similarity
+        let combinedContext = "";
+        let hasResults = false;
 
-        const detailContext = filteredDocs
-          .map((doc) => {
-            const isKB = doc.title.startsWith("Knowledge Base:");
-            const label = isKB ? "Context" : "Document";
-            return `${label}: ${doc.title}\nContent: ${
-              doc.content || doc.detail
-            }`;
-          })
-          .join("\n\n---\n\n");
+        // Store document references for the final answer
+        let documentReferences: string[] = [];
 
-        if (detailContext) {
-          combinedContext +=
-            "=== DOCUMENT DETAILS MATCH ===\n" + detailContext + "\n\n";
+        // Add detail field results first (they're more specific for compliance/keyword searches)
+        if (relevantDocuments && relevantDocuments.length > 0) {
+          const filteredDocs = relevantDocuments.filter(
+            (doc) => doc.similarity > 0.3 // Increased from 0.1 to filter out noise
+          );
 
-          combinedContext +=
-            "=== DOCUMENT REFERENCES ===\n" +
-            documentReferences.join("\n") +
-            "\n\n";
-          hasResults = true;
+          // Store document titles for reference section
+          documentReferences = [
+            ...new Set(
+              filteredDocs
+                .filter((doc) => !doc.title.startsWith("Knowledge Base:"))
+                .map((doc) => doc.title)
+            ),
+          ];
+
+          const detailContext = filteredDocs
+            .map((doc) => {
+              const isKB = doc.title.startsWith("Knowledge Base:");
+              const label = isKB ? "Context" : "Document";
+              return `${label}: ${doc.title}\nContent: ${
+                doc.content || doc.detail
+              }`;
+            })
+            .join("\n\n---\n\n");
+
+          if (detailContext) {
+            combinedContext +=
+              "=== DOCUMENT DETAILS MATCH ===\n" + detailContext + "\n\n";
+
+            combinedContext +=
+              "=== DOCUMENT REFERENCES ===\n" +
+              documentReferences.join("\n") +
+              "\n\n";
+            hasResults = true;
+          }
         }
-      }
 
-      if (!hasResults) {
-        return "No relevant documents found for this question.";
-      }
+        if (!hasResults) {
+          return "No relevant documents found for this question.";
+        }
 
-      console.log("--- DEBUG LLM CONTEXT ---");
-      console.log("References:", documentReferences);
-      console.log("Context Length:", combinedContext.length);
-      // console.log("Context Preview:", combinedContext.substring(0, 500));
-      console.log("-------------------------");
+        console.log("--- DEBUG LLM CONTEXT ---");
+        console.log("References:", documentReferences);
+        console.log("Context Length:", combinedContext.length);
+        // console.log("Context Preview:", combinedContext.substring(0, 500));
+        console.log("-------------------------");
 
-      // Create a prompt with the combined context
-      const prompt = `Answer the following question based on the provided context:
+        // Create a prompt with the combined context
+        const prompt = `Answer the following question based on the provided context:
       Question: ${question}
 
       Context:
@@ -103,10 +118,10 @@ export const askQuestionTool = tool({
 
       Answer:`;
 
-      const { text } = await generateText({
-        model: openai("gpt-4o-mini"),
-        prompt,
-        system: `You are a helpful assistant that can answer questions based on current documents. Format your responses clearly and professionally:
+        const { text } = await generateText({
+          model: openai("gpt-4o-mini"),
+          prompt,
+          system: `You are a helpful assistant that can answer questions based on current documents. Format your responses clearly and professionally:
       
       IMPORTANT:
       - If the user asks for documents (e.g., "which documents...", "documents that..."), you MUST list the titles of the documents found in the "Document:" sections of the context.
@@ -122,12 +137,14 @@ export const askQuestionTool = tool({
       Please:
         - Must return the article in ${language} language.
       `,
-      });
+        });
 
-      return text;
-    } catch (error: any) {
-      console.error("Error in askQuestionTool:", error);
-      throw new Error("Failed to process question: " + error.message);
-    }
-  },
-});
+        return text;
+      } catch (error: any) {
+        console.error("Error in askQuestionTool:", error);
+        throw new Error("Failed to process question: " + error.message);
+      }
+    },
+  });
+
+export const askQuestionTool = createAskQuestionTool();

@@ -173,6 +173,7 @@ export function EmbedChatSession({
                 }
               >
                 {msg.parts.map((part, index: number) => {
+                  console.log("part", part);
                   switch (part.type) {
                     case "text":
                       return (
@@ -182,13 +183,14 @@ export function EmbedChatSession({
                             : ""}
                         </MessageResponse>
                       );
-                    case "tool-invocation":
+                    case "tool-askQuestion":
+                    case "tool-readCurrentPage":
                       const toolPart = part as ToolUIPart;
                       return (
                         <ToolRow
                           key={`${msg.id}-${index}`}
                           part={toolPart}
-                          toolName={(toolPart as any).toolName}
+                          toolName={(toolPart as any).toolName || part.type.replace("tool-", "")}
                           defaultOpen={true}
                         />
                       );
@@ -197,27 +199,27 @@ export function EmbedChatSession({
                   }
                 })}
               </MessageContent>
-              {status === "submitted" &&
-                msg.id === messages[messages.length - 1]?.id && (
-                  <div className="flex items-center  gap-2 absolute left-[-20px] top-[100px] h-full">
-                    <div className="px-3 py-1 text-xs text-gray-500 flex items-center gap-2">
-                      <div className="animate-pulse h-2 w-2 rounded-full bg-primary"></div>
-                      <span className="flex items-center gap-2">
-                        AI is thinking... <Loader />
-                      </span>
-                    </div>
-                  </div>
-                )}
+              
             </Message>
           ))}
           <div ref={messagesEndRef} />
+          {status === "submitted" && (
+            <div className="flex items-center justify-center">
+              <div className="px-3 py-1 text-xs text-gray-500 flex items-center gap-2">
+                <div className="animate-pulse h-2 w-2 rounded-full bg-primary"></div>
+                <span className="flex items-center gap-2">
+                  AI is thinking... <Loader />
+                </span>
+              </div>
+            </div>
+          )}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>
 
       {/* Chat status indicator */}
       {status === "streaming" && (
-        <div className="px-3 py-1 text-xs text-gray-500 flex items-center gap-2">
+        <div className="px-3 py-1 text-xs text-gray-500 flex items-center justify-center gap-2">
           <div className="animate-pulse h-2 w-2 rounded-full bg-primary"></div>
           {isToolCall ? (
             <span className="flex items-center gap-2">
