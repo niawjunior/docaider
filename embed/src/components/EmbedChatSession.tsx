@@ -188,7 +188,7 @@ export function EmbedChatSession({
                 msg.id === messages[messages.length - 1]?.id && (
                   <div className="flex items-center  gap-2 absolute left-[-20px] top-[100px] h-full">
                     <div className="px-3 py-1 text-xs text-gray-500 flex items-center gap-2">
-                      <div className="animate-pulse h-2 w-2 rounded-full bg-purple-600"></div>
+                      <div className="animate-pulse h-2 w-2 rounded-full bg-primary"></div>
                       <span className="flex items-center gap-2">
                         AI is thinking... <Loader />
                       </span>
@@ -205,7 +205,7 @@ export function EmbedChatSession({
       {/* Chat status indicator */}
       {status === "streaming" && (
         <div className="px-3 py-1 text-xs text-gray-500 flex items-center gap-2">
-          <div className="animate-pulse h-2 w-2 rounded-full bg-purple-600"></div>
+          <div className="animate-pulse h-2 w-2 rounded-full bg-primary"></div>
           {isToolCall ? (
             <span className="flex items-center gap-2">
               Searching through documents...
@@ -229,7 +229,7 @@ export function EmbedChatSession({
       {/* Initialization status */}
       {isInitializing && (
         <div className="px-3 py-1 text-xs text-gray-500 flex items-center gap-2">
-          <div className="animate-pulse h-2 w-2 rounded-full bg-purple-600"></div>
+          <div className="animate-pulse h-2 w-2 rounded-full bg-primary"></div>
           <span>Initializing chat...</span>
         </div>
       )}
@@ -323,7 +323,7 @@ export function EmbedChatSession({
           href="https://docaider.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-purple-600 hover:underline"
+          className="text-primary hover:underline"
         >
           Docaider
         </a>
