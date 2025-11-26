@@ -105,7 +105,7 @@ export async function PUT(
       );
     }
 
-    const { name, detail, isPublic } = await request.json();
+    const { name, detail, instruction, isPublic } = await request.json();
 
     if (!name || name.trim() === "") {
       return NextResponse.json(
@@ -120,6 +120,7 @@ export async function PUT(
       .set({
         name: name.trim(),
         detail: detail?.trim(),
+        instruction: instruction?.trim(),
         isPublic: isPublic || false,
         updatedAt: new Date().toISOString(),
         // Preserve isPinned status
@@ -179,7 +180,7 @@ export async function PATCH(
       );
     }
 
-    const { name, detail, isPublic, documentIds } = await request.json();
+    const { name, detail, instruction, isPublic, documentIds } = await request.json();
 
     // Prepare update data
     const updateData: Record<string, any> = {
@@ -201,6 +202,10 @@ export async function PATCH(
 
     if (detail !== undefined) {
       updateData.detail = detail?.trim();
+    }
+
+    if (instruction !== undefined) {
+      updateData.instruction = instruction?.trim();
     }
 
     if (isPublic !== undefined) {

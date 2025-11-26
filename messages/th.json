@@ -495,7 +495,11 @@
     "bottom-right": "ด้านล่างขวา",
     "bottom-left": "ด้านล่างซ้าย",
     "top-right": "ด้านบนขวา",
-    "top-left": "ด้านบนซ้าย"
+    "top-left": "ด้านบนซ้าย",
+    "instruction": "คำสั่ง",
+    "systemInstruction": "คำสั่งระบบ",
+    "instructionHelp": "กำหนดพฤติกรรมของ AI น้ำเสียง และกฎเฉพาะที่ต้องปฏิบัติตาม",
+    "instructionPlaceholder": "คุณเป็นผู้ช่วยที่เป็นประโยชน์ชื่อ Docaider..."
   },
 
   "home": {

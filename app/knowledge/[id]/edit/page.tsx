@@ -28,6 +28,7 @@ import {
   Eye,
   Share2,
   FileText,
+  Code,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -343,6 +344,17 @@ export default function EditKnowledgeBasePage() {
                 <Button
                   variant="outline"
                   size="sm"
+                  onClick={() =>
+                    router.push(`/knowledge/${params.id}/deploy`)
+                  }
+                >
+                  <Code size={16} className="mr-2" />
+                  {commonT("deploy")}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => handleClick(params.id)}
                 >
                   <Eye size={16} className="mr-2" />
@@ -404,12 +416,13 @@ export default function EditKnowledgeBasePage() {
                               <Textarea
                                 placeholder={t("detailPlaceholder")}
                                 rows={5}
-                                className="min-h-[100px] max-h-[200px] overflow-y-auto"
+                                className="min-h-[100px] max-h-[100px] overflow-y-auto"
                                 {...field}
+                                maxLength={50000}
                               />
                             </FormControl>
                             <FormDescription>
-                              {t("detailHelp") || "This content will be embedded and used for semantic search."}
+                              {field.value?.length || 0}/50,000
                             </FormDescription>
                             <FormMessage />
                           </FormItem>

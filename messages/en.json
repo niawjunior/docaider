@@ -496,7 +496,11 @@
     "bottom-right": "Bottom Right",
     "bottom-left": "Bottom Left",
     "top-right": "Top Right",
-    "top-left": "Top Left"
+    "top-left": "Top Left",
+    "instruction": "Instruction",
+    "systemInstruction": "System Instruction",
+    "instructionHelp": "Define how your AI assistant should behave, its tone of voice, and any specific rules it should follow.",
+    "instructionPlaceholder": "You are a helpful assistant named Docaider. You are friendly, professional, and concise..."
   },
 
   "home": {

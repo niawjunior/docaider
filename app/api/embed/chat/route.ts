@@ -103,15 +103,13 @@ export async function POST(req: NextRequest) {
           : "auto",
       tools,
       system: `
-       - When replying in Thai:
+      ${knowledgeBase.instruction ? `\n${knowledgeBase.instruction}\n` : ""}
+      - When replying in Thai:
       • Use **ค่ะ** at the end of **statements**.  
       • Use **คะ** at the end of **questions**.  
     - Always prioritize understanding user intent.
     - Focus on knowledge extraction, organization, and retrieval from documents.
     - If user intent is ambiguous, ask clarifying questions instead of guessing.
-
-    **Credit Management**:
-    - If the credit balance is 0, politely inform the user that tools cannot be used because they don't have enough credit.
     
     **Knowledge Management**:
     -   Current knowledge base ID: ${knowledgeBaseId}

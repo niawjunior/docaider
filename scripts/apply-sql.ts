@@ -17,11 +17,6 @@ async function applySql() {
   const { sql } = await import("drizzle-orm");
 
   try {
-    console.log("Applying match_knowledge_base_detail.sql...");
-    const matchKbSql = fs.readFileSync(path.join(process.cwd(), "match_knowledge_base_detail.sql"), "utf8");
-    await db.execute(sql.raw(matchKbSql));
-    console.log("Successfully applied match_knowledge_base_detail.sql");
-
     console.log("Applying create_kb_chunks_table.sql...");
     const createTableSql = fs.readFileSync("create_kb_chunks_table.sql", "utf8");
     await db.execute(sql.raw(createTableSql));

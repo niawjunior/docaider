@@ -8,5 +8,4 @@ CREATE INDEX IF NOT EXISTS document_chunks_embedding_idx ON document_chunks USIN
 -- Create HNSW index for documents detail_embedding
 CREATE INDEX IF NOT EXISTS documents_detail_embedding_idx ON documents USING hnsw (detail_embedding vector_cosine_ops);
 
--- Create HNSW index for knowledge_bases detail_embedding
-CREATE INDEX IF NOT EXISTS knowledge_bases_detail_embedding_idx ON knowledge_bases USING hnsw (detail_embedding vector_cosine_ops);
+

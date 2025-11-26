@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { HexColorPicker } from "react-colorful";
-import { Copy, Check, Code, ArrowLeft, Edit, Share2 } from "lucide-react";
+import { Copy, Check, Code, ArrowLeft, Edit, Share2, Settings, Save, RefreshCw, Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import useSupabaseSession from "@/app/hooks/useSupabaseSession";
@@ -31,13 +32,16 @@ export default function DeployKnowledgeBasePage() {
 
   // State for loading and data
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [knowledgeBase, setKnowledgeBase] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Local state for embed settings
   const [localAllowEmbedding, setLocalAllowEmbedding] = useState(false);
+  const [instruction, setInstruction] = useState("");
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState("code");
+  const [activeTab, setActiveTab] = useState("instruction"); // Default to instruction
+  const [chatId, setChatId] = useState(() => uuidv4());
 
   // Embed configuration options
   const [embedConfig, setEmbedConfig] = useState({
@@ -65,6 +69,7 @@ export default function DeployKnowledgeBasePage() {
     if (knowledgeBaseData) {
       setKnowledgeBase(knowledgeBaseData);
       setLocalAllowEmbedding(knowledgeBaseData.allowEmbedding || false);
+      setInstruction(knowledgeBaseData.instruction || "");
 
       // Update embed config if it exists
       if (
@@ -145,8 +150,10 @@ export default function DeployKnowledgeBasePage() {
 
   // Handle save settings
   const handleSaveSettings = async () => {
+    setIsSaving(true);
     try {
-      const response = await fetch(`/api/knowledge-bases/${params.id}/embed`, {
+      // Save embed settings
+      const embedResponse = await fetch(`/api/knowledge-bases/${params.id}/embed`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -157,16 +164,35 @@ export default function DeployKnowledgeBasePage() {
         }),
       });
 
-      if (!response.ok) {
+      if (!embedResponse.ok) {
         throw new Error("Failed to save embed settings");
       }
 
-      toast.success(t("embedSettingsSaved"));
+      // Save instruction
+      const instructionResponse = await fetch(`/api/knowledge-base/${params.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          instruction,
+        }),
+      });
+
+      if (!instructionResponse.ok) {
+        throw new Error("Failed to save instruction");
+      }
+
+      toast.success(t("settingsSaved", { defaultValue: "Settings saved successfully" }));
     } catch (error) {
-      console.error("Error saving embed settings:", error);
+      console.error("Error saving settings:", error);
       toast.error(t("errorSavingSettings"));
+    } finally {
+      setIsSaving(false);
     }
   };
+
+
 
   if (isLoading || isLoadingKB) {
     return <GlobalLoader />;
@@ -265,7 +291,11 @@ export default function DeployKnowledgeBasePage() {
 
                   {(knowledgeBase.isPublic || localAllowEmbedding) && (
                     <Tabs value={activeTab} onValueChange={setActiveTab}>
-                      <TabsList className="grid w-full grid-cols-2">
+                      <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="instruction">
+                          <Settings className="mr-2 h-4 w-4" />
+                          {t("instruction", { defaultValue: "Instruction" })}
+                        </TabsTrigger>
                         <TabsTrigger value="code">
                           <Code className="mr-2 h-4 w-4" />
                           {t("embedCode")}
@@ -274,6 +304,24 @@ export default function DeployKnowledgeBasePage() {
                           {t("appearance")}
                         </TabsTrigger>
                       </TabsList>
+
+                      <TabsContent value="instruction" className="space-y-4">
+                        <div className="space-y-4 mt-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="instruction">{t("systemInstruction", { defaultValue: "System Instruction" })}</Label>
+                            <p className="text-sm text-muted-foreground">
+                              {t("instructionHelp", { defaultValue: "Define how your AI assistant should behave, its tone of voice, and any specific rules it should follow." })}
+                            </p>
+                            <Textarea
+                              id="instruction"
+                              value={instruction}
+                              onChange={(e) => setInstruction(e.target.value)}
+                              placeholder={t("instructionPlaceholder", { defaultValue: "You are a helpful assistant..." })}
+                              className="min-h-[100px] max-h-[100px] overflow-y-auto text-sm"
+                            />
+                          </div>
+                        </div>
+                      </TabsContent>
 
                       <TabsContent value="code" className="space-y-4">
                         <div className="mt-4">
@@ -473,7 +521,8 @@ export default function DeployKnowledgeBasePage() {
                       >
                         {t("cancel")}
                       </Button>
-                      <Button onClick={handleSaveSettings}>
+                      <Button onClick={handleSaveSettings} disabled={isSaving}>
+                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {t("saveSettings")}
                       </Button>
                     </div>
@@ -481,13 +530,23 @@ export default function DeployKnowledgeBasePage() {
                 </CardContent>
               </Card>
             </div>
-            <div className="w-full lg:sticky lg:top-6 h-fit">
+            <div className="w-full lg:sticky lg:top-6">
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Preview</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Test your chat widget with current settings
-                  </p>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg">Preview</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Test your chat widget with current settings
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setChatId(uuidv4())}
+                    title="Reset Chat"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="relative h-[500px] mx-auto m-auto flex justify-center items-center">
@@ -498,7 +557,7 @@ export default function DeployKnowledgeBasePage() {
                           ? window.location.origin
                           : ""
                       }
-                      chatId={uuidv4()}
+                      chatId={chatId}
                       chatboxTitle={embedConfig.title}
                       position={embedConfig.position as any}
                       width={embedConfig.width}

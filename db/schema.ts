@@ -327,7 +327,8 @@ export const knowledgeBases = pgTable(
     id: uuid().defaultRandom().primaryKey().notNull(),
     name: text().notNull(),
     detail: text(), // Detailed description for vector search
-    detailEmbedding: vector("detail_embedding", { dimensions: 1536 }), // Embedding for the detail field
+    instruction: text(), // Custom instruction for the AI persona/behavior
+
     isPublic: boolean("is_public").default(false),
     // Embedding configuration
     allowEmbedding: boolean("allow_embedding").default(false),

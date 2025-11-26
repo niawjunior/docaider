@@ -50,8 +50,8 @@ export const askQuestionTool = tool({
       // Add detail field results first (they're more specific for compliance/keyword searches)
       if (relevantDocuments && relevantDocuments.length > 0) {
         const filteredDocs = relevantDocuments.filter(
-          (doc) => doc.similarity > 0.1
-        ); // Only include high similarity matches
+          (doc) => doc.similarity > 0.3 // Increased from 0.1 to filter out noise
+        );
 
         // Store document titles for reference section
         documentReferences = [
@@ -112,10 +112,11 @@ export const askQuestionTool = tool({
       - If the user asks for documents (e.g., "which documents...", "documents that..."), you MUST list the titles of the documents found in the "Document:" sections of the context.
       - Do NOT just explain the concept from the "Context:" section. You must link it to the specific "Document:".
       
-      IMPORTANT: You must cite your sources.
+      IMPORTANT: Citation Rules
+      - IF you use information from a document to answer the question, you MUST cite it.
       - At the end of your answer, include a section titled "References" or "เอกสารอ้างอิง" (depending on language).
-      - List the document titles used to answer the question.
-      - Use the titles exactly as provided in the "Document:" field of the context.
+      - List ONLY the document titles that contained the information you used.
+      - If the question is a greeting (e.g., "Hi", "Hello") or general conversation NOT requiring document info, do NOT include a References section.
       - Do NOT cite sources labeled as "Context:". Only cite "Document:".
 
       Please:

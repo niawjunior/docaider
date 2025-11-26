@@ -41,12 +41,15 @@ export const embedAskQuestionTool = tool({
         question
       );
 
-      if (!relevantChunks || relevantChunks.length === 0) {
+      // Filter relevant chunks by similarity
+      const filteredChunks = relevantChunks.filter(chunk => chunk.similarity > 0.3);
+
+      if (!filteredChunks || filteredChunks.length === 0) {
         return "No relevant documents found for this question.";
       }
 
       // Combine relevant chunks into a single context with labels
-      const context = relevantChunks
+      const context = filteredChunks
         .map((chunk) => {
           const isKB = chunk.title.startsWith("Knowledge Base:");
           const label = isKB ? "Context" : "Document";
@@ -59,7 +62,7 @@ export const embedAskQuestionTool = tool({
       // Create deduplicated reference list (excluding KB context)
       const documentReferences = [
         ...new Set(
-          relevantChunks
+          filteredChunks
             .filter((doc) => !doc.title.startsWith("Knowledge Base:"))
             .map((doc) => doc.title)
         ),
@@ -88,10 +91,11 @@ export const embedAskQuestionTool = tool({
       - If the user asks for documents (e.g., "which documents...", "documents that..."), you MUST list the titles of the documents found in the "Document:" sections of the context.
       - Do NOT just explain the concept from the "Context:" section. You must link it to the specific "Document:".
       
-      IMPORTANT: You must cite your sources.
+      IMPORTANT: Citation Rules
+      - IF you use information from a document to answer the question, you MUST cite it.
       - At the end of your answer, include a section titled "References" or "เอกสารอ้างอิง" (depending on language).
-      - List the document titles used to answer the question.
-      - Use the titles exactly as provided in the "Document:" field of the context.
+      - List ONLY the document titles that contained the information you used.
+      - If the question is a greeting (e.g., "Hi", "Hello") or general conversation NOT requiring document info, do NOT include a References section.
       - Do NOT cite sources labeled as "Context:". Only cite "Document:".
 
       Please:
