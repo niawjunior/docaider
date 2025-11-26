@@ -17,7 +17,7 @@ import {
   PromptInputTextarea,
   PromptInputSubmit,
 } from "./ai-elements/prompt-input";
-import { Response } from "./ai-elements/response";
+
 import Markdown from "./Markdown";
 import clsx from "clsx";
 import { Toggle } from "@/components/ui/toggle";
@@ -134,7 +134,7 @@ export function EmbedChatSession({
             >
               <MessageContent
                 className={clsx(
-                  "relative pb-4",
+                  "relative",
                   msg.role !== "user" && "min-w-[100%]"
                 )}
                 style={
@@ -150,11 +150,16 @@ export function EmbedChatSession({
                   switch (part.type) {
                     case "text":
                       return (
-                        <Response key={`${msg.id}-${index}`}>
-                          {part.type === "text"
-                            ? (part as { text?: string }).text || ""
-                            : ""}
-                        </Response>
+                        <div key={`${msg.id}-${index}`}>
+                          <Markdown
+                            isUser={msg.role === "user"}
+                            text={
+                              part.type === "text"
+                                ? (part as { text?: string }).text || ""
+                                : ""
+                            }
+                          />
+                        </div>
                       );
                     case "tool-askQuestion":
                       const output = (part as { output?: any }).output;
