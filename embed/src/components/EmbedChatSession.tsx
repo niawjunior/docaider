@@ -31,6 +31,7 @@ interface EmbedChatSessionProps {
   placeholder?: string;
   isInitializing?: boolean;
   initError?: Error | null;
+  isOpen?: boolean;
 }
 
 export function EmbedChatSession({
@@ -41,6 +42,7 @@ export function EmbedChatSession({
   placeholder = "Ask a question...",
   isInitializing = false,
   initError = null,
+  isOpen = false,
 }: EmbedChatSessionProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [alwaysUseDocument, setAlwaysUseDocument] = useState(false);
@@ -56,11 +58,12 @@ export function EmbedChatSession({
   // Use the AI SDK's useChat hook
   const { messages, sendMessage, status, error, stop } = useChat({
     transport: new DefaultChatTransport({
-      api: `${src}/api/embed/chat`,
+      api: `${src}/api/chat`,
       body: () => ({
         chatId: chatId,
         knowledgeBaseId,
         alwaysUseDocument: alwaysUseDocumentRef.current,
+        isEmbed: true,
       }),
     }),
     onToolCall: () => {
@@ -91,12 +94,15 @@ export function EmbedChatSession({
     }
   }, [messages]);
 
-  // Focus input on mount
+  // Focus input on mount or when opened
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
+    if (isOpen && inputRef.current) {
+      // Small timeout to ensure visibility transition is complete
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
-  }, []);
+  }, [isOpen]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();

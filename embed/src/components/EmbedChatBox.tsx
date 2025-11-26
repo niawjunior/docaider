@@ -144,6 +144,7 @@ export function EmbedChatBox({
             placeholder={placeholder}
             isInitializing={isInitializing}
             initError={initError}
+            isOpen={isOpen}
           />
         )}
       </motion.div>
