@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { createServiceClient } from "@/app/utils/supabase/server";
 import { db } from "@/db/config";
-import { knowledgeBases } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { knowledgeBases, documents } from "@/db/schema";
+import { eq, and, inArray } from "drizzle-orm";
 import { createChat } from "@/app/utils/aisdk/chat";
 
 export async function POST(req: NextRequest) {
@@ -50,6 +50,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Get knowledge base documents
+    const knowledgeBaseDocumentIds = knowledgeBase.documentIds || [];
+
+    // Get documents
+    const allDocuments = await db
+      .select({
+        id: documents.id,
+        documentId: documents.documentId,
+        documentName: documents.documentName,
+        title: documents.title,
+      })
+      .from(documents)
+      .where(
+        and(
+          eq(documents.active, true),
+          eq(documents.isKnowledgeBase, true),
+          knowledgeBaseDocumentIds.length > 0
+            ? inArray(documents.documentId, knowledgeBaseDocumentIds)
+            : eq(documents.id, -1) // No matching documents if empty array
+        )
+      )
+      .orderBy(documents.updatedAt);
+
     // Create a new chat session
     const chatId = await createChat();
 
@@ -65,6 +88,7 @@ export async function POST(req: NextRequest) {
     return new Response(
       JSON.stringify({
         chatId,
+        documents: allDocuments.map((doc) => ({ title: doc.title })),
         success: true,
       }),
       {

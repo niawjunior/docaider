@@ -8,6 +8,8 @@ function App() {
   const [isInitializing, setIsInitializing] = useState(false);
   const [initError, setInitError] = useState<Error | null>(null);
 
+  const [documents, setDocuments] = useState<{ title: string }[]>([]);
+
   useEffect(() => {
     // Get configuration from window object
     const windowConfig = window.DocaiderChatConfig;
@@ -21,8 +23,12 @@ function App() {
   }, []);
 
   // Initialize chat with the API
-  const initializeChat = async (knowledgeBaseId: string, src: string) => {
-    if (isInitializing || chatId) return; // Prevent multiple initializations
+  const initializeChat = async (
+    knowledgeBaseId: string,
+    src: string,
+    force = false
+  ) => {
+    if (isInitializing || (chatId && !force)) return; // Prevent multiple initializations
 
     setIsInitializing(true);
     try {
@@ -43,6 +49,9 @@ function App() {
 
       const data = await response.json();
       setChatId(data.chatId);
+      if (data.documents) {
+        setDocuments(data.documents);
+      }
     } catch (error) {
       console.error("Error initializing chat:", error);
       setInitError(
@@ -56,6 +65,15 @@ function App() {
   if (!config || !chatId) {
     return null; // Don't render anything if config is not available
   }
+
+  const handleRefresh = () => {
+    if (config) {
+      // Don't set chatId to null here, just re-initialize with force=true
+      // This keeps the EmbedChatBox mounted, but the EmbedChatSession inside it will re-mount
+      // when the new chatId is set by initializeChat
+      initializeChat(config.knowledgeBaseId, config.src, true);
+    }
+  };
 
   return (
     <EmbedChatBox
@@ -73,6 +91,8 @@ function App() {
       showButtonText={config.showButtonText}
       isInitializing={isInitializing}
       initError={initError}
+      onRefresh={handleRefresh}
+      documents={documents}
     />
   );
 }

@@ -103,7 +103,26 @@ export const embedAskQuestionTool = tool({
       `,
       });
 
-      return text;
+      // Extract sources from the filtered chunks that were actually referenced
+      // Note: This is a heuristic. Ideally the LLM would return structured citations.
+      // For now, we return all chunks that were deemed relevant enough to be in the context,
+      // or we could try to parse the "References" section from the text.
+      // A safer bet for "sources used" is to return the chunks that were passed to the LLM,
+      // but that might be too many.
+      // Let's return the unique documents from filteredChunks.
+      
+      const sources = [
+        ...new Map(
+          filteredChunks
+            .filter((chunk) => !chunk.title.startsWith("Knowledge Base:"))
+            .map((chunk) => [chunk.title, { title: chunk.title, content: chunk.content || chunk.detail }])
+        ).values(),
+      ];
+
+      return {
+        answer: text,
+        sources: sources,
+      };
     } catch (error: any) {
       console.error("Error in embedAskQuestionTool:", error);
       throw new Error("Failed to process question: " + error.message);
