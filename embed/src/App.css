@@ -4,11 +4,11 @@
 @custom-variant dark (&:is(.dark *));
 
 :host {
-  font-family: var(--font-prompt) !important;
+  font-family: var(--font-nunito) !important;
 }
 
 :host .toaster {
-  font-family: var(--font-prompt) !important;
+  font-family: var(--font-nunito) !important;
 }
 .scroll-hidden::-webkit-scrollbar {
   display: none;
@@ -138,4 +138,17 @@
   :host {
     @apply bg-background text-foreground;
   }
+}
+
+/* Loading dots animation */
+.typing-dot {
+  animation: typing 1.4s infinite ease-in-out both;
+  fill: #3B82F6;
+}
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
 }

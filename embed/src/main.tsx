@@ -43,7 +43,7 @@ import App from "../src/App";
   // Tailwind CSS is now bundled directly into the embed.js file
   // No need to load it externally
 
-  // Add Google Fonts Prompt font
+  // Add Google Fonts Nunito font
   const fontPreconnect1 = document.createElement("link");
   fontPreconnect1.rel = "preconnect";
   fontPreconnect1.href = "https://fonts.googleapis.com";
@@ -83,7 +83,7 @@ import App from "../src/App";
       --radius: 0.625rem;
       color-scheme: light;
       all: initial;
-      font-family: var(--font-prompt), sans-serif;
+      font-family: var(--font-nunito), sans-serif;
     }
     
     /* Ensure no dark mode is applied to embed */
@@ -94,6 +94,7 @@ import App from "../src/App";
     /* Reset all elements inside shadow DOM */
     * {
       box-sizing: border-box;
+      font-family: var(--font-nunito), sans-serif;
     }
   `;
   shadowRoot.appendChild(style);
@@ -113,7 +114,7 @@ import App from "../src/App";
   const fontLink = document.createElement("link");
   fontLink.rel = "stylesheet";
   fontLink.href =
-    "https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap";
+    "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap";
   shadowRoot.appendChild(fontLink);
 
   // Set window config for the App component to access

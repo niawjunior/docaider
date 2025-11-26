@@ -14,14 +14,14 @@ interface ToolRowProps {
 export function ToolRow({
   part,
   toolName = "Tool",
-  defaultOpen = true,
+  defaultOpen = false,
 }: ToolRowProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   // Auto-open when output becomes available, if desired
   useEffect(() => {
     if (part.state === "output-available" || part.state === "output-error") {
-      setIsOpen(true);
+      setIsOpen(false);
     }
   }, [part.state]);
 

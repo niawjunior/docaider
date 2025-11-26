@@ -47,9 +47,8 @@ export const MessageContent = ({
 }: MessageContentProps) => (
   <div
     className={cn(
-      "is-user:dark flex w-fit flex-col gap-2 overflow-hidden text-sm",
-      "group-[.is-user]:ml-auto group-[.is-user]:rounded-lg group-[.is-user]:bg-secondary group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-foreground",
-      "group-[.is-assistant]:text-foreground",
+      "flex w-fit flex-col gap-2 overflow-hidden text-sm",
+      "group-[.is-user]:ml-auto",
       className
     )}
     {...props}
@@ -315,8 +314,52 @@ export const MessageResponse = memo(
     <div className={cn("prose dark:prose-invert max-w-none text-sm size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0", className)}>
       <ReactMarkdown
         {...props}
+
+        components={{
+          h1: ({ children }) => (
+            <h1 className="px-4 py-1 text-xl ">
+              {children}
+            </h1>
+          ),
+          h2: ({ children }) => (
+            <h2 className="px-4 py-1 text-lg ">
+              {children}
+            </h2>
+          ),
+          h3: ({ children }) => (
+            <h3 className="px-4 py-1 text-base ">
+              {children}
+            </h3>
+          ),
+          p: ({ children }) => (
+            <p
+             className="px-4 py-1 leading-relaxed whitespace-pre-wrap rounded-2xl text-sm "
+            >
+              {children}
+            </p>
+          ),
+          ul: ({ children }) => (
+            <ul className="list-disc pl-8 py-1 ">{children}</ul>
+          ),
+          ol: ({ children }) => (
+            <ol className="list-decimal pl-8 py-1 ">
+              {children}
+            </ol>
+          ),
+          li: ({ children }) => (
+            <li className="py-1 ">{children}</li>
+          ),
+
+          strong: ({ children }) => (
+            <strong >{children}</strong>
+          ),
+          em: ({ children }) => (
+            <em className="italic ">{children}</em>
+          ),
+          br: () => <br className="hidden" />,
+        }}
       >
-        {children as string}
+      {children as string}
       </ReactMarkdown>
     </div>
   ),
