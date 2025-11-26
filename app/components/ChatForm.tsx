@@ -34,6 +34,8 @@ import {
   type PromptInputMessage,
 } from "@/components/ai-elements/prompt-input";
 import { Loader } from "@/components/ai-elements/loader";
+import { ToolRow } from "@/components/ai-elements/tool-row";
+import { type ToolUIPart } from "ai";
 
 import DocumentUploadDialog from "./chat/DocumentUploadDialog";
 import {
@@ -352,28 +354,25 @@ export default function ChatForm({
                         </MessageResponse>
                       );
                     case "tool-askQuestion":
-                      const output = (part as { output?: any }).output;
-                      let answer = "";
-
-                      if (typeof output === "string") {
-                        answer = output;
-                      } else if (output && typeof output === "object") {
-                        answer = output.answer || "";
-                      }
-
+                      const toolPart = part as ToolUIPart;
                       return (
-                        <MessageResponse key={`${msg.id}-${index}`}>
-                          {answer}
-                        </MessageResponse>
+                        <ToolRow
+                          key={`${msg.id}-${index}`}
+                          part={toolPart}
+                          toolName="Ask Question"
+                          defaultOpen={true}
+                        />
                       );
                     default:
                       return null;
                   }
                 })}
               </MessageContent>
-              {status === "submitted" &&
-                msg.id === messages[messages.length - 1]?.id && (
-                  <div className="flex items-center gap-2 absolute left-[-20px] top-[100px] h-full">
+            </Message>
+          ))}
+          <div ref={messagesEndRef} />
+          {status === "submitted" && (
+            <div className="flex items-center justify-center">
                     <div className="px-3 py-1 text-xs text-gray-500 flex items-center gap-2">
                       <div className="animate-pulse h-2 w-2 rounded-full bg-primary"></div>
                       <span className="flex items-center gap-2">
@@ -381,10 +380,7 @@ export default function ChatForm({
                       </span>
                     </div>
                   </div>
-                )}
-            </Message>
-          ))}
-          <div ref={messagesEndRef} />
+          )}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>

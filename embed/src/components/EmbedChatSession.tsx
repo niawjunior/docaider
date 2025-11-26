@@ -11,17 +11,24 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "./ai-elements/conversation";
-import { Message, MessageContent } from "./ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "./ai-elements/message";
 import {
   PromptInput,
   PromptInputTextarea,
   PromptInputSubmit,
 } from "./ai-elements/prompt-input";
 
-import Markdown from "./Markdown";
 import clsx from "clsx";
-import { Toggle } from "@/components/ui/toggle";
-import { Label } from "./ui/label";
+import { ToolRow } from "./ai-elements/tool-row";
+import { type ToolUIPart } from "ai";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Globe, ChevronDown } from "lucide-react";
+import { readCurrentPage } from "../utils/page-reader";
 
 interface EmbedChatSessionProps {
   knowledgeBaseId: string;
@@ -45,13 +52,13 @@ export function EmbedChatSession({
   isOpen = false,
 }: EmbedChatSessionProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [alwaysUseDocument, setAlwaysUseDocument] = useState(false);
-  const alwaysUseDocumentRef = useRef(alwaysUseDocument);
+  const [activeTool, setActiveTool] = useState<"auto" | "knowledge-base" | "current-page">("auto");
+  const activeToolRef = useRef(activeTool);
 
-  // Update ref when alwaysUseDocument changes
+  // Update ref when activeTool changes
   useEffect(() => {
-    alwaysUseDocumentRef.current = alwaysUseDocument;
-  }, [alwaysUseDocument]);
+    activeToolRef.current = activeTool;
+  }, [activeTool]);
 
   const [isToolCall, setIsToolCall] = useState(false);
 
@@ -59,12 +66,23 @@ export function EmbedChatSession({
   const { messages, sendMessage, status, error, stop } = useChat({
     transport: new DefaultChatTransport({
       api: `${src}/api/chat`,
-      body: () => ({
-        chatId: chatId,
-        knowledgeBaseId,
-        alwaysUseDocument: alwaysUseDocumentRef.current,
-        isEmbed: true,
-      }),
+      body: () => {
+        const body: any = {
+          chatId: chatId,
+          knowledgeBaseId,
+          isEmbed: true,
+          activeTool: activeToolRef.current,
+        };
+
+        if (activeToolRef.current === "current-page" || activeToolRef.current === "auto") {
+          const pageContent = readCurrentPage();
+          if (pageContent) {
+            body.pageContent = pageContent;
+          }
+        }
+
+        return body;
+      },
     }),
     onToolCall: () => {
       setIsToolCall(true);
@@ -124,8 +142,10 @@ export function EmbedChatSession({
           },
         ];
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div ref={containerRef} className="flex flex-col h-full overflow-hidden">
       {/* Chat messages */}
       <Conversation className="flex-1 overflow-y-auto">
         <ConversationContent className="flex flex-col">
@@ -156,34 +176,21 @@ export function EmbedChatSession({
                   switch (part.type) {
                     case "text":
                       return (
-                        <div key={`${msg.id}-${index}`}>
-                          <Markdown
-                            isUser={msg.role === "user"}
-                            text={
-                              part.type === "text"
-                                ? (part as { text?: string }).text || ""
-                                : ""
-                            }
-                          />
-                        </div>
+                        <MessageResponse key={`${msg.id}-${index}`}>
+                          {part.type === "text"
+                            ? (part as { text?: string }).text || ""
+                            : ""}
+                        </MessageResponse>
                       );
-                    case "tool-askQuestion":
-                      const output = (part as { output?: any }).output;
-                      let answer = "";
-                      
-                      if (typeof output === "string") {
-                        answer = output;
-                      } else if (output && typeof output === "object") {
-                        answer = output.answer || "";
-                      }
-
+                    case "tool-invocation":
+                      const toolPart = part as ToolUIPart;
                       return (
-                        <div key={`${msg.id}-${index}`}>
-                          <Markdown
-                            isUser={msg.role === "user"}
-                            text={answer}
-                          />
-                        </div>
+                        <ToolRow
+                          key={`${msg.id}-${index}`}
+                          part={toolPart}
+                          toolName={(toolPart as any).toolName}
+                          defaultOpen={true}
+                        />
                       );
                     default:
                       return null;
@@ -303,22 +310,60 @@ export function EmbedChatSession({
           </div>
         </PromptInput>
 
-        {/* Document Search Toggle */}
-        <div className="pb-3 flex items-center">
-          <div className="flex items-center gap-2">
-            <Toggle
-              pressed={alwaysUseDocument}
-              onPressedChange={setAlwaysUseDocument}
-              variant="outline"
-              size="sm"
-              aria-label="Toggle document search"
-              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-            >
-              <Search className="h-4 w-4" />
-            </Toggle>
-            <Label htmlFor="always-use-document" className="text-xs">
-              Always search through documents
-            </Label>
+        {/* Tool Selector */}
+        <div className="pb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 w-full">
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center justify-between w-full h-8 px-3 py-2 text-xs border rounded-md bg-transparent hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                  <span className="flex items-center gap-2">
+                    {activeTool === "auto" ? (
+                      <span>Auto (AI Decides)</span>
+                    ) : activeTool === "knowledge-base" ? (
+                      <>
+                        <Search className="h-3 w-3" />
+                        <span>Search Knowledge Base</span>
+                      </>
+                    ) : (
+                      <>
+                        <Globe className="h-3 w-3" />
+                        <span>Read Current Page</span>
+                      </>
+                    )}
+                  </span>
+                  <ChevronDown className="h-4 w-4 opacity-50" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[200px]" container={containerRef.current}>
+                <DropdownMenuCheckboxItem
+                  checked={activeTool === "auto"}
+                  onCheckedChange={() => setActiveTool("auto")}
+                  className="text-xs"
+                >
+                  Auto (AI Decides)
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={activeTool === "knowledge-base"}
+                  onCheckedChange={() => setActiveTool("knowledge-base")}
+                  className="text-xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <Search className="h-3 w-3" />
+                    <span>Search Knowledge Base</span>
+                  </div>
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={activeTool === "current-page"}
+                  onCheckedChange={() => setActiveTool("current-page")}
+                  className="text-xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-3 w-3" />
+                    <span>Read Current Page</span>
+                  </div>
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>

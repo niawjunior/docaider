@@ -5,7 +5,7 @@ import { NextRequest } from "next/server";
 
 import { createClient, createServiceClient } from "../../utils/supabase/server";
 import { askQuestionTool } from "@/app/tools/llm-tools";
-import { embedAskQuestionTool } from "@/app/tools/embed-tools";
+import { embedAskQuestionTool, createReadCurrentPageTool } from "@/app/tools/embed-tools";
 import { db } from "../../../db/config";
 import {
   credits,
@@ -30,6 +30,8 @@ export async function POST(req: NextRequest) {
     knowledgeBaseId,
     isEmbed = false,
     alwaysUseDocument = false,
+    pageContent,
+    activeTool,
   } = (await req.json()) as {
     messages: any[];
     id?: string;
@@ -38,6 +40,12 @@ export async function POST(req: NextRequest) {
     knowledgeBaseId: string;
     isEmbed?: boolean;
     alwaysUseDocument?: boolean;
+    pageContent?: {
+      title: string;
+      content: string;
+      url: string;
+    };
+    activeTool?: "knowledge-base" | "current-page" | "auto";
   };
 
   const finalChatId = chatId || id;
@@ -203,13 +211,52 @@ export async function POST(req: NextRequest) {
     .orderBy(documents.updatedAt);
 
   // --- Tool Selection ---
-  const tools = isEmbed
+  let tools: any = isEmbed
     ? { askQuestion: embedAskQuestionTool }
     : { askQuestion: askQuestionTool };
+  if (isEmbed && (activeTool === "current-page" || activeTool === "auto") && pageContent) {
+    if (activeTool === "auto") {
+      // If auto, allow both tools
+      tools = {
+        askQuestion: embedAskQuestionTool,
+        readCurrentPage: createReadCurrentPageTool(pageContent),
+      };
+    } else {
+      // If specifically current-page, only allow that
+      tools = {
+        readCurrentPage: createReadCurrentPageTool(pageContent),
+      };
+    }
+  }
 
   // --- System Prompt Selection ---
   const systemPrompt = isEmbed
-    ? `
+    ? activeTool === "current-page" || activeTool === "auto"
+      ? `
+      ${kbInstruction ? `\n${kbInstruction}\n` : ""}
+      
+      **CRITICAL INSTRUCTION: IDENTITY & PERSONA**
+      - **IDENTITY CHECK**: If the user addresses you by a name other than your defined name (e.g., "Champ" instead of "Pakorn Noi"), you **MUST** politely correct them and reaffirm your identity as defined in the instructions.
+      - When replying in Thai:
+        • Use appropriate polite particles (**ครับ** or **ค่ะ/คะ**) that match the gender and persona defined in your instructions.
+        • If no gender is specified, use polite professional language.
+
+      **TOOL USAGE: READ CURRENT PAGE**
+      The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines. viewing a specific web page. Your primary goal is to answer questions about the content of this page.
+      
+      - You have access to a tool called \`readCurrentPage\`.
+      - **YOU MUST USE THIS TOOL** to retrieve the content of the page the user is viewing.
+      - Once you have the content, answer the user's question based on that content.
+      
+      **BEHAVIOR**:
+      - If the user asks "what is this page about?" or "summarize this page", call \`readCurrentPage\`.
+      - Always be polite and helpful.
+      - If the page content is empty or unreadable, inform the user politely.
+      
+      **Tone & Voice**:
+      - Friendly, clear, and professional.
+      `
+      : `
       ${kbInstruction ? `\n${kbInstruction}\n` : ""}
       
       **CRITICAL INSTRUCTION: STRICT CONTEXT ONLY**
@@ -441,12 +488,16 @@ export async function POST(req: NextRequest) {
   // --- Tool Choice Logic ---
   let toolChoice: "auto" | "none" | "required" = "auto";
   if (isEmbed) {
-    toolChoice =
-      allDocuments.length === 0
-        ? "none"
-        : alwaysUseDocument
-        ? "required"
-        : "auto";
+    if ((activeTool === "current-page" || activeTool === "auto") && pageContent) {
+      toolChoice = "auto";
+    } else {
+      toolChoice =
+        allDocuments.length === 0
+          ? "none"
+          : alwaysUseDocument
+          ? "required"
+          : "auto";
+    }
   } else {
     toolChoice =
       balance <= 0 || allDocuments.length === 0
@@ -461,9 +512,11 @@ export async function POST(req: NextRequest) {
     toolChoice,
     tools,
     activeTools:
-      !isEmbed && userConfigData?.[0]?.useDocument ? ["askQuestion"] : [],
+      !isEmbed && userConfigData?.[0]?.useDocument
+        ? ["askQuestion"]
+        : undefined,
     system: systemPrompt,
-    stopWhen: stepCountIs(1),
+    stopWhen: stepCountIs(5),
     messages: convertToModelMessages(messages),
     onStepFinish: async (response) => {
       // Only update credits for non-embed users

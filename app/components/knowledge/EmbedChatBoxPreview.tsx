@@ -24,6 +24,8 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
+import { ToolRow } from "@/components/ai-elements/tool-row";
+import { type ToolUIPart } from "ai";
 
 interface EmbedChatBoxPreviewProps {
   knowledgeBaseId: string;
@@ -239,15 +241,13 @@ export function EmbedChatBoxPreview({
                             </MessageResponse>
                           );
                         case "tool-askQuestion":
+                          const toolPart = part as ToolUIPart;
                           return (
-                            <Markdown
+                            <ToolRow
                               key={`${msg.id}-${index}`}
-                              isUser={msg.role === "user"}
-                              text={
-                                part.type === "tool-askQuestion"
-                                  ? (part as { output?: string }).output || ""
-                                  : ""
-                              }
+                              part={toolPart}
+                              toolName="Ask Question"
+                              defaultOpen={true}
                             />
                           );
                         default:
