@@ -60,82 +60,93 @@ export function EmbedChatBox({
 
   return (
     <div className={`fixed ${positionClasses[position]} z-50`}>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="bg-white rounded-lg shadow-lg mb-2 overflow-hidden flex flex-col"
-            style={{
-              width,
-              height,
-              boxShadow: "0 5px 20px rgba(0, 0, 0, 0.15)",
-              border: "1px solid #e5e7eb",
-            }}
-          >
-            {/* Chat header */}
-            <div
-              className="p-3 flex items-center justify-between"
-              style={{
-                backgroundColor: "var(--primary)",
-                color: "var(--primary-foreground)",
-                borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
-              }}
+      <motion.div
+        initial="closed"
+        animate={isOpen ? "open" : "closed"}
+        variants={{
+          open: {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            display: "flex",
+            transition: { type: "spring", stiffness: 300, damping: 30 },
+          },
+          closed: {
+            opacity: 0,
+            y: 20,
+            scale: 0.9,
+            transition: { duration: 0.2 },
+            transitionEnd: { display: "none" },
+          },
+        }}
+        className="bg-white rounded-lg shadow-lg mb-2 overflow-hidden flex-col"
+        style={{
+          width,
+          height,
+          boxShadow: "0 5px 20px rgba(0, 0, 0, 0.15)",
+          border: "1px solid #e5e7eb",
+        }}
+      >
+        {/* Chat header */}
+        <div
+          className="p-3 flex items-center justify-between"
+          style={{
+            backgroundColor: "var(--primary)",
+            color: "var(--primary-foreground)",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <Bot
+              className="h-5 w-5"
+              style={{ color: "var(--primary-foreground)" }}
+            />
+            <h3 className="font-medium">{chatboxTitle}</h3>
+          </div>
+          <div className="flex gap-1">
+            <button
+              className="h-8 w-8 hover:bg-white/10 rounded-md flex items-center justify-center transition-colors border-none outline-none"
+              onClick={() => setIsOpen(false)}
+              title="Minimize"
+              style={{ color: "var(--primary-foreground)" }}
             >
-              <div className="flex items-center gap-2">
-                <Bot
-                  className="h-5 w-5"
-                  style={{ color: "var(--primary-foreground)" }}
-                />
-                <h3 className="font-medium">{chatboxTitle}</h3>
-              </div>
-              <div className="flex gap-1">
-                <button
-                  className="h-8 w-8 hover:bg-white/10 rounded-md flex items-center justify-center transition-colors border-none outline-none"
-                  onClick={() => setIsOpen(false)}
-                  title="Minimize"
-                  style={{ color: "var(--primary-foreground)" }}
-                >
-                  <Minus className="h-4 w-4" />
-                </button>
-                <button
-                  className="h-8 w-8 hover:bg-white/10 rounded-md flex items-center justify-center transition-colors border-none outline-none"
-                  onClick={() => setShowFileList(true)}
-                  title="File List"
-                  style={{ color: "var(--primary-foreground)" }}
-                >
-                  <FileText className="h-4 w-4" />
-                </button>
-                {onRefresh && (
-                  <button
-                    className="h-8 w-8 hover:bg-white/10 rounded-md flex items-center justify-center transition-colors border-none outline-none"
-                    onClick={onRefresh}
-                    title="Start New Chat"
-                    style={{ color: "var(--primary-foreground)" }}
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Chat Session */}
-            {chatId && (
-              <EmbedChatSession
-                key={chatId}
-                knowledgeBaseId={knowledgeBaseId}
-                src={src}
-                chatId={chatId}
-                welcomeMessage={welcomeMessage}
-                placeholder={placeholder}
-                isInitializing={isInitializing}
-                initError={initError}
-              />
+              <Minus className="h-4 w-4" />
+            </button>
+            <button
+              className="h-8 w-8 hover:bg-white/10 rounded-md flex items-center justify-center transition-colors border-none outline-none"
+              onClick={() => setShowFileList(true)}
+              title="File List"
+              style={{ color: "var(--primary-foreground)" }}
+            >
+              <FileText className="h-4 w-4" />
+            </button>
+            {onRefresh && (
+              <button
+                className="h-8 w-8 hover:bg-white/10 rounded-md flex items-center justify-center transition-colors border-none outline-none"
+                onClick={onRefresh}
+                title="Start New Chat"
+                style={{ color: "var(--primary-foreground)" }}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </button>
             )}
-          </motion.div>
+          </div>
+        </div>
+
+        {/* Chat Session */}
+        {chatId && (
+          <EmbedChatSession
+            key={chatId}
+            knowledgeBaseId={knowledgeBaseId}
+            src={src}
+            chatId={chatId}
+            welcomeMessage={welcomeMessage}
+            placeholder={placeholder}
+            isInitializing={isInitializing}
+            initError={initError}
+          />
         )}
-      </AnimatePresence>
+      </motion.div>
 
       {/* Chat toggle button */}
       <motion.div
