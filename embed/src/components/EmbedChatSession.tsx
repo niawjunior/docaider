@@ -345,7 +345,7 @@ export function EmbedChatSession({
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder={placeholder}
-                className="w-full bg-gray-100 hover:border-blue-300 text-gray-700 placeholder-gray-400 rounded-[24px] pl-5 pr-14 py-4 focus:outline-none focus:ring-2 focus:ring-blue-200 focus-visible:border-blue-300 focus:bg-white transition-all border-2 border-blue-100 border-solid resize-none shadow-[0_4px_12px_rgba(0,0,0,0.05)] text-sm"
+                className="w-full bg-gray-100 hover:border-blue-300 text-gray-700 placeholder-gray-400 rounded-[24px] pl-5 pr-14 py-4 focus:outline-none focus:ring-2 focus:ring-blue-200 focus-visible:border-blue-300 focus:bg-white transition-all border-2 border-blue-100 border-solid resize-none shadow-[0_4px_12px_rgba(0,0,0,0.05)] text-sm font-semibold"
                 rows={1}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
