@@ -356,10 +356,9 @@ console.log(isInitializing)
                 }}
             />
             <div className="absolute right-2 bottom-2 top-2 flex items-center">
-                <PromptInputSubmit className="bg-blue-500 hover:bg-blue-600 text-white rounded-[18px] w-10 h-10 flex items-center justify-center shadow-md transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <PromptInputSubmit className="bg-blue-400 hover:bg-blue-500 hover:rotate-12 text-white rounded-[18px] w-10 h-10 flex items-center justify-center shadow-md transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:rotate-12 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path>
                     </svg>
                 </PromptInputSubmit>
             </div>
