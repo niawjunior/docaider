@@ -56,7 +56,6 @@ export function EmbedChatSession({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [activeTool, setActiveTool] = useState<"auto" | "knowledge-base" | "current-page">("auto");
   const activeToolRef = useRef(activeTool);
-console.log(isInitializing)
   // Update ref when activeTool changes
   useEffect(() => {
     activeToolRef.current = activeTool;
