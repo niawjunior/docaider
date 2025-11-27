@@ -8,8 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
-import { HexColorPicker } from "react-colorful";
 import { Copy, Check, Code, ArrowLeft, Edit, Share2, Settings, Save, RefreshCw, Loader2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslations } from "next-intl";
@@ -20,6 +18,15 @@ import GlobalLoader from "@/app/components/GlobalLoader";
 import MainLayout from "@/app/components/MainLayout";
 import { EmbedChatBoxPreview } from "@/app/components/knowledge/EmbedChatBoxPreview";
 import { v4 as uuidv4 } from "uuid";
+
+interface EmbedConfig {
+  position: string;
+  welcomeMessage: string;
+  height: string;
+  width: string;
+  title: string;
+  theme: "blue" | "gray" | "green";
+}
 
 export default function DeployKnowledgeBasePage() {
   const t = useTranslations("EmbedDialog");
@@ -44,17 +51,13 @@ export default function DeployKnowledgeBasePage() {
   const [chatId, setChatId] = useState(() => uuidv4());
 
   // Embed configuration options
-  const [embedConfig, setEmbedConfig] = useState({
-    primaryColor: "#7C3AED", // Default Docaider purple
-    textColor: "#FFFFFF",
+  const [embedConfig, setEmbedConfig] = useState<EmbedConfig>({
     position: "bottom-right",
     welcomeMessage: "Hi there! How can I help you with your questions?",
-    buttonIcon: "chat",
-    buttonText: "Chat with AI",
-    showButtonText: true,
     height: "500px",
     width: "350px",
     title: "AI Assistant",
+    theme: "blue",
   });
 
   // Use React Query hooks for fetching knowledge base
@@ -77,22 +80,14 @@ export default function DeployKnowledgeBasePage() {
         Object.keys(knowledgeBaseData.embedConfig).length > 0
       ) {
         setEmbedConfig({
-          primaryColor: knowledgeBaseData.embedConfig.primaryColor || "#7C3AED",
-          textColor: knowledgeBaseData.embedConfig.textColor || "#FFFFFF",
           position: knowledgeBaseData.embedConfig.position || "bottom-right",
           welcomeMessage:
             knowledgeBaseData.embedConfig.welcomeMessage ||
             "Hi there! How can I help you with your questions?",
-          buttonIcon: knowledgeBaseData.embedConfig.buttonIcon || "chat",
-          buttonText:
-            knowledgeBaseData.embedConfig.buttonText || "Chat with AI",
-          showButtonText:
-            knowledgeBaseData.embedConfig.showButtonText !== undefined
-              ? knowledgeBaseData.embedConfig.showButtonText
-              : true,
           height: knowledgeBaseData.embedConfig.height || "500px",
           width: knowledgeBaseData.embedConfig.width || "350px",
           title: knowledgeBaseData.embedConfig.title || "AI Assistant",
+          theme: (knowledgeBaseData.embedConfig.theme as any) || "blue",
         });
       }
       setIsLoading(false);
@@ -124,16 +119,13 @@ export default function DeployKnowledgeBasePage() {
 
     const dataAttributes = [
       `data-kb-id="${params.id}"`,
-      `data-primary-color="${embedConfig.primaryColor}"`,
-      `data-text-color="${embedConfig.textColor}"`,
+      `data-chat-id="${uuidv4()}"`,
       `data-position="${embedConfig.position}"`,
       `data-welcome-message="${embedConfig.welcomeMessage}"`,
-      `data-button-icon="${embedConfig.buttonIcon}"`,
-      `data-button-text="${embedConfig.buttonText}"`,
       `data-title="${embedConfig.title}"`,
-      `data-show-button-text="${embedConfig.showButtonText}"`,
       `data-height="${embedConfig.height}"`,
       `data-width="${embedConfig.width}"`,
+      `data-theme="${embedConfig.theme}"`,
     ].join(" ");
 
     return `<script src="${origin}/embed.js" ${dataAttributes}></script>`;
@@ -388,33 +380,39 @@ export default function DeployKnowledgeBasePage() {
 
                       <TabsContent value="appearance" className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>{t("primaryColor")}</Label>
-                            <HexColorPicker
-                              color={embedConfig.primaryColor}
-                              onChange={(color) =>
-                                setEmbedConfig({
-                                  ...embedConfig,
-                                  primaryColor: color,
-                                })
-                              }
-                            />
-                            <Input
-                              value={embedConfig.primaryColor}
-                              onChange={(e) =>
-                                setEmbedConfig({
-                                  ...embedConfig,
-                                  primaryColor: e.target.value,
-                                })
-                              }
-                              className="mt-2"
-                            />
-                          </div>
-
-                          <div className="space-y-4">
                             <div className="space-y-2">
-                              <Label>{t("position")}</Label>
-                              <div className="grid grid-cols-2 gap-2">
+                              <Label>Theme</Label>
+                              <div className="grid grid-cols-3 gap-2">
+                                {[
+                                  { id: "blue", name: "Cute Blue", color: "bg-blue-400" },
+                                  { id: "gray", name: "Professional", color: "bg-gray-600" },
+                                  { id: "green", name: "Friendly", color: "bg-emerald-400" },
+                                ].map((theme) => (
+                                  <button
+                                    key={theme.id}
+                                    onClick={() =>
+                                      setEmbedConfig({
+                                        ...embedConfig,
+                                        theme: theme.id as any,
+                                      })
+                                    }
+                                    className={`flex flex-col items-center gap-2 p-2 rounded-lg border-2 transition-all ${
+                                      embedConfig.theme === theme.id
+                                        ? "border-blue-500 bg-blue-50"
+                                        : "border-transparent hover:bg-gray-50"
+                                    }`}
+                                  >
+                                    <div className={`w-8 h-8 rounded-full ${theme.color} shadow-sm`} />
+                                    <span className="text-xs font-medium">{theme.name}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label>{t("position")}</Label>
+                                <div className="grid grid-cols-2 gap-2">
                                 {[
                                   "bottom-right",
                                   "bottom-left",
@@ -440,35 +438,6 @@ export default function DeployKnowledgeBasePage() {
                                     {t(position)}
                                   </Button>
                                 ))}
-                              </div>
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label>{t("buttonText")}</Label>
-                              <Input
-                                value={embedConfig.buttonText}
-                                onChange={(e) =>
-                                  setEmbedConfig({
-                                    ...embedConfig,
-                                    buttonText: e.target.value,
-                                  })
-                                }
-                                placeholder={t("buttonTextPlaceholder")}
-                              />
-                              <div className="flex items-center space-x-2 mt-2">
-                                <Checkbox
-                                  id="show-button-text"
-                                  checked={embedConfig.showButtonText}
-                                  onCheckedChange={(checked) =>
-                                    setEmbedConfig({
-                                      ...embedConfig,
-                                      showButtonText: !!checked,
-                                    })
-                                  }
-                                />
-                                <Label htmlFor="show-button-text">
-                                  {t("showButtonText")}
-                                </Label>
                               </div>
                             </div>
 
@@ -539,14 +508,7 @@ export default function DeployKnowledgeBasePage() {
                       Test your chat widget with current settings
                     </p>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setChatId(uuidv4())}
-                    title="Reset Chat"
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
+                  
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="relative h-[500px] mx-auto m-auto flex justify-center items-center">
@@ -563,10 +525,7 @@ export default function DeployKnowledgeBasePage() {
                       width={embedConfig.width}
                       height={embedConfig.height}
                       welcomeMessage={embedConfig.welcomeMessage}
-                      buttonText={embedConfig.buttonText}
-                      showButtonText={embedConfig.showButtonText}
-                      primaryColor={embedConfig.primaryColor}
-                      textColor={embedConfig.textColor}
+                      theme={embedConfig.theme}
                     />
                   </div>
                 </CardContent>

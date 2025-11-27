@@ -2,12 +2,12 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
-  // Important: Use :host for Shadow DOM scoping
-  important: ":host",
+  // Important: Use .docaider-embed for scoping (works in both Shadow DOM and Light DOM)
+  important: ".docaider-embed",
   theme: {
     extend: {
       fontFamily: {
-        prompt: ["Prompt", "sans-serif"],
+        nunito: ["Nunito", "sans-serif"],
       },
     },
   },

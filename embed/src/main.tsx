@@ -23,11 +23,10 @@ import App from "../src/App";
     welcomeMessage:
       scriptTag.getAttribute("data-welcome-message") ||
       "Hello! How can I help you today?",
-    buttonText: scriptTag.getAttribute("data-button-text") || "Chat with AI",
-    showButtonText: scriptTag.getAttribute("data-show-button-text") === "true",
     height: scriptTag.getAttribute("data-height") || "500px",
     width: scriptTag.getAttribute("data-width") || "350px",
     chatboxTitle: scriptTag.getAttribute("data-title") || "AI Assistant",
+    theme: (scriptTag.getAttribute("data-theme") as any) || "blue",
     placeholder:
       scriptTag.getAttribute("data-placeholder") || "Ask a question...",
   };
@@ -102,6 +101,7 @@ import App from "../src/App";
   // Create container inside shadow root
   const container = document.createElement("div");
   container.id = "shadow-container";
+  container.classList.add("docaider-embed");
   shadowRoot.appendChild(container);
 
   // Load CSS inside shadow DOM

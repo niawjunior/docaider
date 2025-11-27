@@ -2,16 +2,12 @@ interface DocaiderChatConfig {
   knowledgeBaseId: string;
   src: string;
   chatboxTitle?: string;
-  primaryColor?: string;
+  theme?: "blue" | "gray" | "green";
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
   width?: string;
   height?: string;
-  iconSize?: string;
   welcomeMessage?: string;
   placeholder?: string;
-  buttonText?: string;
-  showButtonText?: boolean;
-  textColor?: string;
 }
 
 declare global {

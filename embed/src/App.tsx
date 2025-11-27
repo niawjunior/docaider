@@ -84,15 +84,13 @@ function App() {
       position={config.position}
       width={config.width}
       height={config.height}
-      iconSize={config.iconSize}
       welcomeMessage={config.welcomeMessage}
       placeholder={config.placeholder}
-      buttonText={config.buttonText}
-      showButtonText={config.showButtonText}
       isInitializing={isInitializing}
       initError={initError}
       onRefresh={handleRefresh}
       documents={documents}
+      theme={config.theme}
     />
   );
 }
