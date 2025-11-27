@@ -77,7 +77,7 @@ export function EmbedChatBox({
   };
 
   return (
-    <div className={`fixed ${positionClasses[position]} z-50`}>
+    <div className={`fixed ${positionClasses[position]} z-[999999]`}>
       <motion.div
         initial="closed"
         animate={isOpen ? "open" : "closed"}
