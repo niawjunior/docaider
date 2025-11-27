@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack ",
     "build": "npm run build:embed && next build",
-    "build:embed": "cd embed && npm run build && cp dist/style.css ../public/embed-style.css && npm run build:lib",
+    "build:embed": "cd embed && npm run build && npm run build:lib && cp dist/style.css ../public/embed-style.css",
     "start": "next start",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
