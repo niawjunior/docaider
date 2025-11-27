@@ -74,6 +74,7 @@ export function EmbedChatBox({
 
   const [positionState, setPositionState] = useState({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const toggleChat = () => {
     if (isDraggingRef.current) return;
@@ -92,10 +93,35 @@ export function EmbedChatBox({
   }, []);
 
   const handleDragEnd = (_: any, info: any) => {
-    const newPosition = {
-      x: positionState.x + info.offset.x,
-      y: positionState.y + info.offset.y,
-    };
+    // Calculate new position based on drag offset
+    let newX = positionState.x + info.offset.x;
+    let newY = positionState.y + info.offset.y;
+
+    // Boundary check
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+
+      // Calculate the potential new bounding box
+      // Note: rect already includes the drag offset because the element moved
+      
+      // Check horizontal bounds
+      if (rect.left < 0) {
+        newX += -rect.left; // Push right
+      } else if (rect.right > windowWidth) {
+        newX -= (rect.right - windowWidth); // Push left
+      }
+
+      // Check vertical bounds
+      if (rect.top < 0) {
+        newY += -rect.top; // Push down
+      } else if (rect.bottom > windowHeight) {
+        newY -= (rect.bottom - windowHeight); // Push up
+      }
+    }
+
+    const newPosition = { x: newX, y: newY };
     setPositionState(newPosition);
     localStorage.setItem("docaider-chat-position", JSON.stringify(newPosition));
     
@@ -107,6 +133,7 @@ export function EmbedChatBox({
 
   return (
     <motion.div
+      ref={containerRef}
       drag
       dragMomentum={false}
       onDragStart={() => {

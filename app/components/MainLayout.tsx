@@ -215,7 +215,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
 
       <main className=" py-2 min-h-[calc(100vh-120px)]">{children}</main>
       <div className="hidden md:block">
-        <script src={`${process.env.NEXT_PUBLIC_KB_URL}/embed.js`} data-kb-id="c72b3620-13f3-4b2f-99c2-e34be3f37fe5" data-primary-color="#7C3AED" data-text-color="#FFFFFF" data-position="bottom-right" data-welcome-message="Hi there! How can I help you with your questions?" data-button-icon="chat" data-button-text="Chat with AI" data-title="AI Assistant" data-show-button-text="true" data-height="500px" data-width="350px"></script>
+        {/* <script src={`${process.env.NEXT_PUBLIC_KB_URL}/embed.js`} data-kb-id="c72b3620-13f3-4b2f-99c2-e34be3f37fe5" data-primary-color="#7C3AED" data-text-color="#FFFFFF" data-position="bottom-right" data-welcome-message="Hi there! How can I help you with your questions?" data-button-icon="chat" data-button-text="Chat with AI" data-title="AI Assistant" data-show-button-text="true" data-height="500px" data-width="350px"></script> */}
       </div>
       <footer className="w-full bg-background border-t border-border px-6 py-3 text-muted-foreground text-sm">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
