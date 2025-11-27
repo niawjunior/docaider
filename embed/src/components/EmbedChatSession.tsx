@@ -203,7 +203,7 @@ export function EmbedChatSession({
             <div>
                 <h1 className="font-extrabold text-xl tracking-wide">{title}</h1>
                 <div className="flex items-center gap-1 text-xs font-semibold bg-[var(--theme-text-secondary)] bg-opacity-40 px-2 py-0.5 rounded-full w-fit justify-center">
-                    <span className="min-w-2 min-h-2 bg-green-300 rounded-full animate-pulse"></span>
+                    <span className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></span>
                     Online
                 </div>
             </div>
