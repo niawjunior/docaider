@@ -312,7 +312,7 @@ console.log(isInitializing)
       </Conversation>
 
       {/* Quick Actions Bar */}
-      <div className="px-4 py-2 bg-white flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] shrink-0 z-20">
+      {/* <div className="px-4 py-2 bg-white flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] shrink-0 z-20">
         <button onClick={() => handleQuickAction('story')} className="flex-shrink-0 bg-white hover:bg-purple-50 text-purple-600 border border-purple-200 px-4 py-2 rounded-full text-xs font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Magic Story ✨</span>
@@ -325,7 +325,7 @@ console.log(isInitializing)
             <Smile className="w-3.5 h-3.5" />
             <span>Tell a Joke ✨</span>
         </button>
-      </div>
+      </div> */}
 
       {/* Error Message */}
       {error && (
