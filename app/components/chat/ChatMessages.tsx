@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { FaRegFaceSadCry } from "react-icons/fa6";
 import { IoArrowDownSharp } from "react-icons/io5";
@@ -33,9 +33,9 @@ export default function ChatMessages({
   const bottomRef = externalBottomRef || internalBottomRef;
 
   // Handle scrolling to bottom
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, [bottomRef]);
 
   // No longer need to update parent component
 
@@ -64,7 +64,7 @@ export default function ChatMessages({
     if (messages.length > 0) {
       scrollToBottom();
     }
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
   return (
     <div className="relative">
