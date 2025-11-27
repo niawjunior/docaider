@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack ",
-    "build": "next build",
+    "build": "npm run build:embed && next build",
     "build:embed": "cd embed && npm run build && cp dist/style.css ../public/embed-style.css && npm run build:lib",
     "start": "next start",
     "db:generate": "drizzle-kit generate",
