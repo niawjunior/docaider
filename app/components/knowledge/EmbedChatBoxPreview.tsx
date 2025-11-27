@@ -1,6 +1,24 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+
+const Typewriter = ({ text, delay = 50 }: { text: string; delay?: number }) => {
+  const [currentText, setCurrentText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setCurrentText((prev) => prev + text[currentIndex]);
+        setCurrentIndex((prev) => prev + 1);
+      }, delay);
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, delay, text]);
+
+  return <span>{currentText}</span>;
+};
+
 import { MessageCircle, X, Bot } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
@@ -398,21 +416,68 @@ export function EmbedChatBoxPreview({
         <div className="flex justify-end">
           <button
             onClick={toggleChat}
-            className={`shadow-lg ${
-              showButtonText ? "rounded-lg px-4 py-2" : "rounded-full"
-            } flex items-center justify-center transition-opacity hover:opacity-90 border-none outline-none`}
+            className={`shadow-none bg-transparent p-0 flex items-center justify-center transition-all hover:scale-105 border-none outline-none`}
             style={{
-              backgroundColor: primaryColor,
-              color: textColor,
-              width: showButtonText ? "auto" : iconSize,
-              height: showButtonText ? "auto" : iconSize,
+              width: "auto",
+              height: "auto",
             }}
           >
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              {showButtonText && (
-                <span className="font-medium">{buttonText}</span>
-              )}
+            <div className="flex items-end gap-4">
+              {/* Typing Bubble */}
+              <div className="bg-white px-4 py-2 rounded-2xl rounded-br-none shadow-lg mb-4 max-w-[200px] hidden md:block">
+                <p className="text-sm text-gray-700 font-medium">
+                  <Typewriter text="สวัสดีครับ มีอะไรให้ผมช่วยมั้ยครับ" />
+                </p>
+              </div>
+
+              {/* Avatar */}
+              <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-blue-200 animate-[bounce_2s_infinite]">
+                <svg viewBox="0 0 100 100" className="w-10 h-10">
+                  <circle cx="50" cy="50" r="40" fill="#FFDFC4"></circle>
+                  <path
+                    d="M10,50 Q10,10 50,10 Q90,10 90,50"
+                    fill="#8B4513"
+                    stroke="#5A2D0C"
+                    strokeWidth="2"
+                  ></path>
+                  <path
+                    d="M10,50 Q20,30 30,45 Q40,25 50,45 Q60,25 70,45 Q80,30 90,50"
+                    fill="#8B4513"
+                  ></path>
+                  <path d="M10,40 Q50,-10 90,40 Z" fill="#4299E1"></path>
+                  <rect
+                    x="25"
+                    y="35"
+                    width="50"
+                    height="10"
+                    rx="5"
+                    fill="#2B6CB0"
+                  ></rect>
+                  <circle cx="35" cy="60" r="4" fill="#333"></circle>
+                  <circle cx="65" cy="60" r="4" fill="#333"></circle>
+                  <circle
+                    cx="25"
+                    cy="70"
+                    r="5"
+                    fill="#FFB6C1"
+                    opacity="0.6"
+                  ></circle>
+                  <circle
+                    cx="75"
+                    cy="70"
+                    r="5"
+                    fill="#FFB6C1"
+                    opacity="0.6"
+                  ></circle>
+                  <path
+                    d="M40,75 Q50,85 60,75"
+                    fill="none"
+                    stroke="#333"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  ></path>
+                </svg>
+              </div>
             </div>
           </button>
         </div>
