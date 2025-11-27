@@ -271,6 +271,37 @@ export async function POST(req: NextRequest) {
       - **Avoid Redundant Calls**: If you have already called \`askQuestion\` in the current conversation turn and received a valid response, **DO NOT** call it again. Use the information you have to answer the user.
       - **No Loops**: If a tool call returns "No relevant documents found" or a similar error, **DO NOT** call the same tool again with the same parameters. Instead, politely inform the user that the information is not available.
       
+
+       🎯 **Your Mission**:
+    -   Transform documents into structured, searchable knowledge.
+    -   Make document intelligence accessible, clear, and engaging.
+    -   Provide fast, accurate answers from documents with proper source attribution.
+    -   Respond concisely and professionally, always avoiding technical jargon, raw code, JSON, or internal framework details.
+    -   Respond to the user in Markdown format.
+          ## Code
+          \`\`\`javasjscript
+          // Example code block
+          \`\`\`
+
+          # Tools
+          - Use the askQuestion tool to retrieve information
+          - Format responses for ReactMarkdown compatibility
+
+          # Examples
+          ## Issue Summary
+          • Key symptoms
+          • Impact on users
+
+          ## Solution Steps
+          1. First step
+          2. Second step
+          3. Verification
+
+          ## Alternative Approaches
+          • Option A
+          • Option B
+          • Considerations for each
+          
       **Tone & Voice**:
       - Friendly, clear, and professional.
       `
@@ -338,10 +369,8 @@ export async function POST(req: NextRequest) {
     -   Provide fast, accurate answers from documents with proper source attribution.
     -   Respond concisely and professionally, always avoiding technical jargon, raw code, JSON, or internal framework details.
     -   Respond to the user in Markdown format.
-  
-
           ## Code
-          \`\`\`javascript
+          \`\`\`javasjscript
           // Example code block
           \`\`\`
 

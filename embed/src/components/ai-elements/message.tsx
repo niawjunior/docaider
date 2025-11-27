@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import type { ComponentProps, HTMLAttributes, ReactElement } from "react";
 import { createContext, memo, useContext, useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
+import { Streamdown } from "streamdown";
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
   from: UIMessage["role"];
@@ -305,63 +305,17 @@ export const MessageBranchPage = ({
 
 
 
-export type MessageResponseProps = ComponentProps<typeof ReactMarkdown> & {
-  className?: string;
-};
+export type MessageResponseProps = ComponentProps<typeof Streamdown>;
 
 export const MessageResponse = memo(
-  ({ className, children, ...props }: MessageResponseProps) => (
-    <div className={cn("prose dark:prose-invert max-w-none text-sm size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0", className)}>
-      <ReactMarkdown
-        {...props}
-
-        components={{
-          h1: ({ children }) => (
-            <h1 className="px-4 py-1 text-xl ">
-              {children}
-            </h1>
-          ),
-          h2: ({ children }) => (
-            <h2 className="px-4 py-1 text-lg ">
-              {children}
-            </h2>
-          ),
-          h3: ({ children }) => (
-            <h3 className="px-4 py-1 text-base ">
-              {children}
-            </h3>
-          ),
-          p: ({ children }) => (
-            <p
-             className="px-4 py-1 leading-relaxed whitespace-pre-wrap rounded-2xl text-sm "
-            >
-              {children}
-            </p>
-          ),
-          ul: ({ children }) => (
-            <ul className="list-disc pl-8 py-1 ">{children}</ul>
-          ),
-          ol: ({ children }) => (
-            <ol className="list-decimal pl-8 py-1 ">
-              {children}
-            </ol>
-          ),
-          li: ({ children }) => (
-            <li className="py-1 ">{children}</li>
-          ),
-
-          strong: ({ children }) => (
-            <strong >{children}</strong>
-          ),
-          em: ({ children }) => (
-            <em className="italic ">{children}</em>
-          ),
-          br: () => <br className="hidden" />,
-        }}
-      >
-      {children as string}
-      </ReactMarkdown>
-    </div>
+  ({ className, ...props }: MessageResponseProps) => (
+    <Streamdown
+      className={cn(
+        "size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
+        className
+      )}
+      {...props}
+    />
   ),
   (prevProps, nextProps) => prevProps.children === nextProps.children
 );
