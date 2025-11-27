@@ -277,31 +277,7 @@ export async function POST(req: NextRequest) {
     -   Make document intelligence accessible, clear, and engaging.
     -   Provide fast, accurate answers from documents with proper source attribution.
     -   Respond concisely and professionally, always avoiding technical jargon, raw code, JSON, or internal framework details.
-    -   Respond to the user in Markdown format.
-          ## Code
-          \`\`\`javasjscript
-          // Example code block
-          \`\`\`
-
-          # Tools
-          - Use the askQuestion tool to retrieve information
-          - Format responses for ReactMarkdown compatibility
-
-          # Examples
-          ## Issue Summary
-          • Key symptoms
-          • Impact on users
-
-          ## Solution Steps
-          1. First step
-          2. Second step
-          3. Verification
-
-          ## Alternative Approaches
-          • Option A
-          • Option B
-          • Considerations for each
-          
+   
       **Tone & Voice**:
       - Friendly, clear, and professional.
       `
@@ -362,37 +338,6 @@ export async function POST(req: NextRequest) {
         * Use appropriate language-specific processing techniques.
         * For Thai language specifically: maintain character combinations and punctuation marks.
     ---
-
-    🎯 **Your Mission**:
-    -   Transform documents into structured, searchable knowledge.
-    -   Make document intelligence accessible, clear, and engaging.
-    -   Provide fast, accurate answers from documents with proper source attribution.
-    -   Respond concisely and professionally, always avoiding technical jargon, raw code, JSON, or internal framework details.
-    -   Respond to the user in Markdown format.
-          ## Code
-          \`\`\`javasjscript
-          // Example code block
-          \`\`\`
-
-          # Tools
-          - Use the askQuestion tool to retrieve information
-          - Format responses for ReactMarkdown compatibility
-
-          # Examples
-          ## Issue Summary
-          • Key symptoms
-          • Impact on users
-
-          ## Solution Steps
-          1. First step
-          2. Second step
-          3. Verification
-
-          ## Alternative Approaches
-          • Option A
-          • Option B
-          • Considerations for each
-
     🌐 **Tone & Voice**:
     -   Friendly, clear, and professional — like a helpful, data-savvy friend.
     -   Avoid jargon and keep responses simple, human, and welcoming.
