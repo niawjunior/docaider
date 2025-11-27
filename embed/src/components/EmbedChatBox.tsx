@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const Typewriter = ({ text, delay = 50 }: { text: string; delay?: number }) => {
   const [currentText, setCurrentText] = useState("");
@@ -72,12 +72,52 @@ export function EmbedChatBox({
     "top-left": "top-4 left-4",
   };
 
+  const [positionState, setPositionState] = useState({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+
   const toggleChat = () => {
+    if (isDraggingRef.current) return;
     setIsOpen(!isOpen);
   };
 
+  useEffect(() => {
+    const savedPosition = localStorage.getItem("docaider-chat-position");
+    if (savedPosition) {
+      try {
+        setPositionState(JSON.parse(savedPosition));
+      } catch (e) {
+        console.error("Failed to parse saved position", e);
+      }
+    }
+  }, []);
+
+  const handleDragEnd = (_: any, info: any) => {
+    const newPosition = {
+      x: positionState.x + info.offset.x,
+      y: positionState.y + info.offset.y,
+    };
+    setPositionState(newPosition);
+    localStorage.setItem("docaider-chat-position", JSON.stringify(newPosition));
+    
+    // Reset dragging flag after a short delay to prevent click trigger
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 100);
+  };
+
   return (
-    <div className={`fixed ${positionClasses[position]} z-[999999]`}>
+    <motion.div
+      drag
+      dragMomentum={false}
+      onDragStart={() => {
+        isDraggingRef.current = true;
+      }}
+      onDragEnd={handleDragEnd}
+      initial={positionState}
+      animate={positionState}
+      className={`fixed ${positionClasses[position]} z-[999999]`}
+      style={{ x: positionState.x, y: positionState.y }}
+    >
       <motion.div
         initial="closed"
         animate={isOpen ? "open" : "closed"}
@@ -248,6 +288,6 @@ export function EmbedChatBox({
           </div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
