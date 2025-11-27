@@ -1,10 +1,10 @@
-import { convertToModelMessages, stepCountIs, streamText, UIMessage } from "ai";
+import { convertToModelMessages, stepCountIs, streamText, UIMessage, tool } from "ai";
 import { openai } from "@ai-sdk/openai";
 
 import { NextRequest } from "next/server";
 
 import { createClient, createServiceClient } from "../../utils/supabase/server";
-import { askQuestionTool, createAskQuestionTool } from "@/app/tools/llm-tools";
+import { askQuestionTool, createAskQuestionTool, finishTool } from "@/app/tools/llm-tools";
 import { createReadCurrentPageTool } from "@/app/tools/embed-tools";
 import { db } from "../../../db/config";
 import {
@@ -217,8 +217,9 @@ export async function POST(req: NextRequest) {
           knowledgeBaseId,
           isEmbed: true,
         }),
+        finish: finishTool,
       }
-    : { askQuestion: askQuestionTool };
+    : { askQuestion: askQuestionTool, finish: finishTool };
   if (isEmbed && (activeTool === "current-page" || activeTool === "auto") && pageContent) {
     if (activeTool === "auto") {
       // If auto, allow both tools
@@ -228,11 +229,13 @@ export async function POST(req: NextRequest) {
           isEmbed: true,
         }),
         readCurrentPage: createReadCurrentPageTool(pageContent),
+        finish: finishTool,
       };
     } else {
       // If specifically current-page, only allow that
       tools = {
         readCurrentPage: createReadCurrentPageTool(pageContent),
+        finish: finishTool,
       };
     }
   }
@@ -261,6 +264,12 @@ export async function POST(req: NextRequest) {
       - If the user asks "what is this page about?" or "summarize this page", call \`readCurrentPage\`.
       - Always be polite and helpful.
       - If the page content is empty or unreadable, inform the user politely.
+
+      **TOOL USAGE: ASK QUESTION (Knowledge Base)**
+      - You also have access to the \`askQuestion\` tool to query the knowledge base.
+      - **Use this tool** if the user's question is about the documents in the knowledge base, rather than the current page.
+      - **Avoid Redundant Calls**: If you have already called \`askQuestion\` in the current conversation turn and received a valid response, **DO NOT** call it again. Use the information you have to answer the user.
+      - **No Loops**: If a tool call returns "No relevant documents found" or a similar error, **DO NOT** call the same tool again with the same parameters. Instead, politely inform the user that the information is not available.
       
       **Tone & Voice**:
       - Friendly, clear, and professional.
@@ -369,7 +378,8 @@ export async function POST(req: NextRequest) {
     3.  If multiple tools could apply, prioritize the most specific and relevant one.
     4.  If no tool is suitable, respond directly using natural language.
     ‼️ **IMPORTANT Tool Usage Rules**:
-    * **Document Questions (askQuestion)**: If the user asks about a document AND documents are available, you **MUST** call the \`askQuestion\` tool.
+    * **Document Questions (askQuestion)**: If the user asks about a document AND documents are available, you should call the \`askQuestion\` tool to retrieve information.
+    * **Avoid Redundant Calls**: If you have already called \`askQuestion\` in the current conversation turn and received a valid response, **DO NOT** call it again. Use the information you have to answer the user.
     * **No Loops**: If a tool call returns "No relevant documents found" or a similar error, **DO NOT** call the same tool again with the same parameters. Instead, politely inform the user that the information is not available.
     * **"This Page" Questions**: If the user asks about "this page", "current page", or "what is on the screen", and the \`readCurrentPage\` tool is available, you **MUST** use \`readCurrentPage\` instead of \`askQuestion\`.
     * **Credit Unavailability**: If the credit balance is 0, politely inform the user that tools cannot be used because they don't have enough credit.
@@ -531,10 +541,14 @@ export async function POST(req: NextRequest) {
     tools,
     activeTools:
       !isEmbed && userConfigData?.[0]?.useDocument
-        ? ["askQuestion"]
+        ? ["askQuestion", "finish"]
         : undefined,
     system: systemPrompt,
-    stopWhen: stepCountIs(5),
+    stopWhen: (result: any) => {
+      const steps = result.steps;
+      const lastStep = steps?.[steps.length - 1];
+      return !!lastStep?.toolCalls?.some((tc: any) => tc.toolName === "finish");
+    },
     messages: convertToModelMessages(messages),
     onStepFinish: async (response) => {
       // Only update credits for non-embed users

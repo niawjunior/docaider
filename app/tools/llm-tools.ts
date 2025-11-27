@@ -148,3 +148,13 @@ export const createAskQuestionTool = (config?: {
   });
 
 export const askQuestionTool = createAskQuestionTool();
+
+export const finishTool = tool({
+  description: "A tool for the model to call when it has finished its work.",
+  inputSchema: z.object({
+    answer: z.string().describe("The final answer to the user's question."),
+  }),
+  execute: async ({ answer }) => {
+    return answer;
+  },
+});
