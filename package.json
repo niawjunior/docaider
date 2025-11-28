@@ -100,6 +100,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-resizable": "^3.0.8",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "@types/wav": "^1.0.4",
     "@vitejs/plugin-react": "^5.0.1",
     "drizzle-kit": "^0.31.4",
