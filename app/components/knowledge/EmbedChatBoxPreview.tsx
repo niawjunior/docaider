@@ -48,16 +48,6 @@ export default function EmbedChatBoxPreview({
 
   useEffect(() => {
     setMounted(true);
-
-    // Load the CSS file
-    const link = document.createElement("link");
-    link.href = "/embed-style.css";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-
-    return () => {
-      document.head.removeChild(link);
-    };
   }, []);
 
   if (!mounted) return null;

@@ -1,64 +1,59 @@
-# docaider-embed
+# Docaider Embed Widget
 
-The official embed chat widget for Docaider. Easily add an AI-powered chat widget to your website, compatible with HTML, React, and Vue.
+[![npm version](https://img.shields.io/npm/v/docaider-embed.svg)](https://www.npmjs.com/package/docaider-embed)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Website](https://img.shields.io/badge/Website-docaider.com-blue)](https://www.docaider.com)
 
-## Features
+The official AI-powered chat widget for **[Docaider](https://www.docaider.com)**. Seamlessly integrate a smart knowledge base assistant into your website with a few lines of code.
 
-- 🤖 AI-powered chat interface
-- 🎨 Customizable theme and colors
-- 📦 Lightweight and easy to integrate
-- ⚛️ React and Vue support
-- 🛡️ Shadow DOM style isolation
-- 🎮 Programmatic control API
+Compatible with **HTML**, **React**, **Vue**, and any other framework.
 
-## Installation
+## ✨ Features
 
-```bash
-npm install docaider-embed
-```
+- 🤖 **AI-Powered**: Instant answers from your knowledge base.
+- 🎨 **Customizable**: Control colors, position, and branding.
+- ⚛️ **Framework Agnostic**: First-class support for React and Vue.
+- 🛡️ **Shadow DOM**: Styles are isolated and won't conflict with your site.
+- 📱 **Responsive**: Optimized for desktop and mobile.
+- 🎮 **Control API**: Open, close, and interact programmatically.
 
-## Usage
+---
 
-### 1. HTML (Script Tag)
+## 🚀 Quick Start (HTML)
 
-Add the following script tag to your HTML page. The widget will automatically initialize.
+The fastest way to get started is using the pre-built script. Add this to your `<body>` tag:
 
 ```html
 <script 
   src="https://unpkg.com/docaider-embed/dist/embed.js"
   data-kb-id="YOUR_KNOWLEDGE_BASE_ID"
   data-title="AI Assistant"
+  data-theme="blue"
   data-position="bottom-right">
 </script>
 ```
 
-#### Global API
+That's it! The widget will appear on your site.
 
-You can control the widget programmatically using the global `window.Docaider` object:
+---
 
-```javascript
-// Open the chat
-window.Docaider.open();
+## 📦 Installation (NPM)
 
-// Close the chat
-window.Docaider.close();
+For React, Vue, or modern JavaScript applications:
 
-// Toggle the chat
-window.Docaider.toggle();
-
-// Set the welcome message bubble
-window.Docaider.setWelcomeMessage("Hello! How can I help?");
-
-// Set the input field text
-window.Docaider.setMessage("I have a question about pricing");
-
-// Send a message programmatically
-window.Docaider.sendMessage("What are your pricing plans?");
+```bash
+npm install docaider-embed
+# or
+yarn add docaider-embed
+# or
+pnpm add docaider-embed
 ```
 
-### 2. React
+---
 
-Import the `EmbedChatBox` component. Styles are injected automatically via Shadow DOM.
+## ⚛️ React Usage
+
+Import the component and use it in your app. Styles are injected automatically.
 
 ```tsx
 import { useRef } from "react";
@@ -69,23 +64,30 @@ function App() {
 
   return (
     <>
-      <button onClick={() => chatRef.current?.open()}>Open Chat</button>
-      
+      <button onClick={() => chatRef.current?.open()}>
+        Open Chat
+      </button>
+
       <EmbedChatBox 
         ref={chatRef}
         knowledgeBaseId="YOUR_KNOWLEDGE_BASE_ID"
-        src="https://your-docaider-instance.com"
+        // Optional: Override the default API endpoint
+        src="https://your-docaider-instance.com" 
+        theme="blue"
+        position="bottom-right"
       />
     </>
   );
 }
 ```
 
-### 3. Vue
+---
 
-You can use the widget as a global plugin (recommended) or import it locally.
+## 🟢 Vue Usage
 
-#### Method 1: Global Plugin (Recommended)
+We provide a dedicated Vue plugin and composable for the best developer experience.
+
+### 1. Global Registration (Recommended)
 
 Register the plugin in your `main.ts`:
 
@@ -99,77 +101,79 @@ app.use(DocaiderEmbed);
 app.mount("#app");
 ```
 
-Then use the component anywhere without importing:
+Then use the component anywhere:
 
 ```vue
 <template>
   <VueEmbedChatBox
     knowledgeBaseId="YOUR_KNOWLEDGE_BASE_ID"
-    src="https://your-docaider-instance.com"
+    theme="green"
   />
 </template>
 ```
 
-#### Method 2: Local Import
+### 2. Programmatic Control (Composable)
 
-```vue
-<script setup lang="ts">
-import { VueEmbedChatBox } from 'docaider-embed/vue';
-</script>
-
-<template>
-  <VueEmbedChatBox
-    knowledgeBaseId="YOUR_KNOWLEDGE_BASE_ID"
-    src="https://your-docaider-instance.com"
-  />
-</template>
-```
-
-#### Programmatic Control (Composable)
-
-Control the widget from **any component** using the `useDocaiderEmbed` composable:
+Control the widget from **any component** (even without a ref) using `useDocaiderEmbed`:
 
 ```vue
 <script setup lang="ts">
 import { useDocaiderEmbed } from "docaider-embed/vue";
 
+// Control the global chat instance
 const { open, close, toggle, setWelcomeMessage } = useDocaiderEmbed();
 
-const handleSupport = () => {
-  setWelcomeMessage("Hello! How can I help with billing?");
+const openSupport = () => {
+  setWelcomeMessage("Hi! How can I help you with billing today?");
   open();
 };
 </script>
 
 <template>
-  <button @click="handleSupport">Contact Support</button>
+  <button @click="openSupport">Contact Support</button>
 </template>
 ```
 
-#### TypeScript Support
+---
 
-If you need to type a ref manually:
+## 📚 API Reference
 
-```typescript
-import { type VueEmbedChatBoxRef } from "docaider-embed/vue";
-const chatRef = ref<VueEmbedChatBoxRef | null>(null);
-```
-
-## Props / Attributes
+### Props / Attributes
 
 | Prop (React/Vue) | Attribute (HTML) | Type | Default | Description |
 |------------------|------------------|------|---------|-------------|
 | `knowledgeBaseId` | `data-kb-id` | `string` | **Required** | Your Docaider Knowledge Base ID |
-| `src` | `src` (origin) | `string` | **Required** | URL of your Docaider instance |
-| `chatboxTitle` | `data-title` | `string` | "AI Assistant" | Title in the chat header |
-| `position` | `data-position` | `string` | "bottom-right" | "bottom-right", "bottom-left", "top-right", "top-left" |
-| `theme` | `data-theme` | `string` | "blue" | "blue", "gray", "green" |
-| `welcomeMessage` | `data-welcome-message` | `string` | "Hello..." | Initial message bubble |
-| `placeholder` | `data-placeholder` | `string` | "Ask a question..." | Input placeholder text |
-| `width` | `data-width` | `string` | "350px" | Width of the chat window |
-| `height` | `data-height` | `string` | "500px" | Height of the chat window |
+| `src` | `src` | `string` | `undefined` | Custom Docaider instance URL (if self-hosted) |
+| `chatboxTitle` | `data-title` | `string` | `"AI Assistant"` | Title displayed in the header |
+| `position` | `data-position` | `string` | `"bottom-right"` | `bottom-right`, `bottom-left`, `top-right`, `top-left` |
+| `theme` | `data-theme` | `string` | `"blue"` | `blue`, `gray`, `green`, `orange`, `purple` |
+| `welcomeMessage` | `data-welcome-message` | `string` | `"Hello..."` | Initial message bubble text |
+| `placeholder` | `data-placeholder` | `string` | `"Ask a question..."` | Input field placeholder |
+| `width` | `data-width` | `string` | `"350px"` | Width of the chat window |
+| `height` | `data-height` | `string` | `"500px"` | Height of the chat window |
+| `logo` | `data-logo` | `string` | `undefined` | URL to a custom logo image |
 
+### Instance Methods
+
+Methods available on the ref (React/Vue) or `window.Docaider` (HTML):
+
+- **`open()`**: Opens the chat window.
+- **`close()`**: Closes the chat window.
+- **`toggle()`**: Toggles the open/closed state.
+- **`setWelcomeMessage(msg: string)`**: Updates the welcome message bubble immediately.
+- **`setMessage(msg: string)`**: Sets the text in the input field.
+- **`sendMessage(msg: string)`**: Programmatically sends a message as the user.
+
+---
+
+## 🔗 Links
+
+- **Website**: [https://www.docaider.com](https://www.docaider.com)
+- **Documentation**: [https://docs.docaider.com](https://docs.docaider.com)
+- **NPM Package**: [https://www.npmjs.com/package/docaider-embed](https://www.npmjs.com/package/docaider-embed)
+
+---
 
 ## License
 
-MIT
+MIT © [Docaider](https://www.docaider.com)

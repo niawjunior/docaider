@@ -1,8 +1,7 @@
 import { useRef, useState, useLayoutEffect, forwardRef } from "react";
 import { createPortal } from "react-dom";
-import { EmbedChatBox, type EmbedChatBoxProps, type EmbedChatBoxRef } from "./EmbedChatBox";
-// @ts-ignore
-import styles from "../App.css?inline";
+import { styles } from "@/generated-styles";
+import { EmbedChatBox, type EmbedChatBoxRef, type EmbedChatBoxProps } from "./EmbedChatBox";
 
 export const ShadowEmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>((props, ref) => {
   const hostRef = useRef<HTMLDivElement>(null);

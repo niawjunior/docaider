@@ -1,6 +1,6 @@
 {
   "name": "docaider-embed",
-  "version": "0.0.21",
+  "version": "0.0.25",
   "description": "AI-powered embed chat widget for Docaider",
   "keywords": [
     "ai",
@@ -17,7 +17,8 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "exports": {
     ".": {
@@ -35,7 +36,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:lib": "vite build && vite build -c vite.lib.config.ts && tsc -p tsconfig.build.json && cp ../public/embed.css dist/style.css",
+    "build:styles": "node scripts/build-styles.js",
+    "build:lib": "npm run build:styles && vite build && vite build -c vite.lib.config.ts && tsc -p tsconfig.build.json && cp ../public/embed.css dist/style.css",
     "lint": "eslint .",
     "preview": "vite preview",
     "prepublishOnly": "npm run build:lib"
@@ -69,8 +71,6 @@
     "lucide-react": "^0.540.0",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^15.6.3",
-    "rehype-highlight": "^7.0.2",
-    "streamdown": "^1.0.12",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.12",
     "tw-animate-css": "^1.3.7",
