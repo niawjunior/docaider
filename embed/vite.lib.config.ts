@@ -29,17 +29,24 @@ export default defineConfig({
       formats: ["es", "cjs"],
     },
     rollupOptions: {
-      external: [
-        "react",
-        "react-dom",
-        "react-dom/client",
-        "react-dom/server",
-        "react/jsx-runtime",
-        "framer-motion",
-        "lucide-react",
-        "vue",
-        "katex",
-      ],
+      external: (id) => {
+        // Externalize all katex imports (including deep imports like katex/dist/...)
+        if (id === 'katex' || id.startsWith('katex/')) {
+          return true;
+        }
+        // Externalize other peer dependencies
+        const externalDeps = [
+          'react',
+          'react-dom',
+          'react-dom/client',
+          'react-dom/server',
+          'react/jsx-runtime',
+          'framer-motion',
+          'lucide-react',
+          'vue',
+        ];
+        return externalDeps.some(dep => id === dep || id.startsWith(dep + '/'));
+      },
       output: {
         globals: {
           react: "React",

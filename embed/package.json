@@ -1,6 +1,6 @@
 {
   "name": "docaider-embed",
-  "version": "0.0.19",
+  "version": "0.0.21",
   "description": "AI-powered embed chat widget for Docaider",
   "keywords": [
     "ai",
@@ -35,7 +35,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:lib": "vite build -c vite.lib.config.ts && tsc -p tsconfig.build.json",
+    "build:lib": "vite build && vite build -c vite.lib.config.ts && tsc -p tsconfig.build.json && cp ../public/embed.css dist/style.css",
     "lint": "eslint .",
     "preview": "vite preview",
     "prepublishOnly": "npm run build:lib"
