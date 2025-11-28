@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     vue(),
     tailwindcss(),
-  ],
+  ] as any,
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),

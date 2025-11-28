@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
       "process.env": env, // Map process.env to the loaded environment variables
       "process.env.NODE_ENV": JSON.stringify(mode),
     },
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss()] as any,
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
