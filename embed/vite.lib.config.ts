@@ -10,6 +10,9 @@ export default defineConfig({
     vue(),
     tailwindcss(),
   ] as any,
+  optimizeDeps: {
+    exclude: ["katex"],
+  },
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
