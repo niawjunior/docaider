@@ -2,6 +2,9 @@
   "name": "mcp_client",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "embed"
+  ],
   "scripts": {
     "dev": "next dev --turbopack ",
     "build": "npm run build:embed && next build",
