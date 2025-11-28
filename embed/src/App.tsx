@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { EmbedChatBox } from "./components/EmbedChatBox";
+import { useState, useEffect, useRef } from "react";
+import { EmbedChatBox, type EmbedChatBoxRef } from "./components/EmbedChatBox";
 import "./App.css";
 
 function App() {
@@ -7,6 +7,7 @@ function App() {
   const [chatId, setChatId] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(false);
   const [initError, setInitError] = useState<Error | null>(null);
+  const chatBoxRef = useRef<EmbedChatBoxRef>(null);
 
   const [documents, setDocuments] = useState<{ title: string }[]>([]);
 
@@ -20,6 +21,21 @@ function App() {
     } else {
       console.error("Docaider ChatConfig not found in window object");
     }
+
+    // Expose global API
+    window.Docaider = {
+      open: () => chatBoxRef.current?.open(),
+      close: () => chatBoxRef.current?.close(),
+      toggle: () => chatBoxRef.current?.toggle(),
+      setWelcomeMessage: (message: string) => chatBoxRef.current?.setWelcomeMessage(message),
+      setMessage: (message: string) => chatBoxRef.current?.setMessage(message),
+      sendMessage: (message: string) => chatBoxRef.current?.sendMessage(message),
+    };
+
+    return () => {
+      // Cleanup
+      delete (window as any).Docaider;
+    };
   }, []);
 
   // Initialize chat with the API
@@ -77,6 +93,7 @@ function App() {
 
   return (
     <EmbedChatBox
+      ref={chatBoxRef}
       src={config.src}
       knowledgeBaseId={config.knowledgeBaseId}
       chatId={chatId}

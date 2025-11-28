@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { Loader } from "@/components/ai-elements/loader";
@@ -28,6 +28,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { readCurrentPage } from "../utils/page-reader";
 
+export interface EmbedChatSessionRef {
+  setMessage: (message: string) => void;
+  sendMessage: (message: string) => void;
+}
+
 interface EmbedChatSessionProps {
   knowledgeBaseId: string;
   src: string;
@@ -41,7 +46,7 @@ interface EmbedChatSessionProps {
   title?: string;
 }
 
-export function EmbedChatSession({
+export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSessionProps & { onClose?: () => void }>(({
   knowledgeBaseId,
   src,
   chatId,
@@ -52,8 +57,23 @@ export function EmbedChatSession({
   isOpen = false,
   onClose,
   title = "Little Helper",
-}: EmbedChatSessionProps & { onClose?: () => void }) {
+}, ref) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [inputValue, setInputValue] = useState("");
+
+  useImperativeHandle(ref, () => ({
+    setMessage: (message: string) => {
+      setInputValue(message);
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    },
+    sendMessage: (message: string) => {
+      setInputValue("");
+      sendMessage({ text: message });
+    },
+  }));
+
   const [activeTool, setActiveTool] = useState<"auto" | "knowledge-base" | "current-page">("auto");
   const activeToolRef = useRef(activeTool);
   // Update ref when activeTool changes
@@ -98,7 +118,6 @@ export function EmbedChatSession({
     id: chatId,
   });
 
-  const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom of messages when new message is added
@@ -405,4 +424,4 @@ export function EmbedChatSession({
       </div>
     </div>
   );
-}
+});

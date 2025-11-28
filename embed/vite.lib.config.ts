@@ -1,11 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [
     react(),
+    vue(),
     tailwindcss(),
   ],
   resolve: {
@@ -15,9 +17,12 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: resolve(__dirname, "src/index.ts"),
+      entry: {
+        index: resolve(__dirname, "src/index.ts"),
+        vue: resolve(__dirname, "src/vue.ts"),
+      },
       name: "DocaiderEmbed",
-      fileName: (format) => `index.${format === "es" ? "js" : "cjs"}`,
+      fileName: (format, entryName) => `${entryName}.${format === "es" ? "js" : "cjs"}`,
       formats: ["es", "cjs"],
     },
     rollupOptions: {
@@ -27,6 +32,7 @@ export default defineConfig({
         "react/jsx-runtime",
         "framer-motion",
         "lucide-react",
+        "vue",
       ],
       output: {
         globals: {
@@ -34,6 +40,7 @@ export default defineConfig({
           "react-dom": "ReactDOM",
           "framer-motion": "Motion",
           "lucide-react": "Lucide",
+          vue: "Vue",
         },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name?.endsWith(".css")) {
@@ -41,7 +48,12 @@ export default defineConfig({
           }
           return "assets/[name]-[hash][extname]";
         },
-        inlineDynamicImports: true,
+        inlineDynamicImports: false, // Must be false for multi-entry
+        manualChunks: (id) => {
+          if (id.includes("node_modules")) {
+            return "vendor";
+          }
+        },
       },
     },
     emptyOutDir: true,

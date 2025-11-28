@@ -1,25 +1,49 @@
 {
-  "name": "@docaider/embed",
-  "private": true,
-  "version": "0.0.0",
+  "name": "docaider-embed",
+  "version": "0.0.5",
+  "description": "AI-powered embed chat widget for Docaider",
+  "keywords": [
+    "ai",
+    "chat",
+    "embed",
+    "react",
+    "vue",
+    "docaider"
+  ],
+  "author": "Docaider",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./style.css": "./dist/style.css"
+    "./style.css": "./dist/style.css",
+    "./vue": {
+      "types": "./dist/vue.d.ts",
+      "import": "./dist/vue.js",
+      "require": "./dist/vue.cjs"
+    }
   },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:lib": "vite build -c vite.lib.config.ts && tsc -p tsconfig.build.json",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build:lib"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "vue": ">=3"
   },
   "dependencies": {
     "@ai-sdk/react": "^2.0.8",
@@ -42,8 +66,6 @@
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.540.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^15.6.3",
     "rehype-highlight": "^7.0.2",
@@ -57,10 +79,11 @@
   "devDependencies": {
     "@eslint/js": "^9.33.0",
     "@types/node": "^24.3.0",
-    "@types/react": "^19.1.10",
-    "@types/react-dom": "^19.1.7",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@vitejs/plugin-react": "^5.0.0",
+    "@vitejs/plugin-vue": "^6.0.2",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
@@ -68,6 +91,7 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
     "vite": "^7.1.2",
-    "vite-plugin-dts": "^4.5.4"
+    "vite-plugin-dts": "^4.5.4",
+    "vue": "^3.5.25"
   }
 }

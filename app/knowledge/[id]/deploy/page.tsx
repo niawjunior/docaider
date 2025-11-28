@@ -16,7 +16,7 @@ import useSupabaseSession from "@/app/hooks/useSupabaseSession";
 import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
 import GlobalLoader from "@/app/components/GlobalLoader";
 import MainLayout from "@/app/components/MainLayout";
-import { EmbedChatBoxPreview } from "@/app/components/knowledge/EmbedChatBoxPreview";
+import EmbedChatBoxPreview from "@/app/components/knowledge/EmbedChatBoxPreview";
 import { v4 as uuidv4 } from "uuid";
 
 interface EmbedConfig {

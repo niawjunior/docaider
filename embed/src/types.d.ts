@@ -13,6 +13,14 @@ interface DocaiderChatConfig {
 declare global {
   interface Window {
     DocaiderChatConfig: DocaiderChatConfig;
+    Docaider?: {
+      open: () => void;
+      close: () => void;
+      toggle: () => void;
+      setWelcomeMessage: (message: string) => void;
+      setMessage: (message: string) => void;
+      sendMessage: (message: string) => void;
+    };
   }
 }
 

@@ -17,8 +17,6 @@ import App from "../src/App";
   const config = {
     knowledgeBaseId: scriptTag.getAttribute("data-kb-id"),
     src: origin,
-    primaryColor: scriptTag.getAttribute("data-primary-color") || "#0091ff",
-    textColor: scriptTag.getAttribute("data-text-color") || "#FFFFFF",
     position: scriptTag.getAttribute("data-position") || "bottom-right",
     welcomeMessage:
       scriptTag.getAttribute("data-welcome-message") ||
@@ -67,8 +65,6 @@ import App from "../src/App";
   style.textContent = `
     /* Scoped CSS variables for Docaider embed - won't affect host website */
     :host {
-      --primary: ${config.primaryColor};
-      --primary-foreground: ${config.textColor};
       --background: oklch(1 0 0);
       --foreground: oklch(0.145 0 0);
       --card: oklch(1 0 0);

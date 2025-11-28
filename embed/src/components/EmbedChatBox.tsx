@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 
 const Typewriter = ({ text, delay = 50 }: { text: string; delay?: number }) => {
   const [currentText, setCurrentText] = useState("");
@@ -21,7 +21,7 @@ const Typewriter = ({ text, delay = 50 }: { text: string; delay?: number }) => {
 
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Bot, Minus, RefreshCw, FileText } from "lucide-react";
-import { EmbedChatSession } from "./EmbedChatSession";
+import { EmbedChatSession, type EmbedChatSessionRef } from "./EmbedChatSession";
 
 
 export interface EmbedChatBoxProps {
@@ -42,7 +42,16 @@ export interface EmbedChatBoxProps {
   theme?: "blue" | "gray" | "green";
 }
 
-export function EmbedChatBox({
+export interface EmbedChatBoxRef {
+  open: () => void;
+  close: () => void;
+  toggle: () => void;
+  setWelcomeMessage: (message: string) => void;
+  setMessage: (message: string) => void;
+  sendMessage: (message: string) => void;
+}
+
+export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
   knowledgeBaseId,
   src,
   chatId,
@@ -50,7 +59,7 @@ export function EmbedChatBox({
   position = "bottom-right",
   width = "350px",
   height = "500px",
-  welcomeMessage = "Hello! How can I help you today?",
+  welcomeMessage: initialWelcomeMessage = "Hello! How can I help you today?",
   placeholder = "Ask a question...",
   isInitializing = false,
   initError = null,
@@ -58,9 +67,31 @@ export function EmbedChatBox({
   documents = [],
   positionStrategy = "fixed",
   theme = "blue",
-}: EmbedChatBoxProps) {
+}, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showFileList, setShowFileList] = useState(false);
+  const [welcomeMessage, setWelcomeMessageState] = useState(initialWelcomeMessage);
+  const sessionRef = useRef<EmbedChatSessionRef>(null);
+
+  // Update welcome message if prop changes
+  useEffect(() => {
+    setWelcomeMessageState(initialWelcomeMessage);
+  }, [initialWelcomeMessage]);
+
+  useImperativeHandle(ref, () => ({
+    open: () => setIsOpen(true),
+    close: () => setIsOpen(false),
+    toggle: () => setIsOpen((prev) => !prev),
+    setWelcomeMessage: (message: string) => setWelcomeMessageState(message),
+    setMessage: (message: string) => {
+      if (!isOpen) setIsOpen(true);
+      sessionRef.current?.setMessage(message);
+    },
+    sendMessage: (message: string) => {
+      if (!isOpen) setIsOpen(true);
+      sessionRef.current?.sendMessage(message);
+    },
+  }));
 
   // Position classes
   const positionClasses = {
@@ -183,6 +214,7 @@ export function EmbedChatBox({
           {chatId && (
             <EmbedChatSession
               key={chatId}
+              ref={sessionRef}
               knowledgeBaseId={knowledgeBaseId}
               src={src}
               chatId={chatId}
@@ -327,4 +359,4 @@ export function EmbedChatBox({
       </motion.div>
     </div>
   );
-}
+});

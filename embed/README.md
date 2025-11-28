@@ -1,92 +1,128 @@
-# Docaider Embed Chat Widget
+# docaider-embed
 
-## Overview
+The official embed chat widget for Docaider. Easily add an AI-powered chat widget to your website, compatible with HTML, React, and Vue.
 
-The Docaider Embed Chat Widget allows you to easily add an AI-powered chat widget to your website with a single script tag. The widget connects to your Docaider knowledge base and provides an intuitive chat interface for your users to ask questions about your content.
+## Features
 
-## Quick Start
+- 🤖 AI-powered chat interface
+- 🎨 Customizable theme and colors
+- 📦 Lightweight and easy to integrate
+- ⚛️ React and Vue support
+- 🛡️ Shadow DOM style isolation
+- 🎮 Programmatic control API
 
-Add the following script tag to your HTML page:
+## Installation
+
+```bash
+npm install docaider-embed
+```
+
+## Usage
+
+### 1. HTML (Script Tag)
+
+Add the following script tag to your HTML page. The widget will automatically initialize.
 
 ```html
 <script 
-  src="https://your-domain.com/embed.js"
-  data-kb-id="your-knowledge-base-id"
-  data-title="AI Assistant">
+  src="https://unpkg.com/docaider-embed/dist/embed.js"
+  data-kb-id="YOUR_KNOWLEDGE_BASE_ID"
+  data-title="AI Assistant"
+  data-position="bottom-right">
 </script>
 ```
 
-That's it! The chat widget will appear as a floating button in the bottom right corner of your page.
+#### Global API
 
-## Configuration Options
+You can control the widget programmatically using the global `window.Docaider` object:
 
-All configuration is done via data attributes on the script tag. Here are all available options:
+```javascript
+// Open the chat
+window.Docaider.open();
 
-| Attribute | Description | Default Value |
-|-----------|-------------|---------------|
-| `data-kb-id` | **Required.** Your Docaider knowledge base ID | - |
-| `data-title` | Title displayed in the chat header | "AI Assistant" |
-| `data-primary-color` | Primary color for buttons and user messages | "#0091ff" |
-| `data-text-color` | Text color for buttons and user messages | "#FFFFFF" |
-| `data-position` | Position of the chat widget | "bottom-right" |
-| `data-width` | Width of the chat window | "350px" |
-| `data-height` | Height of the chat window | "500px" |
-| `data-welcome-message` | Initial message from the assistant | "Hello! How can I help you today?" |
-| `data-placeholder` | Placeholder text for the input field | "Ask a question..." |
-| `data-button-text` | Text displayed on the chat button | "Chat with AI" |
-| `data-show-button-text` | Whether to show text on the chat button | "false" |
+// Close the chat
+window.Docaider.close();
 
-### Position Options
+// Toggle the chat
+window.Docaider.toggle();
 
-The `data-position` attribute accepts the following values:
-- `bottom-right` (default)
-- `bottom-left`
-- `top-right`
-- `top-left`
+// Set the welcome message bubble
+window.Docaider.setWelcomeMessage("Hello! How can I help?");
 
-## Example with All Options
+// Set the input field text
+window.Docaider.setMessage("I have a question about pricing");
 
-```html
-<script 
-  src="https://your-domain.com/embed.js"
-  data-kb-id="your-knowledge-base-id"
-  data-title="Docaider Assistant"
-  data-primary-color="#7C3AED"
-  data-position="bottom-right"
-  data-width="350px"
-  data-height="500px"
-  data-welcome-message="Hello! How can I help you with your documents today?"
-  data-placeholder="Ask me anything..."
-  data-button-text="Chat with Docaider"
-  data-show-button-text="false"
-  data-text-color="#FFFFFF">
+// Send a message programmatically
+window.Docaider.sendMessage("What are your pricing plans?");
+```
+
+### 2. React
+
+Import the `EmbedChatBox` component. Styles are injected automatically via Shadow DOM.
+
+```tsx
+import { useRef } from "react";
+import { EmbedChatBox, type EmbedChatBoxRef } from "docaider-embed";
+
+function App() {
+  const chatRef = useRef<EmbedChatBoxRef>(null);
+
+  return (
+    <>
+      <button onClick={() => chatRef.current?.open()}>Open Chat</button>
+      
+      <EmbedChatBox 
+        ref={chatRef}
+        knowledgeBaseId="YOUR_KNOWLEDGE_BASE_ID"
+        src="https://your-docaider-instance.com"
+      />
+    </>
+  );
+}
+```
+
+### 3. Vue
+
+Import the `VueEmbedChatBox` component.
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue';
+import { VueEmbedChatBox } from 'docaider-embed/vue';
+
+const chatRef = ref();
+
+const openChat = () => {
+  chatRef.value?.open();
+};
 </script>
+
+<template>
+  <button @click="openChat">Open Chat</button>
+  
+  <VueEmbedChatBox
+    ref="chatRef"
+    knowledgeBaseId="YOUR_KNOWLEDGE_BASE_ID"
+    src="https://your-docaider-instance.com"
+  />
+</template>
 ```
 
-## Development
+## Props / Attributes
 
-This project uses Vite for building the embed script. The build process creates a standalone UMD bundle that includes all dependencies (React, ReactDOM, etc.).
+| Prop (React/Vue) | Attribute (HTML) | Type | Default | Description |
+|------------------|------------------|------|---------|-------------|
+| `knowledgeBaseId` | `data-kb-id` | `string` | **Required** | Your Docaider Knowledge Base ID |
+| `src` | `src` (origin) | `string` | **Required** | URL of your Docaider instance |
+| `chatboxTitle` | `data-title` | `string` | "AI Assistant" | Title in the chat header |
+| `position` | `data-position` | `string` | "bottom-right" | "bottom-right", "bottom-left", "top-right", "top-left" |
+| `theme` | `data-theme` | `string` | "blue" | "blue", "gray", "green" |
+| `welcomeMessage` | `data-welcome-message` | `string` | "Hello..." | Initial message bubble |
+| `placeholder` | `data-placeholder` | `string` | "Ask a question..." | Input placeholder text |
+| `width` | `data-width` | `string` | "350px" | Width of the chat window |
+| `height` | `data-height` | `string` | "500px" | Height of the chat window |
 
-### Dependencies
 
-This project requires the following key dependencies:
+## License
 
-```bash
-# Core dependencies
-npm install @ai-sdk/react ai
-```
-
-- `@ai-sdk/react`: Provides the useChat hook for managing chat state and streaming
-- `ai`: Provides DefaultChatTransport for API integration
-
-### Build Commands
-
-```bash
-# Install dependencies
-npm install
-
-# Build the embed script
-npm run build
-```
-
-The build will output `embed.js` to the `/public` folder.
+MIT

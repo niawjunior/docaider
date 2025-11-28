@@ -1,3 +1,3 @@
-export { EmbedChatBox } from "./components/EmbedChatBox";
-export type { EmbedChatBoxProps } from "./components/EmbedChatBox";
-import "./App.css";
+export { ShadowEmbedChatBox as EmbedChatBox } from "./components/ShadowEmbedChatBox";
+export type { EmbedChatBoxProps, EmbedChatBoxRef } from "./components/EmbedChatBox";
+

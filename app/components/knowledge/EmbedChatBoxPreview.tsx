@@ -1,12 +1,17 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useState, useEffect, useRef } from "react";
+import type { EmbedChatBoxRef } from "docaider-embed";
 
 const EmbedChatBox = dynamic(
-  () => import("@docaider/embed").then((mod) => mod.EmbedChatBox),
-  { ssr: false }
+  () =>
+    import("docaider-embed").then((mod) => ({
+      default: mod.EmbedChatBox,
+    })),
+  {
+    ssr: false
+  }
 );
 
 interface EmbedChatBoxPreviewProps {
@@ -24,7 +29,7 @@ interface EmbedChatBoxPreviewProps {
   theme?: "blue" | "gray" | "green";
 }
 
-export function EmbedChatBoxPreview({
+export default function EmbedChatBoxPreview({
   knowledgeBaseId,
   src,
   chatId,
@@ -38,58 +43,94 @@ export function EmbedChatBoxPreview({
   initError = null,
   theme = "blue",
 }: EmbedChatBoxPreviewProps) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const [shadowRoot, setShadowRoot] = useState<ShadowRoot | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const chatBoxRef = useRef<EmbedChatBoxRef>(null);
 
   useEffect(() => {
-    if (rootRef.current) {
-      const shadow = rootRef.current.shadowRoot || rootRef.current.attachShadow({ mode: "open" });
-      setShadowRoot(shadow);
-    }
+    setMounted(true);
+
+    // Load the CSS file
+    const link = document.createElement("link");
+    link.href = "/embed-style.css";
+    link.rel = "stylesheet";
+    document.head.appendChild(link);
+
+    return () => {
+      document.head.removeChild(link);
+    };
   }, []);
 
-  // We need to set CSS variables for the embed component to use
-  const style = {
-  
-  } as React.CSSProperties;
+  if (!mounted) return null;
 
   return (
-    <div
-      ref={rootRef}
-      className="relative w-full h-full"
-      style={{
-        width: "100%",
-        height: "100%",
-        minHeight: "500px",
-        position: "relative",
-      }}
-    >
-      {shadowRoot &&
-        createPortal(
-          <>
-            <link rel="stylesheet" href="/embed-style.css" />
-            <div style={style}>
-              <EmbedChatBox
-                knowledgeBaseId={knowledgeBaseId}
-                src={src}
-                chatId={chatId}
-                chatboxTitle={chatboxTitle}
-                position={position}
-                width={width}
-                height={height}
-                welcomeMessage={welcomeMessage}
-                placeholder={placeholder}
-                onRefresh={() => {}}
-                documents={[]}
-                isInitializing={isInitializing}
-                initError={initError}
-                positionStrategy="absolute"
-                theme={theme}
-              />
-            </div>
-          </>,
-          shadowRoot as any
-        )}
+    <div className="relative w-full h-full ">
+      <div className="absolute px-2 left-4 top-8 z-10 flex flex-col gap-2">
+
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => chatBoxRef.current?.open()}
+            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+          >
+            Open
+          </button>
+          <button
+            onClick={() => chatBoxRef.current?.close()}
+            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+          >
+            Close
+          </button>
+          <button
+            onClick={() => chatBoxRef.current?.toggle()}
+            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+          >
+            Toggle
+          </button>
+        </div>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => chatBoxRef.current?.setWelcomeMessage("Hello from control!")}
+            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+          >
+            Set Welcome
+          </button>
+          <button
+            onClick={() => chatBoxRef.current?.setMessage("How do I use this?")}
+            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+          >
+            Set Input
+          </button>
+          <button
+            onClick={() => chatBoxRef.current?.sendMessage("Hello! This is a programmatic message.")}
+            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+          >
+            Send Message
+          </button>
+        </div>
+      </div>
+
+      <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-gray-200 m-4 rounded-lg flex items-center justify-center">
+        <p className="text-gray-400 text-sm">Your website content area</p>
+      </div>
+
+      <EmbedChatBox
+        ref={chatBoxRef}
+        knowledgeBaseId={knowledgeBaseId}
+        src={src}
+        chatId={chatId}
+        chatboxTitle={chatboxTitle}
+        position={position}
+        width={width}
+        height={height}
+        welcomeMessage={welcomeMessage}
+        placeholder={placeholder}
+        onRefresh={() => {}}
+        documents={[]}
+        isInitializing={isInitializing}
+        initError={initError}
+        positionStrategy="absolute"
+        theme={theme}
+      />
     </div>
   );
 }
+

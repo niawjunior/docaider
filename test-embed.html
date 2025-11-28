@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Docaider Embed Test</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        background-color: #f0f0f0;
+      }
+      .controls {
+        margin-bottom: 20px;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      button {
+        padding: 8px 16px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        background-color: #0091ff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+      }
+      button:hover {
+        background-color: #007acc;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Docaider Embed Test</h1>
+
+    <div class="controls">
+      <h3>Global API Controls</h3>
+      <button onclick="window.Docaider.open()">Open Chat</button>
+      <button onclick="window.Docaider.close()">Close Chat</button>
+      <button onclick="window.Docaider.toggle()">Toggle Chat</button>
+      <button
+        onclick="window.Docaider.setWelcomeMessage('Hello from the global API! 👋')"
+      >
+        Set Welcome Message
+      </button>
+      <button onclick="window.Docaider.setMessage('How do I use the API?')">
+        Set Input Message
+      </button>
+      <button onclick="window.Docaider.sendMessage('Hello! This is a programmatic message.')">
+        Send Message
+      </button>
+    </div>
+
+    <!-- 
+      Replace 'https://www.docaider.com' with your local server URL if testing locally.
+      For this test file to work with the local build, you would typically serve the 'public' folder.
+      Here we assume the script is available at /embed.js relative to this file if served from root.
+    -->
+    <script
+      src="http://localhost:3000/embed.js"
+      data-kb-id="cc8d4de8-0146-4e05-8187-2125804627d2"
+      data-theme="blue"
+      data-position="bottom-right"
+      data-welcome-message="สวัสดีครับมีอะไรให้ช่วยมั้ย?"
+      data-title="ภากรน้อย"
+      data-height="640px"
+      data-width="480px"
+    ></script>
+
+    <script>
+      // Wait for Docaider to initialize
+      // Since the script is loaded async/defer usually, or at end of body,
+      // we might need to wait. But here it's synchronous.
+      // In a real scenario, you might want to check if window.Docaider exists.
+      console.log("Docaider Embed Test Loaded");
+    </script>
+  </body>
+</html>
