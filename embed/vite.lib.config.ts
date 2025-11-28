@@ -35,6 +35,7 @@ export default defineConfig({
         "framer-motion",
         "lucide-react",
         "vue",
+        "katex",
       ],
       output: {
         globals: {
