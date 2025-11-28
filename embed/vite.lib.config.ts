@@ -29,6 +29,8 @@ export default defineConfig({
       external: [
         "react",
         "react-dom",
+        "react-dom/client",
+        "react-dom/server",
         "react/jsx-runtime",
         "framer-motion",
         "lucide-react",
@@ -49,11 +51,6 @@ export default defineConfig({
           return "assets/[name]-[hash][extname]";
         },
         inlineDynamicImports: false, // Must be false for multi-entry
-        manualChunks: (id) => {
-          if (id.includes("node_modules")) {
-            return "vendor";
-          }
-        },
       },
     },
     emptyOutDir: true,

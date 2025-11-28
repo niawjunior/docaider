@@ -83,29 +83,76 @@ function App() {
 
 ### 3. Vue
 
-Import the `VueEmbedChatBox` component.
+You can use the widget as a global plugin (recommended) or import it locally.
+
+#### Method 1: Global Plugin (Recommended)
+
+Register the plugin in your `main.ts`:
+
+```typescript
+import { createApp } from "vue";
+import App from "./App.vue";
+import { DocaiderEmbed } from "docaider-embed/vue";
+
+const app = createApp(App);
+app.use(DocaiderEmbed);
+app.mount("#app");
+```
+
+Then use the component anywhere without importing:
 
 ```vue
-<script setup lang="ts">
-import { ref } from 'vue';
-import { VueEmbedChatBox } from 'docaider-embed/vue';
-
-const chatRef = ref();
-
-const openChat = () => {
-  chatRef.value?.open();
-};
-</script>
-
 <template>
-  <button @click="openChat">Open Chat</button>
-  
   <VueEmbedChatBox
-    ref="chatRef"
     knowledgeBaseId="YOUR_KNOWLEDGE_BASE_ID"
     src="https://your-docaider-instance.com"
   />
 </template>
+```
+
+#### Method 2: Local Import
+
+```vue
+<script setup lang="ts">
+import { VueEmbedChatBox } from 'docaider-embed/vue';
+</script>
+
+<template>
+  <VueEmbedChatBox
+    knowledgeBaseId="YOUR_KNOWLEDGE_BASE_ID"
+    src="https://your-docaider-instance.com"
+  />
+</template>
+```
+
+#### Programmatic Control (Composable)
+
+Control the widget from **any component** using the `useDocaiderEmbed` composable:
+
+```vue
+<script setup lang="ts">
+import { useDocaiderEmbed } from "docaider-embed/vue";
+
+const { open, close, toggle, setWelcomeMessage } = useDocaiderEmbed();
+
+const handleSupport = () => {
+  setWelcomeMessage("Hello! How can I help with billing?");
+  open();
+};
+</script>
+
+<template>
+  <button @click="handleSupport">Contact Support</button>
+</template>
+```
+
+#### TypeScript Support
+
+If you need to type a ref manually:
+
+```typescript
+import { type VueEmbedChatBoxRef } from "docaider-embed/vue";
+const chatRef = ref<VueEmbedChatBoxRef | null>(null);
 ```
 
 ## Props / Attributes

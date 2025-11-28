@@ -1,8 +1,11 @@
 import { defineComponent, h, ref, onMounted, onUnmounted, watch, type PropType } from "vue";
 import * as React from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { ShadowEmbedChatBox } from "./ShadowEmbedChatBox";
+import { EmbedChatBox } from "./EmbedChatBox";
 import { type EmbedChatBoxRef, type EmbedChatBoxProps } from "./EmbedChatBox";
+// @ts-ignore
+import styles from "../App.css?inline";
+import { useDocaiderEmbed } from "../composables/useDocaiderEmbed";
 
 export const VueEmbedChatBox = defineComponent({
   name: "VueEmbedChatBox",
@@ -23,17 +26,21 @@ export const VueEmbedChatBox = defineComponent({
     theme: { type: String as PropType<"blue" | "gray" | "green">, default: "blue" },
   },
   setup(props, { expose }) {
-    const containerRef = ref<HTMLDivElement | null>(null);
+    const { _registerInstance } = useDocaiderEmbed();
+    const hostRef = ref<HTMLDivElement | null>(null);
+    const shadowRoot = ref<ShadowRoot | null>(null);
     const reactRoot = ref<Root | null>(null);
     const chatBoxRef = React.createRef<EmbedChatBoxRef>();
+    // Auto-generate chatId if not provided
+    const generatedChatId = ref<string>(props.chatId || `chat-${Math.random().toString(36).substring(2, 15)}`);
 
     const renderReactComponent = () => {
-      if (!containerRef.value || !reactRoot.value) return;
+      if (!shadowRoot.value || !reactRoot.value) return;
 
       const reactProps: EmbedChatBoxProps & { ref: React.RefObject<EmbedChatBoxRef | null> } = {
         knowledgeBaseId: props.knowledgeBaseId,
         src: props.src,
-        chatId: props.chatId,
+        chatId: props.chatId || generatedChatId.value,
         chatboxTitle: props.chatboxTitle,
         position: props.position,
         width: props.width,
@@ -45,16 +52,56 @@ export const VueEmbedChatBox = defineComponent({
         documents: props.documents,
         positionStrategy: props.positionStrategy,
         theme: props.theme,
+        onRefresh: () => {},
         ref: chatBoxRef,
       };
 
-      reactRoot.value.render(React.createElement(ShadowEmbedChatBox, reactProps));
+      reactRoot.value.render(
+        React.createElement(
+          "div",
+          { className: "docaider-embed-container" },
+          React.createElement(EmbedChatBox, reactProps)
+        )
+      );
+    };
+
+    // Create a proxy object that matches EmbedChatBoxRef
+    const instanceProxy = {
+      open: () => chatBoxRef.current?.open(),
+      close: () => chatBoxRef.current?.close(),
+      toggle: () => chatBoxRef.current?.toggle(),
+      setWelcomeMessage: (message: string) => chatBoxRef.current?.setWelcomeMessage(message),
+      setMessage: (message: string) => chatBoxRef.current?.setMessage(message),
+      sendMessage: (message: string) => chatBoxRef.current?.sendMessage(message),
     };
 
     onMounted(() => {
-      if (containerRef.value) {
-        reactRoot.value = createRoot(containerRef.value);
+      if (hostRef.value) {
+        // Create shadow root
+        const root = hostRef.value.attachShadow({ mode: "open" });
+        shadowRoot.value = root;
+
+        // Inject styles
+        const styleElement = document.createElement("style");
+        styleElement.textContent = styles;
+        root.appendChild(styleElement);
+
+        // Inject Google Fonts (Nunito)
+        const fontLink = document.createElement("link");
+        fontLink.rel = "stylesheet";
+        fontLink.href = "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap";
+        root.appendChild(fontLink);
+
+        // Create container for React
+        const container = document.createElement("div");
+        root.appendChild(container);
+
+        // Create React root and render
+        reactRoot.value = createRoot(container);
         renderReactComponent();
+
+        // Register instance for global control
+        _registerInstance(instanceProxy);
       }
     });
 
@@ -64,19 +111,31 @@ export const VueEmbedChatBox = defineComponent({
       }
     });
 
-    watch(() => props, () => {
-      renderReactComponent();
-    }, { deep: true });
+    // Watch individual props instead of all props to avoid unnecessary re-renders
+    watch(
+      [
+        () => props.knowledgeBaseId,
+        () => props.src,
+        () => props.chatId,
+        () => props.chatboxTitle,
+        () => props.position,
+        () => props.width,
+        () => props.height,
+        () => props.welcomeMessage,
+        () => props.placeholder,
+        () => props.isInitializing,
+        () => props.initError,
+        () => props.documents,
+        () => props.positionStrategy,
+        () => props.theme,
+      ],
+      () => {
+        renderReactComponent();
+      }
+    );
 
-    expose({
-      open: () => chatBoxRef.current?.open(),
-      close: () => chatBoxRef.current?.close(),
-      toggle: () => chatBoxRef.current?.toggle(),
-      setWelcomeMessage: (message: string) => chatBoxRef.current?.setWelcomeMessage(message),
-      setMessage: (message: string) => chatBoxRef.current?.setMessage(message),
-      sendMessage: (message: string) => chatBoxRef.current?.sendMessage(message),
-    });
+    expose(instanceProxy);
 
-    return () => h("div", { ref: containerRef, style: { width: "100%", height: "100%" } });
+    return () => h("div", { ref: hostRef, style: { display: "contents" } });
   },
 });

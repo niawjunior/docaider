@@ -255,7 +255,7 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
                 {/* Typing Bubble */}
                 <div className="bg-white px-4 py-2 rounded-2xl border-solid border-2 border-[var(--theme-accent)] rounded-br-none shadow-lg mb-4 max-w-[200px] hidden md:block">
                   <p className="text-sm text-gray-700 font-medium">
-                    <Typewriter text={welcomeMessage || "สวัสดีครับ มีอะไรให้ผมช่วยมั้ยครับ"} />
+                    <Typewriter key={welcomeMessage} text={welcomeMessage || "สวัสดีครับ มีอะไรให้ผมช่วยมั้ยครับ"} />
                   </p>
                 </div>
 
