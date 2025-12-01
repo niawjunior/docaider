@@ -38,6 +38,7 @@
     "build": "tsc -b && vite build",
     "build:styles": "node scripts/build-styles.js",
     "build:lib": "npm run build:styles && vite build && vite build -c vite.lib.config.ts && tsc -p tsconfig.build.json && cp ../public/embed.css dist/style.css",
+    "prepare": "npm run build:lib",
     "lint": "eslint .",
     "preview": "vite preview",
     "prepublishOnly": "npm run build:lib"
