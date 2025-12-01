@@ -3,9 +3,9 @@ import * as React from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { EmbedChatBox } from "./EmbedChatBox";
 import { type EmbedChatBoxRef, type EmbedChatBoxProps } from "./EmbedChatBox";
-// @ts-ignore
 import styles from "../App.css?inline";
 import { useDocaiderEmbed } from "../composables/useDocaiderEmbed";
+import { GOOGLE_FONTS_URL } from "../constants";
 
 export const VueEmbedChatBox = defineComponent({
   name: "VueEmbedChatBox",
@@ -37,7 +37,7 @@ export const VueEmbedChatBox = defineComponent({
     const renderReactComponent = () => {
       if (!shadowRoot.value || !reactRoot.value) return;
 
-      const reactProps: EmbedChatBoxProps & { ref: React.RefObject<EmbedChatBoxRef | null> } = {
+      const reactProps: EmbedChatBoxProps & React.RefAttributes<EmbedChatBoxRef> = {
         knowledgeBaseId: props.knowledgeBaseId,
         src: props.src,
         chatId: props.chatId || generatedChatId.value,
@@ -89,7 +89,7 @@ export const VueEmbedChatBox = defineComponent({
         // Inject Google Fonts (Nunito)
         const fontLink = document.createElement("link");
         fontLink.rel = "stylesheet";
-        fontLink.href = "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap";
+        fontLink.href = GOOGLE_FONTS_URL;
         root.appendChild(fontLink);
 
         // Create container for React

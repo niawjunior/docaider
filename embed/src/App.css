@@ -17,6 +17,9 @@
   display: none;
 }
 
+* {
+  font-family: var(--font-nunito) !important;
+}
 /* Custom Scrollbar */
 .custom-scrollbar {
   scrollbar-width: thin;
@@ -38,6 +41,16 @@
 
 .docaider-embed button {
   cursor: pointer;
+}
+
+/* Override PromptInput Default Styles */
+.prompt-input-override [data-slot="input-group"] {
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+  height: auto !important;
 }
 
 @layer base {

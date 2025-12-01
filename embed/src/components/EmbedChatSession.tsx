@@ -15,6 +15,7 @@ import {
   PromptInput,
   PromptInputTextarea,
   PromptInputSubmit,
+  type PromptInputMessage,
 } from "./ai-elements/prompt-input";
 
 import clsx from "clsx";
@@ -143,10 +144,10 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
     }
   }, [isOpen]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = (message: PromptInputMessage, e: React.FormEvent) => {
     e.preventDefault();
-    if (inputValue.trim()) {
-      sendMessage({ text: inputValue });
+    if (message.text.trim()) {
+      sendMessage({ text: message.text });
       setInputValue("");
     }
   };
@@ -220,7 +221,7 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
                 </svg>
             </div>
             <div>
-                <h1 className="font-extrabold text-xl tracking-wide">{title}</h1>
+                <h1 className="font-extrabold text-xl tracking-wide my-1">{title}</h1>
                 <div className="flex items-center gap-1 text-xs font-semibold bg-[var(--theme-text-secondary)] bg-opacity-40 px-2 py-0.5 rounded-full w-fit justify-center">
                     <span className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></span>
                     Online
@@ -357,18 +358,18 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
 
       {/* Input Area */}
       <div className="p-4 bg-white relative z-20 shrink-0 pt-2">
-        <PromptInput onSubmit={handleSendMessage} className="border-none shadow-none bg-transparent">
-          <div className="relative flex justify-center">
+        <PromptInput onSubmit={handleSendMessage} className="border-none shadow-none bg-transparent prompt-input-override">
+          <div className="relative flex justify-center w-full">
             <PromptInputTextarea
                 ref={inputRef}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder={placeholder}
-                className="w-full min-h-12 bg-gray-100 hover:border-[var(--theme-accent-dark)] text-gray-700 placeholder-gray-400 rounded-[24px]  resize-none p-3 outline-none transition-colors py-4 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)] focus-visible:border-[var(--theme-accent-dark)] focus:bg-white transition-all border-2 border-[var(--theme-border)] border-solid shadow-[0_4px_12px_rgba(0,0,0,0.05)] text-sm font-semibold"
+                className="w-full min-h-8 bg-gray-100 hover:border-[var(--theme-accent-dark)] text-gray-700 placeholder-gray-400 rounded-[24px]  resize-none p-3 outline-none transition-colors py-4 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)] focus-visible:border-[var(--theme-accent-dark)] focus:bg-white transition-all border-2 border-[var(--theme-border)] border-solid shadow-[0_4px_12px_rgba(0,0,0,0.05)] text-sm font-semibold"
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        handleSendMessage(e);
+                        handleSendMessage({ text: inputValue, files: [] }, e);
                     }
                 }}
             />

@@ -1,14 +1,8 @@
-import { ref, reactive } from "vue";
+import { ref } from "vue";
 import type { EmbedChatBoxRef } from "../components/EmbedChatBox";
 
 // Singleton state to hold the active chat instance reference
 const activeChatInstance = ref<EmbedChatBoxRef | null>(null);
-
-// Global state for chat configuration
-const globalState = reactive({
-  isOpen: false,
-  welcomeMessage: "",
-});
 
 export function useDocaiderEmbed() {
   const registerInstance = (instance: EmbedChatBoxRef) => {

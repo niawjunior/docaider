@@ -4,12 +4,13 @@ import { resolve } from "path";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
+
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), ""); // Load all environment variables
 
   return {
     define: {
-      "process.env": env, // Map process.env to the loaded environment variables
       "process.env.NODE_ENV": JSON.stringify(mode),
     },
     plugins: [react(), tailwindcss()] as any,

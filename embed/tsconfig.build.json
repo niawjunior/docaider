@@ -5,7 +5,8 @@
     "emitDeclarationOnly": true,
     "noEmit": false,
     "outDir": "dist",
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": false,
+    "skipLibCheck": true
   },
   "include": ["src"]
 }

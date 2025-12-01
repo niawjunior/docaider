@@ -2,22 +2,7 @@
 
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 
-const Typewriter = ({ text, delay = 50 }: { text: string; delay?: number }) => {
-  const [currentText, setCurrentText] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    if (currentIndex < text.length) {
-      const timeout = setTimeout(() => {
-        setCurrentText((prev) => prev + text[currentIndex]);
-        setCurrentIndex((prev) => prev + 1);
-      }, delay);
-      return () => clearTimeout(timeout);
-    }
-  }, [currentIndex, delay, text]);
-
-  return <span>{currentText}</span>;
-};
+import { Typewriter } from "./ui/Typewriter";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Bot, Minus, RefreshCw, FileText } from "lucide-react";
@@ -254,7 +239,7 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
               <div className="flex items-end gap-4">
                 {/* Typing Bubble */}
                 <div className="bg-white px-4 py-2 rounded-2xl border-solid border-2 border-[var(--theme-accent)] rounded-br-none shadow-lg mb-4 max-w-[200px] hidden md:block">
-                  <p className="text-sm text-gray-700 font-medium">
+                  <p className="text-sm text-gray-700 font-nunito">
                     <Typewriter key={welcomeMessage} text={welcomeMessage || "สวัสดีครับ มีอะไรให้ผมช่วยมั้ยครับ"} />
                   </p>
                 </div>
