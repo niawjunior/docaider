@@ -73,6 +73,7 @@ export const VueEmbedChatBox = defineComponent({
       setWelcomeMessage: (message: string) => chatBoxRef.current?.setWelcomeMessage(message),
       setMessage: (message: string) => chatBoxRef.current?.setMessage(message),
       sendMessage: (message: string) => chatBoxRef.current?.sendMessage(message),
+      useTool: (tool: string, options?: { content?: string; prompt?: string }) => chatBoxRef.current?.useTool(tool, options),
     };
 
     onMounted(() => {

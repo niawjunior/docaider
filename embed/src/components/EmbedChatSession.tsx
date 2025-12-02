@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, type UIMessage as AIMessage } from "ai";
 import { Loader } from "@/components/ai-elements/loader";
 import { ChevronDown, Sparkles, Brain, Smile, Trash2, X } from "lucide-react";
 
@@ -32,6 +32,7 @@ import { readCurrentPage } from "../utils/page-reader";
 export interface EmbedChatSessionRef {
   setMessage: (message: string) => void;
   sendMessage: (message: string) => void;
+  useTool: (tool: string, options?: { content?: string; prompt?: string }) => void;
 }
 
 interface EmbedChatSessionProps {
@@ -62,6 +63,21 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = useState("");
 
+  const [activeTool, setActiveTool] = useState<"auto" | "knowledge-base" | "current-page" | "context">("auto");
+  const activeToolRef = useRef(activeTool);
+  const [contextData, setContextData] = useState<{ content?: string; prompt?: string } | null>(null);
+  const contextDataRef = useRef(contextData);
+
+  // Update ref when activeTool changes
+  useEffect(() => {
+    activeToolRef.current = activeTool;
+  }, [activeTool]);
+
+  // Update ref when contextData changes
+  useEffect(() => {
+    contextDataRef.current = contextData;
+  }, [contextData]);
+
   useImperativeHandle(ref, () => ({
     setMessage: (message: string) => {
       setInputValue(message);
@@ -73,14 +89,53 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
       setInputValue("");
       sendMessage({ text: message });
     },
-  }));
+    useTool: (tool: string, options?: { content?: string; prompt?: string }) => {
+      if (tool === 'context') {
+        setContextData(options || null);
+        setActiveTool('context');
+        
+        // Manually update refs for immediate usage since state updates are async
+        // and useChat reads from these refs for the request body
+        contextDataRef.current = options || null;
+        activeToolRef.current = 'context';
 
-  const [activeTool, setActiveTool] = useState<"auto" | "knowledge-base" | "current-page">("auto");
-  const activeToolRef = useRef(activeTool);
-  // Update ref when activeTool changes
-  useEffect(() => {
-    activeToolRef.current = activeTool;
-  }, [activeTool]);
+        if (options?.prompt) {
+            setInputValue("");
+            sendMessage({ text: options.prompt });
+            
+            // Reset active tool to auto after sending context action
+            // This prevents subsequent messages from being forced into context mode
+            setTimeout(() => {
+                setActiveTool("auto");
+                activeToolRef.current = "auto";
+            }, 500);
+        }
+      } else if (tool === 'readCurrentPage') {
+        setInputValue("");
+        setActiveTool('current-page');
+        if (options?.content) {
+            setInputValue("");
+            sendMessage({ text: options.content });
+        }
+      } else if (tool === 'knowledge-base') {
+        setActiveTool('knowledge-base');
+        if (options?.content) {
+            setInputValue("");
+            sendMessage({ text: options.content });
+        } 
+      } else {
+        setActiveTool('auto');
+        if (options?.content) {
+            setInputValue("");
+            sendMessage({ text: options.content });
+        }
+      }
+
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    },
+  }));
 
   const [isToolCall, setIsToolCall] = useState(false);
 
@@ -102,6 +157,10 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
           if (pageContent) {
             body.pageContent = pageContent;
           }
+        }
+
+        if (activeToolRef.current === "context" && contextDataRef.current) {
+          body.context = contextDataRef.current;
         }
 
         return body;
@@ -281,14 +340,13 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
                   switch (part.type) {
                     case "text":
                       return (
-                        <MessageResponse key={`${msg.id}-${index}`}>
-                          {part.type === "text"
-                            ? (part as { text?: string }).text || ""
-                            : ""}
-                        </MessageResponse>
+                        <div key={`${msg.id}-${index}`}>
+                          <MessageResponse>{(part as { text?: string }).text || ""}</MessageResponse>
+                        </div>
                       );
                     case "tool-askQuestion":
                     case "tool-readCurrentPage":
+                    case "tool-context":
                       const toolPart = part as ToolUIPart;
                       return (
                         <ToolRow
@@ -389,7 +447,12 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
                   <DropdownMenuTrigger asChild>
                     <button className="text-[10px] font-bold text-gray-400 hover:text-[var(--theme-text-secondary)] flex items-center gap-1 transition-colors bg-gray-50 px-2 py-1 rounded-full">
                       <ChevronDown className="w-3 h-3" />
-                      <span>{activeTool === "auto" ? "Auto Smart" : activeTool === "knowledge-base" ? "Knowledge Base Only" : "Read Current Page"}</span>
+                      <span>
+                        {activeTool === "auto" ? "Auto Smart" : 
+                         activeTool === "knowledge-base" ? "Knowledge Base Only" : 
+                         activeTool === "current-page" ? "Read Current Page" :
+                         activeTool === "context" ? (contextData?.prompt || "Context") : "Select Tool"}
+                      </span>
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="min-w-[200px] bg-white dark:bg-zinc-950" container={containerRef.current}>

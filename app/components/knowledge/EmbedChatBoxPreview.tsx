@@ -95,6 +95,33 @@ export default function EmbedChatBoxPreview({
           >
             Send Message
           </button>
+          <button
+            onClick={() => {
+              // @ts-ignore
+              chatBoxRef.current?.useTool("context", { prompt: "correct grammar", content: "I go to schol today" });
+            }}
+            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+          >
+            Tool: Context
+          </button>
+          <button
+            onClick={() => {
+              // @ts-ignore
+              chatBoxRef.current?.useTool("readCurrentPage", { content: "What do you see on the page?"});
+            }}
+            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+          >
+            Tool: Read Page
+          </button>
+          <button
+            onClick={() => {
+              // @ts-ignore
+              chatBoxRef.current?.useTool("knowledge-base", { content: "What is Docaider?" });
+            }}
+            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+          >
+            Tool: Ask Question
+          </button>
         </div>
       </div>
 

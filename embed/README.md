@@ -121,10 +121,18 @@ Control the widget from **any component** (even without a ref) using `useDocaide
 import { useDocaiderEmbed } from "docaider-embed/vue";
 
 // Control the global chat instance
-const { open, close, toggle, setWelcomeMessage } = useDocaiderEmbed();
+const { open, close, toggle, setWelcomeMessage, useTool } = useDocaiderEmbed();
 
 const openSupport = () => {
   setWelcomeMessage("Hi! How can I help you with billing today?");
+  open();
+};
+
+const correctGrammar = () => {
+  useTool("context", { 
+    prompt: "Correct Grammar", 
+    content: "I go to schol today" 
+  });
   open();
 };
 </script>
@@ -163,6 +171,9 @@ Methods available on the ref (React/Vue) or `window.Docaider` (HTML):
 - **`setWelcomeMessage(msg: string)`**: Updates the welcome message bubble immediately.
 - **`setMessage(msg: string)`**: Sets the text in the input field.
 - **`sendMessage(msg: string)`**: Programmatically sends a message as the user.
+- **`useTool(tool: string, options?: { content?: string; prompt?: string })`**: Programmatically triggers a specific tool or action.
+  - `tool`: "context" | "readCurrentPage" | "knowledge-base" | "auto" | "askQuestion"
+  - `options`: Optional parameters for the tool (e.g., `{ prompt: "Correct Grammar", content: "Text to correct" }`)
 
 ---
 

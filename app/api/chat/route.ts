@@ -5,7 +5,7 @@ import { NextRequest } from "next/server";
 
 import { createClient, createServiceClient } from "../../utils/supabase/server";
 import { askQuestionTool, createAskQuestionTool, finishTool } from "@/app/tools/llm-tools";
-import { createReadCurrentPageTool } from "@/app/tools/embed-tools";
+import { createReadCurrentPageTool, createContextTool } from "@/app/tools/embed-tools";
 import { db } from "../../../db/config";
 import {
   credits,
@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     alwaysUseDocument = false,
     pageContent,
     activeTool,
+    context,
   } = (await req.json()) as {
     messages: any[];
     id?: string;
@@ -45,7 +46,11 @@ export async function POST(req: NextRequest) {
       content: string;
       url: string;
     };
-    activeTool?: "knowledge-base" | "current-page" | "auto";
+    activeTool?: "knowledge-base" | "current-page" | "auto" | "context";
+    context?: {
+      prompt: string;
+      content: string;
+    };
   };
 
   const finalChatId = chatId || id;
@@ -220,7 +225,7 @@ export async function POST(req: NextRequest) {
         finish: finishTool,
       }
     : { askQuestion: askQuestionTool, finish: finishTool };
-  if (isEmbed && (activeTool === "current-page" || activeTool === "auto") && pageContent) {
+  if (isEmbed && (activeTool === "current-page" || activeTool === "auto" || activeTool === "context")) {
     if (activeTool === "auto") {
       // If auto, allow both tools
       tools = {
@@ -228,13 +233,22 @@ export async function POST(req: NextRequest) {
           knowledgeBaseId,
           isEmbed: true,
         }),
-        readCurrentPage: createReadCurrentPageTool(pageContent),
+        readCurrentPage: pageContent ? createReadCurrentPageTool(pageContent) : undefined,
         finish: finishTool,
       };
-    } else {
+      // Remove undefined tools
+      Object.keys(tools).forEach(key => tools[key] === undefined && delete tools[key]);
+    } else if (activeTool === "current-page" && pageContent) {
       // If specifically current-page, only allow that
       tools = {
         readCurrentPage: createReadCurrentPageTool(pageContent),
+        finish: finishTool,
+      };
+    } else if (activeTool === "context" && context) {
+      // If specifically context, only allow that
+      console.log(context)
+      tools = {
+        context: createContextTool(context),
         finish: finishTool,
       };
     }
@@ -251,6 +265,13 @@ export async function POST(req: NextRequest) {
       - When replying in Thai:
         • Use appropriate polite particles (**ครับ** or **ค่ะ/คะ**) that match the gender and persona defined in your instructions.
         • If no gender is specified, use polite professional language.
+
+      **TOOL USAGE: CONTEXT**
+      - If the active tool is "context", you have access to a tool called \`context\`.
+      - **YOU MUST USE THIS TOOL** to retrieve the specific context provided by the user.
+      - The user has provided specific content for a specific action (e.g., "Correct Grammar", "Summarize").
+      - Call the \`context\` tool to get this information and perform the requested action.
+      - Don't ask user to provide any input for this tool.
 
       **TOOL USAGE: READ CURRENT PAGE**
       The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines. viewing a specific web page. Your primary goal is to answer questions about the content of this page.
@@ -271,7 +292,7 @@ export async function POST(req: NextRequest) {
       - **Avoid Redundant Calls**: If you have already called \`askQuestion\` in the current conversation turn and received a valid response, **DO NOT** call it again. Use the information you have to answer the user.
       - **No Loops**: If a tool call returns "No relevant documents found" or a similar error, **DO NOT** call the same tool again with the same parameters. Instead, politely inform the user that the information is not available.
       
-
+ 
        🎯 **Your Mission**:
     -   Transform documents into structured, searchable knowledge.
     -   Make document intelligence accessible, clear, and engaging.
@@ -435,6 +456,8 @@ export async function POST(req: NextRequest) {
     } else if (activeTool === "knowledge-base" && allDocuments.length > 0) {
       // Use auto to prevent forced loops in multi-step generation
       toolChoice = "auto";
+    } else if (activeTool === "context" && context) {
+      toolChoice = "auto";
     } else {
       toolChoice =
         allDocuments.length === 0
@@ -454,6 +477,15 @@ export async function POST(req: NextRequest) {
 
   const result = streamText({
     model: openai("gpt-4o-mini"),
+    stopWhen: stepCountIs(5),
+    prepareStep: async ({ stepNumber }) => {
+      if (activeTool === "context" && context && stepNumber === 0) {
+        return {
+          toolChoice: { type: "tool", toolName: "context" } as const,
+        };
+      }
+      return undefined;
+    },
     toolChoice,
     tools,
     activeTools:
@@ -461,11 +493,6 @@ export async function POST(req: NextRequest) {
         ? ["askQuestion", "finish"]
         : undefined,
     system: systemPrompt,
-    stopWhen: (result: any) => {
-      const steps = result.steps;
-      const lastStep = steps?.[steps.length - 1];
-      return !!lastStep?.toolCalls?.some((tc: any) => tc.toolName === "finish");
-    },
     messages: convertToModelMessages(messages),
     onStepFinish: async (response) => {
       // Only update credits for non-embed users
