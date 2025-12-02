@@ -59,19 +59,19 @@ export default function EmbedChatBoxPreview({
         <div className="flex flex-col gap-2">
           <button
             onClick={() => chatBoxRef.current?.open()}
-            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+            className="px-3 py-1.5 border rounded-md text-xs shadow-sm"
           >
             Open
           </button>
           <button
             onClick={() => chatBoxRef.current?.close()}
-            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+            className="px-3 py-1.5 border rounded-md text-xs shadow-sm"
           >
             Close
           </button>
           <button
             onClick={() => chatBoxRef.current?.toggle()}
-            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+            className="px-3 py-1.5 border rounded-md text-xs shadow-sm"
           >
             Toggle
           </button>
@@ -79,19 +79,19 @@ export default function EmbedChatBoxPreview({
         <div className="flex flex-col gap-2">
           <button
             onClick={() => chatBoxRef.current?.setWelcomeMessage("Hello from control!")}
-            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+            className="px-3 py-1.5 border rounded-md text-xs shadow-sm"
           >
             Set Welcome
           </button>
           <button
             onClick={() => chatBoxRef.current?.setMessage("How do I use this?")}
-            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+            className="px-3 py-1.5 border rounded-md text-xs shadow-sm"
           >
             Set Input
           </button>
           <button
             onClick={() => chatBoxRef.current?.sendMessage("Hello! This is a programmatic message.")}
-            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+            className="px-3 py-1.5 border rounded-md text-xs shadow-sm"
           >
             Send Message
           </button>
@@ -100,7 +100,7 @@ export default function EmbedChatBoxPreview({
               // @ts-ignore
               chatBoxRef.current?.useTool("context", { prompt: "correct grammar", content: "I go to schol today" });
             }}
-            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+            className="px-3 py-1.5 border rounded-md text-xs shadow-sm"
           >
             Tool: Context
           </button>
@@ -109,7 +109,7 @@ export default function EmbedChatBoxPreview({
               // @ts-ignore
               chatBoxRef.current?.useTool("readCurrentPage", { content: "What do you see on the page?"});
             }}
-            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+            className="px-3 py-1.5 border rounded-md text-xs shadow-sm"
           >
             Tool: Read Page
           </button>
@@ -118,7 +118,7 @@ export default function EmbedChatBoxPreview({
               // @ts-ignore
               chatBoxRef.current?.useTool("knowledge-base", { content: "What is Docaider?" });
             }}
-            className="px-3 py-1.5 bg-white border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+            className="px-3 py-1.5 border rounded-md text-xs hover:bg-gray-50 shadow-sm"
           >
             Tool: Ask Question
           </button>

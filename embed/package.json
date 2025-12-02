@@ -1,6 +1,6 @@
 {
   "name": "docaider-embed",
-  "version": "0.2.1",
+"version": "0.2.4",
   "description": "AI-powered embed chat widget for Docaider",
   "keywords": [
     "ai",
@@ -82,7 +82,6 @@
     "motion": "^12.23.24",
     "nanoid": "^5.1.6",
     "react-markdown": "^10.1.0",
-    "react-syntax-highlighter": "^15.6.3",
     "shiki": "^3.17.1",
     "streamdown": "^1.6.9",
     "tailwind-merge": "^3.3.1",
@@ -95,7 +94,6 @@
   "devDependencies": {
     "@eslint/js": "^9.33.0",
     "@types/node": "^24.3.0",
-    "@types/react-syntax-highlighter": "^15.5.13",
     "@vitejs/plugin-react": "^5.1.1",
     "@vitejs/plugin-vue": "^6.0.2",
     "eslint": "^9.33.0",

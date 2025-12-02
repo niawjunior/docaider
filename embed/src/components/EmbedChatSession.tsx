@@ -290,11 +290,11 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
 
         <div className="flex gap-3 z-10 text-white opacity-90">
             {onClose && (
-                <button className="text-white hover:bg-[var(--theme-primary-dark)] p-1.5 rounded-xl transition-colors" onClick={onClose}>
+                <button className="flex justify-center items-center text-white hover:bg-[var(--theme-primary-dark)] p-1.5 rounded-xl transition-colors" onClick={onClose}>
                    <div className="h-5 w-5 flex items-center justify-center font-bold text-lg leading-none">−</div>
                 </button>
             )}
-            <button className="text-white hover:bg-[var(--theme-primary-dark)] p-1.5 rounded-xl transition-colors" onClick={clearChat}>
+            <button className="flex justify-center items-center text-white hover:bg-[var(--theme-primary-dark)] p-1.5 rounded-xl transition-colors" onClick={clearChat}>
                  <Trash2 className="h-5 w-5" />
             </button>
         </div>

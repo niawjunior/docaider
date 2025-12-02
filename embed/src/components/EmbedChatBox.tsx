@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "re
 
 import { Typewriter } from "./ui/Typewriter";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { MessageCircle, X, Bot, Minus, RefreshCw, FileText } from "lucide-react";
 import { EmbedChatSession, type EmbedChatSessionRef } from "./EmbedChatSession";
 
@@ -60,6 +60,7 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
   const [showFileList, setShowFileList] = useState(false);
   const [welcomeMessage, setWelcomeMessageState] = useState(initialWelcomeMessage);
   const sessionRef = useRef<EmbedChatSessionRef>(null);
+  const dragControls = useDragControls();
 
   console.log("EmbedChatBox: Rendering", { knowledgeBaseId, chatId });
 
@@ -110,6 +111,16 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
     if (isDraggingRef.current) return;
     setIsOpen(!isOpen);
   };
+
+  // Reset dragging state when closed to prevent getting stuck
+  useEffect(() => {
+    if (!isOpen) {
+      // Small timeout to ensure any pending drag events clear
+      setTimeout(() => {
+        isDraggingRef.current = false;
+      }, 50);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (positionStrategy === "absolute") return;
@@ -169,6 +180,8 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
       <motion.div
         ref={containerRef}
         drag={positionStrategy === "fixed"}
+        dragControls={dragControls}
+        dragListener={false}
         dragMomentum={false}
         onDragStart={() => {
           isDraggingRef.current = true;
@@ -230,6 +243,10 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
           className="flex justify-end"
         >
           <button
+            onPointerDown={(e) => {
+              isDraggingRef.current = false;
+              dragControls.start(e);
+            }}
             onClick={toggleChat}
             className={`shadow-none bg-transparent p-0 flex items-center justify-center transition-all hover:scale-105 border-none outline-none`}
             style={{
