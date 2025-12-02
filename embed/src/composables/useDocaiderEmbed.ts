@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import type { EmbedChatBoxRef } from "../components/EmbedChatBox";
+import type { EmbedChatBoxRef, EmbedTool } from "../components/EmbedChatBox";
 
 // Singleton state to hold the active chat instance reference
 const activeChatInstance = ref<EmbedChatBoxRef | null>(null);
@@ -33,7 +33,7 @@ export function useDocaiderEmbed() {
     activeChatInstance.value?.sendMessage(message);
   };
 
-  const useTool = (tool: string, options?: { content?: string; prompt?: string }) => {
+  const useTool = (tool: EmbedTool, options?: { content?: string; prompt?: string }) => {
     activeChatInstance.value?.useTool(tool, options);
   };
 

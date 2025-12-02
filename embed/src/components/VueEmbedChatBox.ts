@@ -2,7 +2,7 @@ import { defineComponent, h, ref, onMounted, onUnmounted, watch, type PropType }
 import * as React from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { EmbedChatBox } from "./EmbedChatBox";
-import { type EmbedChatBoxRef, type EmbedChatBoxProps } from "./EmbedChatBox";
+import { type EmbedChatBoxRef, type EmbedChatBoxProps, type EmbedTool } from "./EmbedChatBox";
 import styles from "../App.css?inline";
 import { useDocaiderEmbed } from "../composables/useDocaiderEmbed";
 import { GOOGLE_FONTS_URL } from "../constants";
@@ -73,7 +73,7 @@ export const VueEmbedChatBox = defineComponent({
       setWelcomeMessage: (message: string) => chatBoxRef.current?.setWelcomeMessage(message),
       setMessage: (message: string) => chatBoxRef.current?.setMessage(message),
       sendMessage: (message: string) => chatBoxRef.current?.sendMessage(message),
-      useTool: (tool: string, options?: { content?: string; prompt?: string }) => chatBoxRef.current?.useTool(tool, options),
+      useTool: (tool: EmbedTool, options?: { content?: string; prompt?: string }) => chatBoxRef.current?.useTool(tool, options),
     };
 
     onMounted(() => {

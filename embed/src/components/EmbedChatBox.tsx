@@ -27,6 +27,8 @@ export interface EmbedChatBoxProps {
   theme?: "blue" | "gray" | "green";
 }
 
+export type EmbedTool = "context" | "readCurrentPage" | "knowledge-base" | "auto";
+
 export interface EmbedChatBoxRef {
   open: () => void;
   close: () => void;
@@ -34,7 +36,7 @@ export interface EmbedChatBoxRef {
   setWelcomeMessage: (message: string) => void;
   setMessage: (message: string) => void;
   sendMessage: (message: string) => void;
-  useTool: (tool: string, options?: { content?: string; prompt?: string }) => void;
+  useTool: (tool: EmbedTool, options?: { content?: string; prompt?: string }) => void;
 }
 
 export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
@@ -77,7 +79,7 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
       if (!isOpen) setIsOpen(true);
       sessionRef.current?.sendMessage(message);
     },
-    useTool: (tool: string, options?: { content?: string; prompt?: string }) => {
+    useTool: (tool: EmbedTool, options?: { content?: string; prompt?: string }) => {
       if (!isOpen) setIsOpen(true);
       sessionRef.current?.useTool(tool, options);
     },
