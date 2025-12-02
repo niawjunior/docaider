@@ -44,6 +44,7 @@ export function useDocaiderEmbed() {
     setWelcomeMessage,
     setMessage,
     sendMessage,
+    useTool,
     // Internal use only
     _registerInstance: registerInstance,
   };
