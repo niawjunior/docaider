@@ -33,6 +33,10 @@ export function useDocaiderEmbed() {
     activeChatInstance.value?.sendMessage(message);
   };
 
+  const useTool = (tool: string, options?: { content?: string; prompt?: string }) => {
+    activeChatInstance.value?.useTool(tool, options);
+  };
+
   return {
     open,
     close,
