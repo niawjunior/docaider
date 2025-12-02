@@ -61,6 +61,8 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
   const [welcomeMessage, setWelcomeMessageState] = useState(initialWelcomeMessage);
   const sessionRef = useRef<EmbedChatSessionRef>(null);
 
+  console.log("EmbedChatBox: Rendering", { knowledgeBaseId, chatId });
+
   // Update welcome message if prop changes
   useEffect(() => {
     setWelcomeMessageState(initialWelcomeMessage);
@@ -83,7 +85,7 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
       if (!isOpen) setIsOpen(true);
       sessionRef.current?.useTool(tool, options);
     },
-  }));
+  }), [isOpen]);
 
   // Position classes
   const positionClasses = {

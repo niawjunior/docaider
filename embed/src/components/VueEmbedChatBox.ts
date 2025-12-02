@@ -1,4 +1,4 @@
-import { defineComponent, h, ref, onMounted, onUnmounted, watch, type PropType } from "vue";
+import { defineComponent, h, ref, onMounted, onUnmounted, watch, type PropType, shallowRef } from "vue";
 import * as React from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { EmbedChatBox } from "./EmbedChatBox";
@@ -28,41 +28,70 @@ export const VueEmbedChatBox = defineComponent({
   setup(props, { expose }) {
     const { _registerInstance } = useDocaiderEmbed();
     const hostRef = ref<HTMLDivElement | null>(null);
-    const shadowRoot = ref<ShadowRoot | null>(null);
-    const reactRoot = ref<Root | null>(null);
+    // Use shallowRef for non-Vue reactive objects to prevent performance issues and potential loops
+    const shadowRoot = shallowRef<ShadowRoot | null>(null);
+    const reactRoot = shallowRef<Root | null>(null);
     const chatBoxRef = React.createRef<EmbedChatBoxRef>();
     // Auto-generate chatId if not provided
     const generatedChatId = ref<string>(props.chatId || `chat-${Math.random().toString(36).substring(2, 15)}`);
+    const isMounted = ref(false);
+
+    let renderTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    let lastPropsJson: string = "";
 
     const renderReactComponent = () => {
-      if (!shadowRoot.value || !reactRoot.value) return;
+      if (!isMounted.value) return;
+      if (renderTimeout) clearTimeout(renderTimeout);
 
-      const reactProps: EmbedChatBoxProps & React.RefAttributes<EmbedChatBoxRef> = {
-        knowledgeBaseId: props.knowledgeBaseId,
-        src: props.src,
-        chatId: props.chatId || generatedChatId.value,
-        chatboxTitle: props.chatboxTitle,
-        position: props.position,
-        width: props.width,
-        height: props.height,
-        welcomeMessage: props.welcomeMessage,
-        placeholder: props.placeholder,
-        isInitializing: props.isInitializing,
-        initError: props.initError,
-        documents: props.documents,
-        positionStrategy: props.positionStrategy,
-        theme: props.theme,
-        onRefresh: () => {},
-        ref: chatBoxRef,
-      };
+      renderTimeout = setTimeout(() => {
+        if (!shadowRoot.value || !reactRoot.value || !isMounted.value) return;
 
-      reactRoot.value.render(
-        React.createElement(
-          "div",
-          { className: "docaider-embed-container" },
-          React.createElement(EmbedChatBox, reactProps)
-        )
-      );
+        // Create props object
+        const currentProps = {
+          knowledgeBaseId: props.knowledgeBaseId,
+          src: props.src,
+          chatId: props.chatId || generatedChatId.value,
+          chatboxTitle: props.chatboxTitle,
+          position: props.position,
+          width: props.width,
+          height: props.height,
+          welcomeMessage: props.welcomeMessage,
+          placeholder: props.placeholder,
+          isInitializing: props.isInitializing,
+          initError: props.initError,
+          documents: props.documents,
+          positionStrategy: props.positionStrategy,
+          theme: props.theme,
+        };
+
+        // Simple deep comparison using JSON.stringify
+        // This is efficient enough for these props and prevents re-renders if objects are structurally same
+        const propsJson = JSON.stringify(currentProps);
+        if (propsJson === lastPropsJson) {
+           return;
+        }
+        lastPropsJson = propsJson;
+
+        const reactProps: EmbedChatBoxProps & React.RefAttributes<EmbedChatBoxRef> = {
+          ...currentProps,
+          onRefresh: () => {},
+          ref: chatBoxRef,
+        };
+
+        // Wrap in try-catch to prevent React errors from crashing Vue app
+        try {
+          reactRoot.value.render(
+            React.createElement(
+              "div",
+              { className: "docaider-embed-container" },
+              React.createElement(EmbedChatBox, reactProps)
+            )
+          );
+        } catch (error) {
+          console.error("VueEmbedChatBox: Error rendering React component", error);
+        }
+      }, 10); // Small debounce to prevent rapid re-renders
     };
 
     // Create a proxy object that matches EmbedChatBoxRef
@@ -77,6 +106,7 @@ export const VueEmbedChatBox = defineComponent({
     };
 
     onMounted(() => {
+      isMounted.value = true;
       if (hostRef.value) {
         // Create shadow root
         const root = hostRef.value.attachShadow({ mode: "open" });
@@ -107,8 +137,18 @@ export const VueEmbedChatBox = defineComponent({
     });
 
     onUnmounted(() => {
+      isMounted.value = false;
+      if (renderTimeout) clearTimeout(renderTimeout);
+      
       if (reactRoot.value) {
-        reactRoot.value.unmount();
+        // Use setTimeout to allow current render cycle to finish
+        setTimeout(() => {
+          try {
+            reactRoot.value?.unmount();
+          } catch (e) {
+            console.warn("VueEmbedChatBox: Error unmounting React root", e);
+          }
+        }, 0);
       }
     });
 
@@ -130,9 +170,12 @@ export const VueEmbedChatBox = defineComponent({
         () => props.positionStrategy,
         () => props.theme,
       ],
-      () => {
+      (newValues, oldValues) => {
+        // Only log if actually different (though watch handles this, the array ref might change)
+        // console.log("VueEmbedChatBox: Props changed, re-rendering React component");
         renderReactComponent();
-      }
+      },
+      { deep: true } // Ensure deep watch for objects like documents
     );
 
     expose(instanceProxy);

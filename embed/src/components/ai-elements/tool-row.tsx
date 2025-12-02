@@ -41,7 +41,7 @@ export function ToolRow({
 
   return (
     <Tool open={isOpen} onOpenChange={setIsOpen}>
-      <ToolHeader type={part.type} state={part.state} title={toolName} />
+      <ToolHeader className="text-black" type={part.type} state={part.state} title={toolName} />
       <ToolContent>
         <ToolInput input={(part as any).args || (part as any).input} />
         <ToolOutput
