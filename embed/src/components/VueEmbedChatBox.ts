@@ -94,15 +94,28 @@ export const VueEmbedChatBox = defineComponent({
       }, 10); // Small debounce to prevent rapid re-renders
     };
 
+    // Queue for actions called before mount
+    const pendingActions = ref<Array<() => void>>([]);
+
     // Create a proxy object that matches EmbedChatBoxRef
     const instanceProxy = {
       open: () => chatBoxRef.current?.open(),
       close: () => chatBoxRef.current?.close(),
       toggle: () => chatBoxRef.current?.toggle(),
-      setWelcomeMessage: (message: string) => chatBoxRef.current?.setWelcomeMessage(message),
+      setWelcomeMessage: (message?: string) => chatBoxRef.current?.setWelcomeMessage(message),
       setMessage: (message: string) => chatBoxRef.current?.setMessage(message),
       sendMessage: (message: string) => chatBoxRef.current?.sendMessage(message),
       useTool: (tool: EmbedTool, options?: { content?: string; prompt?: string }) => chatBoxRef.current?.useTool(tool, options),
+      useKnowledge: (nameOrContext: string | any, content?: any) => {
+        if (chatBoxRef.current) {
+          chatBoxRef.current.useKnowledge(nameOrContext, content);
+        } else {
+          // Queue the action if not ready
+          pendingActions.value.push(() => {
+            chatBoxRef.current?.useKnowledge(nameOrContext, content);
+          });
+        }
+      },
     };
 
     onMounted(() => {
@@ -133,6 +146,15 @@ export const VueEmbedChatBox = defineComponent({
 
         // Register instance for global control
         _registerInstance(instanceProxy);
+
+        // Process pending actions after a short delay to ensure React ref is populated
+        setTimeout(() => {
+          if (pendingActions.value.length > 0) {
+            console.log(`VueEmbedChatBox: Processing ${pendingActions.value.length} pending actions`);
+            pendingActions.value.forEach(action => action());
+            pendingActions.value = [];
+          }
+        }, 100);
       }
     });
 

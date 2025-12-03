@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
     pageContent,
     activeTool,
     context,
+    disableTools,
   } = (await req.json()) as {
     messages: any[];
     id?: string;
@@ -51,6 +52,7 @@ export async function POST(req: NextRequest) {
       prompt: string;
       content: string;
     };
+    disableTools?: boolean;
   };
 
   const finalChatId = chatId || id;
@@ -246,7 +248,6 @@ export async function POST(req: NextRequest) {
       };
     } else if (activeTool === "context" && context) {
       // If specifically context, only allow that
-      console.log(context)
       tools = {
         context: createContextTool(context),
         finish: finishTool,
@@ -447,8 +448,12 @@ export async function POST(req: NextRequest) {
   // --- Tool Choice Logic ---
   let toolChoice: "auto" | "none" | "required" = "auto";
   if (isEmbed) {
-    console.log("Embed Mode Debug:", { activeTool, pageContent: !!pageContent, allDocsLen: allDocuments.length });
-    if (activeTool === "auto") {
+    console.log("Embed Mode Debug:", { activeTool, pageContent: !!pageContent, allDocsLen: allDocuments.length, disableTools });
+    
+    // If tools are explicitly disabled (e.g. when context is provided in auto mode), force toolChoice to "none"
+    if (disableTools) {
+      toolChoice = "none";
+    } else if (activeTool === "auto") {
       toolChoice = "auto";
     } else if (activeTool === "current-page" && pageContent) {
       // Use auto to prevent forced loops in multi-step generation

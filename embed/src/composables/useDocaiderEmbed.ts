@@ -21,7 +21,7 @@ export function useDocaiderEmbed() {
     activeChatInstance.value?.toggle();
   };
 
-  const setWelcomeMessage = (message: string) => {
+  const setWelcomeMessage = (message?: string) => {
     activeChatInstance.value?.setWelcomeMessage(message);
   };
 
@@ -37,6 +37,10 @@ export function useDocaiderEmbed() {
     activeChatInstance.value?.useTool(tool, options);
   };
 
+  const useKnowledge = (context: any) => {
+    activeChatInstance.value?.useKnowledge(context);
+  };
+
   return {
     open,
     close,
@@ -45,6 +49,7 @@ export function useDocaiderEmbed() {
     setMessage,
     sendMessage,
     useTool,
+    useKnowledge,
     // Internal use only
     _registerInstance: registerInstance,
   };

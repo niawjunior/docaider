@@ -17,9 +17,10 @@ declare global {
       open: () => void;
       close: () => void;
       toggle: () => void;
-      setWelcomeMessage: (message: string) => void;
+      setWelcomeMessage: (message?: string) => void;
       setMessage: (message: string) => void;
       sendMessage: (message: string) => void;
+      useKnowledge: (context: any) => void;
     };
   }
 }

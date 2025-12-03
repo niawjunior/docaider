@@ -27,9 +27,10 @@ function App() {
       open: () => chatBoxRef.current?.open(),
       close: () => chatBoxRef.current?.close(),
       toggle: () => chatBoxRef.current?.toggle(),
-      setWelcomeMessage: (message: string) => chatBoxRef.current?.setWelcomeMessage(message),
+      setWelcomeMessage: (message?: string) => chatBoxRef.current?.setWelcomeMessage(message),
       setMessage: (message: string) => chatBoxRef.current?.setMessage(message),
       sendMessage: (message: string) => chatBoxRef.current?.sendMessage(message),
+      useKnowledge: (context: any) => chatBoxRef.current?.useKnowledge(context),
     };
 
     return () => {

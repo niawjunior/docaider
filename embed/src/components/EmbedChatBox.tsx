@@ -33,10 +33,11 @@ export interface EmbedChatBoxRef {
   open: () => void;
   close: () => void;
   toggle: () => void;
-  setWelcomeMessage: (message: string) => void;
+  setWelcomeMessage: (message?: string) => void;
   setMessage: (message: string) => void;
   sendMessage: (message: string) => void;
   useTool: (tool: EmbedTool, options?: { content?: string; prompt?: string }) => void;
+  useKnowledge: (nameOrContext: string | any, content?: any) => void;
 }
 
 export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
@@ -62,6 +63,8 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
   const sessionRef = useRef<EmbedChatSessionRef>(null);
   const dragControls = useDragControls();
 
+  const [knowledgeContext, setKnowledgeContext] = useState<any>(null);
+
   console.log("EmbedChatBox: Rendering", { knowledgeBaseId, chatId });
 
   // Update welcome message if prop changes
@@ -73,7 +76,7 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
     open: () => setIsOpen(true),
     close: () => setIsOpen(false),
     toggle: () => setIsOpen((prev) => !prev),
-    setWelcomeMessage: (message: string) => setWelcomeMessageState(message),
+    setWelcomeMessage: (message?: string) => setWelcomeMessageState(message || ""),
     setMessage: (message: string) => {
       if (!isOpen) setIsOpen(true);
       sessionRef.current?.setMessage(message);
@@ -85,6 +88,25 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
     useTool: (tool: EmbedTool, options?: { content?: string; prompt?: string }) => {
       if (!isOpen) setIsOpen(true);
       sessionRef.current?.useTool(tool, options);
+    },
+    useKnowledge: (nameOrContext: string | any, content?: any) => {
+      setKnowledgeContext((prev: any) => {
+        // Handle legacy single argument call (backward compatibility)
+        if (content === undefined && typeof nameOrContext !== 'string') {
+           // Treat as "Default Context"
+           const newContext = { ...prev };
+           newContext["Default Context"] = nameOrContext;
+           return newContext;
+        }
+
+        // Handle named context
+        const name = typeof nameOrContext === 'string' ? nameOrContext : "Default Context";
+        const data = content !== undefined ? content : nameOrContext;
+
+        const newContext = { ...prev };
+        newContext[name] = data;
+        return newContext;
+      });
     },
   }), [isOpen]);
 
@@ -232,6 +254,7 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
               isOpen={isOpen}
               onClose={() => setIsOpen(false)}
               title={chatboxTitle}
+              externalContext={knowledgeContext}
             />
           )}
         </motion.div>

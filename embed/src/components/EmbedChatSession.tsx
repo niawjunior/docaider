@@ -46,6 +46,7 @@ interface EmbedChatSessionProps {
   isOpen?: boolean;
   onClose?: () => void;
   title?: string;
+  externalContext?: any;
 }
 
 export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSessionProps & { onClose?: () => void }>(({
@@ -59,6 +60,7 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
   isOpen = false,
   onClose,
   title = "Little Helper",
+  externalContext,
 }, ref) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = useState("");
@@ -77,6 +79,37 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
   useEffect(() => {
     contextDataRef.current = contextData;
   }, [contextData]);
+
+  // Sync external context
+  useEffect(() => {
+    if (externalContext) {
+      // externalContext is now a map of { name: content }
+      const contextNames = Object.keys(externalContext);
+      if (contextNames.length > 0) {
+        // Default to the first context if no specific context tool is active
+        // OR if we are currently in a context mode but the specific context might have changed
+        
+        // If we are already in context mode, check if the current prompt matches one of the new names
+        // If not, switch to the first available context
+        const currentContextName = contextData?.prompt;
+        let targetName = contextNames[0];
+        
+        if (currentContextName && contextNames.includes(currentContextName)) {
+            targetName = currentContextName;
+        }
+
+        const content = externalContext[targetName];
+        const stringifiedContent = typeof content === 'string' ? content : JSON.stringify(content);
+        
+        setContextData({ content: stringifiedContent, prompt: targetName });
+        setActiveTool('context'); // Use 'context' mode for named contexts to distinguish from generic auto
+        
+        // Update refs
+        contextDataRef.current = { content: stringifiedContent, prompt: targetName };
+        activeToolRef.current = 'context';
+      }
+    }
+  }, [externalContext]);
 
   useImperativeHandle(ref, () => ({
     setMessage: (message: string) => {
@@ -159,8 +192,19 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
           }
         }
 
-        if (activeToolRef.current === "context" && contextDataRef.current) {
+        // Send context if it exists, regardless of mode (or specifically for auto/context)
+        // User wants "auto" mode to include this context
+        if ((activeToolRef.current === "context" || activeToolRef.current === "auto") && contextDataRef.current) {
           body.context = contextDataRef.current;
+          
+          // If we have explicit context in auto mode, we might want to disable other tools 
+          // to prevent the LLM from trying to use search/askQuestion when it should use the context.
+          // However, we still want it to be able to use tools if the context isn't sufficient?
+          // The user requested: "when it auto it mean no active tool or no need to call tool"
+          // So if we have context, we disable other tools.
+          if (activeToolRef.current === "auto") {
+             body.disableTools = true;
+          }
         }
 
         return body;
@@ -365,7 +409,9 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
           ))}
           <div ref={messagesEndRef} />
           
-          {status === "submitted" && (
+          <div ref={messagesEndRef} />
+          
+          {(status === "submitted" || (status === "streaming" && messages.length > 0 && messages[messages.length - 1].role === "assistant" && !messages[messages.length - 1].parts.some(p => p.type === "text" && (p as any).text?.length > 0))) && (
             <div className="flex gap-3 items-end animate-[fadeIn_0.3s_ease-out]">
                 <div className="w-8 h-8 rounded-full bg-[var(--theme-accent)] border border-[var(--theme-accent-dark)] flex-shrink-0 flex items-center justify-center overflow-hidden">
                      <svg viewBox="0 0 100 100" className="w-6 h-6">
@@ -477,6 +523,25 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
                     >
                       Read Current Page
                     </DropdownMenuCheckboxItem>
+                    
+                    {/* Dynamic Context Options */}
+                    {externalContext && Object.keys(externalContext).map((name) => (
+                      <DropdownMenuCheckboxItem
+                        key={name}
+                        checked={activeTool === "context" && contextData?.prompt === name}
+                        onCheckedChange={() => {
+                            const content = externalContext[name];
+                            const stringifiedContent = typeof content === 'string' ? content : JSON.stringify(content);
+                            setContextData({ content: stringifiedContent, prompt: name });
+                            setActiveTool("context");
+                            contextDataRef.current = { content: stringifiedContent, prompt: name };
+                            activeToolRef.current = "context";
+                        }}
+                        className="text-xs w-full cursor-pointer"
+                      >
+                        {name}
+                      </DropdownMenuCheckboxItem>
+                    ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
             </div>

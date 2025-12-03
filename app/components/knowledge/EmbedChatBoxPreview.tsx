@@ -122,6 +122,50 @@ export default function EmbedChatBoxPreview({
           >
             Tool: Ask Question
           </button>
+          <button
+            onClick={() => {
+              const appData = {
+                "applications": [
+                  { "id": "txyfSAs6CbZK4vKZntYS", "name": "App Checker (OMS/POS)", "status": "ACTIVE" },
+                  { "id": "3eRxraiEekzBYQlPcKp3", "name": "Cash Card", "status": "ACTIVE" },
+                  { "id": "i55rvtL95fer8enKiOR7", "name": "Order Management (OMS)", "status": "ACTIVE" },
+                  { "id": "cyM3nxBcPSzrdFYQjB7F", "name": "Enterprise Data Platform", "status": "ACTIVE" },
+                  { "id": "s66nlqu3sryaW6lAnRO3", "name": "kingpower.com", "status": "ACTIVE" }
+                ]
+              };
+              
+              const integrationData = {
+                "connections": [
+                  {
+                    "source": "Order Management (OMS)",
+                    "target": "Enterprise Data Platform",
+                    "integrations": ["Data Sync - Collection Point", "Data Sync - Customer", "Data Sync - Transaction (OMS)"]
+                  },
+                  {
+                    "source": "Order Management (OMS)",
+                    "target": "kingpower.com",
+                    "integrations": ["/orders/status/unhold/{subOrderId}/shop", "/orders/status/cancel/{orderId}"]
+                  },
+                  {
+                    "source": "kingpower.com",
+                    "target": "Order Management (OMS)",
+                    "integrations": ["GET/api/collectionpoint/airport-list", "POST/api/online/save-order"]
+                  }
+                ]
+              };
+
+              console.log("Injecting named knowledge contexts");
+              // @ts-ignore
+              chatBoxRef.current?.useKnowledge("Application List", appData);
+              // @ts-ignore
+              chatBoxRef.current?.useKnowledge("Integration Details", integrationData);
+              
+              alert("Injected 'Application List' and 'Integration Details' contexts! Open the chat and check the tool dropdown.");
+            }}
+            className="px-3 py-1.5 border rounded-md text-xs hover:bg-gray-50 shadow-sm text-left"
+          >
+            Inject Named Knowledge
+          </button>
         </div>
       </div>
 
