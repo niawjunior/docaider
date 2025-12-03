@@ -37,8 +37,8 @@ export function useDocaiderEmbed() {
     activeChatInstance.value?.useTool(tool, options);
   };
 
-  const useKnowledge = (context: any) => {
-    activeChatInstance.value?.useKnowledge(context);
+  const useKnowledge = (nameOrContext: string | any, content?: any) => {
+    activeChatInstance.value?.useKnowledge(nameOrContext, content);
   };
 
   return {

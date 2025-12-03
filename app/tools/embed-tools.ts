@@ -52,19 +52,16 @@ export const createContextTool = (contextData: {
     - Content is provided by the user for the action: "${contextData.content}".
     - Understanding the specific text or data the user wants you to process.
     `,
-    inputSchema: z.object({}),
-    execute: async () => {
-      const { text } = await generateText({
-        model: openai("gpt-4o-mini"),
-        prompt: `You are a helpful assistant.
-        
-        The user wants you to perform the following action: "${contextData.prompt}".
-        
-        Content to process:
-        ${contextData.content}
-        
-        Please perform the requested action on the content provided.`,
-      });
-      return text;
+    inputSchema: z.object({
+      action: z.string().describe(`The specific action or topic being accessed, typically "${contextData.prompt}"`),
+    }),
+    execute: async ({ action }) => {
+      // Return the content directly to the main LLM
+      // This avoids a secondary LLM call and reduces latency
+      return {
+        action: action || contextData.prompt,
+        content: contextData.content,
+        instruction: `The user wants you to perform the action "${contextData.prompt}" on this content. Please fulfill the request.`
+      };
     },
   });

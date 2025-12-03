@@ -20,7 +20,7 @@ declare global {
       setWelcomeMessage: (message?: string) => void;
       setMessage: (message: string) => void;
       sendMessage: (message: string) => void;
-      useKnowledge: (context: any) => void;
+      useKnowledge: (nameOrContext: string | any, content?: any) => void;
     };
   }
 }
