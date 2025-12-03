@@ -3,42 +3,43 @@ import type { EmbedChatBoxRef, EmbedTool } from "../components/EmbedChatBox";
 
 // Singleton state to hold the active chat instance reference
 const activeChatInstance = ref<EmbedChatBoxRef | null>(null);
+const pendingActions = ref<Array<() => void>>([]);
 
 export function useDocaiderEmbed() {
   const registerInstance = (instance: EmbedChatBoxRef) => {
     activeChatInstance.value = instance;
+    // Process pending actions
+    if (pendingActions.value.length > 0) {
+      pendingActions.value.forEach(action => action());
+      pendingActions.value = [];
+    }
   };
 
-  const open = () => {
-    activeChatInstance.value?.open();
+  const safeCall = (fn: (instance: EmbedChatBoxRef) => void) => {
+    if (activeChatInstance.value) {
+      fn(activeChatInstance.value);
+    } else {
+      pendingActions.value.push(() => {
+        if (activeChatInstance.value) {
+          fn(activeChatInstance.value);
+        }
+      });
+    }
   };
 
-  const close = () => {
-    activeChatInstance.value?.close();
-  };
-
-  const toggle = () => {
-    activeChatInstance.value?.toggle();
-  };
-
-  const setWelcomeMessage = (message?: string) => {
-    activeChatInstance.value?.setWelcomeMessage(message);
-  };
-
-  const setMessage = (message: string) => {
-    activeChatInstance.value?.setMessage(message);
-  };
-
-  const sendMessage = (message: string) => {
-    activeChatInstance.value?.sendMessage(message);
-  };
-
+  const open = () => safeCall(i => i.open());
+  const close = () => safeCall(i => i.close());
+  const toggle = () => safeCall(i => i.toggle());
+  const setWelcomeMessage = (message?: string) => safeCall(i => i.setWelcomeMessage(message));
+  const setMessage = (message: string) => safeCall(i => i.setMessage(message));
+  const sendMessage = (message: string) => safeCall(i => i.sendMessage(message));
+  
   const useTool = (tool: EmbedTool, options?: { content?: string; prompt?: string }) => {
-    activeChatInstance.value?.useTool(tool, options);
+    safeCall(i => i.useTool(tool, options));
   };
 
   const useKnowledge = (nameOrContext: string | any, content?: any) => {
-    activeChatInstance.value?.useKnowledge(nameOrContext, content);
+    safeCall(i => i.useKnowledge(nameOrContext, content));
   };
 
   return {

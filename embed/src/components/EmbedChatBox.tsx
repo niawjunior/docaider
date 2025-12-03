@@ -91,6 +91,11 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
     },
     useKnowledge: (nameOrContext: string | any, content?: any) => {
       setKnowledgeContext((prev: any) => {
+        // Handle clearing all context
+        if (nameOrContext === null) {
+            return null;
+        }
+
         // Handle legacy single argument call (backward compatibility)
         if (content === undefined && typeof nameOrContext !== 'string') {
            // Treat as "Default Context"
@@ -104,7 +109,18 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
         const data = content !== undefined ? content : nameOrContext;
 
         const newContext = { ...prev };
-        newContext[name] = data;
+        
+        if (data === null) {
+            delete newContext[name];
+        } else {
+            newContext[name] = data;
+        }
+
+        // If empty, return null so that EmbedChatSession resets to auto
+        if (Object.keys(newContext).length === 0) {
+            return null;
+        }
+
         return newContext;
       });
     },

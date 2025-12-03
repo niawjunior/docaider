@@ -108,6 +108,12 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
         contextDataRef.current = { content: stringifiedContent, prompt: targetName };
         activeToolRef.current = 'context';
       }
+    } else if (activeTool === 'context' && !externalContext) {
+       // If external context is cleared and we were in context mode, reset to auto
+      setContextData(null);
+      setActiveTool('auto');
+      contextDataRef.current = null;
+      activeToolRef.current = 'auto';
     }
   }, [externalContext]);
 
