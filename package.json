@@ -52,7 +52,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
-    "docaider-embed": "^0.3.2",
+    "docaider-embed": "^0.3.3",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.44.2",
     "embla-carousel-react": "^8.6.0",

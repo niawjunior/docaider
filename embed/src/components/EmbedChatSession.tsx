@@ -261,15 +261,40 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
     }
   };
 
-  const handleQuickAction = (type: 'story' | 'fact' | 'joke') => {
-    let text = "";
-    if (type === 'story') {
-      text = "Tell me a very short, cute story about a magical animal (max 3 sentences). Use emojis! 🦄";
-    } else if (type === 'fact') {
-      text = "Tell me a fun, mind-blowing fact for kids about nature or space (max 2 sentences). Use emojis! 🌍";
-    } else if (type === 'joke') {
-      text = "Tell me a silly clean joke for kids. Use emojis! 😂";
-    }
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+
+  // Fetch suggestions when contextData changes
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (contextData?.content) {
+        setIsLoadingSuggestions(true);
+        try {
+          const response = await fetch(`${src}/api/suggestions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ context: contextData.content }),
+          });
+          const data = await response.json();
+          if (data.questions && Array.isArray(data.questions)) {
+            setSuggestions(data.questions);
+          }
+        } catch (error) {
+          console.error("Failed to fetch suggestions:", error);
+        } finally {
+          setIsLoadingSuggestions(false);
+        }
+      } else {
+        setSuggestions([]);
+      }
+    };
+
+    // Debounce slightly to avoid rapid calls if context changes fast
+    const timer = setTimeout(fetchSuggestions, 500);
+    return () => clearTimeout(timer);
+  }, [contextData, src]);
+
+  const handleQuickAction = (text: string) => {
     sendMessage({ text });
   };
 
@@ -414,9 +439,6 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
             </Message>
           ))}
           <div ref={messagesEndRef} />
-          
-          <div ref={messagesEndRef} />
-          
           {(status === "submitted" || (status === "streaming" && messages.length > 0 && messages[messages.length - 1].role === "assistant" && !messages[messages.length - 1].parts.some(p => p.type === "text" && (p as any).text?.length > 0))) && (
             <div className="flex gap-3 items-end animate-[fadeIn_0.3s_ease-out]">
                 <div className="w-8 h-8 rounded-full bg-[var(--theme-accent)] border border-[var(--theme-accent-dark)] flex-shrink-0 flex items-center justify-center overflow-hidden">
@@ -441,20 +463,28 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
       </Conversation>
 
       {/* Quick Actions Bar */}
-      {/* <div className="px-4 py-2 bg-white flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] shrink-0 z-20">
-        <button onClick={() => handleQuickAction('story')} className="flex-shrink-0 bg-white hover:bg-purple-50 text-purple-600 border border-purple-200 px-4 py-2 rounded-full text-xs font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Magic Story ✨</span>
-        </button>
-        <button onClick={() => handleQuickAction('fact')} className="flex-shrink-0 bg-white hover:bg-green-50 text-green-600 border border-green-200 px-4 py-2 rounded-full text-xs font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5">
-            <Brain className="w-3.5 h-3.5" />
-            <span>Fun Fact ✨</span>
-        </button>
-         <button onClick={() => handleQuickAction('joke')} className="flex-shrink-0 bg-white hover:bg-yellow-50 text-yellow-600 border border-yellow-200 px-4 py-2 rounded-full text-xs font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5">
-            <Smile className="w-3.5 h-3.5" />
-            <span>Tell a Joke ✨</span>
-        </button>
-      </div> */}
+      {(suggestions.length > 0 || isLoadingSuggestions) && (
+      <div className="px-4 py-2 bg-white flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] shrink-0 z-20 min-h-[36px]">
+        {isLoadingSuggestions ? (
+             <>
+                <div className="flex-shrink-0 bg-gray-50 border border-gray-100 px-4 py-2 rounded-full w-32 h-[24px] animate-pulse"></div>
+                <div className="flex-shrink-0 bg-gray-50 border border-gray-100 px-4 py-2 rounded-full w-24 h-[24px] animate-pulse"></div>
+                <div className="flex-shrink-0 bg-gray-50 border border-gray-100 px-4 py-2 rounded-full w-28 h-[24px] animate-pulse"></div>
+             </>
+        ) : (
+            suggestions.map((question, idx) => (
+                <button 
+                    key={idx}
+                    onClick={() => handleQuickAction(question)} 
+                    className="flex-shrink-0 bg-white hover:bg-purple-50 text-purple-600 border border-purple-200 px-4 py-2 rounded-full text-xs font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5"
+                >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>{question}</span>
+                </button>
+            ))
+        )}
+      </div>
+      )}
 
       {/* Error Message */}
       {error && (
