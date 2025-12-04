@@ -118,7 +118,7 @@ export default function EmbedChatBoxPreview({
               // @ts-ignore
               chatBoxRef.current?.useTool("knowledge-base", { content: "What is Docaider?" });
             }}
-            className="px-3 py-1.5 border rounded-md text-xs hover:bg-gray-50 shadow-sm"
+            className="px-3 py-1.5 border rounded-md text-xs  shadow-sm"
           >
             Tool: Ask Question
           </button>
@@ -162,7 +162,7 @@ export default function EmbedChatBoxPreview({
               
               alert("Injected 'Application List' and 'Integration Details' contexts! Open the chat and check the tool dropdown.");
             }}
-            className="px-3 py-1.5 border rounded-md text-xs hover:bg-gray-50 shadow-sm text-left"
+            className="px-3 py-1.5 border rounded-md text-xs  shadow-sm text-left"
           >
             Inject Named Knowledge
           </button>

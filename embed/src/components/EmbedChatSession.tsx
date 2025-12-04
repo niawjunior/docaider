@@ -131,50 +131,52 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
       sendMessage({ text: message });
     },
     useTool: (tool: string, options?: { content?: string; prompt?: string }) => {
-      if (tool === 'context') {
-        setContextData(options || null);
-        setActiveTool('context');
-        
-        // Manually update refs for immediate usage since state updates are async
-        // and useChat reads from these refs for the request body
-        contextDataRef.current = options || null;
-        activeToolRef.current = 'context';
+      stopAndExecute(() => {
+        if (tool === 'context') {
+          setContextData(options || null);
+          setActiveTool('context');
+          
+          // Manually update refs for immediate usage since state updates are async
+          // and useChat reads from these refs for the request body
+          contextDataRef.current = options || null;
+          activeToolRef.current = 'context';
 
-        if (options?.prompt) {
-            setInputValue("");
-            sendMessage({ text: options.prompt });
-            
-            // Reset active tool to auto after sending context action
-            // This prevents subsequent messages from being forced into context mode
-            setTimeout(() => {
-                setActiveTool("auto");
-                activeToolRef.current = "auto";
-            }, 500);
+          if (options?.prompt) {
+              setInputValue("");
+              sendMessage({ text: options.prompt });
+              
+              // Reset active tool to auto after sending context action
+              // This prevents subsequent messages from being forced into context mode
+              setTimeout(() => {
+                  setActiveTool("auto");
+                  activeToolRef.current = "auto";
+              }, 500);
+          }
+        } else if (tool === 'readCurrentPage') {
+          setInputValue("");
+          setActiveTool('current-page');
+          if (options?.content) {
+              setInputValue("");
+              sendMessage({ text: options.content });
+          }
+        } else if (tool === 'knowledge-base') {
+          setActiveTool('knowledge-base');
+          if (options?.content) {
+              setInputValue("");
+              sendMessage({ text: options.content });
+          } 
+        } else {
+          setActiveTool('auto');
+          if (options?.content) {
+              setInputValue("");
+              sendMessage({ text: options.content });
+          }
         }
-      } else if (tool === 'readCurrentPage') {
-        setInputValue("");
-        setActiveTool('current-page');
-        if (options?.content) {
-            setInputValue("");
-            sendMessage({ text: options.content });
-        }
-      } else if (tool === 'knowledge-base') {
-        setActiveTool('knowledge-base');
-        if (options?.content) {
-            setInputValue("");
-            sendMessage({ text: options.content });
-        } 
-      } else {
-        setActiveTool('auto');
-        if (options?.content) {
-            setInputValue("");
-            sendMessage({ text: options.content });
-        }
-      }
 
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      });
     },
   }));
 
@@ -232,18 +234,6 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom of messages when new message is added
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }, 500);
-    }
-  }, [messages]);
 
   // Focus input on mount or when opened
   useEffect(() => {
@@ -255,11 +245,22 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
     }
   }, [isOpen]);
 
+  const stopAndExecute = (callback: () => void) => {
+    if (status === 'streaming' || status === 'submitted') {
+      stop();
+      setTimeout(callback, 10);
+    } else {
+      callback();
+    }
+  };
+
   const handleSendMessage = (message: PromptInputMessage, e: React.FormEvent) => {
     e.preventDefault();
     if (message.text.trim()) {
-      sendMessage({ text: message.text });
-      setInputValue("");
+      stopAndExecute(() => {
+        sendMessage({ text: message.text });
+        setInputValue("");
+      });
     }
   };
 
@@ -301,7 +302,9 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
   }, [contextData, src, knowledgeBaseId]);
 
   const handleQuickAction = (text: string) => {
-    sendMessage({ text });
+    stopAndExecute(() => {
+      sendMessage({ text });
+    });
   };
 
   const clearChat = () => {

@@ -17,6 +17,7 @@ import { useKnowledgeBases } from "@/app/hooks/useKnowledgeBases";
 import GlobalLoader from "@/app/components/GlobalLoader";
 import MainLayout from "@/app/components/MainLayout";
 import EmbedChatBoxPreview from "@/app/components/knowledge/EmbedChatBoxPreview";
+import { CodeBlock, CodeBlockCopyButton } from "@/components/ai-elements/code-block";
 import { v4 as uuidv4 } from "uuid";
 
 interface EmbedConfig {
@@ -126,14 +127,52 @@ export default function DeployKnowledgeBasePage() {
       `data-height="${embedConfig.height}"`,
       `data-width="${embedConfig.width}"`,
       `data-theme="${embedConfig.theme}"`,
-    ].join(" ");
+    ].join("\n  ");
 
-    return `<script src="${origin}/embed.js" ${dataAttributes}></script>`;
+    return `<script \n  src="${origin}/embed.js" \n  ${dataAttributes}\n></script>`;
+  };
+
+  const generateReactCode = () => {
+    return `import { EmbedChatBox } from "docaider-embed";
+
+export default function ChatWidget() {
+  return (
+    <EmbedChatBox
+      knowledgeBaseId="${params.id}"
+      chatId="${uuidv4()}"
+      chatboxTitle="${embedConfig.title}"
+      position="${embedConfig.position}"
+      theme="${embedConfig.theme}"
+      welcomeMessage="${embedConfig.welcomeMessage}"
+      width="${embedConfig.width}"
+      height="${embedConfig.height}"
+    />
+  );
+}`;
+  };
+
+  const generateVueCode = () => {
+    return `<script setup>
+import { VueEmbedChatBox } from "docaider-embed/vue";
+</script>
+
+<template>
+  <VueEmbedChatBox
+    knowledgeBaseId="${params.id}"
+    chatId="${uuidv4()}"
+    chatboxTitle="${embedConfig.title}"
+    position="${embedConfig.position}"
+    theme="${embedConfig.theme}"
+    welcomeMessage="${embedConfig.welcomeMessage}"
+    width="${embedConfig.width}"
+    height="${embedConfig.height}"
+  />
+</template>`;
   };
 
   // Handle copy to clipboard
-  const handleCopy = () => {
-    navigator.clipboard.writeText(generateEmbedCode());
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
     setCopied(true);
     toast.success(t("codeCopied"));
 
@@ -317,35 +356,76 @@ export default function DeployKnowledgeBasePage() {
 
                       <TabsContent value="code" className="space-y-4">
                         <div className="mt-4">
-                          <Label htmlFor="embed-code">
-                            {t("copyCodeBelow")}
-                          </Label>
-                          <div className="relative mt-1">
-                            <Input
-                              id="embed-code"
-                              value={generateEmbedCode()}
-                              readOnly
-                              className="pr-10 font-mono text-xs h-auto py-2"
-                            />
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="absolute right-0 top-0 h-full px-3"
-                              onClick={handleCopy}
-                            >
-                              {copied ? (
-                                <Check className="h-4 w-4" />
-                              ) : (
-                                <Copy className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-2">
-                            {t("addCodeToWebsite")}
-                          </p>
+                          <Tabs defaultValue="html" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3 mb-4">
+                              <TabsTrigger value="html">HTML</TabsTrigger>
+                              <TabsTrigger value="react">React</TabsTrigger>
+                              <TabsTrigger value="vue">Vue</TabsTrigger>
+                            </TabsList>
+                            
+                            <TabsContent value="html" className="space-y-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="embed-code-html">
+                                  {t("copyCodeBelow")}
+                                </Label>
+                                <div className="relative mt-1">
+                                  <CodeBlock
+                                    code={generateEmbedCode()}
+                                    language="html"
+                                    showLineNumbers={true}
+                                  >
+                                    <CodeBlockCopyButton onCopy={() => toast.success(t("codeCopied"))} />
+                                  </CodeBlock>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  Paste this into your HTML body.
+                                </p>
+                              </div>
+                            </TabsContent>
+
+                            <TabsContent value="react" className="space-y-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="embed-code-react">
+                                  {t("copyCodeBelow")}
+                                </Label>
+                                <div className="relative mt-1">
+                                  <CodeBlock
+                                    code={generateReactCode()}
+                                    language="tsx"
+                                    showLineNumbers={true}
+                                  >
+                                    <CodeBlockCopyButton onCopy={() => toast.success(t("codeCopied"))} />
+                                  </CodeBlock>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  Install <code>docaider-embed</code> and use this component.
+                                </p>
+                              </div>
+                            </TabsContent>
+
+                            <TabsContent value="vue" className="space-y-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="embed-code-vue">
+                                  {t("copyCodeBelow")}
+                                </Label>
+                                <div className="relative mt-1">
+                                  <CodeBlock
+                                    code={generateVueCode()}
+                                    language="vue"
+                                    showLineNumbers={true}
+                                  >
+                                    <CodeBlockCopyButton onCopy={() => toast.success(t("codeCopied"))} />
+                                  </CodeBlock>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  Install <code>docaider-embed</code> and use this component.
+                                </p>
+                              </div>
+                            </TabsContent>
+                          </Tabs>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-2 pt-4 border-t">
                           <Label htmlFor="title">{t("title")}</Label>
                           <Input
                             id="title"

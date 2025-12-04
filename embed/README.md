@@ -121,11 +121,37 @@ Control the widget from **any component** (even without a ref) using `useDocaide
 import { useDocaiderEmbed } from "docaider-embed/vue";
 
 // Control the global chat instance
-const { open, close, toggle, setWelcomeMessage, useTool } = useDocaiderEmbed();
+const { 
+  open, 
+  close, 
+  toggle, 
+  setWelcomeMessage, 
+  setMessage,
+  sendMessage,
+  useTool,
+  useKnowledge 
+} = useDocaiderEmbed();
 
 const openSupport = () => {
   setWelcomeMessage("Hi! How can I help you with billing today?");
   open();
+};
+
+const closeChat = () => {
+  close();
+};
+
+const toggleChat = () => {
+  toggle();
+};
+
+const prefillInput = () => {
+  setMessage("I have a question about...");
+  open();
+};
+
+const autoSendMessage = () => {
+  sendMessage("What are your business hours?");
 };
 
 const correctGrammar = () => {
@@ -135,10 +161,29 @@ const correctGrammar = () => {
   });
   open();
 };
+
+const injectContext = () => {
+  // Inject custom data for the AI to use
+  useKnowledge("User Profile", { 
+    name: "John Doe", 
+    plan: "Premium" 
+  });
+  
+  // Or clear context
+  // useKnowledge(null);
+};
 </script>
 
 <template>
-  <button @click="openSupport">Contact Support</button>
+  <div class="buttons">
+    <button @click="openSupport">Open Support</button>
+    <button @click="closeChat">Close</button>
+    <button @click="toggleChat">Toggle</button>
+    <button @click="prefillInput">Prefill Input</button>
+    <button @click="autoSendMessage">Ask Question</button>
+    <button @click="correctGrammar">Fix Grammar</button>
+    <button @click="injectContext">Inject Data</button>
+  </div>
 </template>
 ```
 
@@ -152,6 +197,7 @@ const correctGrammar = () => {
 |------------------|------------------|------|---------|-------------|
 | `knowledgeBaseId` | `data-kb-id` | `string` | **Required** | Your Docaider Knowledge Base ID |
 | `src` | `src` | `string` | `undefined` | Custom Docaider instance URL (if self-hosted) |
+| `chatId` | `data-chat-id` | `string` | `undefined` | Unique identifier for the chat session |
 | `chatboxTitle` | `data-title` | `string` | `"AI Assistant"` | Title displayed in the header |
 | `position` | `data-position` | `string` | `"bottom-right"` | `bottom-right`, `bottom-left`, `top-right`, `top-left` |
 | `theme` | `data-theme` | `string` | `"blue"` | `blue`, `gray`, `green`, `orange`, `purple` |
@@ -160,6 +206,10 @@ const correctGrammar = () => {
 | `width` | `data-width` | `string` | `"350px"` | Width of the chat window |
 | `height` | `data-height` | `string` | `"500px"` | Height of the chat window |
 | `logo` | `data-logo` | `string` | `undefined` | URL to a custom logo image |
+| `documents` | `data-documents` | `{ title: string }[]` | `[]` | List of available documents to show in file list |
+| `onRefresh` | - | `() => void` | `undefined` | Callback when refresh button is clicked |
+| `positionStrategy` | `data-position-strategy` | `"fixed" \| "absolute"` | `"fixed"` | Positioning strategy for the chat window |
+| `initialSuggestions` | `data-initial-suggestions` | `string[]` | `[]` | Initial quick suggestions to display |
 
 ### Instance Methods
 
@@ -174,6 +224,10 @@ Methods available on the ref (React/Vue) or `window.Docaider` (HTML):
 - **`useTool(tool: string, options?: { content?: string; prompt?: string })`**: Programmatically triggers a specific tool or action.
   - `tool`: "context" | "readCurrentPage" | "knowledge-base" | "auto" | "askQuestion"
   - `options`: Optional parameters for the tool (e.g., `{ prompt: "Correct Grammar", content: "Text to correct" }`)
+- **`useKnowledge(nameOrContext: string | any, content?: any)`**: Programmatically sets or clears knowledge context.
+  - **Set Default Context**: `useKnowledge({ foo: "bar" })`
+  - **Set Named Context**: `useKnowledge("My Context", { foo: "bar" })`
+  - **Clear Context**: `useKnowledge(null)` or `useKnowledge("My Context", null)`
 
 ---
 
