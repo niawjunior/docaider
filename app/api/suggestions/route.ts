@@ -2,35 +2,40 @@ import { openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "../../../db/config";
+import { knowledgeBases } from "../../../db/schema";
+import { eq } from "drizzle-orm";
+import { generateSuggestions } from "@/app/utils/ai-suggestions";
 
 export async function POST(req: NextRequest) {
   try {
-    const { context } = await req.json();
+    const { context, knowledgeBaseId } = await req.json();
 
-    if (!context) {
-      return NextResponse.json({ questions: [] });
+    let contextToAnalyze = context;
+
+    // If no explicit context, try to get knowledge base instruction
+    if (!contextToAnalyze && knowledgeBaseId) {
+      try {
+        const [knowledgeBase] = await db
+          .select({ instruction: knowledgeBases.instruction })
+          .from(knowledgeBases)
+          .where(eq(knowledgeBases.id, knowledgeBaseId));
+        
+        if (knowledgeBase?.instruction) {
+          contextToAnalyze = `Knowledge Base Instruction/Description:\n${knowledgeBase.instruction}`;
+        }
+      } catch (dbError) {
+        console.error("Error fetching knowledge base instruction:", dbError);
+      }
     }
 
-    const { object } = await generateObject({
-      model: openai("gpt-4o-mini"),
-      schema: z.object({
-        questions: z.array(z.string()).describe("Array of 3 short questions in Thai"),
-      }),
-      prompt: `
-        Analyze the following context data and generate 3 short, simple, and relevant questions in Thai that a user might ask about this data.
-        
-        Context:
-        ${typeof context === 'string' ? context : JSON.stringify(context).slice(0, 5000)}
+    if (!contextToAnalyze) {
+      contextToAnalyze = "General helpful AI assistant ready to answer questions and assist with tasks.";
+    }
 
-        Requirements:
-        1. Questions must be in Thai.
-        2. Questions must be short (under 40 characters if possible).
-        3. Questions must be directly answerable from the context.
-        4. Tone: Friendly and helpful.
-      `,
-    });
+    const questions = await generateSuggestions(typeof contextToAnalyze === 'string' ? contextToAnalyze : JSON.stringify(contextToAnalyze));
 
-    return NextResponse.json(object);
+    return NextResponse.json({ questions });
   } catch (error) {
     console.error("Error generating suggestions:", error);
     return NextResponse.json({ questions: [] }, { status: 500 });

@@ -47,6 +47,7 @@ interface EmbedChatSessionProps {
   onClose?: () => void;
   title?: string;
   externalContext?: any;
+  initialSuggestions?: string[];
 }
 
 export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSessionProps & { onClose?: () => void }>(({
@@ -61,6 +62,7 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
   onClose,
   title = "Little Helper",
   externalContext,
+  initialSuggestions = [],
 }, ref) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = useState("");
@@ -261,19 +263,23 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
     }
   };
 
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>(initialSuggestions);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
-  // Fetch suggestions when contextData changes
+  // Fetch suggestions when contextData changes or on mount (for KB instruction)
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (contextData?.content) {
+      // We fetch if there is context OR if we have a knowledgeBaseId (for auto mode)
+      if (contextData?.content || knowledgeBaseId) {
         setIsLoadingSuggestions(true);
         try {
           const response = await fetch(`${src}/api/suggestions`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ context: contextData.content }),
+            body: JSON.stringify({ 
+                context: contextData?.content,
+                knowledgeBaseId 
+            }),
           });
           const data = await response.json();
           if (data.questions && Array.isArray(data.questions)) {
@@ -292,7 +298,7 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
     // Debounce slightly to avoid rapid calls if context changes fast
     const timer = setTimeout(fetchSuggestions, 500);
     return () => clearTimeout(timer);
-  }, [contextData, src]);
+  }, [contextData, src, knowledgeBaseId]);
 
   const handleQuickAction = (text: string) => {
     sendMessage({ text });
@@ -540,7 +546,12 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
                   <DropdownMenuContent align="start" className="min-w-[200px] bg-white dark:bg-zinc-950" container={containerRef.current}>
                     <DropdownMenuCheckboxItem
                       checked={activeTool === "auto"}
-                      onCheckedChange={() => setActiveTool("auto")}
+                      onCheckedChange={() => {
+                        setActiveTool("auto");
+                        setContextData(null);
+                        contextDataRef.current = null;
+                        activeToolRef.current = "auto";
+                      }}
                       className="text-xs w-full cursor-pointer"
                     >
                       Auto (Smart)

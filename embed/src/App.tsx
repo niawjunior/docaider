@@ -10,6 +10,7 @@ function App() {
   const chatBoxRef = useRef<EmbedChatBoxRef>(null);
 
   const [documents, setDocuments] = useState<{ title: string }[]>([]);
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
 
   useEffect(() => {
     // Get configuration from window object
@@ -69,6 +70,9 @@ function App() {
       if (data.documents) {
         setDocuments(data.documents);
       }
+      if (data.suggestedQuestions) {
+        setSuggestedQuestions(data.suggestedQuestions);
+      }
     } catch (error) {
       console.error("Error initializing chat:", error);
       setInitError(
@@ -109,6 +113,7 @@ function App() {
       onRefresh={handleRefresh}
       documents={documents}
       theme={config.theme}
+      initialSuggestions={suggestedQuestions}
     />
   );
 }

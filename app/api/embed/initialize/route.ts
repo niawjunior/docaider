@@ -4,6 +4,7 @@ import { db } from "@/db/config";
 import { knowledgeBases, documents } from "@/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { createChat } from "@/app/utils/aisdk/chat";
+import { generateSuggestions } from "@/app/utils/ai-suggestions";
 
 export async function POST(req: NextRequest) {
   try {
@@ -85,10 +86,20 @@ export async function POST(req: NextRequest) {
       timestamp: new Date().toISOString(),
     });
 
+    // Generate initial suggestions
+    let initialSuggestions: string[] = [];
+    try {
+        const context = knowledgeBase.instruction || "General helpful AI assistant ready to answer questions and assist with tasks.";
+        initialSuggestions = await generateSuggestions(context);
+    } catch (e) {
+        console.error("Failed to generate initial suggestions:", e);
+    }
+
     return new Response(
       JSON.stringify({
         chatId,
         documents: allDocuments.map((doc) => ({ title: doc.title })),
+        suggestedQuestions: initialSuggestions,
         success: true,
       }),
       {

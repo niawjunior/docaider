@@ -25,6 +25,7 @@ export interface EmbedChatBoxProps {
   documents?: { title: string }[];
   positionStrategy?: "fixed" | "absolute";
   theme?: "blue" | "gray" | "green";
+  initialSuggestions?: string[];
 }
 
 export type EmbedTool = "context" | "readCurrentPage" | "knowledge-base" | "auto";
@@ -56,6 +57,7 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
   documents = [],
   positionStrategy = "fixed",
   theme = "blue",
+  initialSuggestions = [],
 }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showFileList, setShowFileList] = useState(false);
@@ -65,7 +67,6 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
 
   const [knowledgeContext, setKnowledgeContext] = useState<any>(null);
 
-  console.log("EmbedChatBox: Rendering", { knowledgeBaseId, chatId });
 
   // Update welcome message if prop changes
   useEffect(() => {
@@ -271,6 +272,7 @@ export const EmbedChatBox = forwardRef<EmbedChatBoxRef, EmbedChatBoxProps>(({
               onClose={() => setIsOpen(false)}
               title={chatboxTitle}
               externalContext={knowledgeContext}
+              initialSuggestions={initialSuggestions}
             />
           )}
         </motion.div>
