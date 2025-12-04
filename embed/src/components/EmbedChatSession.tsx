@@ -482,9 +482,9 @@ export const EmbedChatSession = forwardRef<EmbedChatSessionRef, EmbedChatSession
                 <button 
                     key={idx}
                     onClick={() => handleQuickAction(question)} 
-                    className="flex-shrink-0 bg-white hover:bg-purple-50 text-purple-600 border border-purple-200 px-4 py-2 rounded-full text-xs font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5"
+                    className="flex-shrink-0 bg-white hover:bg-[var(--theme-secondary)] text-[var(--theme-text-primary)] border border-[var(--theme-border-highlight)] px-4 py-2 rounded-full text-xs font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5"
                 >
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Sparkles className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
                     <span>{question}</span>
                 </button>
             ))
