@@ -48,9 +48,9 @@ export const createContextTool = (contextData: {
     description: `Use this tool to **access the specific context** provided by the user for the action: "${contextData.prompt}".
     
     ✅ **Required for**:
-    - Performing the action "${contextData.prompt}" on the provided content.
-    - Content is provided by the user for the action: "${contextData.content}".
-    - Understanding the specific text or data the user wants you to process.
+    - Answering questions related to "${contextData.prompt}".
+    - Accessing the data or content associated with "${contextData.prompt}".
+    - Performing actions on the provided context.
     `,
     inputSchema: z.object({
       action: z.string().describe(`The specific action or topic being accessed, typically "${contextData.prompt}"`),
@@ -61,7 +61,7 @@ export const createContextTool = (contextData: {
       return {
         action: action || contextData.prompt,
         content: contextData.content,
-        instruction: `The user wants you to perform the action "${contextData.prompt}" on this content. Please fulfill the request.`
+        instruction: `Here is the content for "${contextData.prompt}". Use this information to answer the user's question or fulfill their request.`
       };
     },
   });
