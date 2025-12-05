@@ -18,6 +18,8 @@ import { formatDistanceToNow } from "date-fns";
 import { useKnowledgeBases } from "./hooks/useKnowledgeBases";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { EmbedChatBox } from "docaider-embed";
+import { Check } from "lucide-react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -245,6 +247,133 @@ export default function Home() {
                 />
               </div>
             </motion.div>
+          </section>
+
+          {/* Embed Section */}
+          <section className="relative z-10 py-24 overflow-hidden">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
+                >
+                  <div className="relative mb-8 flex flex-col items-center">
+                    <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                      {t("embedSection.title")}
+                    </h2>
+                    <motion.div
+                      className="h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full w-24"
+                      initial={{ width: 0 }}
+                      whileInView={{ width: "96px" }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.2, duration: 0.8 }}
+                    />
+                  </div>
+                  <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+                    {t("embedSection.subtitle")}
+                  </p>
+
+                  <div className="space-y-4 mb-8">
+                    {[
+                      t("features.embedFeature.feature1"),
+                      t("features.embedFeature.feature2"),
+                      t("features.embedFeature.feature3"),
+                    ].map((feature, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 + index * 0.1 }}
+                        viewport={{ once: true }}
+                        className="flex items-center space-x-3"
+                      >
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center">
+                          <Check className="w-4 h-4 text-green-500" />
+                        </div>
+                        <span className="text-foreground font-medium">
+                          {feature}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                  viewport={{ once: true }}
+                  className="relative"
+                >
+                  {/* Decorative background blob */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/20 to-red-500/20 rounded-3xl blur-3xl -z-10 transform rotate-6" />
+
+                  <div className="bg-card border border-border rounded-xl shadow-2xl overflow-hidden min-h-[600px] relative flex flex-col">
+                    {/* Browser Toolbar */}
+                    <div className="bg-muted/50 border-b border-border p-4 flex items-center space-x-4">
+                      <div className="flex space-x-2">
+                        <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
+                        <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
+                        <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
+                      </div>
+                      <div className="flex-1 bg-background rounded-md h-8 flex items-center px-3 text-xs text-muted-foreground border border-border/50">
+                        <span className="opacity-50">https://your-awesome-website.com</span>
+                      </div>
+                    </div>
+
+                    {/* Fake Website Content */}
+                    <div className="flex-1 p-8 relative bg-background/50">
+                      <div className="absolute inset-0 bg-grid-black/5 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-white/5" />
+                      
+                      <div className="relative space-y-8 max-w-2xl mx-auto opacity-30 pointer-events-none select-none">
+                        {/* Hero Section Mock */}
+                        <div className="space-y-4 text-center mt-8">
+                          <div className="h-12 bg-foreground/10 rounded-lg w-3/4 mx-auto" />
+                          <div className="h-4 bg-foreground/10 rounded w-1/2 mx-auto" />
+                        </div>
+
+                        {/* Content Grid Mock */}
+                        <div className="grid grid-cols-2 gap-4 mt-12">
+                          <div className="space-y-3">
+                            <div className="h-40 bg-foreground/5 rounded-lg" />
+                            <div className="h-4 bg-foreground/10 rounded w-3/4" />
+                            <div className="h-4 bg-foreground/10 rounded w-1/2" />
+                          </div>
+                          <div className="space-y-3">
+                            <div className="h-40 bg-foreground/5 rounded-lg" />
+                            <div className="h-4 bg-foreground/10 rounded w-3/4" />
+                            <div className="h-4 bg-foreground/10 rounded w-1/2" />
+                          </div>
+                        </div>
+                        
+                        {/* Text Block Mock */}
+                        <div className="space-y-3 mt-8">
+                           <div className="h-4 bg-foreground/10 rounded w-full" />
+                           <div className="h-4 bg-foreground/10 rounded w-5/6" />
+                           <div className="h-4 bg-foreground/10 rounded w-4/6" />
+                        </div>
+                      </div>
+
+                      {/* Actual Embed Component */}
+                      <EmbedChatBox 
+                        knowledgeBaseId="c72b3620-13f3-4b2f-99c2-e34be3f37fe5"
+                        theme="blue"
+                        position="bottom-right"
+                        welcomeMessage="Hi! I'm the Docaider AI assistant. How can I help you today?"
+                        src="http://localhost:3000"
+                        chatId="demo-chat"
+                        width="400px"
+                        height="450px"
+                        positionStrategy="absolute"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
           </section>
         </motion.div>
         {/* ProductHunt Badge */}

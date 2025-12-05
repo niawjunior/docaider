@@ -549,6 +549,23 @@
         "feature1": "Categorized views (My Knowledge Bases, Shared, Public)",
         "feature2": "Advanced search and filtering options",
         "feature3": "Quick access to recent knowledge bases"
+      },
+      "embedFeature": {
+        "title": "Embed Anywhere",
+        "description": "Add a chat widget to your website in minutes",
+        "feature1": "Simple copy-paste installation",
+        "feature2": "Customizable appearance and behavior",
+        "feature3": "Works with React, Vue, and HTML"
+      }
+    },
+    "embedSection": {
+      "title": "Embed on Your Website",
+      "subtitle": "Add a powerful AI assistant to your website with just a few lines of code. Customize the look and feel to match your brand.",
+      "copyCode": "Copy Code",
+      "copied": "Copied!",
+      "demo": {
+        "title": "Try it out",
+        "description": "Interact with the widget to see how it works"
       }
     },
     "publicKnowledgeBases": {
