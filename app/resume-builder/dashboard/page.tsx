@@ -51,9 +51,9 @@ export default function DashboardPage() {
       setDeletingId(id);
       await deleteResume(id);
       setResumes((prev) => prev.filter((r) => r.id !== id));
-      toast.success("Website deleted successfully");
+      toast.success("Resume deleted successfully");
     } catch (error) {
-      toast.error("Failed to delete website");
+      toast.error("Failed to delete resume");
     } finally {
       setDeletingId(null);
     }
@@ -74,50 +74,50 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 text-slate-100 dark flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <ResumeBuilderHeader />
+    <div className="min-h-screen bg-slate-950 text-slate-100 dark">
+      <ResumeBuilderHeader theme="dark" className="bg-transparent border-b border-white/10" />
 
       <main className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">My Websites</h1>
-            <p className="text-slate-500 mt-2">Manage your personal portfolio websites</p>
+            <h1 className="text-3xl font-bold text-white">My Resumes</h1>
+            <p className="text-slate-400 mt-2">Manage your personal interactive resumes</p>
           </div>
           <Button onClick={() => {
               localStorage.removeItem("resume_draft"); 
               localStorage.removeItem("resume_theme");
               router.push("/resume-builder/create");
-            }}>
+            }} className="bg-white text-black hover:bg-slate-200">
             <Plus className="w-4 h-4 mr-2" />
             Create New
           </Button>
         </div>
 
         {resumes.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl border border-slate-200 border-dashed">
-            <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="text-center py-20 bg-slate-900 rounded-2xl border border-white/10 border-dashed">
+            <div className="w-16 h-16 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4">
               <Monitor className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">No websites yet</h3>
-            <p className="text-slate-500 max-w-sm mx-auto mb-8">
-              Create your first personal website from your resume in seconds.
+            <h3 className="text-xl font-bold text-white mb-2">No resumes yet</h3>
+            <p className="text-slate-400 max-w-sm mx-auto mb-8">
+              Create your first interactive resume in seconds.
             </p>
-            <Button size="lg" onClick={() => router.push("/resume-builder/create")}>
+            <Button size="lg" onClick={() => router.push("/resume-builder/create")} className="bg-white text-black hover:bg-slate-200">
               Build for Free
             </Button>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {resumes.map((resume) => (
-              <Card key={resume.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 border-slate-200 pt-0">
-                <div className="aspect-video bg-slate-100 relative group-hover:scale-[1.02] transition-transform duration-500 overflow-hidden">
+              <Card key={resume.id} className="overflow-hidden group hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 border-white/10 bg-slate-900 pt-0">
+                <div className="aspect-video bg-slate-950 relative group-hover:scale-[1.02] transition-transform duration-500 overflow-hidden border-b border-white/5">
                   <div className="absolute inset-0 scale-[0.25] origin-top-left w-[400%] h-[400%] pointer-events-none" style={{ containerType: "inline-size" }}>
                     <ResumePreview
                       data={resume.content}
@@ -143,10 +143,10 @@ export default function DashboardPage() {
                 <div className="p-5">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <h3 className="font-bold text-slate-900 truncate pr-4">
+                      <h3 className="font-bold text-white truncate pr-4">
                         {resume.content.personalInfo.fullName || "Untitled Resume"}
                       </h3>
-                      <p className="text-sm text-slate-500 capitalize">{resume.theme} Theme</p>
+                      <p className="text-sm text-slate-400 capitalize">{resume.theme} Theme</p>
                     </div>
                     {resume.is_public && (
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
@@ -155,22 +155,22 @@ export default function DashboardPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
-                    <span className="text-xs text-slate-400">
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+                    <span className="text-xs text-slate-500">
                       Updated {formatDistanceToNow(new Date(resume.updated_at), { addSuffix: true })}
                     </span>
                     
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50">
+                        <Button variant="outline" size="icon" className="h-8 w-8 text-slate-400">
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Website?</AlertDialogTitle>
+                          <AlertDialogTitle className="text-slate-900 dark:text-white">Delete Resume?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete your website and remove it from our servers.
+                            This action cannot be undone. This will permanently delete your resume.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

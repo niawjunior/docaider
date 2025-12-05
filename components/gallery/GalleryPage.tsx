@@ -44,9 +44,9 @@ export function GalleryPage({ initialData }: GalleryPageProps) {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-950 text-slate-100 dark">
       {/* Header */}
-      <ResumeBuilderHeader />
+      <ResumeBuilderHeader theme="dark" className="bg-transparent border-b border-white/10" />
 
       <main>
         <section className="py-24 px-6">
@@ -55,7 +55,7 @@ export function GalleryPage({ initialData }: GalleryPageProps) {
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight"
+            className="text-4xl md:text-5xl font-extrabold text-white tracking-tight"
           >
             Discover What's Possible
           </motion.h2>
@@ -63,7 +63,7 @@ export function GalleryPage({ initialData }: GalleryPageProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-slate-600 text-lg"
+            className="text-slate-400 text-lg"
           >
             Explore resumes created by our community. Get inspired and build your own.
           </motion.p>
@@ -80,18 +80,18 @@ export function GalleryPage({ initialData }: GalleryPageProps) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
               placeholder="Search by name or role..."
-              className="pl-10 bg-white h-12 text-base"
+              className="pl-10 bg-slate-900/50 border-white/10 h-9 text-base text-white placeholder:text-slate-500 focus:bg-slate-900 transition-colors"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="w-full md:w-[200px]">
             <Select value={filterTheme} onValueChange={setFilterTheme}>
-              <SelectTrigger className="bg-white h-12">
+              <SelectTrigger className="bg-slate-900/50 border-white/10 text-white">
                 <Filter className="w-4 h-4 mr-2 text-slate-400" />
                 <SelectValue placeholder="Filter by theme" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent >
                 <SelectItem value="all">All Themes</SelectItem>
                 <SelectItem value="modern">Modern</SelectItem>
                 <SelectItem value="minimal">Minimal</SelectItem>
@@ -117,10 +117,10 @@ export function GalleryPage({ initialData }: GalleryPageProps) {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
                 key={item.slug}
-                className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer"
+                className="group relative bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-purple-500/10 border border-white/5 hover:border-white/20 transition-all duration-500 cursor-pointer"
                 onClick={() => window.open(`/p/${item.slug}`, "_blank")}
               >
-                <div className="aspect-video w-full overflow-hidden bg-slate-100 relative">
+                <div className="aspect-video w-full overflow-hidden bg-slate-950 relative border-b border-white/5">
                   <div className="absolute inset-0 scale-[0.25] origin-top-left w-[400%] h-[400%] pointer-events-none" style={{ containerType: "inline-size" }}>
                     <ResumePreview
                       data={item.content}
@@ -138,14 +138,14 @@ export function GalleryPage({ initialData }: GalleryPageProps) {
                 
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-bold text-lg text-slate-900 truncate pr-2 group-hover:text-blue-600 transition-colors">
+                    <h3 className="font-bold text-lg text-white truncate pr-2 group-hover:text-blue-400 transition-colors">
                       {item.job_title || "Community Member"}
                     </h3>
-                    <span className="text-xs font-medium px-2 py-1 bg-slate-100 rounded-full text-slate-600 capitalize shrink-0">
+                    <span className="text-xs font-medium px-2 py-1 bg-white/10 text-slate-300 rounded-full capitalize shrink-0 border border-white/5">
                       {item.theme}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-500 font-medium mb-1">
+                  <p className="text-sm text-slate-400 font-medium mb-1">
                     {item.content.personalInfo.fullName}
                   </p>
                   <p className="text-slate-500 text-sm line-clamp-2">
@@ -158,7 +158,7 @@ export function GalleryPage({ initialData }: GalleryPageProps) {
         </motion.div>
 
             {filteredData.length === 0 && (
-              <div className="text-center py-20 text-slate-500">
+              <div className="text-center py-20 text-slate-400">
                 No resumes found matching your criteria.
               </div>
             )}

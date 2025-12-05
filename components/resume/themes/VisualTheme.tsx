@@ -13,7 +13,7 @@ export const VisualTheme = ({ data }: VisualThemeProps) => {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-white selection:text-black">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center mix-blend-difference">
+      <nav className="sticky top-0 left-0 right-0 z-50 p-6 flex justify-between items-center mix-blend-difference">
         <span className="text-xl font-bold tracking-tighter uppercase">{data.personalInfo.fullName}</span>
         <div className="flex gap-6 text-sm font-medium uppercase tracking-widest">
           <a href="#work" className="hover:opacity-50 transition-opacity">Work</a>
@@ -44,10 +44,10 @@ export const VisualTheme = ({ data }: VisualThemeProps) => {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-[12vw] leading-[0.85] font-black uppercase tracking-tighter mb-8"
+            className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl leading-[0.85] font-black uppercase tracking-tighter mb-8 break-words"
           >
             {/* Split name for visual impact if possible, otherwise just display */}
-            {data.personalInfo.fullName.split(" ").map((word, i) => (
+            {(data.personalInfo.fullName || "").split(" ").map((word, i) => (
               <span key={i} className="block">{word}</span>
             ))}
           </motion.h1>

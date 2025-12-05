@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Upload, Wand2, Share2, Plus, Trash2, Layout } from "lucide-react";
+import { Loader2, Upload, Wand2, Share2, Plus, Trash2, Layout, X } from "lucide-react";
 import { ResumePreview } from "@/components/resume/ResumePreview";
 import { ResumeData } from "@/lib/schemas/resume";
 import { toast } from "sonner";
@@ -171,16 +171,17 @@ export function ResumeEditor() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen  bg-slate-950 text-white flex flex-col text-slate-100 dark">
       <ResumeBuilderHeader 
         maxWidth="max-w-full" 
         showBackToApp={false}
-        className="px-6"
+        className="bg-transparent border-b border-white/10 relative z-50 backdrop-blur-md"
+        theme="dark"
       >
         <div className="flex gap-2 items-center">
           {resumeData && (
-            <div className="flex items-center gap-2 mr-4 border-r border-slate-200 pr-4">
-              <span className="text-sm text-slate-500 font-medium hidden sm:inline">Theme:</span>
+            <div className="flex items-center gap-2 mr-4 border-r border-white/10 pr-4">
+              <span className="text-sm text-slate-400 font-medium hidden sm:inline">Theme:</span>
               <Select
                 value={theme}
                 onValueChange={(value: any) => setTheme(value)}
@@ -192,7 +193,7 @@ export function ResumeEditor() {
                   <SelectItem value="modern">Modern</SelectItem>
                   <SelectItem value="minimal">Minimal</SelectItem>
                   <SelectItem value="creative">Creative</SelectItem>
-                  <SelectItem value="portfolio">Portfolio (Website)</SelectItem>
+                  <SelectItem value="portfolio">Portfolio (Resume)</SelectItem>
                   <SelectItem value="studio">Studio (Agency)</SelectItem>
                   <SelectItem value="visual">Visual (New)</SelectItem>
                 </SelectContent>
@@ -204,14 +205,14 @@ export function ResumeEditor() {
             <DialogTrigger asChild>
               <Button disabled={!resumeData || isLoading}>
                 <Share2 className="w-4 h-4 mr-2" />
-                {idParam ? "Update Website" : "Publish Website"}
+                {idParam ? "Update Resume" : "Publish Resume"}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{idParam ? "Update your Website" : "Publish your Website"}</DialogTitle>
+                <DialogTitle>{idParam ? "Update your Resume" : "Publish your Resume"}</DialogTitle>
                 <DialogDescription>
-                  {idParam ? "Save changes to your existing website." : "Choose a unique URL for your resume website."}
+                  {idParam ? "Save changes to your existing resume." : "Choose a unique URL for your resume."}
                 </DialogDescription>
               </DialogHeader>
               
@@ -235,7 +236,7 @@ export function ResumeEditor() {
                     <Share2 className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg">{idParam ? "Website Updated!" : "Website Published!"}</h3>
+                    <h3 className="font-bold text-lg">{idParam ? "Resume Updated!" : "Resume Published!"}</h3>
                     <p className="text-slate-500">Your resume is now live at:</p>
                   </div>
                   <div className="p-3 bg-slate-100 rounded-lg text-sm font-mono break-all">
@@ -274,7 +275,7 @@ export function ResumeEditor() {
                   </Button>
                 ) : (
                   <Button variant="outline" asChild>
-                    <Link href={publishedUrl} target="_blank">View Live Site</Link>
+                    <Link href={publishedUrl} target="_blank">View Live Resume</Link>
                   </Button>
                 )}
               </DialogFooter>
@@ -285,7 +286,7 @@ export function ResumeEditor() {
 
       <main className="flex-1 flex overflow-hidden">
         {/* Left Panel - Editor */}
-        <div className="w-1/2 h-[calc(100vh-70px)] max-w-xl border-r border-slate-200 bg-white overflow-y-auto p-6">
+        <div className="w-1/2 h-[calc(100vh-70px)] max-w-xl border-r border-white/10 bg-slate-900 overflow-y-auto p-6">
           {isLoading ? (
             <div className="h-full flex items-center justify-center">
               <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
@@ -296,7 +297,7 @@ export function ResumeEditor() {
                 <Upload className="w-10 h-10 text-blue-600" />
               </div>
               <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-slate-900">
+                <h2 className="text-2xl font-bold text-white">
                   Upload your Resume
                 </h2>
                 <p className="text-slate-500 max-w-sm">
@@ -378,12 +379,13 @@ export function ResumeEditor() {
                         alt="Cover" 
                         className="w-full h-full object-cover"
                       />
-                      <button
+                      <Button
                         onClick={() => setResumeData({ ...resumeData, coverImage: undefined })}
-                        className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 hover:bg-red-500 transition-colors"
+                        variant="destructive"
+                        className="absolute top-1 right-1"
                       >
                         <Trash2 className="w-3 h-3" />
-                      </button>
+                      </Button>
                     </div>
                   )}
                   <div className="flex-1">
@@ -497,11 +499,11 @@ export function ResumeEditor() {
                   </Button>
                 </div>
                 {resumeData.experience.map((exp, index) => (
-                  <Card key={index} className="p-4 space-y-4 relative group">
+                  <Card key={index} className="p-4 space-y-4 relative group bg-slate-800/50 border-white/10">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-600 hover:bg-red-50"
+                      className="absolute top-0 right-2"
                       onClick={() => {
                         const newExp = [...resumeData.experience];
                         newExp.splice(index, 1);
@@ -577,11 +579,11 @@ export function ResumeEditor() {
                   </Button>
                 </div>
                 {resumeData.education.map((edu, index) => (
-                  <Card key={index} className="p-4 space-y-4 relative group">
+                  <Card key={index} className="p-4 space-y-4 relative group bg-slate-800/50 border-white/10">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-600 hover:bg-red-50"
+                      className="absolute top-0 right-2"
                       onClick={() => {
                         const newEdu = [...resumeData.education];
                         newEdu.splice(index, 1);
@@ -658,14 +660,15 @@ export function ResumeEditor() {
                 <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
                   Skills
                 </h3>
-                <div className="flex flex-wrap gap-2 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <div className="flex flex-wrap gap-2 p-4  rounded-lg">
                   {resumeData.skills.map((skill, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-1 px-3 py-1 bg-white border border-slate-200 rounded-full text-sm"
+                      className="flex items-center gap-1 px-3 py-1 border border-slate-200 rounded-full text-sm"
                     >
                       <span>{skill}</span>
-                      <button
+                      <Button
+                        variant="ghost"
                         onClick={() => {
                           const newSkills = [...resumeData.skills];
                           newSkills.splice(index, 1);
@@ -673,14 +676,14 @@ export function ResumeEditor() {
                         }}
                         className="text-slate-400 hover:text-red-500 ml-1"
                       >
-                        ×
-                      </button>
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
                   ))}
-                  <div className="flex items-center gap-2 min-w-[120px]">
+                  <div className="flex items-center gap-2 w-full">
                     <Input
                       placeholder="Add skill..."
-                      className="h-8 text-sm bg-transparent border-none shadow-none focus-visible:ring-0 px-0"
+                      className=" text-sm  border-none shadow-none focus-visible:ring-0 mt-2"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
@@ -726,11 +729,11 @@ export function ResumeEditor() {
                   </Button>
                 </div>
                 {(resumeData.projects || []).map((proj, index) => (
-                  <Card key={index} className="p-4 space-y-4 relative group">
+                  <Card key={index} className="p-4 space-y-4 relative group bg-transparent">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-600 hover:bg-red-50"
+                      className="absolute top-0 right-2"
                       onClick={() => {
                         const newProjs = [...(resumeData.projects || [])];
                         newProjs.splice(index, 1);
@@ -793,11 +796,11 @@ export function ResumeEditor() {
                   </Button>
                 </div>
                 {(resumeData.testimonials || []).map((testimonial, index) => (
-                  <Card key={index} className="p-4 space-y-4 relative group">
+                  <Card key={index} className="p-4 space-y-4 relative group bg-transparent">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-600 hover:bg-red-50"
+                      className="absolute top-0 right-2"
                       onClick={() => {
                         const newTestimonials = [...(resumeData.testimonials || [])];
                         newTestimonials.splice(index, 1);
@@ -850,7 +853,7 @@ export function ResumeEditor() {
         </div>
 
         {/* Right Panel - Preview */}
-        <div className="flex-1 bg-slate-100 h-[calc(100vh-70px)] overflow-y-auto flex items-start justify-center" style={{ containerType: "inline-size" }}>
+        <div className="flex-1 bg-slate-950/50 h-[calc(100vh-70px)] overflow-y-auto flex items-start justify-center" style={{ containerType: "inline-size" }}>
             {resumeData ? (
               <ResumePreview data={resumeData} theme={theme} />
             ) : (
