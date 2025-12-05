@@ -60,7 +60,13 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/api/credits") &&
     !request.nextUrl.pathname.startsWith("/api/line/webhook") &&
     !request.nextUrl.pathname.startsWith("/api/transcribe") &&
-    !request.nextUrl.pathname.startsWith("/api/text-to-speech")
+    !request.nextUrl.pathname.startsWith("/api/text-to-speech") &&
+    !request.nextUrl.pathname.startsWith("/p/") && // Public resumes
+    // Allow resume builder landing page and gallery, but protect create/edit routes
+    !(
+      request.nextUrl.pathname === "/resume-builder" || 
+      request.nextUrl.pathname.startsWith("/resume-builder/gallery")
+    )
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();

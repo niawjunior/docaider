@@ -714,3 +714,64 @@ export const knowledgeBaseChunks = pgTable(
     }),
   ]
 );
+
+// Resumes table - stores parsed resume data and website configuration
+export const resumes = pgTable(
+  "resumes",
+  {
+    id: uuid()
+      .default(sql`uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    slug: text().unique().notNull(), // Public URL slug (e.g., /p/john-doe)
+    content: jsonb().notNull(), // Structured resume data (personal info, experience, etc.)
+    theme: text().default("modern").notNull(),
+    jobTitle: text("job_title"), // Extracted from content for easier querying
+    summary: text("summary"), // Extracted from content for easier querying
+    isPublic: boolean("is_public").default(false),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    }).default(sql`timezone('utc'::text, now())`),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "string",
+    }).default(sql`timezone('utc'::text, now())`),
+  },
+  (table) => [
+    unique("unique_user_slug").on(table.slug),
+    pgPolicy("Users can view their own resumes", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+    pgPolicy("Anyone can view public resumes", {
+      as: "permissive",
+      for: "select",
+      to: ["public"],
+      using: sql`(is_public = true)`,
+    }),
+    pgPolicy("Users can insert their own resumes", {
+      as: "permissive",
+      for: "insert",
+      to: ["public"],
+      withCheck: sql`(auth.uid() = user_id)`,
+    }),
+    pgPolicy("Users can update their own resumes", {
+      as: "permissive",
+      for: "update",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+    pgPolicy("Users can delete their own resumes", {
+      as: "permissive",
+      for: "delete",
+      to: ["public"],
+      using: sql`(auth.uid() = user_id)`,
+    }),
+  ]
+);

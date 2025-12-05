@@ -71,6 +71,20 @@
       "when": 1764053094081,
       "tag": "0009_grey_sister_grimm",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1764917613042,
+      "tag": "0010_colorful_giant_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1764927943535,
+      "tag": "0011_sour_leech",
+      "breakpoints": true
     }
   ]
 }

@@ -80,6 +80,13 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
             >
               {t("pricing")}
             </Button>
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/resume-builder")}
+              className="text-sm"
+            >
+              Resume Builder
+            </Button>
             {session ? (
               <>
                 <Button
@@ -158,6 +165,15 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                     className="justify-center "
                   >
                     {t("pricing")}
+                  </Button>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleNavigation("/resume-builder")}
+                    className="justify-center "
+                  >
+                    Resume Builder
                   </Button>
                 </SheetClose>
                 {session ? (

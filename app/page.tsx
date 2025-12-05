@@ -363,7 +363,7 @@ export default function Home() {
                         theme="blue"
                         position="bottom-right"
                         welcomeMessage="Hi! I'm the Docaider AI assistant. How can I help you today?"
-                        src="http://localhost:3000"
+                        src="https://www.docaider.com"
                         chatId="demo-chat"
                         width="400px"
                         height="450px"
