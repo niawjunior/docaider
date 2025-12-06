@@ -60,7 +60,7 @@ export default function DashboardPage() {
   };
   
   const handleEdit = (resume: any) => {
-    router.push(`/resume-builder/create?id=${resume.id}`);
+    router.push(`/resume-builder/${resume.id}/edit`);
   };
 
   if (loading) {

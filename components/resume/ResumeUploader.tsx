@@ -14,6 +14,7 @@ import { ScanAnimation, CircuitAnimation, SparkleAnimation, RocketAnimation } fr
 interface ResumeUploaderProps {
   onUploadSuccess: (data: ResumeData) => void;
   isLoading?: boolean;
+  onLoadingStateChange?: (isLoading: boolean, colorClass?: string) => void;
 }
 
 const PROCESSING_STEPS = [
@@ -23,7 +24,8 @@ const PROCESSING_STEPS = [
     { text: "Finalizing...", icon: RocketAnimation, color: "text-green-400", subtext: "Preparing your editor..." }
 ];
 
-export function ResumeUploader({ onUploadSuccess, isLoading: externalLoading }: ResumeUploaderProps) {
+export function ResumeUploader(props: ResumeUploaderProps) {
+  const { onUploadSuccess, isLoading: externalLoading } = props;
   const [file, setFile] = useState<File | null>(null);
   const [processingStep, setProcessingStep] = useState(0);
   const [isFinalizing, setIsFinalizing] = useState(false);
@@ -47,7 +49,7 @@ export function ResumeUploader({ onUploadSuccess, isLoading: externalLoading }: 
           // Always enforce default cover image, ignoring AI hallucination
           data.coverImage = "/images/cover.png";
           onUploadSuccess(data);
-      }, 1000);
+      }, 3000); // Allow time for Finalizing animation to complete
     },
     onError: (error) => {
       toast.error("Failed to parse resume. Please try again.");
@@ -58,6 +60,19 @@ export function ResumeUploader({ onUploadSuccess, isLoading: externalLoading }: 
   });
 
   const isLoading = externalLoading || parseResume.isPending || isFinalizing;
+  const { onLoadingStateChange } = props;
+
+  // Sync Loading State with Parent
+  useEffect(() => {
+      if (onLoadingStateChange) {
+          if (isLoading) {
+             const stepColor = PROCESSING_STEPS[processingStep].color.replace('text-', 'bg-').replace('-400', '-500');
+             onLoadingStateChange(true, stepColor);
+          } else {
+             onLoadingStateChange(false);
+          }
+      }
+  }, [isLoading, processingStep, onLoadingStateChange]);
 
   // Multi-step Loading Animation
   useEffect(() => {
@@ -237,7 +252,7 @@ export function ResumeUploader({ onUploadSuccess, isLoading: externalLoading }: 
                          <div className="w-full space-y-2">
                              <div className="flex justify-between text-xs font-medium text-slate-400 px-1">
                                 <span>Progress</span>
-                                <span>{Math.min((processingStep + 1) * 25, 99)}%</span>
+                                <span>{Math.min((processingStep + 1) * 25, 100)}%</span>
                              </div>
                              <div className="relative w-full h-2 bg-slate-800 rounded-full overflow-hidden">
                                  <motion.div
@@ -248,8 +263,8 @@ export function ResumeUploader({ onUploadSuccess, isLoading: externalLoading }: 
                                          processingStep === 2 ? "bg-yellow-500" : "bg-green-500"
                                      )}
                                      initial={{ width: "0%" }}
-                                     animate={{ width: `${((processingStep + 1) / 3) * 100}%` }}
-                                     transition={{ duration: 2.5, ease: "easeInOut" }}
+                                     animate={{ width: `${((processingStep + 1) / 4) * 100}%` }}
+                                     transition={{ duration: 1.5, ease: "easeInOut" }}
                                  />
                                  
                                  {/* Scanning Shine Effect */}

@@ -197,30 +197,8 @@ export function LandingPage({ initialData }: LandingPageProps) {
     router.push("/resume-builder/create");
   };
 
-  const handleUseTemplate = async (data: ResumeData, theme: string) => {
-    setIsCreating(true);
-    try {
-        const result = await saveDraft({
-            content: data,
-            theme,
-        });
-        if (result.success && result.id) {
-            toast.success("Template loaded!");
-            router.push(`/resume-builder/create?id=${result.id}`);
-        }
-    } catch (e: any) {
-        if (e.message.includes("Unauthorized") || e.message.includes("must be logged in")) {
-            // Redirect to login with a next param that includes the theme and auto-trigger
-            const nextUrl = encodeURIComponent(`/resume-builder/create?theme=${theme}&auto=true`);
-            router.push(`/login?next=${nextUrl}`);
-            setIsCreating(false);
-            return;
-        }
-        
-        toast.error("Failed to load template");
-        console.error(e);
-        setIsCreating(false);
-    }
+  const handleUseTemplate = (data: ResumeData, theme: string) => {
+    router.push(`/resume-builder/create?theme=${theme}`);
   };
 
   const showcaseItems = [
@@ -231,32 +209,6 @@ export function LandingPage({ initialData }: LandingPageProps) {
       data: item.content as ResumeData,
     })),
   ].slice(0, 3);
-
-  const DEMO_DATA: ResumeData = {
-    personalInfo: {
-      fullName: "Alex Morgan",
-      summary: "Product Designer with 5 years of experience building digital products.",
-      email: "alex@example.com",
-    },
-    experience: [
-      {
-        company: "Tech Corp",
-        position: "Senior Designer",
-        startDate: "2021",
-        endDate: "Present",
-        description: "Leading the design system team.",
-      },
-    ],
-    projects: [
-      { name: "E-commerce API", description: "High-performance API." }
-    ],
-    testimonials: [],
-    education: [],
-    skills: ["Figma", "React", "UI/UX"],
-  };
-
-  // THEME_DEMOS imported from @/lib/themes
-
 
   return (
     <div className="min-h-screen bg-slate-950 text-white overflow-hidden selection:bg-purple-500/30 bg-dot-white/[0.2]">
