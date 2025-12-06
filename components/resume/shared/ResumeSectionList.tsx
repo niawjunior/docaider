@@ -31,6 +31,8 @@ interface ResumeSectionListProps<T> {
   ) => React.ReactNode;
   className?: string;
   strategy?: "vertical" | "rect";
+  title?: string;
+  readOnly?: boolean;
 }
 
 // Extends T with potential ID for internal use
@@ -66,8 +68,8 @@ function SortableItem({
   return (
     <div ref={setNodeRef} style={style} className={cn("relative group/sortable", className)}>
        {dragEnabled && (
-         <div 
-            {...attributes} 
+         <div
+            {...attributes}
             {...listeners}
             className="absolute -left-6 top-2.5 p-1 text-slate-300 hover:text-slate-600 cursor-grab active:cursor-grabbing opacity-0 group-hover/sortable:opacity-100 transition-opacity z-10"
          >
@@ -79,11 +81,13 @@ function SortableItem({
   );
 }
 
-export function ResumeSectionList<T extends ItemWithId>({ 
-    data, 
-    onUpdate, 
-    renderItem, 
+export function ResumeSectionList<T extends { id?: string }>({
+    title,
+    data,
+    onUpdate,
+    renderItem,
     className,
+    readOnly = false,
     strategy
 }: ResumeSectionListProps<T>) {
 
@@ -143,7 +147,7 @@ export function ResumeSectionList<T extends ItemWithId>({
     }
   };
 
-  if (!items.length) return null;
+  if (!items.length && !title) return null; // Only return null if no items AND no title
 
   return (
     <DndContext 
@@ -160,7 +164,7 @@ export function ResumeSectionList<T extends ItemWithId>({
              <SortableItem 
                 key={item.id || index} 
                 id={item.id || `item-${index}`}
-                dragEnabled={!!onUpdate}
+                dragEnabled={!!onUpdate && !readOnly}
              >
                 {renderItem(
                     item, 
@@ -168,12 +172,12 @@ export function ResumeSectionList<T extends ItemWithId>({
                     (updates) => {
                          const newData = [...items];
                          newData[index] = { ...newData[index], ...updates };
-                         onUpdate(newData);
+                         if (onUpdate) onUpdate(newData);
                     },
                     () => {
                          const newData = [...items];
                          newData.splice(index, 1);
-                         onUpdate(newData);
+                         if (onUpdate) onUpdate(newData);
                     }
                 )}
              </SortableItem>

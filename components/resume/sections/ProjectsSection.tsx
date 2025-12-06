@@ -11,9 +11,10 @@ interface ProjectsSectionProps {
     data: ResumeData;
     theme: "modern" | "minimal" | "creative" | "portfolio" | "studio" | "visual";
     onUpdate?: (data: ResumeData) => void;
+    readOnly?: boolean;
 }
 
-export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps) {
+export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSectionProps) {
     const { updateSection } = useResumeUpdate(data, onUpdate);
 
     if (!onUpdate && (!data.projects || data.projects.length === 0)) {
@@ -31,7 +32,7 @@ export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps)
         <ResumeSection
             title="Projects"
             theme={theme}
-            onAdd={onUpdate ? () => {
+            onAdd={onUpdate && !readOnly ? () => {
                 const newProj = [{
                     id: crypto.randomUUID(),
                     name: "Project Name",
@@ -41,7 +42,7 @@ export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps)
                 handleUpdate(newProj);
             } : undefined}
         >
-            {(!data.projects || data.projects.length === 0) && onUpdate ? (
+            {(!data.projects || data.projects.length === 0) && onUpdate && !readOnly ? (
                 <EmptySectionPlaceholder 
                     className="mt-4"
                     message="Add your first project"
@@ -59,6 +60,7 @@ export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps)
                 <ResumeSectionList
                     data={data.projects}
                     onUpdate={handleUpdate}
+                    readOnly={readOnly}
                     className={cn(
                         "grid gap-4",
                         theme === "modern" && "grid-cols-1",
@@ -90,7 +92,7 @@ export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps)
                                     theme === "creative" && "text-lg",
                                     theme === "studio" && "text-xl tracking-tight text-white",
                                  )}>
-                                    <InlineEdit readOnly={!onUpdate} 
+                                        <InlineEdit readOnly={readOnly || !onUpdate} 
                                         value={project.name} 
                                         placeholder="Project Name"
                                         className={cn(
@@ -107,7 +109,7 @@ export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps)
                                  )}>
                                     {project.url && (
                                        <a href={project.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline text-sm truncate max-w-[150px]">
-                                         <InlineEdit readOnly={!onUpdate} 
+                                             <InlineEdit readOnly={readOnly || !onUpdate} 
                                             value={project.url} 
                                             placeholder="URL"
                                             onSave={(val) => updateItem({ url: val })}
@@ -115,7 +117,7 @@ export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps)
                                        </a>
                                     )}
                                     
-                                    {onUpdate && (
+                                     {onUpdate && !readOnly && (
                                          <ThemeDeleteButton
                                             className={cn(
                                               "bg-transparent hover:bg-red-50 text-slate-400 hover:text-red-500 p-1 w-6 h-6 border-none transition-opacity",
@@ -133,7 +135,7 @@ export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps)
                                 theme === "minimal" && "text-center",
                                 theme === "studio" && "text-neutral-400"
                             )}>
-                                 <InlineEdit readOnly={!onUpdate} 
+                                 <InlineEdit readOnly={readOnly || !onUpdate} 
                                     value={project.description} 
                                     placeholder="Project description" 
                                     multiline
@@ -147,7 +149,7 @@ export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps)
                              )}>
                                 {(project.technologies || []).map((tech, tIndex) => (
                                     <span key={tIndex} className="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                        <InlineEdit readOnly={!onUpdate}
+                                            <InlineEdit readOnly={readOnly || !onUpdate}
                                            value={tech}
                                            onSave={(val) => {
                                                const newTech = [...(project.technologies || [])];
@@ -156,7 +158,7 @@ export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps)
                                            }}
                                            className="bg-transparent"
                                         />
-                                         {onUpdate && (
+                                          {onUpdate && !readOnly && (
                                             <button 
                                                 onClick={() => {
                                                     const newTech = [...(project.technologies || [])];
@@ -168,7 +170,7 @@ export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps)
                                          )}
                                     </span>
                                 ))}
-                                   {onUpdate && (
+                                   {onUpdate && !readOnly && (
                                      <button 
                                          onClick={() => {
                                             const newTech = [...(project.technologies || []), "New Tech"];

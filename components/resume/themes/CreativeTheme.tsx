@@ -15,19 +15,20 @@ import { Plus } from "lucide-react";
 interface CreativeThemeProps {
   data: ResumeData;
   onUpdate?: (data: ResumeData) => void;
+  readOnly?: boolean;
 }
 
-export const CreativeTheme = ({ data, onUpdate }: CreativeThemeProps) => {
+export const CreativeTheme = ({ data, onUpdate, readOnly }: CreativeThemeProps) => {
   const order = (data.sectionOrder && data.sectionOrder.length > 0) 
       ? data.sectionOrder 
       : ["experience", "education", "projects", "skills"];
 
   const renderSection = (id: string) => {
     switch (id) {
-        case 'summary': return <SummarySection key={id} data={data} theme="creative" onUpdate={onUpdate} />;
-        case 'experience': return <ExperienceSection key={id} data={data} theme="creative" onUpdate={onUpdate} />;
-        case 'education': return <EducationSection key={id} data={data} theme="creative" onUpdate={onUpdate} />;
-        case 'projects': return <ProjectsSection key={id} data={data} theme="creative" onUpdate={onUpdate} />;
+        case 'summary': return <SummarySection key={id} data={data} theme="creative" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'experience': return <ExperienceSection key={id} data={data} theme="creative" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'education': return <EducationSection key={id} data={data} theme="creative" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'projects': return <ProjectsSection key={id} data={data} theme="creative" onUpdate={onUpdate} readOnly={readOnly} />;
         case 'skills':
              // Skills in sidebar for Creative
              return null;
@@ -42,6 +43,7 @@ export const CreativeTheme = ({ data, onUpdate }: CreativeThemeProps) => {
                         data={data} 
                         onUpdate={onUpdate} 
                         theme="creative"
+                        readOnly={readOnly}
                     />
                 );
             }
@@ -53,8 +55,8 @@ export const CreativeTheme = ({ data, onUpdate }: CreativeThemeProps) => {
       <div className="w-full max-w-full min-h-[1100px] bg-white text-slate-900 shadow-xl mx-auto print:shadow-none group/resume text-left p-0 flex">
         {/* Sidebar */}
         <div className="w-1/3 bg-slate-900 text-white p-8 space-y-8 text-left">
-           <ContactHeader data={data} theme="creative" onUpdate={onUpdate} />
-           <SkillsSection data={data} theme="creative" onUpdate={onUpdate} />
+           <ContactHeader data={data} theme="creative" onUpdate={onUpdate} readOnly={readOnly} />
+           <SkillsSection data={data} theme="creative" onUpdate={onUpdate} readOnly={readOnly} />
         </div>
 
         {/* Main Content */}
@@ -64,7 +66,7 @@ export const CreativeTheme = ({ data, onUpdate }: CreativeThemeProps) => {
                return renderSection(id);
            })}
            
-           {onUpdate && (
+           {onUpdate && !readOnly && (
                <div className="mt-8 border-t border-slate-200 pt-8 flex justify-center">
                    <Button variant="outline" className="text-slate-900 border-slate-200 hover:bg-slate-100" onClick={() => {
                        const newSection = {

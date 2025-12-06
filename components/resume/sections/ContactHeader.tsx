@@ -7,9 +7,10 @@ interface ContactHeaderProps {
     data: ResumeData;
     theme: "modern" | "minimal" | "creative" | "portfolio" | "studio" | "visual";
     onUpdate?: (data: ResumeData) => void;
+    readOnly?: boolean;
 }
 
-export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
+export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeaderProps) {
     
     const handleUpdate = (path: string, value: any) => {
         if (!onUpdate) return;
@@ -33,14 +34,14 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
             <div className="space-y-8">
                 <div className="space-y-2">
                     <h1 className="text-3xl font-bold leading-tight">
-                        <InlineEdit readOnly={!onUpdate} 
+                        <InlineEdit readOnly={readOnly || !onUpdate} 
                             value={data.personalInfo.fullName} 
                             onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
                             className="text-white hover:bg-white/10"
                         />
                     </h1>
                     <div className="text-slate-400 text-sm">
-                        <InlineEdit readOnly={!onUpdate} 
+                        <InlineEdit readOnly={readOnly || !onUpdate} 
                             value={data.personalInfo.summary} 
                             onSave={(val) => handleUpdate('personalInfo.summary', val)} 
                             multiline
@@ -53,7 +54,7 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
                     {(onUpdate || data.personalInfo.email) && (
                         <div className="flex items-center gap-2">
                             <Mail className="w-4 h-4 shrink-0" />
-                            <InlineEdit readOnly={!onUpdate} 
+                            <InlineEdit readOnly={readOnly || !onUpdate} 
                                 value={data.personalInfo.email} 
                                 onSave={(val) => handleUpdate('personalInfo.email', val)} 
                                 className="text-white hover:bg-white/10"
@@ -63,7 +64,7 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
                     {(onUpdate || data.personalInfo.phone) && (
                         <div className="flex items-center gap-2">
                             <Phone className="w-4 h-4 shrink-0" />
-                            <InlineEdit readOnly={!onUpdate} 
+                            <InlineEdit readOnly={readOnly || !onUpdate} 
                                 value={data.personalInfo.phone} 
                                 onSave={(val) => handleUpdate('personalInfo.phone', val)} 
                                 className="text-white hover:bg-white/10"
@@ -73,7 +74,7 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
                     {(onUpdate || data.personalInfo.location) && (
                         <div className="flex items-center gap-2">
                             <MapPin className="w-4 h-4 shrink-0" />
-                            <InlineEdit readOnly={!onUpdate} 
+                            <InlineEdit readOnly={readOnly || !onUpdate} 
                                 value={data.personalInfo.location} 
                                 onSave={(val) => handleUpdate('personalInfo.location', val)} 
                                 className="text-white hover:bg-white/10"
@@ -83,7 +84,7 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
                     {(onUpdate || data.personalInfo.website) && (
                         <div className="flex items-center gap-2">
                             <Globe className="w-4 h-4 shrink-0" />
-                            <InlineEdit readOnly={!onUpdate} 
+                            <InlineEdit readOnly={readOnly || !onUpdate} 
                                 value={data.personalInfo.website} 
                                 onSave={(val) => handleUpdate('personalInfo.website', val)} 
                                 className="text-white hover:bg-white/10"
@@ -111,7 +112,7 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
                     theme === "minimal" && "text-3xl tracking-widest font-normal text-slate-900"
                 )}
             >
-                <InlineEdit readOnly={!onUpdate} 
+                <InlineEdit readOnly={readOnly || !onUpdate} 
                     value={data.personalInfo.fullName} 
                     placeholder="Your Name"
                     onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
@@ -124,7 +125,7 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
                     theme === "minimal" && "italic text-center"
                 )}
             >
-                <InlineEdit readOnly={!onUpdate} 
+                <InlineEdit readOnly={readOnly || !onUpdate} 
                     value={data.personalInfo.summary} 
                     placeholder="Professional Summary"
                     multiline
@@ -142,7 +143,7 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
                 {(onUpdate || data.personalInfo.email) && (
                     <div className="flex items-center gap-1">
                         <Mail className="w-4 h-4" />
-                        <InlineEdit readOnly={!onUpdate} 
+                        <InlineEdit readOnly={readOnly || !onUpdate} 
                             value={data.personalInfo.email} 
                             placeholder="Email"
                             onSave={(val) => handleUpdate('personalInfo.email', val)} 
@@ -152,7 +153,7 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
                 {(onUpdate || data.personalInfo.phone) && (
                     <div className="flex items-center gap-1">
                         <Phone className="w-4 h-4" />
-                        <InlineEdit readOnly={!onUpdate} 
+                        <InlineEdit readOnly={readOnly || !onUpdate} 
                             value={data.personalInfo.phone} 
                             placeholder="Phone"
                             onSave={(val) => handleUpdate('personalInfo.phone', val)} 
@@ -162,7 +163,7 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
                 {(onUpdate || data.personalInfo.location) && (
                     <div className="flex items-center gap-1">
                         <MapPin className="w-4 h-4" />
-                        <InlineEdit readOnly={!onUpdate} 
+                        <InlineEdit readOnly={readOnly || !onUpdate} 
                             value={data.personalInfo.location} 
                             placeholder="Location"
                             onSave={(val) => handleUpdate('personalInfo.location', val)} 
@@ -172,7 +173,7 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
                 {(onUpdate || data.personalInfo.website) && (
                     <div className="flex items-center gap-1">
                         <Globe className="w-4 h-4" />
-                        <InlineEdit readOnly={!onUpdate} 
+                        <InlineEdit readOnly={readOnly || !onUpdate} 
                             value={data.personalInfo.website} 
                             placeholder="Website"
                             onSave={(val) => handleUpdate('personalInfo.website', val)} 

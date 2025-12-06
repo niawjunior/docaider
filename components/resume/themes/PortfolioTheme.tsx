@@ -19,9 +19,10 @@ import { CustomSectionRenderer } from "@/components/resume/shared/CustomSectionR
 interface PortfolioThemeProps {
   data: ResumeData;
   onUpdate?: (data: ResumeData) => void;
+  readOnly?: boolean;
 }
 
-export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
+export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps) => {
   const { updateField: handleUpdate } = useResumeUpdate(data, onUpdate);
 
   // Determine order (fallback if empty)
@@ -31,11 +32,11 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
 
   const renderSection = (id: string) => {
     switch (id) {
-        case 'summary': return <SummarySection key={id} data={data} theme="portfolio" onUpdate={onUpdate} />;
-        case 'experience': return <ExperienceSection key={id} data={data} theme="portfolio" onUpdate={onUpdate} />;
-        case 'education': return <EducationSection key={id} data={data} theme="portfolio" onUpdate={onUpdate} />;
-        case 'projects': return <ProjectsSection key={id} data={data} theme="portfolio" onUpdate={onUpdate} />;
-        case 'skills': return <SkillsSection key={id} data={data} theme="portfolio" onUpdate={onUpdate} />;
+        case 'summary': return <SummarySection key={id} data={data} theme="portfolio" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'experience': return <ExperienceSection key={id} data={data} theme="portfolio" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'education': return <EducationSection key={id} data={data} theme="portfolio" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'projects': return <ProjectsSection key={id} data={data} theme="portfolio" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'skills': return <SkillsSection key={id} data={data} theme="portfolio" onUpdate={onUpdate} readOnly={readOnly} />;
         default:
             const custom = data.customSections?.find(c => c.id === id);
             if (custom) {
@@ -47,6 +48,7 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
                         data={data} 
                         onUpdate={onUpdate} 
                         theme="portfolio"
+                        readOnly={readOnly}
                     />
                 );
             }
@@ -65,7 +67,7 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
       >
         <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="font-bold text-xl tracking-tight flex items-center gap-1">
-             <InlineEdit readOnly={!onUpdate} 
+             <InlineEdit readOnly={readOnly || !onUpdate} 
                 value={(data.personalInfo.fullName ?? '').split(' ')[0]}
                 onSave={(val) => {
                      // Read-only for nav logo derived from main name
@@ -96,7 +98,7 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 flex flex-wrap gap-2 items-baseline">
               <span>Hi, I'm</span>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                 <InlineEdit readOnly={!onUpdate} 
+                 <InlineEdit readOnly={readOnly || !onUpdate} 
                     value={data.personalInfo.fullName} 
                     onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
                     placeholder="Your Name"
@@ -105,7 +107,7 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-slate-600 leading-relaxed mb-8">
-               <InlineEdit readOnly={!onUpdate} 
+               <InlineEdit readOnly={readOnly || !onUpdate} 
                     value={data.personalInfo.summary} 
                     onSave={(val) => handleUpdate('personalInfo.summary', val)} 
                     placeholder="Brief bio or summary..."
@@ -126,7 +128,7 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
                     ) : (
                         <div className="flex items-center gap-2">
                             <Mail className="w-4 h-4" />
-                            <InlineEdit readOnly={!onUpdate}
+                            <InlineEdit readOnly={readOnly || !onUpdate}
                                 value={data.personalInfo.email}
                                 placeholder="Email"
                                 onSave={(val) => handleUpdate('personalInfo.email', val)}
@@ -148,7 +150,7 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
                     ) : (
                         <div className="flex items-center gap-2">
                             <Linkedin className="w-4 h-4" />
-                            <InlineEdit readOnly={!onUpdate} 
+                            <InlineEdit readOnly={readOnly || !onUpdate} 
                                 value={data.personalInfo.linkedin} 
                                 placeholder="LinkedIn URL"
                                 onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
@@ -170,7 +172,7 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
                     ) : (
                         <div className="flex items-center gap-2">
                             <Globe className="w-4 h-4" />
-                            <InlineEdit readOnly={!onUpdate} 
+                            <InlineEdit readOnly={readOnly || !onUpdate} 
                                 value={data.personalInfo.website} 
                                 placeholder="Website URL"
                                 onSave={(val) => handleUpdate('personalInfo.website', val)} 
@@ -197,7 +199,7 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
             </motion.div>
         ))}
 
-        {onUpdate && (
+        {onUpdate && !readOnly && (
            <div className="mt-8 border-t border-slate-200 pt-8 flex justify-center print:hidden">
                <Button variant="outline" className="text-slate-900 border-slate-200 hover:bg-slate-100" onClick={() => {
                    const newSection = {

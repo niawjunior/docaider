@@ -8,9 +8,10 @@ interface SkillsSectionProps {
     data: ResumeData;
     theme: "modern" | "minimal" | "creative" | "portfolio" | "studio" | "visual";
     onUpdate?: (data: ResumeData) => void;
+    readOnly?: boolean;
 }
 
-export function SkillsSection({ data, theme, onUpdate }: SkillsSectionProps) {
+export function SkillsSection({ data, theme, onUpdate, readOnly }: SkillsSectionProps) {
     const { updateSection } = useResumeUpdate(data, onUpdate);
 
     if (!onUpdate && (!data.skills || data.skills.length === 0)) {
@@ -27,7 +28,7 @@ export function SkillsSection({ data, theme, onUpdate }: SkillsSectionProps) {
             <div className="space-y-2">
                 <div className="flex justify-between items-center">
                     <h3 className="uppercase tracking-widest text-xs font-bold text-slate-500">Skills</h3>
-                    {onUpdate && (
+                    {onUpdate && !readOnly && (
                         <ThemeAddButton 
                             label=""
                             className="h-6 w-6 p-0 text-slate-500 hover:text-white bg-transparent"
@@ -42,7 +43,7 @@ export function SkillsSection({ data, theme, onUpdate }: SkillsSectionProps) {
                     {data.skills.map((skill, index) => (
                         <div key={index} className="group/skill relative">
                             <span className="px-2 py-1 bg-slate-800 rounded text-xs flex items-center gap-2 hover:bg-slate-700 transition-colors">
-                                <InlineEdit readOnly={!onUpdate} 
+                                <InlineEdit readOnly={readOnly || !onUpdate} 
                                     value={skill}
                                     onSave={(val) => {
                                         const newSkills = [...data.skills];
@@ -51,7 +52,7 @@ export function SkillsSection({ data, theme, onUpdate }: SkillsSectionProps) {
                                     }}
                                     className="bg-transparent text-slate-300 min-w-[20px]"
                                 />
-                                {onUpdate && (
+                                {onUpdate && !readOnly && (
                                     <ThemeDeleteButton
                                         onClick={() => {
                                             const newSkills = [...data.skills];
@@ -85,7 +86,7 @@ export function SkillsSection({ data, theme, onUpdate }: SkillsSectionProps) {
                 >
                     Skills
                 </h2>
-                {onUpdate && (
+                {onUpdate && !readOnly && (
                     <ThemeAddButton 
                         label=""
                         className="w-8 h-8 p-0 border-none bg-transparent hover:bg-slate-100 text-slate-500 flex-none"
@@ -111,7 +112,7 @@ export function SkillsSection({ data, theme, onUpdate }: SkillsSectionProps) {
                             theme === "minimal" && "px-2 border-b border-slate-200 hover:border-slate-400 pb-1 text-slate-900"
                         )}
                     >
-                        <InlineEdit readOnly={!onUpdate} 
+                        <InlineEdit readOnly={readOnly || !onUpdate} 
                             value={skill}
                             onSave={(val) => {
                                 const newSkills = [...data.skills];
@@ -120,7 +121,7 @@ export function SkillsSection({ data, theme, onUpdate }: SkillsSectionProps) {
                             }}
                             className={theme === "modern" ? "bg-transparent text-slate-700" : "bg-transparent"}
                         />
-                        {onUpdate && (
+                        {onUpdate && !readOnly && (
                             <ThemeDeleteButton
                                 onClick={() => {
                                     const newSkills = [...data.skills];

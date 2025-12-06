@@ -13,28 +13,30 @@ interface ResumePreviewProps {
   theme?: "modern" | "minimal" | "creative" | "portfolio" | "studio" | "visual";
   className?: string;
   onUpdate?: (data: ResumeData) => void;
+  readOnly?: boolean;
 }
 
 export function ResumePreview({
   data,
   theme = "modern",
   className,
-  onUpdate
+  onUpdate,
+  readOnly
 }: ResumePreviewProps) {
   
   switch (theme) {
     case 'portfolio':
-      return <PortfolioTheme data={data} onUpdate={onUpdate} />;
+      return <PortfolioTheme data={data} onUpdate={onUpdate} readOnly={readOnly} />;
     case 'studio':
-      return <StudioTheme data={data} onUpdate={onUpdate} />;
+      return <StudioTheme data={data} onUpdate={onUpdate} readOnly={readOnly} />;
     case 'visual':
-      return <VisualTheme data={data} onUpdate={onUpdate} />;
+      return <VisualTheme data={data} onUpdate={onUpdate} readOnly={readOnly} />;
     case 'minimal':
-      return <MinimalTheme data={data} onUpdate={onUpdate} />;
+      return <MinimalTheme data={data} onUpdate={onUpdate} readOnly={readOnly} />;
     case 'creative':
-      return <CreativeTheme data={data} onUpdate={onUpdate} />;
+      return <CreativeTheme data={data} onUpdate={onUpdate} readOnly={readOnly} />;
     case 'modern':
     default:
-      return <ModernTheme data={data} onUpdate={onUpdate} />;
+      return <ModernTheme data={data} onUpdate={onUpdate} readOnly={readOnly} />;
   }
 }

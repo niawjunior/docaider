@@ -12,9 +12,10 @@ import { Plus } from "lucide-react";
 interface VisualThemeProps {
   data: ResumeData;
   onUpdate?: (data: ResumeData) => void;
+  readOnly?: boolean;
 }
 
-export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
+export const VisualTheme = ({ data, onUpdate, readOnly }: VisualThemeProps) => {
   const { updateField: handleUpdate } = useResumeUpdate(data, onUpdate);
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
@@ -60,7 +61,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
           >
              {/* Edit full name here */}
              <div className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl leading-[0.85] font-black uppercase tracking-tighter break-words">
-                 <InlineEdit readOnly={!onUpdate} 
+                 <InlineEdit readOnly={readOnly || !onUpdate} 
                     value={data.personalInfo.fullName} 
                     onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
                     className="bg-transparent border-none w-full"
@@ -76,7 +77,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
             className="flex flex-col md:flex-row justify-between items-start md:items-end border-t border-white/20 pt-8"
           >
             <div className="text-xl md:text-2xl font-light uppercase tracking-wide max-w-md mb-8 md:mb-0">
-               <InlineEdit readOnly={!onUpdate} 
+               <InlineEdit readOnly={readOnly || !onUpdate} 
                     value={data.personalInfo.jobTitle} 
                     onSave={(val) => handleUpdate('personalInfo.jobTitle', val)} 
                     placeholder="Job Title"
@@ -101,7 +102,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                             transition={{ duration: 0.8 }}
                         >
                           <div className="text-2xl md:text-4xl leading-relaxed font-light text-neutral-300">
-                             <InlineEdit readOnly={!onUpdate}
+                             <InlineEdit readOnly={readOnly || !onUpdate}
                                 value={data.personalInfo.summary}
                                 placeholder="Write a short bio about yourself..."
                                 multiline
@@ -120,7 +121,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                              <h2 className="text-6xl md:text-8xl font-black uppercase tracking-tighter text-transparent stroke-text-white">
                                 Selected Works
                              </h2>
-                              {onUpdate && (
+                              {onUpdate && !readOnly && (
                                     <ThemeAddButton 
                                         label="Add Project"
                                         className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
@@ -138,7 +139,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                            </div>
                            
                            <div className="space-y-32">
-                               {(!data.projects || data.projects.length === 0) && onUpdate ? (
+                                {(!data.projects || data.projects.length === 0) && onUpdate && !readOnly ? (
                                      <EmptySectionPlaceholder 
                                         className="border-white/20 hover:border-white/40 bg-transparent text-white"
                                         message="Add your first project"
@@ -166,7 +167,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                            <div className="border-l-2 border-white/20 pl-8 md:pl-16 ml-4 md:ml-0 transition-colors group-hover/item:border-white">
                                                <div className="flex justify-between items-start mb-6">
                                                    <h3 className="text-4xl md:text-5xl font-bold">
-                                                        <InlineEdit readOnly={!onUpdate}
+                                                        <InlineEdit readOnly={readOnly || !onUpdate}
                                                             value={project.name}
                                                             placeholder="Project Name"
                                                             onSave={(val) => {
@@ -177,7 +178,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                                             className="bg-transparent border-none w-full"
                                                         />
                                                    </h3>
-                                                    {onUpdate && (
+                                                    {onUpdate && !readOnly && (
                                                        <ThemeDeleteButton
                                                           className="text-red-500 hover:bg-red-900/50 bg-transparent border-none"
                                                           onClick={() => {
@@ -190,7 +191,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                                </div>
                                                
                                                <div className="text-xl md:text-2xl text-neutral-400 font-light mb-8 max-w-2xl">
-                                                    <InlineEdit readOnly={!onUpdate}
+                                                    <InlineEdit readOnly={readOnly || !onUpdate}
                                                         value={project.description}
                                                         placeholder="Description..."
                                                         multiline
@@ -206,7 +207,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                                <div className="flex items-center gap-4 text-sm font-mono uppercase tracking-widest text-neutral-500">
                                                     <div className="flex items-center gap-2">
                                                         <span>URL:</span>
-                                                         <InlineEdit readOnly={!onUpdate}
+                                                         <InlineEdit readOnly={readOnly || !onUpdate}
                                                             value={project.url}
                                                             placeholder="https://..."
                                                             onSave={(val) => {
@@ -232,7 +233,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                         <section key="experience" className="py-24 w-full">
                            <div className="flex justify-between items-end mb-12 border-b border-white/20 pb-8">
                              <h2 className="text-4xl font-bold uppercase tracking-tighter">Experience</h2>
-                              {onUpdate && (
+                              {onUpdate && !readOnly && (
                                     <ThemeAddButton 
                                         label="Add"
                                         className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
@@ -250,7 +251,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                            </div>
                            
                            <div className="grid md:grid-cols-2 gap-16">
-                                {(!data.experience || data.experience.length === 0) && onUpdate ? (
+                                {(!data.experience || data.experience.length === 0) && onUpdate && !readOnly ? (
                                     <div className="col-span-2">
                                          <EmptySectionPlaceholder 
                                             className="border-white/20 hover:border-white/40 bg-transparent text-white"
@@ -272,7 +273,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                         <div key={exp.id || i} className="group/item relative">
                                              <div className="flex justify-between items-start">
                                                  <div className="text-neutral-500 font-mono text-sm mb-2 flex gap-1">
-                                                      <InlineEdit readOnly={!onUpdate}
+                                                      <InlineEdit readOnly={readOnly || !onUpdate}
                                                         value={exp.startDate}
                                                         placeholder="Start"
                                                         onSave={(val) => {
@@ -283,7 +284,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                                         className="bg-transparent border-none text-right"
                                                     />
                                                      <span>-</span>
-                                                      <InlineEdit readOnly={!onUpdate}
+                                                      <InlineEdit readOnly={readOnly || !onUpdate}
                                                         value={exp.endDate}
                                                         placeholder="Present"
                                                         onSave={(val) => {
@@ -294,7 +295,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                                         className="bg-transparent border-none"
                                                     />
                                                  </div>
-                                                  {onUpdate && (
+                                                  {onUpdate && !readOnly && (
                                                        <ThemeDeleteButton
                                                           className="text-red-500 hover:bg-red-900/50 bg-transparent border-none"
                                                           onClick={() => {
@@ -307,7 +308,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                              </div>
                                             
                                             <h3 className="text-2xl font-bold mb-1">
-                                                 <InlineEdit readOnly={!onUpdate}
+                                                 <InlineEdit readOnly={readOnly || !onUpdate}
                                                     value={exp.company}
                                                     placeholder="Company"
                                                     onSave={(val) => {
@@ -319,7 +320,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                                 />
                                             </h3>
                                             <div className="text-lg text-neutral-400 mb-4">
-                                                 <InlineEdit readOnly={!onUpdate}
+                                                 <InlineEdit readOnly={readOnly || !onUpdate}
                                                     value={exp.position}
                                                     placeholder="Position"
                                                     onSave={(val) => {
@@ -332,7 +333,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                             </div>
                                             
                                             <p className="text-neutral-400 leading-relaxed text-sm">
-                                                 <InlineEdit readOnly={!onUpdate}
+                                                 <InlineEdit readOnly={readOnly || !onUpdate}
                                                     value={exp.description}
                                                     placeholder="Description..."
                                                     multiline
@@ -357,7 +358,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                         <section key="skills" className="py-12 w-full border-t border-white/10">
                            <div className="flex justify-between items-center mb-8">
                              <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-widest">Stack</h3>
-                              {onUpdate && (
+                              {onUpdate && !readOnly && (
                                 <ThemeAddButton 
                                     label=""
                                     className="w-6 h-6 p-0 bg-transparent hover:bg-white/10 text-white border-white/20 hover:text-white"
@@ -372,7 +373,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                            <div className="flex flex-wrap gap-x-8 gap-y-4">
                               {data.skills.map((skill, i) => (
                                   <span key={i} className="group/item relative text-xl md:text-2xl font-light text-neutral-300 hover:text-white transition-colors">
-                                       <InlineEdit readOnly={!onUpdate} 
+                                       <InlineEdit readOnly={readOnly || !onUpdate} 
                                             value={skill} 
                                             onSave={(val) => {
                                                 const newSkills = [...data.skills];
@@ -381,7 +382,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                             }}
                                             className="bg-transparent border-none text-center min-w-[60px]"
                                         />
-                                         {onUpdate && (
+                                         {onUpdate && !readOnly && (
                                         <ThemeDeleteButton
                                             onClick={() => {
                                                 const newSkills = [...data.skills];
@@ -403,7 +404,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                         <section key="education" className="w-full py-12">
                             <div className="flex justify-between items-end mb-12 border-b border-neutral-800 pb-8">
                              <h2 className="text-4xl font-bold uppercase tracking-tighter">Education</h2>
-                              {onUpdate && (
+                              {onUpdate && !readOnly && (
                                     <ThemeAddButton 
                                         label="Add"
                                         className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
@@ -421,7 +422,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                            </div>
                            
                            <div className="space-y-8">
-                                {(!data.education || data.education.length === 0) && onUpdate ? (
+                                {(!data.education || data.education.length === 0) && onUpdate && !readOnly ? (
                                     <EmptySectionPlaceholder 
                                         className="border-white/20 hover:border-white/40 bg-transparent text-white"
                                         message="Add your education"
@@ -440,8 +441,8 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                     data.education.map((edu, i) => (
                                         <div key={edu.id || i} className="group/item relative grid md:grid-cols-[1fr_200px] gap-4 items-end">
                                             <div>
-                                                <h3 className="text-xl font-bold">
-                                                     <InlineEdit readOnly={!onUpdate} 
+                                                 <h3 className="text-xl font-bold">
+                                                     <InlineEdit readOnly={readOnly || !onUpdate} 
                                                         value={edu.institution} 
                                                         placeholder="Institution"
                                                         onSave={(val) => {
@@ -452,8 +453,8 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                                         className="bg-transparent border-none"
                                                     />
                                                 </h3>
-                                                <p className="text-neutral-400 flex gap-1 items-center">
-                                                     <InlineEdit readOnly={!onUpdate} 
+                                                 <p className="text-neutral-400 flex gap-1 items-center">
+                                                     <InlineEdit readOnly={readOnly || !onUpdate} 
                                                         value={edu.degree} 
                                                         placeholder="Degree"
                                                         onSave={(val) => {
@@ -464,7 +465,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                                         className="bg-transparent border-none"
                                                     />
                                                    <span>-</span>
-                                                     <InlineEdit readOnly={!onUpdate} 
+                                                     <InlineEdit readOnly={readOnly || !onUpdate} 
                                                         value={edu.fieldOfStudy} 
                                                         placeholder="Field"
                                                         onSave={(val) => {
@@ -477,7 +478,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                                 </p>
                                             </div>
                                             <div className="text-right text-neutral-500 font-mono text-sm flex gap-1 justify-end items-center">
-                                                 <InlineEdit readOnly={!onUpdate} 
+                                                 <InlineEdit readOnly={readOnly || !onUpdate} 
                                                     value={edu.startDate} 
                                                     placeholder="Start"
                                                     onSave={(val) => {
@@ -488,7 +489,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                                     className="bg-transparent border-none text-right"
                                                 />
                                                 <span>-</span>
-                                                <InlineEdit readOnly={!onUpdate} 
+                                                <InlineEdit readOnly={readOnly || !onUpdate} 
                                                     value={edu.endDate} 
                                                     placeholder="Present"
                                                     onSave={(val) => {
@@ -498,7 +499,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                                     }}
                                                     className="bg-transparent border-none"
                                                 />
-                                                 {onUpdate && (
+                                                 {onUpdate && !readOnly && (
                                                   <ThemeDeleteButton
                                                      className="text-red-500 hover:bg-red-900/50 bg-transparent border-none ml-2"
                                                      onClick={() => {
@@ -527,6 +528,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                     data={data} 
                                     onUpdate={onUpdate} 
                                     theme="visual"
+                                    readOnly={readOnly}
                                 />
                              </section>
                         );
@@ -543,7 +545,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
           <div className="flex flex-col gap-4 text-xl md:text-2xl text-neutral-400 items-center">
              <div className="flex items-center gap-2">
                  <Mail className="w-6 h-6" />
-                 <InlineEdit readOnly={!onUpdate} 
+                 <InlineEdit readOnly={readOnly || !onUpdate} 
                     value={data.personalInfo.email} 
                     placeholder="Email Address"
                     onSave={(val) => handleUpdate('personalInfo.email', val)} 
@@ -552,7 +554,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
              </div>
              <div className="flex items-center gap-2">
                   <Linkedin className="w-6 h-6" />
-                  <InlineEdit readOnly={!onUpdate} 
+                  <InlineEdit readOnly={readOnly || !onUpdate} 
                     value={data.personalInfo.linkedin} 
                     placeholder="LinkedIn"
                     onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
@@ -561,7 +563,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
              </div>
              <div className="flex items-center gap-2">
                  <Globe className="w-6 h-6" />
-                  <InlineEdit readOnly={!onUpdate} 
+                   <InlineEdit readOnly={readOnly || !onUpdate} 
                     value={data.personalInfo.website} 
                     placeholder="Website"
                     onSave={(val) => handleUpdate('personalInfo.website', val)} 
@@ -570,7 +572,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
              </div>
              <div className="flex items-center gap-2 mt-4 text-lg">
                  <MapPin className="w-5 h-5" />
-                  <InlineEdit readOnly={!onUpdate} 
+                   <InlineEdit readOnly={readOnly || !onUpdate} 
                     value={data.personalInfo.location} 
                     placeholder="Location"
                     onSave={(val) => handleUpdate('personalInfo.location', val)} 
@@ -589,11 +591,12 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                     data={data} 
                     onUpdate={onUpdate} 
                     theme="visual"
+                    readOnly={readOnly}
                 />
              </section>
         ))}
 
-        {onUpdate && (
+        {onUpdate && !readOnly && (
             <div className="flex justify-center mb-48 pt-12 print:hidden">
                <Button variant="outline" onClick={() => {
                    const newSection = {

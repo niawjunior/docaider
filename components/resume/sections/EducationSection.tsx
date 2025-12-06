@@ -11,9 +11,10 @@ interface EducationSectionProps {
     data: ResumeData;
     theme: "modern" | "minimal" | "creative" | "portfolio" | "studio" | "visual";
     onUpdate?: (data: ResumeData) => void;
+    readOnly?: boolean;
 }
 
-export function EducationSection({ data, theme, onUpdate }: EducationSectionProps) {
+export function EducationSection({ data, theme, onUpdate, readOnly }: EducationSectionProps) {
     const { updateSection } = useResumeUpdate(data, onUpdate);
 
     if (!onUpdate && (!data.education || data.education.length === 0)) {
@@ -30,7 +31,7 @@ export function EducationSection({ data, theme, onUpdate }: EducationSectionProp
         <ResumeSection
             title="Education"
             theme={theme}
-            onAdd={onUpdate ? () => {
+            onAdd={onUpdate && !readOnly ? () => {
                 const newEdu = [{
                     id: crypto.randomUUID(),
                     institution: "University",
@@ -41,7 +42,7 @@ export function EducationSection({ data, theme, onUpdate }: EducationSectionProp
                 handleUpdate(newEdu);
             } : undefined}
         >
-            {(!data.education || data.education.length === 0) && onUpdate ? (
+            {(!data.education || data.education.length === 0) && onUpdate && !readOnly ? (
                 <EmptySectionPlaceholder 
                     className="mt-4"
                     message="Add your education"
@@ -60,6 +61,7 @@ export function EducationSection({ data, theme, onUpdate }: EducationSectionProp
                 <ResumeSectionList
                     data={data.education}
                     onUpdate={handleUpdate}
+                    readOnly={readOnly}
                     className="space-y-4"
                     renderItem={(edu, index, updateItem, deleteItem) => (
                         <div className={cn(
@@ -76,7 +78,7 @@ export function EducationSection({ data, theme, onUpdate }: EducationSectionProp
                                     theme !== "creative" && "w-full",
                                     theme === "studio" ? "text-white text-xl tracking-tight" : "text-slate-900"
                                 )}>
-                                    <InlineEdit readOnly={!onUpdate} 
+                                    <InlineEdit readOnly={readOnly || !onUpdate} 
                                         value={edu.institution} 
                                         placeholder="Institution"
                                         className={theme === "minimal" ? "text-center w-full block" : ""}
@@ -93,13 +95,13 @@ export function EducationSection({ data, theme, onUpdate }: EducationSectionProp
                                             "text-sm flex gap-1 whitespace-nowrap",
                                             theme === "studio" ? "text-neutral-400" : "text-slate-500"
                                         )}>
-                                            <InlineEdit readOnly={!onUpdate} 
+                                            <InlineEdit readOnly={readOnly || !onUpdate} 
                                                 value={edu.startDate} 
                                                 placeholder="Start"
                                                 onSave={(val) => updateItem({ startDate: val })}
                                             />
                                             <span>-</span>
-                                            <InlineEdit readOnly={!onUpdate} 
+                                            <InlineEdit readOnly={readOnly || !onUpdate} 
                                                 value={edu.endDate} 
                                                 placeholder="Present"
                                                 onSave={(val) => updateItem({ endDate: val })}
@@ -107,7 +109,7 @@ export function EducationSection({ data, theme, onUpdate }: EducationSectionProp
                                         </div>
                                     )}
 
-                                     {onUpdate && (
+                                     {onUpdate && !readOnly && (
                                         <ThemeDeleteButton
                                             className={cn(
                                                 "text-red-500 hover:bg-red-50 rounded bg-transparent border-none shadow-none w-6 h-6 p-1 transition-opacity",
@@ -125,13 +127,13 @@ export function EducationSection({ data, theme, onUpdate }: EducationSectionProp
                                 theme === "minimal" && "justify-center",
                                 theme === "studio" && "text-neutral-500"
                             )}>
-                                 <InlineEdit readOnly={!onUpdate} 
+                                 <InlineEdit readOnly={readOnly || !onUpdate} 
                                      value={edu.degree} 
                                      placeholder="Degree"
                                      onSave={(val) => updateItem({ degree: val })}
                                  />
                                  <span>in</span>
-                                <InlineEdit readOnly={!onUpdate} 
+                                <InlineEdit readOnly={readOnly || !onUpdate} 
                                      value={edu.fieldOfStudy} 
                                      placeholder="Field of Study"
                                      onSave={(val) => updateItem({ fieldOfStudy: val })}
@@ -141,13 +143,13 @@ export function EducationSection({ data, theme, onUpdate }: EducationSectionProp
                             {/* Creative Theme Date Location */}
                             {theme === "creative" && (
                                 <div className="text-xs text-slate-400 mt-1 uppercase tracking-wider flex gap-1">
-                                    <InlineEdit readOnly={!onUpdate} 
+                                    <InlineEdit readOnly={readOnly || !onUpdate} 
                                         value={edu.startDate} 
                                         placeholder="Start"
                                         onSave={(val) => updateItem({ startDate: val })}
                                     />
                                     <span>-</span>
-                                    <InlineEdit readOnly={!onUpdate} 
+                                    <InlineEdit readOnly={readOnly || !onUpdate} 
                                         value={edu.endDate} 
                                         placeholder="Present"
                                         onSave={(val) => updateItem({ endDate: val })}

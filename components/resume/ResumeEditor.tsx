@@ -324,12 +324,12 @@ export function ResumeEditor() {
 
                     {/* Theme Selector */}
                     <div className="flex items-center space-x-2 hidden sm:flex">
-                        <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Theme</span>
+                        <span className="text-slate-300 hover:text-white hover:bg-white/10 text-xs font-bold uppercase tracking-wider">Theme</span>
                         <Select
                         value={theme}
                         onValueChange={(val: any) => setTheme(val)}
                         >
-                        <SelectTrigger className="w-[130px] h-8 bg-white/5 border-white/10 text-slate-200 text-xs">
+                        <SelectTrigger className="w-[130px] h-8 text-slate-300 hover:text-white hover:bg-white/10 bg-white/5 border-white/10 text-xs">
                             <SelectValue placeholder="Theme" />
                         </SelectTrigger>
                         <SelectContent>
@@ -519,6 +519,7 @@ export function ResumeEditor() {
                         data={resumeData} 
                         theme={theme} 
                         onUpdate={(newData) => setResumeData(newData)}
+                        readOnly={isViewMode} // Pass readOnly state
                     />
                 </div>
             ) : (

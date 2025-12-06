@@ -14,6 +14,7 @@ interface CustomSectionRendererProps {
     onUpdate?: (data: ResumeData) => void;
     className?: string;
     theme?: string;
+    readOnly?: boolean;
 }
 
 export function CustomSectionRenderer({ 
@@ -22,7 +23,8 @@ export function CustomSectionRenderer({
     data, 
     onUpdate, 
     className,
-    theme 
+    theme,
+    readOnly
 }: CustomSectionRendererProps) {
     const { updateField } = useResumeUpdate(data, onUpdate);
 
@@ -56,13 +58,13 @@ export function CustomSectionRenderer({
                     theme === "portfolio" && "text-2xl text-slate-900",
                 )}>
                     {theme === "creative" && <span className="w-8 h-1 bg-slate-900 block" />}
-                    <InlineEdit readOnly={!onUpdate}
+                    <InlineEdit readOnly={readOnly || !onUpdate}
                         value={section.title}
                         onSave={(val) => handleUpdateSection({ ...section, title: val })}
                         className="bg-transparent"
                     />
                 </h2>
-                 {onUpdate && (
+                 {onUpdate && !readOnly && (
                     <div className="flex items-center gap-2">
                          <ThemeAddButton 
                             label={theme !== "minimal" ? "Add Item" : ""}
@@ -95,7 +97,7 @@ export function CustomSectionRenderer({
                 )}
             </div>
 
-            {(!section.items || section.items.length === 0) && onUpdate ? (
+            {(!section.items || section.items.length === 0) && onUpdate && !readOnly ? (
                  <EmptySectionPlaceholder 
                     message={`Add items to ${section.title}`}
                     onClick={() => {
@@ -114,6 +116,7 @@ export function CustomSectionRenderer({
             ) : (
                 <ResumeSectionList
                   data={section.items}
+                  readOnly={readOnly}
                   onUpdate={(val) => handleUpdateSection({ ...section, items: val })}
                   className={cn(
                       "space-y-6", 
@@ -139,7 +142,7 @@ export function CustomSectionRenderer({
                                  "font-bold text-lg",
                                  (theme === "studio" || theme === "visual") ? "text-white" : "text-slate-900"
                              )}>
-                                 <InlineEdit readOnly={!onUpdate}
+                                 <InlineEdit readOnly={readOnly || !onUpdate}
                                     value={item.title}
                                     placeholder="Title"
                                     onSave={(val) => updateItem({ title: val })}
@@ -151,7 +154,7 @@ export function CustomSectionRenderer({
                                      "text-sm font-medium",
                                       (theme === "studio" || theme === "visual") ? "text-neutral-400" : (theme === "minimal" ? "text-slate-700" : "text-blue-600")
                                  )}>
-                                     <InlineEdit readOnly={!onUpdate}
+                                     <InlineEdit readOnly={readOnly || !onUpdate}
                                         value={item.subtitle}
                                         placeholder="Subtitle"
                                         onSave={(val) => updateItem({ subtitle: val })}
@@ -166,7 +169,7 @@ export function CustomSectionRenderer({
                             "text-sm leading-relaxed",
                              (theme === "studio" || theme === "visual") ? "text-neutral-400" : "text-slate-600"
                         )}>
-                            <InlineEdit readOnly={!onUpdate}
+                            <InlineEdit readOnly={readOnly || !onUpdate}
                                 value={item.content}
                                 placeholder="Content..."
                                 multiline

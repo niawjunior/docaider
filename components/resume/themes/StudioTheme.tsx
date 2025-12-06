@@ -17,9 +17,10 @@ import { Plus } from "lucide-react";
 interface StudioThemeProps {
   data: ResumeData;
   onUpdate?: (data: ResumeData) => void;
+  readOnly?: boolean;
 }
 
-export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
+export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
   const { updateField: handleUpdate } = useResumeUpdate(data, onUpdate);
 
   const marqueeVariants = {
@@ -74,7 +75,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
         {/* Editable Job Title (Outside Marquee for ease of editing) */}
         <div className="px-6 mt-4 text-center">
              <div className="text-sm text-neutral-500 mb-1">MARQUEE TEXT (Edit here):</div>
-             <InlineEdit readOnly={!onUpdate}
+             <InlineEdit readOnly={readOnly || !onUpdate}
                 value={data.personalInfo.jobTitle}
                 placeholder="CREATIVE DEVELOPER"
                 onSave={(val) => handleUpdate('personalInfo.jobTitle', val?.toUpperCase())}
@@ -98,7 +99,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                           id="about"
                         >
                            <div className="text-4xl md:text-6xl font-bold leading-tight mb-8">
-                             <InlineEdit readOnly={!onUpdate}
+                             <InlineEdit readOnly={readOnly || !onUpdate}
                                 value={data.personalInfo.summary}
                                 placeholder="Your professional summary goes here..."
                                 multiline
@@ -122,7 +123,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                            <div className="space-y-4">
                                <div className="flex justify-between items-center">
                                    <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-widest">Skills</h3>
-                                    {onUpdate && (
+                                    {onUpdate && !readOnly && (
                                        <ThemeAddButton
                                          label=""
                                          className="w-6 h-6 p-0 bg-transparent hover:bg-neutral-800 text-white border-neutral-800 hover:text-white"
@@ -136,7 +137,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                              <div className="flex flex-wrap gap-4">
                                  {data.skills.map((skill, i) => (
                                  <span key={i} className="group/skill relative inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 text-sm tracking-wider uppercase">
-                                      <InlineEdit readOnly={!onUpdate}
+                                      <InlineEdit readOnly={readOnly || !onUpdate}
                                          value={skill}
                                          onSave={(val) => {
                                              const newSkills = [...data.skills];
@@ -145,7 +146,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                                          }}
                                          className="bg-transparent"
                                       />
-                                       {onUpdate && (
+                                       {onUpdate && !readOnly && (
                                          <ThemeDeleteButton
                                              onClick={() => {
                                                  const newSkills = [...data.skills];
@@ -161,7 +162,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                            </div>
                         </motion.section>
                     );
-                
+
                 case 'projects':
                      // Selected Work
                     if (!onUpdate && (!data.projects || data.projects.length === 0)) return null;
@@ -171,7 +172,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                             <h2 className="text-8xl font-black uppercase tracking-tighter stroke-text text-transparent">
                                 Work
                             </h2>
-                             {onUpdate && (
+                             {onUpdate && !readOnly && (
                                  <ThemeAddButton
                                     label="Add Project"
                                     className="border-neutral-700 hover:bg-neutral-800 text-white bg-transparent hover:text-white"
@@ -187,8 +188,8 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                                 />
                             )}
                          </div>
-            
-                        {(!data.projects || data.projects.length === 0) && onUpdate ? (
+
+                        {(!data.projects || data.projects.length === 0) && onUpdate && !readOnly ? (
                              <EmptySectionPlaceholder
                                 className="border-neutral-800 hover:border-neutral-600 bg-transparent"
                                 message="Add your first Project"
@@ -205,6 +206,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                         ) : (
                             <ResumeSectionList
                               data={data.projects}
+                              readOnly={readOnly}
                               onUpdate={(val) => handleUpdate('projects', val)}
                               className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16"
                               renderItem={(project, i, updateItem, deleteItem) => (
@@ -218,14 +220,14 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                                   <div className="border-b border-neutral-800 pb-4 mb-4 flex justify-between items-end">
                                     <div className="flex-1 flex items-start gap-2">
                                         <h3 className="text-3xl font-bold">
-                                            <InlineEdit readOnly={!onUpdate}
+                                            <InlineEdit readOnly={readOnly || !onUpdate}
                                                 value={project.name}
                                                 placeholder="Project Name"
                                                 onSave={(val) => updateItem({ name: val })}
                                                 className="bg-transparent"
                                             />
                                         </h3>
-                                        {onUpdate && (
+                                        {onUpdate && !readOnly && (
                                              <ThemeDeleteButton
                                                 className="text-red-500 hover:bg-red-900/50 border-none bg-transparent transition-opacity shrink-0"
                                                 onClick={deleteItem}
@@ -235,7 +237,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                                      <div className="flex flex-col gap-1 text-neutral-500">
                                          <div className="flex items-center gap-1">
                                              <span className="text-xs uppercase tracking-wider">URL:</span>
-                                             <InlineEdit readOnly={!onUpdate}
+                                             <InlineEdit readOnly={readOnly || !onUpdate}
                                                 value={project.url}
                                                 placeholder="https://..."
                                                 onSave={(val) => updateItem({ url: val })}
@@ -246,7 +248,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                                   </div>
                                   <div>
                                     <p className="text-xl text-neutral-400 font-light leading-relaxed">
-                                         <InlineEdit readOnly={!onUpdate}
+                                         <InlineEdit readOnly={readOnly || !onUpdate}
                                             value={project.description}
                                             placeholder="Project description..."
                                             multiline
@@ -261,7 +263,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                         )}
                       </section>
                     );
-                
+
                 case 'experience':
                     if (!onUpdate && (!data.experience || data.experience.length === 0)) return null;
                     return (
@@ -270,7 +272,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                                 <h2 className="text-4xl font-bold uppercase tracking-tight">
                                     Experience
                                 </h2>
-                                 {onUpdate && (
+                                 {onUpdate && !readOnly && (
                                     <ThemeAddButton
                                         label="Add"
                                         className="bg-white text-black hover:bg-neutral-200 border-none"
@@ -287,8 +289,8 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                                     />
                                 )}
                             </div>
-                
-                            {(!data.experience || data.experience.length === 0) && onUpdate ? (
+
+                            {(!data.experience || data.experience.length === 0) && onUpdate && !readOnly ? (
                                  <EmptySectionPlaceholder
                                     className="border-neutral-800 hover:border-neutral-600 bg-transparent"
                                     message="Add your first Experience"
@@ -306,13 +308,14 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                             ) : (
                                 <ResumeSectionList
                                   data={data.experience}
+                                  readOnly={readOnly || !onUpdate}
                                   onUpdate={(val) => handleUpdate('experience', val)}
                                   className="grid grid-cols-1 gap-12"
                                   renderItem={(exp, i, updateItem, deleteItem) => (
                                     <div className="group/item relative border-l border-neutral-800 pl-8 ml-2">
                                         <div className="flex flex-col md:flex-row md:items-baseline justify-between mb-4 relative pr-8">
                                             <h3 className="text-2xl font-bold text-white">
-                                                <InlineEdit readOnly={!onUpdate}
+                                                <InlineEdit readOnly={readOnly || !onUpdate}
                                                     value={exp.company}
                                                     placeholder="Company"
                                                     onSave={(val) => updateItem({ company: val })}
@@ -320,31 +323,31 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                                                 />
                                             </h3>
                                              <div className="text-neutral-500 font-mono text-sm mr-2">
-                                                <InlineEdit readOnly={!onUpdate}
+                                                <InlineEdit readOnly={readOnly || !onUpdate}
                                                     value={exp.startDate}
                                                     placeholder="Start"
                                                     onSave={(val) => updateItem({ startDate: val })}
                                                     className="bg-transparent text-right"
                                                 />
                                                 {" — "}
-                                                <InlineEdit readOnly={!onUpdate}
+                                                <InlineEdit readOnly={readOnly || !onUpdate}
                                                     value={exp.endDate}
                                                     placeholder="Present"
                                                     onSave={(val) => updateItem({ endDate: val })}
                                                     className="bg-transparent text-right"
                                                 />
                                             </div>
-                                             {onUpdate && (
+                                             {onUpdate && !readOnly && (
                                               <ThemeDeleteButton
                                                  className="absolute right-0 top-1 text-neutral-500 hover:text-red-500 bg-transparent border-none"
                                                  onClick={deleteItem}
                                               />
                                              )}
                                         </div>
-                                        
+
                                         <div className="bg-neutral-900/50 p-6 rounded-lg border border-neutral-800/50">
                                             <h4 className="text-xl text-neutral-300 mb-4">
-                                                <InlineEdit readOnly={!onUpdate}
+                                                <InlineEdit readOnly={readOnly || !onUpdate}
                                                     value={exp.position}
                                                     placeholder="Position"
                                                     onSave={(val) => updateItem({ position: val })}
@@ -352,7 +355,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                                                 />
                                             </h4>
                                             <p className="text-neutral-400 leading-relaxed font-light">
-                                                 <InlineEdit readOnly={!onUpdate}
+                                                 <InlineEdit readOnly={readOnly || !onUpdate}
                                                     value={exp.description}
                                                     placeholder="Description..."
                                                     multiline
@@ -367,7 +370,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                             )}
                         </section>
                     );
-                
+
                 case 'education':
                     // Add Education Section for Studio Theme
                     if (!onUpdate && (!data.education || data.education.length === 0)) return null;
@@ -377,7 +380,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                                 <h2 className="text-4xl font-bold uppercase tracking-tight">
                                     Education
                                 </h2>
-                                 {onUpdate && (
+                                 {onUpdate && !readOnly && (
                                     <ThemeAddButton
                                         label="Add"
                                         className="bg-white text-black hover:bg-neutral-200 border-none"
@@ -393,8 +396,8 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                                     />
                                 )}
                             </div>
-                
-                            {(!data.education || data.education.length === 0) && onUpdate ? (
+
+                            {(!data.education || data.education.length === 0) && onUpdate && !readOnly ? (
                                  <EmptySectionPlaceholder
                                     className="border-neutral-800 hover:border-neutral-600 bg-transparent"
                                     message="Add your Education"
@@ -411,13 +414,14 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                             ) : (
                                 <ResumeSectionList
                                   data={data.education}
+                                  readOnly={readOnly || !onUpdate}
                                   onUpdate={(val) => handleUpdate('education', val)}
                                   className="grid grid-cols-1 gap-12"
                                   renderItem={(edu, i, updateItem, deleteItem) => (
                                     <div className="group/item relative border-l border-neutral-800 pl-8 ml-2">
                                         <div className="flex flex-col md:flex-row md:items-baseline justify-between mb-4 relative pr-8">
                                             <h3 className="text-2xl font-bold text-white">
-                                                <InlineEdit readOnly={!onUpdate}
+                                                <InlineEdit readOnly={readOnly || !onUpdate}
                                                     value={edu.institution}
                                                     placeholder="School/University"
                                                     onSave={(val) => updateItem({ institution: val })}
@@ -425,24 +429,24 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                                                 />
                                             </h3>
                                              <div className="text-neutral-500 font-mono text-sm mr-2">
-                                                <InlineEdit readOnly={!onUpdate}
+                                                <InlineEdit readOnly={readOnly || !onUpdate}
                                                     value={edu.endDate}
                                                     placeholder="Year"
                                                     onSave={(val) => updateItem({ endDate: val })}
                                                     className="bg-transparent text-right"
                                                 />
                                             </div>
-                                            {onUpdate && (
+                                            {onUpdate && !readOnly && (
                                               <ThemeDeleteButton
                                                  className="absolute right-0 top-1 text-neutral-500 hover:text-red-500 bg-transparent border-none"
                                                  onClick={deleteItem}
                                               />
                                              )}
                                         </div>
-                                        
+
                                         <div className="bg-neutral-900/50 p-6 rounded-lg border border-neutral-800/50">
                                             <p className="text-xl text-neutral-400 font-light">
-                                                 <InlineEdit readOnly={!onUpdate}
+                                                 <InlineEdit readOnly={readOnly || !onUpdate}
                                                     value={edu.degree}
                                                     placeholder="Degree/Certificate"
                                                     onSave={(val) => updateItem({ degree: val })}
@@ -462,12 +466,13 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                     if (custom) {
                         return (
                              <section key={id} className="py-24 border-t border-neutral-800">
-                                <CustomSectionRenderer 
-                                    section={custom} 
-                                    index={data.customSections?.indexOf(custom) || 0} 
-                                    data={data} 
-                                    onUpdate={onUpdate} 
+                                <CustomSectionRenderer
+                                    section={custom}
+                                    index={data.customSections?.indexOf(custom) || 0}
+                                    data={data}
+                                    onUpdate={onUpdate}
                                     theme="studio"
+                                    readOnly={readOnly}
                                 />
                              </section>
                         );
@@ -476,7 +481,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
             }
         })}
 
-        {onUpdate && (
+        {onUpdate && !readOnly && (
             <div className="flex justify-center py-24 border-t border-neutral-800 print:hidden">
                <Button variant="outline" onClick={() => {
                    const newSection = {
@@ -509,7 +514,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
             <div className="flex flex-col gap-8 text-xl">
                <div className="flex items-center gap-4 group">
                     <Mail className="w-6 h-6 text-neutral-500 group-hover:text-white transition-colors" />
-                    <InlineEdit readOnly={!onUpdate} 
+                    <InlineEdit readOnly={readOnly || !onUpdate} 
                         value={data.personalInfo.email} 
                         placeholder="Email Address"
                         onSave={(val) => handleUpdate('personalInfo.email', val)} 
@@ -518,7 +523,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                </div>
                <div className="flex items-center gap-4 group">
                     <Linkedin className="w-6 h-6 text-neutral-500 group-hover:text-white transition-colors" />
-                     <InlineEdit readOnly={!onUpdate} 
+                     <InlineEdit readOnly={readOnly || !onUpdate} 
                         value={data.personalInfo.linkedin} 
                         placeholder="LinkedIn URL"
                         onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
@@ -527,7 +532,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                </div>
                <div className="flex items-center gap-4 group">
                     <Globe className="w-6 h-6 text-neutral-500 group-hover:text-white transition-colors" />
-                     <InlineEdit readOnly={!onUpdate} 
+                     <InlineEdit readOnly={readOnly || !onUpdate} 
                         value={data.personalInfo.website} 
                         placeholder="Website URL"
                         onSave={(val) => handleUpdate('personalInfo.website', val)} 
@@ -538,7 +543,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
             
             <div className="mt-20 pt-8 border-t border-neutral-900 text-neutral-600 text-sm flex justify-between items-center">
                  <div>
-                    <InlineEdit readOnly={!onUpdate} 
+                    <InlineEdit readOnly={readOnly || !onUpdate} 
                         value={data.personalInfo.fullName} 
                         placeholder="Your Name"
                         onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
@@ -547,7 +552,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                     <span> © {new Date().getFullYear()}</span>
                  </div>
                  <div>
-                     <InlineEdit readOnly={!onUpdate} 
+                     <InlineEdit readOnly={readOnly || !onUpdate} 
                         value={data.personalInfo.location} 
                         placeholder="Location"
                         onSave={(val) => handleUpdate('personalInfo.location', val)} 

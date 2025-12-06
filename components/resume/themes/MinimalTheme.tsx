@@ -14,9 +14,10 @@ import { Plus } from "lucide-react";
 interface MinimalThemeProps {
   data: ResumeData;
   onUpdate?: (data: ResumeData) => void;
+  readOnly?: boolean;
 }
 
-export const MinimalTheme = ({ data, onUpdate }: MinimalThemeProps) => {
+export const MinimalTheme = ({ data, onUpdate, readOnly }: MinimalThemeProps) => {
   // Determine order
   const order = (data.sectionOrder && data.sectionOrder.length > 0) 
       ? data.sectionOrder 
@@ -24,11 +25,11 @@ export const MinimalTheme = ({ data, onUpdate }: MinimalThemeProps) => {
 
   const renderSection = (id: string) => {
     switch (id) {
-        case 'summary': return <SummarySection key={id} data={data} theme="minimal" onUpdate={onUpdate} />;
-        case 'experience': return <ExperienceSection key={id} data={data} theme="minimal" onUpdate={onUpdate} />;
-        case 'education': return <EducationSection key={id} data={data} theme="minimal" onUpdate={onUpdate} />;
-        case 'projects': return <ProjectsSection key={id} data={data} theme="minimal" onUpdate={onUpdate} />;
-        case 'skills': return <SkillsSection key={id} data={data} theme="minimal" onUpdate={onUpdate} />;
+        case 'summary': return <SummarySection key={id} data={data} theme="minimal" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'experience': return <ExperienceSection key={id} data={data} theme="minimal" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'education': return <EducationSection key={id} data={data} theme="minimal" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'projects': return <ProjectsSection key={id} data={data} theme="minimal" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'skills': return <SkillsSection key={id} data={data} theme="minimal" onUpdate={onUpdate} readOnly={readOnly} />;
         default:
             const custom = data.customSections?.find(c => c.id === id);
             if (custom) {
@@ -40,6 +41,7 @@ export const MinimalTheme = ({ data, onUpdate }: MinimalThemeProps) => {
                         data={data} 
                         onUpdate={onUpdate} 
                         theme="minimal"
+                        readOnly={readOnly}
                     />
                 );
             }
@@ -49,12 +51,12 @@ export const MinimalTheme = ({ data, onUpdate }: MinimalThemeProps) => {
 
   return (
     <div id="resume-preview" className="w-[210mm] min-h-[297mm] bg-white shadow-xl mx-auto p-12 md:p-16 space-y-8 text-left">
-      <ContactHeader data={data} theme="minimal" onUpdate={onUpdate} />
+      <ContactHeader data={data} theme="minimal" onUpdate={onUpdate} readOnly={readOnly} />
       
       {/* Dynamic Order */}
       {order.map(id => renderSection(id))}
 
-       {onUpdate && (
+       {onUpdate && !readOnly && (
            <div className="mt-8 border-t border-slate-200 pt-8 flex justify-center print:hidden">
                <Button variant="outline" className="text-slate-900 border-slate-200 hover:bg-slate-100" onClick={() => {
                    const newSection = {

@@ -10,9 +10,10 @@ interface SummarySectionProps {
   theme?: string;
   onUpdate?: (data: ResumeData) => void;
   className?: string;
+  readOnly?: boolean;
 }
 
-export const SummarySection = ({ data, theme, onUpdate, className }: SummarySectionProps) => {
+export const SummarySection = ({ data, theme, onUpdate, className, readOnly }: SummarySectionProps) => {
   const { updateField: handleUpdate } = useResumeUpdate(data, onUpdate);
 
   if (!onUpdate && !data.personalInfo.summary) return null;
@@ -29,7 +30,7 @@ export const SummarySection = ({ data, theme, onUpdate, className }: SummarySect
       </h3>
       <div className="text-sm leading-relaxed text-slate-700">
         <InlineEdit
-          readOnly={!onUpdate}
+          readOnly={readOnly || !onUpdate}
           value={data.personalInfo.summary}
           placeholder="Write a professional summary..."
           multiline

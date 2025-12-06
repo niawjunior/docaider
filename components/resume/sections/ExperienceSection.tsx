@@ -11,9 +11,10 @@ interface ExperienceSectionProps {
     data: ResumeData;
     theme: "modern" | "minimal" | "creative" | "portfolio" | "studio" | "visual";
     onUpdate?: (data: ResumeData) => void;
+    readOnly?: boolean;
 }
 
-export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionProps) {
+export function ExperienceSection({ data, theme, onUpdate, readOnly }: ExperienceSectionProps) {
     const { updateSection } = useResumeUpdate(data, onUpdate);
 
     if (!onUpdate && (!data.experience || data.experience.length === 0)) {
@@ -29,7 +30,7 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
         <ResumeSection
             title="Experience"
             theme={theme}
-            onAdd={onUpdate ? () => {
+            onAdd={onUpdate && !readOnly ? () => {
                 const newExp = [{
                     id: crypto.randomUUID(),
                     company: "Company Name",
@@ -40,7 +41,7 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
                 handleUpdate(newExp);
             } : undefined}
         >
-            {(!data.experience || data.experience.length === 0) && onUpdate ? (
+            {(!data.experience || data.experience.length === 0) && onUpdate && !readOnly ? (
                 <EmptySectionPlaceholder
                     className="mt-4"
                     message="Add your first experience"
@@ -58,6 +59,7 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
             ) : (
                 <ResumeSectionList
                   data={data.experience}
+                  readOnly={readOnly}
                   onUpdate={handleUpdate}
                   className={cn(
                       theme === "creative" ? "space-y-8 border-l-2 border-slate-100 pl-6 ml-1" : "space-y-6",
@@ -83,7 +85,7 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
                                 theme === "creative" ? "text-lg" : "text-lg w-full",
                                 theme === "studio" ? "text-white text-xl tracking-tight" : "text-slate-900" 
                             )}>
-                                <InlineEdit readOnly={!onUpdate} 
+                                <InlineEdit readOnly={readOnly || !onUpdate} 
                                     value={exp.position} 
                                     placeholder="Position"
                                     className={theme === "minimal" ? "text-center w-full block" : ""}
@@ -100,13 +102,13 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
                                          "text-sm whitespace-nowrap flex gap-1",
                                          theme === "studio" ? "text-neutral-400" : "text-slate-500"
                                      )}>
-                                        <InlineEdit readOnly={!onUpdate} 
+                                        <InlineEdit readOnly={readOnly || !onUpdate} 
                                             value={exp.startDate} 
                                             placeholder="Start"
                                             onSave={(val) => updateItem({ startDate: val })}
                                         />
                                         <span>-</span>
-                                        <InlineEdit readOnly={!onUpdate} 
+                                        <InlineEdit readOnly={readOnly || !onUpdate} 
                                             value={exp.endDate} 
                                             placeholder="Present"
                                             onSave={(val) => updateItem({ endDate: val })}
@@ -114,7 +116,7 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
                                     </div>
                                 )}
 
-                                 {onUpdate && (
+                                 {onUpdate && !readOnly && (
                                     <ThemeDeleteButton
                                         className={cn(
                                             "text-red-500 hover:bg-red-50 rounded bg-transparent border-none shadow-none w-6 h-6 p-1 transition-opacity",
@@ -137,7 +139,7 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
                                 theme === "creative" && "text-slate-500",
                                 theme === "studio" ? "text-neutral-500" : "text-slate-700"
                             )}>
-                                <InlineEdit readOnly={!onUpdate} 
+                                <InlineEdit readOnly={readOnly || !onUpdate} 
                                     value={exp.company} 
                                     placeholder="Company"
                                     className={theme === "minimal" ? "text-center w-full block" : ""}
@@ -148,13 +150,13 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
                             {/* Creative Theme Dates (Below Title) */}
                             {theme === "creative" && (
                                 <div className="text-xs text-slate-400 mb-2 font-mono">
-                                    <InlineEdit readOnly={!onUpdate} 
+                                    <InlineEdit readOnly={readOnly || !onUpdate} 
                                         value={exp.startDate} 
                                         placeholder="Start"
                                         onSave={(val) => updateItem({ startDate: val })}
                                     />
                                     <span> - </span>
-                                    <InlineEdit readOnly={!onUpdate} 
+                                    <InlineEdit readOnly={readOnly || !onUpdate} 
                                         value={exp.endDate} 
                                         placeholder="Present"
                                         onSave={(val) => updateItem({ endDate: val })}
@@ -163,7 +165,7 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
                             )}
 
                             <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                                <InlineEdit readOnly={!onUpdate} 
+                                <InlineEdit readOnly={readOnly || !onUpdate} 
                                     value={exp.description} 
                                     placeholder="Description"
                                     multiline

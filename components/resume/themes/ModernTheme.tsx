@@ -13,9 +13,10 @@ import { CustomSectionRenderer } from "@/components/resume/shared/CustomSectionR
 interface ModernThemeProps {
   data: ResumeData;
   onUpdate?: (data: ResumeData) => void;
+  readOnly?: boolean; // Added readOnly prop
 }
 
-export const ModernTheme = ({ data, onUpdate }: ModernThemeProps) => {
+export const ModernTheme = ({ data, onUpdate, readOnly }: ModernThemeProps) => { // Destructure readOnly
   // Determine order (fallback if empty)
   const order = (data.sectionOrder && data.sectionOrder.length > 0) 
       ? data.sectionOrder 
@@ -24,10 +25,10 @@ export const ModernTheme = ({ data, onUpdate }: ModernThemeProps) => {
   // Helper to render a section by ID
   const renderSection = (id: string) => {
     switch (id) {
-        case 'summary': return <SummarySection key={id} data={data} theme="modern" onUpdate={onUpdate} />;
-        case 'experience': return <ExperienceSection key={id} data={data} theme="modern" onUpdate={onUpdate} />;
-        case 'education': return <EducationSection key={id} data={data} theme="modern" onUpdate={onUpdate} />;
-        case 'projects': return <ProjectsSection key={id} data={data} theme="modern" onUpdate={onUpdate} />;
+        case 'summary': return <SummarySection key={id} data={data} theme="modern" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'experience': return <ExperienceSection key={id} data={data} theme="modern" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'education': return <EducationSection key={id} data={data} theme="modern" onUpdate={onUpdate} readOnly={readOnly} />;
+        case 'projects': return <ProjectsSection key={id} data={data} theme="modern" onUpdate={onUpdate} readOnly={readOnly} />;
         case 'skills':
             // In Modern theme, Skills are typically in the sidebar.
             // If the user drags 'skills' into the main list, we technically "skip" it here
@@ -48,6 +49,7 @@ export const ModernTheme = ({ data, onUpdate }: ModernThemeProps) => {
                         data={data} 
                         onUpdate={onUpdate} 
                         theme="modern"
+                        readOnly={readOnly} // Pass readOnly to CustomSectionRenderer
                     />
                 );
             }
@@ -65,10 +67,10 @@ export const ModernTheme = ({ data, onUpdate }: ModernThemeProps) => {
              </div>
         </div>
         
-        <ContactHeader data={data} theme="modern" onUpdate={onUpdate} />
+        <ContactHeader data={data} theme="modern" onUpdate={onUpdate} readOnly={readOnly} /> {/* Pass readOnly */}
         
         {/* Fixed Sidebar Sections */}
-        <SkillsSection data={data} theme="modern" onUpdate={onUpdate} />
+        <SkillsSection data={data} theme="modern" onUpdate={onUpdate} readOnly={readOnly} /> {/* Pass readOnly */}
       </div>
 
       {/* Main Content */}
