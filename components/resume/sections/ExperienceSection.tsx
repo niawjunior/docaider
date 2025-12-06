@@ -9,13 +9,18 @@ import { EmptySectionPlaceholder } from "@/components/resume/shared/EmptySection
 
 interface ExperienceSectionProps {
     data: ResumeData;
-    theme: "modern" | "minimal" | "creative";
+    theme: "modern" | "minimal" | "creative" | "portfolio" | "studio" | "visual";
     onUpdate?: (data: ResumeData) => void;
 }
 
 export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionProps) {
     const { updateSection } = useResumeUpdate(data, onUpdate);
 
+    if (!onUpdate && (!data.experience || data.experience.length === 0)) {
+        return null;
+    }
+
+    const items = data.experience || [];
     const handleUpdate = (newExp: any[]) => {
         updateSection('experience', newExp);
     };
@@ -55,7 +60,9 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
                   data={data.experience}
                   onUpdate={handleUpdate}
                   className={cn(
-                      theme === "creative" ? "space-y-8 border-l-2 border-slate-100 pl-6 ml-1" : "space-y-6"
+                      theme === "creative" ? "space-y-8 border-l-2 border-slate-100 pl-6 ml-1" : "space-y-6",
+                      // Studio theme spacing
+                      theme === "studio" && "space-y-8"
                   )}
                   renderItem={(exp, index, updateItem, deleteItem) => (
                       <div className={cn(
@@ -73,7 +80,8 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
                         )}>
                             <h3 className={cn(
                                 "font-bold",
-                                theme === "creative" ? "text-lg" : "text-lg w-full"
+                                theme === "creative" ? "text-lg" : "text-lg w-full",
+                                theme === "studio" ? "text-white text-xl tracking-tight" : "text-slate-900" 
                             )}>
                                 <InlineEdit readOnly={!onUpdate} 
                                     value={exp.position} 
@@ -88,7 +96,10 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
                                 theme === "minimal" ? "w-full justify-center mt-1" : "shrink-0"
                             )}>
                                 {theme !== "creative" && (
-                                     <div className="text-sm text-slate-500 whitespace-nowrap flex gap-1">
+                                     <div className={cn(
+                                         "text-sm whitespace-nowrap flex gap-1",
+                                         theme === "studio" ? "text-neutral-400" : "text-slate-500"
+                                     )}>
                                         <InlineEdit readOnly={!onUpdate} 
                                             value={exp.startDate} 
                                             placeholder="Start"
@@ -107,7 +118,8 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
                                     <ThemeDeleteButton
                                         className={cn(
                                             "text-red-500 hover:bg-red-50 rounded bg-transparent border-none shadow-none w-6 h-6 p-1 transition-opacity",
-                                            theme === "minimal" ? "absolute right-0 top-0" : ""
+                                            theme === "minimal" && "absolute right-0 top-0",
+                                            theme === "studio" && "text-red-400 hover:bg-white/10 ml-2" // Add margin for studio to prevent overlap
                                         )}
                                         onClick={deleteItem}
                                     />
@@ -121,7 +133,9 @@ export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionPr
                         )}>
                             <div className={cn(
                                 "font-medium mb-1",
-                                theme === "creative" ? "text-slate-500" : ""
+                                "font-medium mb-1",
+                                theme === "creative" && "text-slate-500",
+                                theme === "studio" ? "text-neutral-500" : "text-slate-700"
                             )}>
                                 <InlineEdit readOnly={!onUpdate} 
                                     value={exp.company} 

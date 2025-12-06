@@ -155,7 +155,7 @@ export async function saveDraft(data: {
     return { success: true, id: data.id, slug: data.slug };
   } else {
     // Create new draft
-    const slug = data.slug || `draft-${Date.now()}`;
+    const slug = data.slug || `${Date.now()}`;
     const { data: newResume, error } = await adminSupabase
       .from("resumes")
       .insert({

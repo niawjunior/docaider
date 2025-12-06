@@ -13,6 +13,10 @@ interface SkillsSectionProps {
 export function SkillsSection({ data, theme, onUpdate }: SkillsSectionProps) {
     const { updateSection } = useResumeUpdate(data, onUpdate);
 
+    if (!onUpdate && (!data.skills || data.skills.length === 0)) {
+        return null;
+    }
+
     const handleUpdate = (newSkills: string[]) => {
         updateSection('skills', newSkills);
     };
@@ -68,20 +72,23 @@ export function SkillsSection({ data, theme, onUpdate }: SkillsSectionProps) {
     // Modern & Minimal
     return (
         <section className="mb-8 text-left">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-200 pb-2">
+            <div className={cn(
+                "flex justify-between items-center mb-4 border-b pb-2",
+                theme === "modern" ? "border-slate-700" : "border-slate-200"
+            )}>
                 <h2
                     className={cn(
                         "font-bold uppercase",
-                        theme === "modern" && "text-xl",
-                        theme === "minimal" && "text-sm tracking-widest text-center w-full border-none"
+                        theme === "modern" && "text-xl text-white",
+                        theme === "minimal" && "text-sm tracking-widest text-center flex-1 border-none text-slate-900"
                     )}
                 >
                     Skills
                 </h2>
-                {onUpdate && theme !== "minimal" && (
+                {onUpdate && (
                     <ThemeAddButton 
                         label=""
-                        className="w-8 h-8 p-0 border-none bg-transparent hover:bg-slate-100 text-slate-500"
+                        className="w-8 h-8 p-0 border-none bg-transparent hover:bg-slate-100 text-slate-500 flex-none"
                         onClick={() => {
                             const newSkills = [...data.skills, "New Skill"];
                             handleUpdate(newSkills);
@@ -101,7 +108,7 @@ export function SkillsSection({ data, theme, onUpdate }: SkillsSectionProps) {
                         className={cn(
                             "text-sm font-medium group/skill relative flex items-center gap-1",
                             theme === "modern" && "px-3 py-1 bg-slate-100 text-slate-700 rounded-full hover:bg-slate-200 transition-colors",
-                            theme === "minimal" && "px-2 border-b border-slate-200 hover:border-slate-400 pb-1"
+                            theme === "minimal" && "px-2 border-b border-slate-200 hover:border-slate-400 pb-1 text-slate-900"
                         )}
                     >
                         <InlineEdit readOnly={!onUpdate} 

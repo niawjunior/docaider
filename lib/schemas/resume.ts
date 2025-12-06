@@ -50,6 +50,28 @@ export const ResumeSchema = z.object({
       content: z.string().optional(),
     })
   ).optional().default([]).describe("Client testimonials"),
+  customSections: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      type: z.enum(["list", "text"]),
+      items: z.array(
+        z.object({
+          id: z.string(),
+          title: z.string().optional(), // Used for list items (e.g. "Main Text")
+          subtitle: z.string().optional(), // Used for list items (e.g. date/role)
+          content: z.string().optional(), // Used for text type or description
+        })
+      ).default([])
+    })
+  ).optional().default([]).describe("Custom user-defined sections"),
+  sectionOrder: z.array(z.string()).default([
+    "summary",
+    "experience", 
+    "education", 
+    "projects", 
+    "skills"
+  ]).describe("Order of sections to render"),
 });
 
 export type ResumeData = z.infer<typeof ResumeSchema>;

@@ -1,12 +1,13 @@
 import { ResumeData } from "@/lib/schemas/resume";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowUpRight, Mail, MapPin, Globe, Linkedin, ExternalLink } from "lucide-react";
+import {  Mail, MapPin, Globe, Linkedin } from "lucide-react";
 import { InlineEdit } from "@/components/ui/inline-edit";
 import { Button } from "@/components/ui/button";
 import { ThemeAddButton, ThemeDeleteButton } from "./ThemeControls";
 import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
-import { ResumeSectionList } from "@/components/resume/shared/ResumeSectionList";
 import { EmptySectionPlaceholder } from "@/components/resume/shared/EmptySectionPlaceholder";
+import { CustomSectionRenderer } from "@/components/resume/shared/CustomSectionRenderer";
+import { Plus } from "lucide-react";
 
 interface VisualThemeProps {
   data: ResumeData;
@@ -82,402 +83,457 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                     className="bg-transparent border-none"
                  />
             </div>
-            <div className="text-neutral-400 max-w-md text-sm md:text-base">
-                 <InlineEdit readOnly={!onUpdate} 
-                    value={data.personalInfo.summary} 
-                    onSave={(val) => handleUpdate('personalInfo.summary', val)} 
-                    multiline
-                    placeholder="Professional summary..."
-                    className="bg-transparent border-none"
-                 />
-            </div>
           </motion.div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-24" id="work">
-        
-        {/* Selected Works */}
-        {data.projects && data.projects.length > 0 && (
-          <section className="mb-48">
-             <div className="flex items-end justify-between mb-24">
-              <h2 className="text-6xl md:text-8xl font-bold uppercase tracking-tighter">
-                Selected<br/>Works
-              </h2>
-               {onUpdate && (
-                     <ThemeAddButton 
-                        label="Add Project"
-                        className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
-                        onClick={() => {
-                            const newProj = [{
-                                name: "Project Name",
-                                description: "Description",
-                                technologies: []
-                            }, ...data.projects];
-                            handleUpdate('projects', newProj);
-                     }} />
-                )}
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-x-12 gap-y-24">
-              {(!data.projects || data.projects.length === 0) && onUpdate ? (
-                   <div className="col-span-2">
-                        <EmptySectionPlaceholder 
-                            className="border-white/20 hover:border-white/40 bg-transparent text-white"
-                            message="Add some work to showcase"
-                            onClick={() => {
-                                const newProj = [{
-                                    id: crypto.randomUUID(),
-                                    name: "Project Name",
-                                    description: "Description",
-                                    technologies: []
-                                }, ...(data.projects || [])];
-                                handleUpdate('projects', newProj);
-                            }}
-                        />
-                   </div>
-              ) : (
-                  data.projects.map((project, i) => (
-                    <motion.div
-                      key={project.id || i}
-                      initial={{ opacity: 0, y: 50 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-10%" }}
-                      transition={{ duration: 0.6, delay: i % 2 * 0.2 }}
-                      className={`group/item relative ${i % 2 === 1 ? "md:mt-32" : ""}`}
-                    >
-                         {onUpdate && (
-                         <ThemeDeleteButton
-                            className="absolute right-0 top-0 z-20 bg-red-600 hover:bg-red-700 text-white border-none"
-                            onClick={() => {
-                                //e.preventDefault(); // StopPropagation handled in component
-                                const newProjs = [...data.projects];
-                                newProjs.splice(i, 1);
-                                handleUpdate('projects', newProjs);
-                            }}
-                         />
-                        )}
-                      <div className="block cursor-default">
-                        <div className="aspect-[3/4] mb-8 overflow-hidden bg-neutral-900 relative">
-                           {/* Placeholder pattern since we don't have project images yet */}
-                          <div className="w-full h-full bg-neutral-800 group-hover/item:scale-105 transition-transform duration-700 ease-out flex items-center justify-center">
-                             <span className="text-neutral-700 text-9xl font-black opacity-20 group-hover/item:opacity-40 transition-opacity">
-                               {String(i + 1).padStart(2, '0')}
-                             </span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-2xl font-bold uppercase tracking-tighter mb-2">
-                                 <InlineEdit readOnly={!onUpdate} 
-                                    value={project.name} 
-                                    onSave={(val) => {
-                                        const newProjs = [...data.projects];
-                                        newProjs[i].name = val;
-                                        handleUpdate('projects', newProjs);
-                                    }}
-                                    className="bg-transparent border-none"
-                                    placeholder="Project Name"
-                                 />
-                            </h3>
-                            <p className="text-neutral-500 text-sm mb-4">
-                                 <InlineEdit readOnly={!onUpdate} 
-                                    value={project.description} 
-                                    onSave={(val) => {
-                                        const newProjs = [...data.projects];
-                                        newProjs[i].description = val;
-                                        handleUpdate('projects', newProjs);
-                                    }}
-                                    multiline
-                                    className="bg-transparent border-none h-auto min-h-[40px]"
-                                    placeholder="Description"
-                                 />
-                            </p>
-                          </div>
-                          
-                          <div className="flex flex-col items-end gap-2 text-neutral-500">
-                              <div className="flex items-center gap-1 group/link">
-                                 <ExternalLink className="w-4 h-4" />
-                                  <InlineEdit readOnly={!onUpdate} 
-                                    value={project.url} 
-                                    onSave={(val) => {
-                                        const newProjs = [...data.projects];
-                                        newProjs[i].url = val;
-                                        handleUpdate('projects', newProjs);
-                                    }}
-                                    className="bg-transparent border-none text-xs text-right"
-                                    placeholder="Project URL"
-                                 />
-                              </div>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))
-              )}
-            </div>
-          </section>
-        )}
-
-        {/* Experience */}
-        <section id="about" className="mb-48 w-full">
-           <div className="flex justify-between items-end mb-12 border-b border-neutral-800 pb-8">
-             <h2 className="text-4xl font-bold uppercase tracking-tighter">Experience</h2>
-              {onUpdate && (
-                    <ThemeAddButton 
-                        label="Add"
-                        className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
-                        onClick={() => {
-                        const newExp = [{
-                            id: crypto.randomUUID(),
-                            company: "Company Name",
-                            position: "Position",
-                            startDate: "2024",
-                            description: "Job description goes here..."
-                        }, ...data.experience];
-                        handleUpdate('experience', newExp);
-                    }} />
-            )}
-           </div>
-
-           {(!data.experience || data.experience.length === 0) && onUpdate ? (
-                <EmptySectionPlaceholder 
-                    className="border-white/20 hover:border-white/40 bg-transparent text-white"
-                    message="Add your past experience"
-                    onClick={() => {
-                        const newExp = [{
-                            id: crypto.randomUUID(),
-                            company: "Company Name",
-                            position: "Position",
-                            startDate: "2024",
-                            description: "Job description goes here..."
-                        }, ...(data.experience || [])];
-                        handleUpdate('experience', newExp);
-                    }}
-                />
-           ) : (
-               <ResumeSectionList
-                 data={data.experience}
-                 onUpdate={(val) => handleUpdate('experience', val)}
-                 className="space-y-12"
-                 renderItem={(exp, i, updateItem, deleteItem) => (
-                    <div className="group/item relative border-l border-neutral-800 pl-8 ml-3">
-                     
-                     <div className="absolute -left-[5px] top-2 w-2 h-2 bg-neutral-600 rounded-full" />
-                     <div className="flex flex-col md:flex-row md:items-baseline justify-between mb-2">
-                          <div className="flex-1">
-                               <h3 className="text-xl font-bold text-white">
-                                 <InlineEdit readOnly={!onUpdate} 
-                                     value={exp.company} 
-                                     onSave={(val) => updateItem({ company: val })} 
-                                     className="bg-transparent"
-                                 />
-                             </h3>
-                          </div>
-                          <div className="flex items-center gap-2">
-                               <span className="text-sm font-mono text-neutral-500">
-                                  <InlineEdit readOnly={!onUpdate} 
-                                     value={exp.startDate} 
-                                     onSave={(val) => updateItem({ startDate: val })}
-                                     className="bg-transparent text-right"
-                                  />
-                                   {" - "}
-                                   <InlineEdit readOnly={!onUpdate} 
-                                     value={exp.endDate} 
-                                     onSave={(val) => updateItem({ endDate: val })} 
-                                     className="bg-transparent text-right"
-                                  />
-                               </span>
-                                {onUpdate && (
-                                  <ThemeDeleteButton
-                                     className="text-red-500 hover:bg-red-900/50 bg-transparent border-none transition-opacity"
-                                     onClick={deleteItem}
-                                  />
-                                 )}
-                          </div>
-                     </div>
-                       <h3 className="text-2xl font-bold">
-                            <InlineEdit readOnly={!onUpdate} 
-                                 value={exp.position} 
-                                 placeholder="Position"
-                                 onSave={(val) => updateItem({ position: val })} 
-                                 className="bg-transparent border-none"
+        {/* Dynamic Section Rendering */}
+        {(data.sectionOrder && data.sectionOrder.length > 0 ? data.sectionOrder : ["summary", "projects", "experience", "skills", "education"]).map(id => {
+            switch(id) {
+                case 'summary':
+                    return (
+                        <motion.section
+                            key="summary"
+                            className="py-12 md:py-24 max-w-4xl mx-auto text-center"
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8 }}
+                        >
+                          <div className="text-2xl md:text-4xl leading-relaxed font-light text-neutral-300">
+                             <InlineEdit readOnly={!onUpdate}
+                                value={data.personalInfo.summary}
+                                placeholder="Write a short bio about yourself..."
+                                multiline
+                                onSave={(val) => handleUpdate('personalInfo.summary', val)}
+                                className="bg-transparent text-center border-none focus:ring-0 w-full"
                              />
-                       </h3>
-     
-     
-                     <p className="text-neutral-400 leading-relaxed">
-                          <InlineEdit readOnly={!onUpdate} 
-                                 value={exp.description} 
-                                 placeholder="Description"
-                                 multiline
-                                 onSave={(val) => updateItem({ description: val })} 
-                                 className="bg-transparent border-none"
-                             />
-                     </p>
-                   </div>
-                 )}
-               />
-           )}
-        </section>
-
-         {/* Skills - Often forgotten in visual themes but useful */}
-         <section className="mb-48">
-            <div className="flex justify-between items-center mb-12 border-b border-neutral-800 pb-8">
-             <h2 className="text-4xl font-bold uppercase tracking-tighter">Skills</h2>
-              {onUpdate && (
-                     <ThemeAddButton 
-                        label="Add"
-                        className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
-                        onClick={() => {
-                        const newSkills = [...data.skills, "SKILL"];
-                        handleUpdate('skills', newSkills);
-                    }} />
-            )}
-           </div>
-           <div className="flex flex-wrap gap-4">
-              {data.skills.map((skill, i) => (
-                  <span key={i} className="group/skill relative border border-white/20 px-6 py-3 rounded-full uppercase tracking-widest text-sm hover:bg-white hover:text-black transition-colors inline-flex items-center gap-2 pr-2">
-                     <InlineEdit readOnly={!onUpdate} 
-                            value={skill} 
-                            placeholder="SKILL"
-                            onSave={(val) => {
-                                const newSkills = [...data.skills];
-                                newSkills[i] = val;
-                                handleUpdate('skills', newSkills);
-                            }}
-                            className="bg-transparent border-none text-center min-w-[60px]"
-                        />
-                         {onUpdate && (
-                        <ThemeDeleteButton
-                            onClick={() => {
-                                const newSkills = [...data.skills];
-                                newSkills.splice(i, 1);
-                                handleUpdate('skills', newSkills);
-                            }}
-                             className="bg-red-600 hover:bg-red-700 text-white border-none w-5 h-5 p-1 rounded-full transition-all"
-                         />
-                    )}
-                  </span>
-              ))}
-           </div>
-         </section>
-
-        {/* Education */}
-        <section className="w-full">
-            <div className="flex justify-between items-end mb-12 border-b border-neutral-800 pb-8">
-             <h2 className="text-4xl font-bold uppercase tracking-tighter">Education</h2>
-              {onUpdate && (
-                    <ThemeAddButton 
-                        label="Add"
-                        className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
-                        onClick={() => {
-                        const newEdu = [{
-                            institution: "University",
-                            degree: "Degree",
-                            startDate: "2020",
-                            endDate: "2024"
-                        }, ...(data.education || [])];
-                        handleUpdate('education', newEdu);
-                    }} />
-            )}
-           </div>
-           
-           <div className="space-y-8">
-                {(!data.education || data.education.length === 0) && onUpdate ? (
-                    <EmptySectionPlaceholder 
-                        className="border-white/20 hover:border-white/40 bg-transparent text-white"
-                        message="Add your education"
-                        onClick={() => {
-                            const newEdu = [{
-                                id: crypto.randomUUID(),
-                                institution: "University",
-                                degree: "Degree",
-                                startDate: "2020",
-                                endDate: "2024"
-                            }, ...(data.education || [])];
-                            handleUpdate('education', newEdu);
-                        }}
-                    />
-                ) : (
-                    data.education.map((edu, i) => (
-                        <div key={edu.id || i} className="group/item relative grid md:grid-cols-[1fr_200px] gap-4 items-end">
-                            <div>
-                                <h3 className="text-xl font-bold">
-                                     <InlineEdit readOnly={!onUpdate} 
-                                        value={edu.institution} 
-                                        placeholder="Institution"
-                                        onSave={(val) => {
-                                            const newEdu = [...data.education];
-                                            newEdu[i].institution = val;
-                                            handleUpdate('education', newEdu);
+                          </div>
+                        </motion.section>
+                    );
+                
+                case 'projects':
+                    if (!onUpdate && (!data.projects || data.projects.length === 0)) return null;
+                    return (
+                        <section key="projects" id="work" className="py-24 w-full">
+                           <div className="flex justify-between items-end mb-16 border-b border-white/20 pb-8">
+                             <h2 className="text-6xl md:text-8xl font-black uppercase tracking-tighter text-transparent stroke-text-white">
+                                Selected Works
+                             </h2>
+                              {onUpdate && (
+                                    <ThemeAddButton 
+                                        label="Add Project"
+                                        className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
+                                        onClick={() => {
+                                        const newProj = [{
+                                            id: crypto.randomUUID(),
+                                            name: "Project Name",
+                                            description: "Short description",
+                                            url: "https://project.com",
+                                            technologies: []
+                                        }, ...data.projects];
+                                        handleUpdate('projects', newProj);
+                                    }} />
+                              )}
+                           </div>
+                           
+                           <div className="space-y-32">
+                               {(!data.projects || data.projects.length === 0) && onUpdate ? (
+                                     <EmptySectionPlaceholder 
+                                        className="border-white/20 hover:border-white/40 bg-transparent text-white"
+                                        message="Add your first project"
+                                        onClick={() => {
+                                            const newProj = [{
+                                                id: crypto.randomUUID(),
+                                                name: "Project Name",
+                                                description: "Short description",
+                                                url: "https://project.com",
+                                                technologies: []
+                                            }, ...(data.projects || [])];
+                                            handleUpdate('projects', newProj);
                                         }}
-                                        className="bg-transparent border-none"
                                     />
-                                </h3>
-                                <p className="text-neutral-400 flex gap-1">
-                                     <InlineEdit readOnly={!onUpdate} 
-                                        value={edu.degree} 
-                                        placeholder="Degree"
-                                        onSave={(val) => {
-                                            const newEdu = [...data.education];
-                                            newEdu[i].degree = val;
-                                            handleUpdate('education', newEdu);
-                                        }}
-                                        className="bg-transparent border-none"
-                                    />
-                                   <span>-</span>
-                                     <InlineEdit readOnly={!onUpdate} 
-                                        value={edu.fieldOfStudy} 
-                                        placeholder="Field"
-                                        onSave={(val) => {
-                                            const newEdu = [...data.education];
-                                            newEdu[i].fieldOfStudy = val;
-                                            handleUpdate('education', newEdu);
-                                        }}
-                                        className="bg-transparent border-none"
-                                    />
-                                </p>
-                            </div>
-                            <div className="text-right text-neutral-500 font-mono text-sm flex gap-1 justify-end items-center">
-                                 <InlineEdit readOnly={!onUpdate} 
-                                    value={edu.startDate} 
-                                    placeholder="Start"
-                                    onSave={(val) => {
-                                        const newEdu = [...data.education];
-                                        newEdu[i].startDate = val;
-                                        handleUpdate('education', newEdu);
-                                    }}
-                                    className="bg-transparent border-none text-right"
+                               ) : (
+                                   data.projects.map((project, i) => (
+                                       <motion.div 
+                                         key={project.id || i}
+                                         initial={{ opacity: 0, y: 50 }}
+                                         whileInView={{ opacity: 1, y: 0 }}
+                                         viewport={{ once: true }}
+                                         transition={{ duration: 0.6 }}
+                                         className="group/item relative block"
+                                       >
+                                           <div className="border-l-2 border-white/20 pl-8 md:pl-16 ml-4 md:ml-0 transition-colors group-hover/item:border-white">
+                                               <div className="flex justify-between items-start mb-6">
+                                                   <h3 className="text-4xl md:text-5xl font-bold">
+                                                        <InlineEdit readOnly={!onUpdate}
+                                                            value={project.name}
+                                                            placeholder="Project Name"
+                                                            onSave={(val) => {
+                                                                const newProj = [...data.projects];
+                                                                newProj[i].name = val;
+                                                                handleUpdate('projects', newProj);
+                                                            }}
+                                                            className="bg-transparent border-none w-full"
+                                                        />
+                                                   </h3>
+                                                    {onUpdate && (
+                                                       <ThemeDeleteButton
+                                                          className="text-red-500 hover:bg-red-900/50 bg-transparent border-none"
+                                                          onClick={() => {
+                                                              const newProj = [...data.projects];
+                                                              newProj.splice(i, 1);
+                                                              handleUpdate('projects', newProj);
+                                                          }}
+                                                       />
+                                                  )}
+                                               </div>
+                                               
+                                               <div className="text-xl md:text-2xl text-neutral-400 font-light mb-8 max-w-2xl">
+                                                    <InlineEdit readOnly={!onUpdate}
+                                                        value={project.description}
+                                                        placeholder="Description..."
+                                                        multiline
+                                                        onSave={(val) => {
+                                                            const newProj = [...data.projects];
+                                                            newProj[i].description = val;
+                                                            handleUpdate('projects', newProj);
+                                                        }}
+                                                        className="bg-transparent border-none w-full"
+                                                    />
+                                               </div>
+                                               
+                                               <div className="flex items-center gap-4 text-sm font-mono uppercase tracking-widest text-neutral-500">
+                                                    <div className="flex items-center gap-2">
+                                                        <span>URL:</span>
+                                                         <InlineEdit readOnly={!onUpdate}
+                                                            value={project.url}
+                                                            placeholder="https://..."
+                                                            onSave={(val) => {
+                                                                const newProj = [...data.projects];
+                                                                newProj[i].url = val;
+                                                                handleUpdate('projects', newProj);
+                                                            }}
+                                                            className="bg-transparent border-none min-w-[100px]"
+                                                        />
+                                                    </div>
+                                               </div>
+                                           </div>
+                                       </motion.div>
+                                   ))
+                               )}
+                           </div>
+                        </section>
+                    );
+                
+                case 'experience':
+                    if (!onUpdate && (!data.experience || data.experience.length === 0)) return null;
+                    return (
+                        <section key="experience" className="py-24 w-full">
+                           <div className="flex justify-between items-end mb-12 border-b border-white/20 pb-8">
+                             <h2 className="text-4xl font-bold uppercase tracking-tighter">Experience</h2>
+                              {onUpdate && (
+                                    <ThemeAddButton 
+                                        label="Add"
+                                        className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
+                                        onClick={() => {
+                                        const newExp = [{
+                                            id: crypto.randomUUID(),
+                                            company: "Company",
+                                            position: "Role",
+                                            startDate: "2024",
+                                            description: "Description"
+                                        }, ...data.experience];
+                                        handleUpdate('experience', newExp);
+                                    }} />
+                            )}
+                           </div>
+                           
+                           <div className="grid md:grid-cols-2 gap-16">
+                                {(!data.experience || data.experience.length === 0) && onUpdate ? (
+                                    <div className="col-span-2">
+                                         <EmptySectionPlaceholder 
+                                            className="border-white/20 hover:border-white/40 bg-transparent text-white"
+                                            message="Add your first experience"
+                                            onClick={() => {
+                                                const newExp = [{
+                                                    id: crypto.randomUUID(),
+                                                    company: "Company",
+                                                    position: "Role",
+                                                    startDate: "2024",
+                                                    description: "Description"
+                                                }, ...(data.experience || [])];
+                                                handleUpdate('experience', newExp);
+                                            }}
+                                        />
+                                    </div>
+                                ) : (
+                                    data.experience.map((exp, i) => (
+                                        <div key={exp.id || i} className="group/item relative">
+                                             <div className="flex justify-between items-start">
+                                                 <div className="text-neutral-500 font-mono text-sm mb-2 flex gap-1">
+                                                      <InlineEdit readOnly={!onUpdate}
+                                                        value={exp.startDate}
+                                                        placeholder="Start"
+                                                        onSave={(val) => {
+                                                            const newExp = [...data.experience];
+                                                            newExp[i].startDate = val;
+                                                            handleUpdate('experience', newExp);
+                                                        }}
+                                                        className="bg-transparent border-none text-right"
+                                                    />
+                                                     <span>-</span>
+                                                      <InlineEdit readOnly={!onUpdate}
+                                                        value={exp.endDate}
+                                                        placeholder="Present"
+                                                        onSave={(val) => {
+                                                            const newExp = [...data.experience];
+                                                            newExp[i].endDate = val;
+                                                            handleUpdate('experience', newExp);
+                                                        }}
+                                                        className="bg-transparent border-none"
+                                                    />
+                                                 </div>
+                                                  {onUpdate && (
+                                                       <ThemeDeleteButton
+                                                          className="text-red-500 hover:bg-red-900/50 bg-transparent border-none"
+                                                          onClick={() => {
+                                                              const newExp = [...data.experience];
+                                                              newExp.splice(i, 1);
+                                                              handleUpdate('experience', newExp);
+                                                          }}
+                                                       />
+                                                  )}
+                                             </div>
+                                            
+                                            <h3 className="text-2xl font-bold mb-1">
+                                                 <InlineEdit readOnly={!onUpdate}
+                                                    value={exp.company}
+                                                    placeholder="Company"
+                                                    onSave={(val) => {
+                                                        const newExp = [...data.experience];
+                                                        newExp[i].company = val;
+                                                        handleUpdate('experience', newExp);
+                                                    }}
+                                                    className="bg-transparent border-none"
+                                                />
+                                            </h3>
+                                            <div className="text-lg text-neutral-400 mb-4">
+                                                 <InlineEdit readOnly={!onUpdate}
+                                                    value={exp.position}
+                                                    placeholder="Position"
+                                                    onSave={(val) => {
+                                                        const newExp = [...data.experience];
+                                                        newExp[i].position = val;
+                                                        handleUpdate('experience', newExp);
+                                                    }}
+                                                    className="bg-transparent border-none"
+                                                />
+                                            </div>
+                                            
+                                            <p className="text-neutral-400 leading-relaxed text-sm">
+                                                 <InlineEdit readOnly={!onUpdate}
+                                                    value={exp.description}
+                                                    placeholder="Description..."
+                                                    multiline
+                                                    onSave={(val) => {
+                                                        const newExp = [...data.experience];
+                                                        newExp[i].description = val;
+                                                        handleUpdate('experience', newExp);
+                                                    }}
+                                                    className="bg-transparent border-none"
+                                                />
+                                            </p>
+                                        </div>
+                                    ))
+                                )}
+                           </div>
+                        </section>
+                    );
+                
+                case 'skills':
+                    if (!onUpdate && (!data.skills || data.skills.length === 0)) return null;
+                    return (
+                        <section key="skills" className="py-12 w-full border-t border-white/10">
+                           <div className="flex justify-between items-center mb-8">
+                             <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-widest">Stack</h3>
+                              {onUpdate && (
+                                <ThemeAddButton 
+                                    label=""
+                                    className="w-6 h-6 p-0 bg-transparent hover:bg-white/10 text-white border-white/20 hover:text-white"
+                                    onClick={() => {
+                                    const newSkills = [...data.skills, "Skill"];
+                                    handleUpdate('skills', newSkills);
+                                    }} 
                                 />
-                                <span>-</span>
-                                <InlineEdit readOnly={!onUpdate} 
-                                    value={edu.endDate} 
-                                    placeholder="Present"
-                                    onSave={(val) => {
-                                        const newEdu = [...data.education];
-                                        newEdu[i].endDate = val;
-                                        handleUpdate('education', newEdu);
-                                    }}
-                                    className="bg-transparent border-none"
-                                />
-                                 {onUpdate && (
-                                  <ThemeDeleteButton
-                                     className="text-red-500 hover:bg-red-900/50 bg-transparent border-none ml-2"
-                                     onClick={() => {
-                                         const newEdu = [...data.education];
-                                         newEdu.splice(i, 1);
-                                         handleUpdate('education', newEdu);
-                                     }}
-                                  />
                              )}
-                            </div>
-                        </div>
-                    ))
-                )}
-            </div>
-        </section>
+                           </div>
+                           
+                           <div className="flex flex-wrap gap-x-8 gap-y-4">
+                              {data.skills.map((skill, i) => (
+                                  <span key={i} className="group/item relative text-xl md:text-2xl font-light text-neutral-300 hover:text-white transition-colors">
+                                       <InlineEdit readOnly={!onUpdate} 
+                                            value={skill} 
+                                            onSave={(val) => {
+                                                const newSkills = [...data.skills];
+                                                newSkills[i] = val;
+                                                handleUpdate('skills', newSkills);
+                                            }}
+                                            className="bg-transparent border-none text-center min-w-[60px]"
+                                        />
+                                         {onUpdate && (
+                                        <ThemeDeleteButton
+                                            onClick={() => {
+                                                const newSkills = [...data.skills];
+                                                newSkills.splice(i, 1);
+                                                handleUpdate('skills', newSkills);
+                                            }}
+                                             className="bg-red-600 hover:bg-red-700 text-white border-none w-5 h-5 p-1 rounded-full transition-all ml-2 align-middle opacity-0 group-hover/item:opacity-100"
+                                         />
+                                    )}
+                                  </span>
+                              ))}
+                           </div>
+                         </section>
+                    );
+                
+                case 'education':
+                    if (!onUpdate && (!data.education || data.education.length === 0)) return null;
+                    return (
+                        <section key="education" className="w-full py-12">
+                            <div className="flex justify-between items-end mb-12 border-b border-neutral-800 pb-8">
+                             <h2 className="text-4xl font-bold uppercase tracking-tighter">Education</h2>
+                              {onUpdate && (
+                                    <ThemeAddButton 
+                                        label="Add"
+                                        className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
+                                        onClick={() => {
+                                        const newEdu = [{
+                                            id: crypto.randomUUID(),
+                                            institution: "University",
+                                            degree: "Degree",
+                                            startDate: "2020",
+                                            endDate: "2024"
+                                        }, ...data.education];
+                                        handleUpdate('education', newEdu);
+                                    }} />
+                            )}
+                           </div>
+                           
+                           <div className="space-y-8">
+                                {(!data.education || data.education.length === 0) && onUpdate ? (
+                                    <EmptySectionPlaceholder 
+                                        className="border-white/20 hover:border-white/40 bg-transparent text-white"
+                                        message="Add your education"
+                                        onClick={() => {
+                                            const newEdu = [{
+                                                id: crypto.randomUUID(),
+                                                institution: "University",
+                                                degree: "Degree",
+                                                startDate: "2020",
+                                                endDate: "2024"
+                                            }, ...(data.education || [])];
+                                            handleUpdate('education', newEdu);
+                                        }}
+                                    />
+                                ) : (
+                                    data.education.map((edu, i) => (
+                                        <div key={edu.id || i} className="group/item relative grid md:grid-cols-[1fr_200px] gap-4 items-end">
+                                            <div>
+                                                <h3 className="text-xl font-bold">
+                                                     <InlineEdit readOnly={!onUpdate} 
+                                                        value={edu.institution} 
+                                                        placeholder="Institution"
+                                                        onSave={(val) => {
+                                                            const newEdu = [...data.education];
+                                                            newEdu[i].institution = val;
+                                                            handleUpdate('education', newEdu);
+                                                        }}
+                                                        className="bg-transparent border-none"
+                                                    />
+                                                </h3>
+                                                <p className="text-neutral-400 flex gap-1 items-center">
+                                                     <InlineEdit readOnly={!onUpdate} 
+                                                        value={edu.degree} 
+                                                        placeholder="Degree"
+                                                        onSave={(val) => {
+                                                            const newEdu = [...data.education];
+                                                            newEdu[i].degree = val;
+                                                            handleUpdate('education', newEdu);
+                                                        }}
+                                                        className="bg-transparent border-none"
+                                                    />
+                                                   <span>-</span>
+                                                     <InlineEdit readOnly={!onUpdate} 
+                                                        value={edu.fieldOfStudy} 
+                                                        placeholder="Field"
+                                                        onSave={(val) => {
+                                                            const newEdu = [...data.education];
+                                                            newEdu[i].fieldOfStudy = val;
+                                                            handleUpdate('education', newEdu);
+                                                        }}
+                                                        className="bg-transparent border-none"
+                                                    />
+                                                </p>
+                                            </div>
+                                            <div className="text-right text-neutral-500 font-mono text-sm flex gap-1 justify-end items-center">
+                                                 <InlineEdit readOnly={!onUpdate} 
+                                                    value={edu.startDate} 
+                                                    placeholder="Start"
+                                                    onSave={(val) => {
+                                                        const newEdu = [...data.education];
+                                                        newEdu[i].startDate = val;
+                                                        handleUpdate('education', newEdu);
+                                                    }}
+                                                    className="bg-transparent border-none text-right"
+                                                />
+                                                <span>-</span>
+                                                <InlineEdit readOnly={!onUpdate} 
+                                                    value={edu.endDate} 
+                                                    placeholder="Present"
+                                                    onSave={(val) => {
+                                                        const newEdu = [...data.education];
+                                                        newEdu[i].endDate = val;
+                                                        handleUpdate('education', newEdu);
+                                                    }}
+                                                    className="bg-transparent border-none"
+                                                />
+                                                 {onUpdate && (
+                                                  <ThemeDeleteButton
+                                                     className="text-red-500 hover:bg-red-900/50 bg-transparent border-none ml-2"
+                                                     onClick={() => {
+                                                         const newEdu = [...data.education];
+                                                         newEdu.splice(i, 1);
+                                                         handleUpdate('education', newEdu);
+                                                     }}
+                                                  />
+                                             )}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                           </div>
+                        </section>
+                    );
+                
+                default:
+                    const custom = data.customSections?.find(c => c.id === id);
+                    if (custom) {
+                        return (
+                             <section key={id} className="mb-48 border-t border-white/20 pt-24">
+                                <CustomSectionRenderer 
+                                    section={custom} 
+                                    index={data.customSections?.indexOf(custom) || 0} 
+                                    data={data} 
+                                    onUpdate={onUpdate} 
+                                    theme="visual"
+                                />
+                             </section>
+                        );
+                    }
+                    return null;
+            }
+        })}
 
         {/* Contact Footer */}
         <section id="contact" className="py-48 flex flex-col items-center justify-center text-center">
@@ -523,6 +579,37 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
              </div>
           </div>
         </section>
+
+        {/* Custom Sections */}
+        {data.customSections?.map((section, index) => (
+             <section key={section.id} className="mb-48 border-t border-white/20 pt-24">
+                <CustomSectionRenderer 
+                    section={section} 
+                    index={index} 
+                    data={data} 
+                    onUpdate={onUpdate} 
+                    theme="visual"
+                />
+             </section>
+        ))}
+
+        {onUpdate && (
+            <div className="flex justify-center mb-48 pt-12 print:hidden">
+               <Button variant="outline" onClick={() => {
+                   const newSection = {
+                       id: crypto.randomUUID(),
+                       title: "New Section",
+                       type: "list" as const,
+                       items: []
+                   };
+                   const newSections = [...(data.customSections || []), newSection];
+                   handleUpdate('customSections', newSections);
+               }} className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white">
+                   <Plus className="w-4 h-4 mr-2" />
+                   Add Section
+               </Button>
+            </div>
+        )}
 
       </main>
     </div>

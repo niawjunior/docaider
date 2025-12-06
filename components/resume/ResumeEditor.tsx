@@ -29,6 +29,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { publishResume, getResumeById, saveDraft } from "@/app/actions/resume";
 import { ResumeBuilderHeader } from "@/components/resume/ResumeBuilderHeader";
+import { SectionManager } from "./shared/SectionManager";
 
 export function ResumeEditor() {
   const router = useRouter();
@@ -55,13 +56,15 @@ export function ResumeEditor() {
              setResumeData(data.content);
              setTheme(data.theme as any);
              setSlug(data.slug);
-             setPublishedUrl(null); 
+             setTheme(data.theme as any);
+             setSlug(data.slug);
+             // setPublishedUrl(null); // Keep existing publishedUrl if any (e.g. from just publishing)
              lastSavedData.current = JSON.stringify(data.content);
            }
          } catch (e) {
            console.error("Failed to load resume", e);
            toast.error("Failed to load resume");
-         } finally {
+       } finally {
            setIsLoading(false);
          }
       } else {
@@ -105,7 +108,7 @@ export function ResumeEditor() {
       }
     };
     loadData();
-  }, [idParam, themeParam, searchParams]);
+  }, [idParam, themeParam]); // Removed searchParams to prevent re-renders on unrelated changes
 
   // Track unsaved changes
   const isDirty = JSON.stringify(resumeData) !== lastSavedData.current;
@@ -203,6 +206,10 @@ export function ResumeEditor() {
                         </SelectContent>
                         </Select>
                     </div>
+
+                    {resumeData && (
+                        <SectionManager data={resumeData} onUpdate={setResumeData} />
+                    )}
 
                     {/* Publish Dialog Trigger */}
                     <Dialog>

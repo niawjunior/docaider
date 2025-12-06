@@ -9,12 +9,16 @@ import { EmptySectionPlaceholder } from "@/components/resume/shared/EmptySection
 
 interface EducationSectionProps {
     data: ResumeData;
-    theme: "modern" | "minimal" | "creative";
+    theme: "modern" | "minimal" | "creative" | "portfolio" | "studio" | "visual";
     onUpdate?: (data: ResumeData) => void;
 }
 
 export function EducationSection({ data, theme, onUpdate }: EducationSectionProps) {
     const { updateSection } = useResumeUpdate(data, onUpdate);
+
+    if (!onUpdate && (!data.education || data.education.length === 0)) {
+        return null;
+    }
 
     const handleUpdate = (newEdu: any[]) => {
         updateSection('education', newEdu);
@@ -69,7 +73,8 @@ export function EducationSection({ data, theme, onUpdate }: EducationSectionProp
                             )}>
                                 <h3 className={cn(
                                     "font-bold",
-                                    theme !== "creative" && "w-full"
+                                    theme !== "creative" && "w-full",
+                                    theme === "studio" ? "text-white text-xl tracking-tight" : "text-slate-900"
                                 )}>
                                     <InlineEdit readOnly={!onUpdate} 
                                         value={edu.institution} 
@@ -84,7 +89,10 @@ export function EducationSection({ data, theme, onUpdate }: EducationSectionProp
                                     theme === "minimal" ? "w-full justify-center mt-1" : "shrink-0"
                                 )}>
                                     {theme !== "creative" && (
-                                        <div className="text-sm text-slate-500 flex gap-1 whitespace-nowrap">
+                                        <div className={cn(
+                                            "text-sm flex gap-1 whitespace-nowrap",
+                                            theme === "studio" ? "text-neutral-400" : "text-slate-500"
+                                        )}>
                                             <InlineEdit readOnly={!onUpdate} 
                                                 value={edu.startDate} 
                                                 placeholder="Start"
@@ -103,7 +111,8 @@ export function EducationSection({ data, theme, onUpdate }: EducationSectionProp
                                         <ThemeDeleteButton
                                             className={cn(
                                                 "text-red-500 hover:bg-red-50 rounded bg-transparent border-none shadow-none w-6 h-6 p-1 transition-opacity",
-                                                theme === "minimal" ? "absolute right-0 top-0" : ""
+                                                theme === "minimal" && "absolute right-0 top-0",
+                                                theme === "studio" && "text-red-400 hover:bg-white/10 ml-2"
                                             )}
                                             onClick={deleteItem}
                                         />
@@ -113,7 +122,8 @@ export function EducationSection({ data, theme, onUpdate }: EducationSectionProp
                             
                             <div className={cn(
                                 "text-slate-600 flex gap-1",
-                                theme === "minimal" && "justify-center"
+                                theme === "minimal" && "justify-center",
+                                theme === "studio" && "text-neutral-500"
                             )}>
                                  <InlineEdit readOnly={!onUpdate} 
                                      value={edu.degree} 

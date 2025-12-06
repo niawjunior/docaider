@@ -50,38 +50,46 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
                 </div>
 
                 <div className="space-y-4 text-sm">
-                    <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 shrink-0" />
-                        <InlineEdit readOnly={!onUpdate} 
-                            value={data.personalInfo.email} 
-                            onSave={(val) => handleUpdate('personalInfo.email', val)} 
-                            className="text-white hover:bg-white/10"
-                        />
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 shrink-0" />
-                        <InlineEdit readOnly={!onUpdate} 
-                            value={data.personalInfo.phone} 
-                            onSave={(val) => handleUpdate('personalInfo.phone', val)} 
-                            className="text-white hover:bg-white/10"
-                        />
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 shrink-0" />
-                        <InlineEdit readOnly={!onUpdate} 
-                            value={data.personalInfo.location} 
-                            onSave={(val) => handleUpdate('personalInfo.location', val)} 
-                            className="text-white hover:bg-white/10"
-                        />
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4 shrink-0" />
-                        <InlineEdit readOnly={!onUpdate} 
-                            value={data.personalInfo.website} 
-                            onSave={(val) => handleUpdate('personalInfo.website', val)} 
-                            className="text-white hover:bg-white/10"
-                        />
-                    </div>
+                    {(onUpdate || data.personalInfo.email) && (
+                        <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 shrink-0" />
+                            <InlineEdit readOnly={!onUpdate} 
+                                value={data.personalInfo.email} 
+                                onSave={(val) => handleUpdate('personalInfo.email', val)} 
+                                className="text-white hover:bg-white/10"
+                            />
+                        </div>
+                    )}
+                    {(onUpdate || data.personalInfo.phone) && (
+                        <div className="flex items-center gap-2">
+                            <Phone className="w-4 h-4 shrink-0" />
+                            <InlineEdit readOnly={!onUpdate} 
+                                value={data.personalInfo.phone} 
+                                onSave={(val) => handleUpdate('personalInfo.phone', val)} 
+                                className="text-white hover:bg-white/10"
+                            />
+                        </div>
+                    )}
+                    {(onUpdate || data.personalInfo.location) && (
+                        <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 shrink-0" />
+                            <InlineEdit readOnly={!onUpdate} 
+                                value={data.personalInfo.location} 
+                                onSave={(val) => handleUpdate('personalInfo.location', val)} 
+                                className="text-white hover:bg-white/10"
+                            />
+                        </div>
+                    )}
+                    {(onUpdate || data.personalInfo.website) && (
+                        <div className="flex items-center gap-2">
+                            <Globe className="w-4 h-4 shrink-0" />
+                            <InlineEdit readOnly={!onUpdate} 
+                                value={data.personalInfo.website} 
+                                onSave={(val) => handleUpdate('personalInfo.website', val)} 
+                                className="text-white hover:bg-white/10"
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         );
@@ -100,7 +108,7 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
                 className={cn(
                     "font-bold uppercase tracking-tight mb-2 w-full",
                     theme === "modern" && "text-4xl",
-                    theme === "minimal" && "text-3xl tracking-widest font-normal"
+                    theme === "minimal" && "text-3xl tracking-widest font-normal text-slate-900"
                 )}
             >
                 <InlineEdit readOnly={!onUpdate} 
@@ -112,7 +120,7 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
             </div>
             <div
                 className={cn(
-                    "text-lg text-slate-600 mb-4 w-full",
+                    "text-lg text-slate-500 mb-4 w-full",
                     theme === "minimal" && "italic text-center"
                 )}
             >
@@ -127,42 +135,50 @@ export function ContactHeader({ data, theme, onUpdate }: ContactHeaderProps) {
 
             <div
                 className={cn(
-                    "flex flex-wrap gap-4 text-sm text-slate-600",
+                    "flex flex-wrap gap-4 text-sm text-slate-500",
                     theme === "minimal" && "justify-center"
                 )}
             >
-                <div className="flex items-center gap-1">
-                    <Mail className="w-4 h-4" />
-                    <InlineEdit readOnly={!onUpdate} 
-                        value={data.personalInfo.email} 
-                        placeholder="Email"
-                        onSave={(val) => handleUpdate('personalInfo.email', val)} 
-                    />
-                </div>
-                <div className="flex items-center gap-1">
-                    <Phone className="w-4 h-4" />
-                    <InlineEdit readOnly={!onUpdate} 
-                        value={data.personalInfo.phone} 
-                        placeholder="Phone"
-                        onSave={(val) => handleUpdate('personalInfo.phone', val)} 
-                    />
-                </div>
-                <div className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
-                    <InlineEdit readOnly={!onUpdate} 
-                        value={data.personalInfo.location} 
-                        placeholder="Location"
-                        onSave={(val) => handleUpdate('personalInfo.location', val)} 
-                    />
-                </div>
-                <div className="flex items-center gap-1">
-                    <Globe className="w-4 h-4" />
-                    <InlineEdit readOnly={!onUpdate} 
-                        value={data.personalInfo.website} 
-                        placeholder="Website"
-                        onSave={(val) => handleUpdate('personalInfo.website', val)} 
-                    />
-                </div>
+                {(onUpdate || data.personalInfo.email) && (
+                    <div className="flex items-center gap-1">
+                        <Mail className="w-4 h-4" />
+                        <InlineEdit readOnly={!onUpdate} 
+                            value={data.personalInfo.email} 
+                            placeholder="Email"
+                            onSave={(val) => handleUpdate('personalInfo.email', val)} 
+                        />
+                    </div>
+                )}
+                {(onUpdate || data.personalInfo.phone) && (
+                    <div className="flex items-center gap-1">
+                        <Phone className="w-4 h-4" />
+                        <InlineEdit readOnly={!onUpdate} 
+                            value={data.personalInfo.phone} 
+                            placeholder="Phone"
+                            onSave={(val) => handleUpdate('personalInfo.phone', val)} 
+                        />
+                    </div>
+                )}
+                {(onUpdate || data.personalInfo.location) && (
+                    <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        <InlineEdit readOnly={!onUpdate} 
+                            value={data.personalInfo.location} 
+                            placeholder="Location"
+                            onSave={(val) => handleUpdate('personalInfo.location', val)} 
+                        />
+                    </div>
+                )}
+                {(onUpdate || data.personalInfo.website) && (
+                    <div className="flex items-center gap-1">
+                        <Globe className="w-4 h-4" />
+                        <InlineEdit readOnly={!onUpdate} 
+                            value={data.personalInfo.website} 
+                            placeholder="Website"
+                            onSave={(val) => handleUpdate('personalInfo.website', val)} 
+                        />
+                    </div>
+                )}
             </div>
         </header>
     );

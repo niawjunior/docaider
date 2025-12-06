@@ -16,6 +16,11 @@ interface ProjectsSectionProps {
 export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps) {
     const { updateSection } = useResumeUpdate(data, onUpdate);
 
+    if (!onUpdate && (!data.projects || data.projects.length === 0)) {
+        return null;
+    }
+
+    const items = data.projects || [];
     const handleUpdate = (newProjs: any[]) => {
         updateSection('projects', newProjs);
     };
@@ -81,7 +86,9 @@ export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps)
                                     "font-bold text-slate-900",
                                     theme === "modern" && "text-base",
                                     theme === "portfolio" && "text-lg",
-                                    theme === "creative" && "text-lg"
+                                    theme === "portfolio" && "text-lg",
+                                    theme === "creative" && "text-lg",
+                                    theme === "studio" && "text-xl tracking-tight text-white",
                                  )}>
                                     <InlineEdit readOnly={!onUpdate} 
                                         value={project.name} 
@@ -112,7 +119,8 @@ export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps)
                                          <ThemeDeleteButton
                                             className={cn(
                                               "bg-transparent hover:bg-red-50 text-slate-400 hover:text-red-500 p-1 w-6 h-6 border-none transition-opacity",
-                                              theme === "minimal" ? "absolute right-0 top-0" : ""
+                                              theme === "minimal" && "absolute right-0 top-0",
+                                              theme === "studio" && "text-red-400 hover:bg-white/10 ml-2 relative top-0 right-0"
                                             )}
                                             onClick={deleteItem}
                                          />
@@ -122,7 +130,8 @@ export function ProjectsSection({ data, theme, onUpdate }: ProjectsSectionProps)
     
                             <div className={cn(
                                 "text-slate-600 text-sm leading-relaxed",
-                                theme === "minimal" && "text-center"
+                                theme === "minimal" && "text-center",
+                                theme === "studio" && "text-neutral-400"
                             )}>
                                  <InlineEdit readOnly={!onUpdate} 
                                     value={project.description} 

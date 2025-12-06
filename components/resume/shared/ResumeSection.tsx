@@ -49,6 +49,7 @@ export function ResumeSection({
   return (
     <section className={cn(
         theme === "creative" ? "" : "mb-8 text-left",
+        (theme === "modern" || theme === "minimal") && "text-slate-900",
         className
     )}>
        <div className={headerStyles.wrapper}>
@@ -56,7 +57,7 @@ export function ResumeSection({
               {theme === "creative" && <span className="w-8 h-1 bg-slate-900 block" />}
               {title}
           </h2>
-          {onAdd && theme !== "minimal" && (
+          {onAdd && (
                 <ThemeAddButton 
                     label={theme === "creative" ? "Add" : ""}
                     className={headerStyles.addButton}
