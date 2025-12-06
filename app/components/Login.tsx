@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 
 const LoginComponent = () => {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callback_url") || "/dashboard";
+  const callbackUrl = searchParams.get("callback_url") || searchParams.get("next") || "/dashboard";
   const t = useTranslations("login");
   return (
     <div className="h-[calc(100dvh-250px)] flex items-center justify-center text-foreground overflow-hidden px-4">

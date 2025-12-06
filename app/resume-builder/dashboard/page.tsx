@@ -60,16 +60,7 @@ export default function DashboardPage() {
   };
   
   const handleEdit = (resume: any) => {
-    // Load resume into local storage draft then navigate
-    localStorage.setItem("resume_draft", JSON.stringify(resume.content));
-    localStorage.setItem("resume_theme", resume.theme || "modern");
-    // We also pass the slug so we know we are editing an existing one? 
-    // Currently the editor doesn't support "update mode" explicitly via URL ID, 
-    // it just uses the slug at publish time to check existence.
-    // So loading into draft is enough to "restore" the state.
-    // However, if they change the slug, it might create a new one?
-    // For now, let's just load the content.
-    router.push(`/resume-builder/create?theme=${resume.theme || "modern"}&id=${resume.id}`);
+    router.push(`/resume-builder/create?id=${resume.id}`);
   };
 
   if (loading) {
@@ -91,8 +82,6 @@ export default function DashboardPage() {
             <p className="text-slate-400 mt-2">Manage your personal interactive resumes</p>
           </div>
           <Button onClick={() => {
-              localStorage.removeItem("resume_draft"); 
-              localStorage.removeItem("resume_theme");
               router.push("/resume-builder/create");
             }} className="bg-white text-black hover:bg-slate-200">
             <Plus className="w-4 h-4 mr-2" />
@@ -127,7 +116,14 @@ export default function DashboardPage() {
                   
                   {/* Overlay Actions */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <Button variant="secondary" size="sm" asChild>
+                  { !resume.is_public ? (
+                     <Button variant="secondary" size="sm" onClick={() => handleEdit(resume)}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                  ) : (
+                    <>
+                      <Button variant="secondary" size="sm" asChild>
                       <Link href={`/p/${resume.slug}`} target="_blank">
                         <ExternalLink className="w-4 h-4 mr-2" />
                         View Live
@@ -137,6 +133,8 @@ export default function DashboardPage() {
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
                     </Button>
+                    </>
+                  )}
                   </div>
                 </div>
 

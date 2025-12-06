@@ -35,8 +35,6 @@ export function ResumeBuilderHeader({
   };
 
   const handleCreate = () => {
-     localStorage.removeItem("resume_draft"); 
-     localStorage.removeItem("resume_theme");
      router.push("/resume-builder/create");
   };
 

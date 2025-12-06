@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Upload, Wand2, Share2, Plus, Trash2, Layout, X } from "lucide-react";
+import { Loader2, Upload, Wand2, Share2, Layout, RotateCcw, FileText } from "lucide-react";
 import { ResumePreview } from "@/components/resume/ResumePreview";
 import { ResumeData } from "@/lib/schemas/resume";
 import { toast } from "sonner";
@@ -40,7 +38,7 @@ import {
 } from "@/components/ui/select";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { publishResume, uploadResumeImage, getResumeById } from "@/app/actions/resume";
+import { publishResume, uploadResumeImage, getResumeById, saveDraft } from "@/app/actions/resume";
 import { ResumeBuilderHeader } from "@/components/resume/ResumeBuilderHeader";
 
 export function ResumeEditor() {
@@ -57,11 +55,11 @@ export function ResumeEditor() {
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
   const [slug, setSlug] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Load from localStorage or Server
+  // Initialize Data
   useEffect(() => {
     const loadData = async () => {
-      // If editing existing resume
       if (idParam) {
          try {
            const data = await getResumeById(idParam);
@@ -69,7 +67,6 @@ export function ResumeEditor() {
              setResumeData(data.content);
              setTheme(data.theme as any);
              setSlug(data.slug);
-             // Ensure we are in "edit/publish" mode
              setPublishedUrl(null); 
            }
          } catch (e) {
@@ -78,37 +75,71 @@ export function ResumeEditor() {
          } finally {
            setIsLoading(false);
          }
-         return;
-      }
-
-      // Normal localStorage load
-      const savedDraft = localStorage.getItem("resume_draft");
-      const savedTheme = localStorage.getItem("resume_theme");
-      if (savedDraft) {
-        try {
-          setResumeData(JSON.parse(savedDraft));
-        } catch (e) {
-          console.error("Failed to parse saved draft", e);
+      } else {
+        const autoCreate = searchParams.get("auto") === "true";
+        
+        if (themeParam && autoCreate && !resumeData) {
+            // Auto-creation flow: Keep loading explicit
+            setTheme(themeParam as any);
+            const { getThemeById } = await import("@/lib/themes");
+            const demoTheme = getThemeById(themeParam);
+            
+            if (demoTheme) {
+                try {
+                    const result = await saveDraft({
+                        content: demoTheme.data as any,
+                        theme: themeParam,
+                    });
+                    if (result.success && result.id) {
+                        toast.success("Template initialized!");
+                        // Update URL to include ID without reloading
+                        router.replace(`/resume-builder/create?id=${result.id}`);
+                        setResumeData(demoTheme.data as any);
+                        setSlug(result.slug || "");
+                    }
+                } catch(e) {
+                     console.error("Auto-create failed", e);
+                } finally {
+                     setIsLoading(false);
+                }
+            } else {
+                setIsLoading(false);
+            }
+        } else {
+            // Standard fresh start
+            setIsLoading(false);
+            if (themeParam) {
+                setTheme(themeParam as any);
+            }
         }
       }
-      if (themeParam) {
-        setTheme(themeParam as any);
-      } else if (savedTheme) {
-        setTheme(savedTheme as any);
-      }
-      setIsLoading(false);
     };
-    
     loadData();
-  }, [idParam, themeParam]);
+  }, [idParam, themeParam, searchParams]);
 
-  // Save to localStorage on change (only if not in strict edit mode? or always sync?)
+  // Autosave to DB
   useEffect(() => {
-    if (resumeData) {
-      localStorage.setItem("resume_draft", JSON.stringify(resumeData));
-    }
-    localStorage.setItem("resume_theme", theme);
-  }, [resumeData, theme]);
+    if (!resumeData || !idParam) return;
+
+    const timer = setTimeout(async () => {
+        setIsSaving(true);
+        try {
+            await saveDraft({
+                content: resumeData,
+                theme,
+                id: idParam,
+                slug // Keep existing slug
+            });
+            // Quiet success - autosave shouldn't nag
+        } catch (e) {
+            console.error("Autosave Failed", e);
+        } finally {
+            setIsSaving(false);
+        }
+    }, 1000); // 1s debounce
+
+    return () => clearTimeout(timer);
+  }, [resumeData, theme, idParam, slug]);
 
   const parseResume = useMutation({
     mutationFn: async (file: File) => {
@@ -121,12 +152,26 @@ export function ResumeEditor() {
       if (!res.ok) throw new Error("Failed to parse resume");
       return res.json() as Promise<ResumeData>;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // Always enforce default cover image, ignoring AI hallucination
       data.coverImage = "/images/cover.png";
       
-      setResumeData(data);
-      toast.success("Resume parsed successfully!");
+      // Auto-create draft immediately
+      try {
+          const result = await saveDraft({
+              content: data,
+              theme,
+          });
+          
+          if (result.success && result.id) {
+            setResumeData(data);
+            toast.success("Resume created! Drafting started.");
+            router.push(`/resume-builder/create?id=${result.id}`);
+          }
+      } catch (e) {
+          toast.error("Failed to create draft.");
+          console.error(e);
+      }
     },
     onError: (error) => {
       toast.error("Failed to parse resume. Please try again.");
@@ -146,32 +191,46 @@ export function ResumeEditor() {
     }
   };
 
-  const handleCoverImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0] || !resumeData) return;
+  const handleUploadResumeReset = () => {
+      // Clears everything and goes back to upload screen
+      setResumeData(null);
+      setFile(null);
+      router.push("/resume-builder/create"); // Remove ID
+      toast.success("Ready for new upload");
+  };
 
-    setIsUploading(true);
-    const file = e.target.files[0];
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const publicUrl = await uploadResumeImage(formData);
-
-      setResumeData({
-        ...resumeData,
-        coverImage: publicUrl,
-      });
-      toast.success("Cover image uploaded!");
-    } catch (error) {
-      toast.error("Error uploading image");
-      console.error(error);
-    } finally {
-      setIsUploading(false);
-    }
+  const handleResetTheme = async () => {
+      if (!resumeData) return;
+      // Reset content to a basic template but keep personal info? 
+      // User requested "reset with default of that theme". 
+      // Usually means clearing the data but keeping the structure? 
+      // Actually, safest is to maybe keep Personal Info but clear others?
+      // Or just re-initialize the data structure.
+      // Let's assume re-initializing empty sections but keeping Name/Email is nice?
+      // Or purely default. "Default of that theme" implies example data?
+      // Let's do a hard reset to the initial parsed state if possible? No we lost that.
+      // Let's reset to Minimal Valid Data.
+      
+      const defaultData: ResumeData = {
+          personalInfo: { ...resumeData.personalInfo }, // Keep basic info
+          skills: ["Skill 1", "Skill 2"],
+          experience: [{
+              company: "Company Name",
+              position: "Position",
+              startDate: "2024-01",
+              description: "Description of your role..."
+          }],
+          education: [],
+          projects: [],
+          testimonials: []
+      };
+      
+      setResumeData(defaultData);
+      toast.success("Theme data reset to defaults");
   };
 
   return (
-    <div className="min-h-screen  bg-slate-950 text-white flex flex-col text-slate-100 dark">
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col text-slate-100 dark">
       <ResumeBuilderHeader 
         maxWidth="max-w-full" 
         showBackToApp={false}
@@ -181,6 +240,7 @@ export function ResumeEditor() {
         <div className="flex gap-2 items-center">
           {resumeData && (
             <div className="flex items-center gap-2 mr-4 border-r border-white/10 pr-4">
+               {isSaving && <span className="text-xs text-slate-500 animate-pulse mr-2">Saving...</span>}
               <span className="text-sm text-slate-400 font-medium hidden sm:inline">Theme:</span>
               <Select
                 value={theme}
@@ -201,6 +261,60 @@ export function ResumeEditor() {
             </div>
           )}
           
+          <div className="mr-2 flex gap-2">
+            {resumeData && (
+                <>
+                {/* Reset Theme Button */}
+                 <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Reset
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Reset to Theme Defaults?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will reset your content (Experience, Skills, etc.) to the default placeholder text for this theme. Your personal info will be kept.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleResetTheme}>
+                        Reset
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
+                {/* Upload New Resume Button */}
+                 <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Upload New
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Upload New Resume?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will close the current resume and return to the upload screen. Unsaved changes to the current resume are already saved as a draft.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleUploadResumeReset}>
+                        Go to Upload
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                </>
+            )}
+          </div>
+
           <Dialog>
             <DialogTrigger asChild>
               <Button disabled={!resumeData || isLoading}>
@@ -254,13 +368,22 @@ export function ResumeEditor() {
                       if (!resumeData || !slug) return;
                       setIsPublishing(true);
                       try {
-                        const result = await publishResume({
+                        const result = await saveDraft({
                           content: resumeData,
                           theme,
                           slug,
                           id: idParam || undefined,
                         });
-                        setPublishedUrl(result.url);
+                        // Publish implies setting is_public=true, but saveDraft is draft.
+                        // We actually need publishResume for this specific dialog action to flip the flag.
+                        const pubResult = await publishResume({
+                             content: resumeData,
+                             theme,
+                             slug,
+                             id: idParam || undefined
+                        });
+                        
+                        setPublishedUrl(pubResult.url);
                         toast.success(idParam ? "Updated successfully!" : "Published successfully!");
                       } catch (err) {
                         toast.error("Failed to publish. Slug might be taken.");
@@ -285,587 +408,83 @@ export function ResumeEditor() {
       </ResumeBuilderHeader>
 
       <main className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Editor */}
-        <div className="w-1/2 h-[calc(100vh-70px)] max-w-xl border-r border-white/10 bg-slate-900 overflow-y-auto p-6">
-          {isLoading ? (
-            <div className="h-full flex items-center justify-center">
-              <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
-            </div>
-          ) : !resumeData ? (
-            <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
-              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
-                <Upload className="w-10 h-10 text-blue-600" />
-              </div>
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-white">
-                  Upload your Resume
-                </h2>
-                <p className="text-slate-500 max-w-sm">
-                  Upload your existing PDF or Word resume and we'll transform it
-                  into a beautiful website in seconds.
-                </p>
-              </div>
-              
-              <div className="w-full max-w-sm space-y-4">
-                <Input
-                  type="file"
-                  accept=".pdf,.docx,.doc"
-                  onChange={handleFileChange}
-                  className="cursor-pointer"
-                />
-                <Button
-                  className="w-full"
-                  size="lg"
-                  onClick={handleUpload}
-                  disabled={!file || parseResume.isPending}
-                >
-                  {parseResume.isPending ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Parsing...
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 className="w-4 h-4 mr-2" />
-                      Generate Website
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Edit Content</h2>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      Upload Your Resume
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will clear your current draft and you will lose all unsaved changes. This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => {
-                          setResumeData(null);
-                          localStorage.removeItem("resume_draft");
-                        }}
-                      >
-                        Continue
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-
-              {/* Cover Image Upload - Only for Visual Theme */}
-              {theme === "visual" && (
-                <section className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
-                  <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
-                    Cover Image
-                  </h3>
-                <div className="flex items-center gap-4">
-                  {resumeData.coverImage && (
-                    <div className="relative w-24 h-16 rounded-lg overflow-hidden border border-slate-200">
-                      <img 
-                        src={resumeData.coverImage} 
-                        alt="Cover" 
-                        className="w-full h-full object-cover"
-                      />
-                      <Button
-                        onClick={() => setResumeData({ ...resumeData, coverImage: undefined })}
-                        variant="destructive"
-                        className="absolute top-1 right-1"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <Label htmlFor="cover-upload" className="cursor-pointer">
-                      <div className="flex items-center justify-center w-full h-16 border-2 border-dashed border-slate-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
-                        <div className="flex items-center gap-2 text-slate-500">
-                          {isUploading ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Upload className="w-4 h-4" />
-                          )}
-                          <span className="text-sm font-medium">
-                            {isUploading ? "Uploading..." : "Upload Cover Image"}
-                          </span>
-                        </div>
-                      </div>
-                      <Input
-                        id="cover-upload"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleCoverImageUpload}
-                        disabled={isUploading}
-                      />
-                    </Label>
-                  </div>
+        {/* Full Screen Preview with Inline Edit */}
+        <div className="w-full h-[calc(100vh-100px)] bg-slate-950 overflow-y-auto flex items-start justify-center p-8 bg-dot-white/[0.2]">
+            {isLoading ? (
+                <div className="h-full flex items-center justify-center">
+                     <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
                 </div>
-              </section>
-              )}
-
-              {/* Personal Info Form */}
-              <section className="space-y-4">
-                <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
-                  Personal Info
-                </h3>
-                <div className="grid gap-4">
-                  <div className="grid gap-2">
-                    <Label>Full Name</Label>
-                    <Input
-                      value={resumeData.personalInfo.fullName}
-                      onChange={(e) =>
-                        setResumeData({
-                          ...resumeData,
-                          personalInfo: {
-                            ...resumeData.personalInfo,
-                            fullName: e.target.value,
-                          },
-                        })
-                      }
+            ) : resumeData ? (
+                <div className="w-full max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="bg-slate-900 backdrop-blur rounded-lg p-2 text-center mb-4 text-slate-200 text-sm border border-white/10 w-fit mx-auto sticky top-0 z-40">
+                        Click on any text to edit directly.
+                    </div>
+                    <ResumePreview 
+                        data={resumeData} 
+                        theme={theme} 
+                        onUpdate={(newData) => setResumeData(newData)}
                     />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Job Title</Label>
-                    <Input
-                      value={resumeData.personalInfo.jobTitle || ""}
-                      onChange={(e) =>
-                        setResumeData({
-                          ...resumeData,
-                          personalInfo: {
-                            ...resumeData.personalInfo,
-                            jobTitle: e.target.value,
-                          },
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Professional Summary</Label>
-                    <Textarea
-                      value={resumeData.personalInfo.summary}
-                      rows={4}
-                      onChange={(e) =>
-                        setResumeData({
-                          ...resumeData,
-                          personalInfo: {
-                            ...resumeData.personalInfo,
-                            summary: e.target.value,
-                          },
-                        })
-                      }
-                    />
-                  </div>
                 </div>
-              </section>
-
-              {/* Experience Form */}
-              <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
-                    Experience
-                  </h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setResumeData({
-                        ...resumeData,
-                        experience: [
-                          {
-                            company: "New Company",
-                            position: "Position",
-                            startDate: "2023",
-                            description: "Description",
-                          },
-                          ...resumeData.experience,
-                        ],
-                      })
-                    }
-                  >
-                    <Plus className="w-4 h-4 mr-2" /> Add
-                  </Button>
-                </div>
-                {resumeData.experience.map((exp, index) => (
-                  <Card key={index} className="p-4 space-y-4 relative group bg-slate-800/50 border-white/10">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-0 right-2"
-                      onClick={() => {
-                        const newExp = [...resumeData.experience];
-                        newExp.splice(index, 1);
-                        setResumeData({ ...resumeData, experience: newExp });
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label>Company</Label>
-                        <Input
-                          value={exp.company}
-                          onChange={(e) => {
-                            const newExp = [...resumeData.experience];
-                            newExp[index].company = e.target.value;
-                            setResumeData({ ...resumeData, experience: newExp });
-                          }}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label>Position</Label>
-                        <Input
-                          value={exp.position}
-                          onChange={(e) => {
-                            const newExp = [...resumeData.experience];
-                            newExp[index].position = e.target.value;
-                            setResumeData({ ...resumeData, experience: newExp });
-                          }}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Description</Label>
-                      <Textarea
-                        value={exp.description}
-                        rows={3}
-                        onChange={(e) => {
-                          const newExp = [...resumeData.experience];
-                          newExp[index].description = e.target.value;
-                          setResumeData({ ...resumeData, experience: newExp });
-                        }}
-                      />
-                    </div>
-                  </Card>
-                ))}
-              </section>
-
-              {/* Education Form */}
-              <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
-                    Education
-                  </h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setResumeData({
-                        ...resumeData,
-                        education: [
-                          ...resumeData.education,
-                          {
-                            institution: "New Institution",
-                            degree: "Degree",
-                            startDate: "2023",
-                          },
-                        ],
-                      })
-                    }
-                  >
-                    <Plus className="w-4 h-4 mr-2" /> Add
-                  </Button>
-                </div>
-                {resumeData.education.map((edu, index) => (
-                  <Card key={index} className="p-4 space-y-4 relative group bg-slate-800/50 border-white/10">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-0 right-2"
-                      onClick={() => {
-                        const newEdu = [...resumeData.education];
-                        newEdu.splice(index, 1);
-                        setResumeData({ ...resumeData, education: newEdu });
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                    <div className="grid gap-2">
-                      <Label>Institution</Label>
-                      <Input
-                        value={edu.institution}
-                        onChange={(e) => {
-                          const newEdu = [...resumeData.education];
-                          newEdu[index].institution = e.target.value;
-                          setResumeData({ ...resumeData, education: newEdu });
-                        }}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label>Degree</Label>
-                        <Input
-                          value={edu.degree}
-                          onChange={(e) => {
-                            const newEdu = [...resumeData.education];
-                            newEdu[index].degree = e.target.value;
-                            setResumeData({ ...resumeData, education: newEdu });
-                          }}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label>Field of Study</Label>
-                        <Input
-                          value={edu.fieldOfStudy || ""}
-                          onChange={(e) => {
-                            const newEdu = [...resumeData.education];
-                            newEdu[index].fieldOfStudy = e.target.value;
-                            setResumeData({ ...resumeData, education: newEdu });
-                          }}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label>Start Date</Label>
-                        <Input
-                          value={edu.startDate || ""}
-                          onChange={(e) => {
-                            const newEdu = [...resumeData.education];
-                            newEdu[index].startDate = e.target.value;
-                            setResumeData({ ...resumeData, education: newEdu });
-                          }}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label>End Date</Label>
-                        <Input
-                          value={edu.endDate || ""}
-                          onChange={(e) => {
-                            const newEdu = [...resumeData.education];
-                            newEdu[index].endDate = e.target.value;
-                            setResumeData({ ...resumeData, education: newEdu });
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </section>
-
-              {/* Skills Form */}
-              <section className="space-y-4">
-                <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
-                  Skills
-                </h3>
-                <div className="flex flex-wrap gap-2 p-4  rounded-lg">
-                  {resumeData.skills.map((skill, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-1 px-3 py-1 border border-slate-200 rounded-full text-sm"
-                    >
-                      <span>{skill}</span>
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          const newSkills = [...resumeData.skills];
-                          newSkills.splice(index, 1);
-                          setResumeData({ ...resumeData, skills: newSkills });
-                        }}
-                        className="text-slate-400 hover:text-red-500 ml-1"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  <div className="flex items-center gap-2 w-full">
-                    <Input
-                      placeholder="Add skill..."
-                      className=" text-sm  border-none shadow-none focus-visible:ring-0 mt-2"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          const val = e.currentTarget.value.trim();
-                          if (val) {
-                            setResumeData({
-                              ...resumeData,
-                              skills: [...resumeData.skills, val],
-                            });
-                            e.currentTarget.value = "";
-                          }
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              </section>
-
-              {/* Projects Form */}
-              <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
-                    Projects
-                  </h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setResumeData({
-                        ...resumeData,
-                        projects: [
-                          ...(resumeData.projects || []),
-                          {
-                            name: "New Project",
-                            description: "Description",
-                            technologies: [],
-                          },
-                        ],
-                      })
-                    }
-                  >
-                    <Plus className="w-4 h-4 mr-2" /> Add
-                  </Button>
-                </div>
-                {(resumeData.projects || []).map((proj, index) => (
-                  <Card key={index} className="p-4 space-y-4 relative group bg-transparent">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-0 right-2"
-                      onClick={() => {
-                        const newProjs = [...(resumeData.projects || [])];
-                        newProjs.splice(index, 1);
-                        setResumeData({ ...resumeData, projects: newProjs });
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                    <div className="grid gap-2">
-                      <Label>Project Name</Label>
-                      <Input
-                        value={proj.name}
-                        onChange={(e) => {
-                          const newProjs = [...(resumeData.projects || [])];
-                          newProjs[index].name = e.target.value;
-                          setResumeData({ ...resumeData, projects: newProjs });
-                        }}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Description</Label>
-                      <Textarea
-                        value={proj.description}
-                        rows={3}
-                        onChange={(e) => {
-                          const newProjs = [...(resumeData.projects || [])];
-                          newProjs[index].description = e.target.value;
-                          setResumeData({ ...resumeData, projects: newProjs });
-                        }}
-                      />
-                    </div>
-                  </Card>
-                ))}
-              </section>
-
-              {/* Testimonials Form */}
-              <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
-                    Testimonials
-                  </h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setResumeData({
-                        ...resumeData,
-                        testimonials: [
-                          ...(resumeData.testimonials || []),
-                          {
-                            name: "Client Name",
-                            role: "Role / Company",
-                            content: "Testimonial content...",
-                          },
-                        ],
-                      })
-                    }
-                  >
-                    <Plus className="w-4 h-4 mr-2" /> Add
-                  </Button>
-                </div>
-                {(resumeData.testimonials || []).map((testimonial, index) => (
-                  <Card key={index} className="p-4 space-y-4 relative group bg-transparent">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-0 right-2"
-                      onClick={() => {
-                        const newTestimonials = [...(resumeData.testimonials || [])];
-                        newTestimonials.splice(index, 1);
-                        setResumeData({ ...resumeData, testimonials: newTestimonials });
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label>Name</Label>
-                        <Input
-                          value={testimonial.name}
-                          onChange={(e) => {
-                            const newTestimonials = [...(resumeData.testimonials || [])];
-                            newTestimonials[index].name = e.target.value;
-                            setResumeData({ ...resumeData, testimonials: newTestimonials });
-                          }}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label>Role</Label>
-                        <Input
-                          value={testimonial.role}
-                          onChange={(e) => {
-                            const newTestimonials = [...(resumeData.testimonials || [])];
-                            newTestimonials[index].role = e.target.value;
-                            setResumeData({ ...resumeData, testimonials: newTestimonials });
-                          }}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>Content</Label>
-                      <Textarea
-                        value={testimonial.content}
-                        rows={3}
-                        onChange={(e) => {
-                          const newTestimonials = [...(resumeData.testimonials || [])];
-                          newTestimonials[index].content = e.target.value;
-                          setResumeData({ ...resumeData, testimonials: newTestimonials });
-                        }}
-                      />
-                    </div>
-                  </Card>
-                ))}
-              </section>
-            </div>
-          )}
-        </div>
-
-        {/* Right Panel - Preview */}
-        <div className="flex-1 bg-slate-950/50 h-[calc(100vh-70px)] overflow-y-auto flex items-start justify-center" style={{ containerType: "inline-size" }}>
-            {resumeData ? (
-              <ResumePreview data={resumeData} theme={theme} />
             ) : (
-              <div className="h-full flex items-center justify-center text-slate-300">
-                <div className="text-center space-y-4">
-                  <Layout className="w-20 h-20 mx-auto opacity-20" />
-                  <p className="text-lg font-medium">Preview will appear here</p>
+                <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
+                <div className="w-24 h-24 bg-blue-500/10 rounded-full flex items-center justify-center">
+                    <Upload className="w-12 h-12 text-blue-500" />
                 </div>
-              </div>
+                <div className="space-y-2">
+                    <h2 className="text-3xl font-bold text-white">
+                    Build your Resume
+                    </h2>
+                    <p className="text-slate-400 max-w-md text-lg">
+                    Upload your existing PDF or Word resume to get started, or create one from scratch.
+                    </p>
+                </div>
+                
+                <div className="w-full max-w-sm space-y-4">
+                    <div className="relative group">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-200"></div>
+                        <div className="relative bg-slate-900 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors p-6 space-y-4">
+                            <div className="flex items-center justify-center w-full">
+                                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-700 border-dashed rounded-lg cursor-pointer hover:bg-slate-800 hover:border-blue-500 transition-all">
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <Upload className="w-8 h-8 mb-3 text-slate-500 group-hover:text-blue-500 transition-colors" />
+                                        <p className="mb-2 text-sm text-slate-400"><span className="font-semibold text-slate-200">Click to upload</span> or drag and drop</p>
+                                        <p className="text-xs text-slate-500">PDF, DOCX (MAX. 5MB)</p>
+                                    </div>
+                                    <Input
+                                        type="file"
+                                        accept=".pdf,.docx,.doc"
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
+                                </label>
+                            </div>
+                             <Button
+                                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium h-11"
+                                onClick={handleUpload}
+                                disabled={!file || parseResume.isPending}
+                                >
+                                {parseResume.isPending ? (
+                                    <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Analyzing Resume...
+                                    </>
+                                ) : (
+                                    <>
+                                    <Wand2 className="w-4 h-4 mr-2" />
+                                    Import & Edit
+                                    </>
+                                )}
+                                </Button>
+                        </div>
+                    </div>
+                </div>
+                </div>
             )}
         </div>
       </main>
+
+      <style jsx global>{`
+      `}</style>
     </div>
   );
 }

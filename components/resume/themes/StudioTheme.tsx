@@ -5,15 +5,20 @@ import {
   Mail, 
   Linkedin, 
   Globe,
-  Quote
+  Quote,
+  Plus,
+  Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { InlineEdit } from "@/components/ui/inline-edit";
+import { Button } from "@/components/ui/button";
 
 interface StudioThemeProps {
   data: ResumeData;
+  onUpdate?: (data: ResumeData) => void;
 }
 
-export const StudioTheme = ({ data }: StudioThemeProps) => {
+export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -43,14 +48,30 @@ export const StudioTheme = ({ data }: StudioThemeProps) => {
     },
   };
 
+  const handleUpdate = (path: string, value: any) => {
+    if (!onUpdate) return;
+    const newData = JSON.parse(JSON.stringify(data));
+    
+    // Helper to set value at path
+    const parts = path.split('.');
+    let current = newData;
+    for (let i = 0; i < parts.length - 1; i++) {
+        current = current[parts[i]];
+    }
+    current[parts[parts.length - 1]] = value;
+    
+    onUpdate(newData);
+  };
+
   return (
-    <div className="min-h-screen w-full bg-black text-white font-sans selection:bg-white selection:text-black overflow-hidden">
+    <div className="min-h-screen w-full bg-black text-white font-sans selection:bg-white selection:text-black overflow-hidden relative">
       {/* Navigation */}
       <nav className="sticky top-0 w-full z-50 mix-blend-difference px-6 py-6 flex justify-between items-center bg-black/0 backdrop-blur-sm">
         <div className="text-xl font-bold tracking-tighter uppercase">
+           {/* Static Logo from Name */}
           {(data.personalInfo.fullName ?? '').split(' ')[0]}
         </div>
-        <div className="flex gap-6 text-sm font-medium uppercase tracking-widest">
+        <div className="flex gap-6 text-sm font-medium uppercase tracking-widest hidden sm:flex">
           <a href="#work" className="hover:underline decoration-2 underline-offset-4">Work</a>
           <a href="#about" className="hover:underline decoration-2 underline-offset-4">About</a>
           <a href="#contact" className="hover:underline decoration-2 underline-offset-4">Contact</a>
@@ -66,8 +87,9 @@ export const StudioTheme = ({ data }: StudioThemeProps) => {
         >
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex items-center gap-8">
-              <span className="text-[10cqw] font-black leading-none uppercase tracking-tighter">
-                {data.personalInfo.jobTitle || "Creative Developer"}
+              <span className="text-[10cqw] font-black leading-none uppercase tracking-tighter text-white">
+                 {/* Marquee text is usually job title */}
+                 {data.personalInfo.jobTitle || "Creative Developer"}
               </span>
               <span className="text-[10cqw] font-black leading-none text-transparent stroke-text">
                 —
@@ -75,6 +97,17 @@ export const StudioTheme = ({ data }: StudioThemeProps) => {
             </div>
           ))}
         </motion.div>
+        
+        {/* Editable Job Title (Outside Marquee for ease of editing) */}
+        <div className="px-6 mt-4 text-center">
+             <div className="text-sm text-neutral-500 mb-1">MARQUEE TEXT (Edit here):</div>
+             <InlineEdit readOnly={!onUpdate} 
+                value={data.personalInfo.jobTitle} 
+                placeholder="CREATIVE DEVELOPER"
+                onSave={(val) => handleUpdate('personalInfo.jobTitle', val?.toUpperCase())} 
+                className="text-2xl font-bold uppercase tracking-tighter bg-neutral-900 border-none text-center"
+             />
+        </div>
       </div>
 
       <main className="px-6">
@@ -84,59 +117,145 @@ export const StudioTheme = ({ data }: StudioThemeProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="py-24 max-w-4xl"
+          id="about"
         >
-          <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-8">
-            {data.personalInfo.summary}
-          </h1>
-          <div className="flex flex-wrap gap-4">
-            {data.skills.map((skill, i) => (
-              <span key={i} className="px-4 py-2 border border-neutral-800 rounded-full text-sm uppercase tracking-wider hover:bg-white hover:text-black transition-colors cursor-default">
-                {skill}
-              </span>
-            ))}
+          <div className="text-4xl md:text-6xl font-bold leading-tight mb-8">
+             <InlineEdit readOnly={!onUpdate} 
+                value={data.personalInfo.summary} 
+                placeholder="Your professional summary goes here..."
+                multiline
+                onSave={(val) => handleUpdate('personalInfo.summary', val)} 
+                className="bg-transparent border-neutral-800"
+             />
+          </div>
+          
+          <div className="space-y-4">
+             <div className="flex justify-between items-center">
+                 <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-widest">Skills</h3>
+                  {onUpdate && (
+                     <Button variant="ghost" size="sm" className="hover:bg-neutral-800 text-white" onClick={() => {
+                            const newSkills = [...data.skills, "New Skill"];
+                            handleUpdate('skills', newSkills);
+                     }}>
+                         <Plus className="w-4 h-4" />
+                     </Button>
+                )}
+             </div>
+            <div className="flex flex-wrap gap-4">
+                {data.skills.map((skill, i) => (
+                <span key={i} className="group/skill relative px-4 py-2 border border-neutral-800 rounded-full text-sm uppercase tracking-wider hover:bg-white hover:text-black transition-colors cursor-default">
+                     <InlineEdit readOnly={!onUpdate} 
+                        value={skill}
+                        onSave={(val) => {
+                            const newSkills = [...data.skills];
+                            newSkills[i] = val;
+                            handleUpdate('skills', newSkills);
+                        }}
+                        className="bg-transparent"
+                     />
+                      {onUpdate && (
+                        <button 
+                            onClick={() => {
+                                const newSkills = [...data.skills];
+                                newSkills.splice(i, 1);
+                                handleUpdate('skills', newSkills);
+                            }}
+                            className="absolute -top-2 -right-2 bg-red-600 rounded-full p-1 opacity-0 group-hover/skill:opacity-100 transition-opacity text-white"
+                        >
+                            <Trash2 className="w-3 h-3" />
+                        </button>
+                    )}
+                </span>
+                ))}
+            </div>
           </div>
         </motion.section>
 
         {/* Selected Work */}
         {data.projects && data.projects.length > 0 && (
           <section id="work" className="py-24 border-t border-neutral-800">
-            <div className="flex justify-between items-end mb-16">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-neutral-500">Selected Work</h2>
-              <span className="text-sm font-bold uppercase tracking-widest text-neutral-500">
-                {data.projects.length} Projects
-              </span>
-            </div>
-            
-            <div className="grid md:grid-cols-2 gap-x-12 gap-y-24">
+             <div className="flex justify-between items-end mb-16">
+                <h2 className="text-8xl font-black uppercase tracking-tighter stroke-text text-transparent">
+                    Work
+                </h2>
+                 {onUpdate && (
+                     <Button variant="outline" className="border-neutral-700 hover:bg-neutral-800 text-white bg-transparent" onClick={() => {
+                            const newProj = [{
+                                name: "Project Name",
+                                description: "Description",
+                                technologies: []
+                            }, ...data.projects];
+                            handleUpdate('projects', newProj);
+                     }}>
+                         <Plus className="w-4 h-4 mr-2" /> Add Project
+                     </Button>
+                )}
+             </div>
+
+            <div className="grid gap-0">
               {data.projects.map((project, i) => (
                 <motion.div 
-                  key={i}
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="group cursor-pointer"
+                  key={i} 
+                  className="group/item relative py-12 border-t border-neutral-900 grid md:grid-cols-[1fr_2fr] gap-8 hover:bg-neutral-900/50 transition-colors px-4 -mx-4 rounded"
                 >
-                  <div className="aspect-[4/3] bg-neutral-900 mb-6 overflow-hidden relative">
-                    <div className="absolute inset-0 bg-neutral-800 group-hover:scale-105 transition-transform duration-700" />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                      <ArrowUpRight className="w-12 h-12 text-white" />
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2 group-hover:underline decoration-2 underline-offset-4">
-                        {project.name}
-                      </h3>
-                      <p className="text-neutral-400 max-w-sm">
-                        {project.description}
-                      </p>
-                    </div>
-                    {project.technologies && (
-                      <div className="text-xs text-neutral-500 uppercase tracking-widest text-right">
-                        {project.technologies.slice(0, 3).join(" / ")}
-                      </div>
+                     {onUpdate && (
+                     <button 
+                        className="absolute right-4 top-12 opacity-0 group-hover/item:opacity-100 p-2 text-red-500 hover:bg-red-900/50 rounded"
+                        onClick={() => {
+                            const newProjs = [...data.projects];
+                            newProjs.splice(i, 1);
+                            handleUpdate('projects', newProjs);
+                        }}
+                     >
+                         <Trash2 className="w-5 h-5" />
+                     </button>
                     )}
+                  <div>
+                    <h3 className="text-3xl font-bold mb-2">
+                        <InlineEdit readOnly={!onUpdate} 
+                            value={project.name} 
+                            placeholder="Project Name"
+                            onSave={(val) => {
+                                const newProjs = [...data.projects];
+                                newProjs[i].name = val;
+                                handleUpdate('projects', newProjs);
+                            }}
+                            className="bg-transparent"
+                        />
+                    </h3>
+                     <div className="flex flex-col gap-1 text-neutral-500">
+                         <div className="flex items-center gap-1">
+                             <span className="text-xs uppercase tracking-wider">URL:</span>
+                             <InlineEdit readOnly={!onUpdate} 
+                                value={project.url} 
+                                placeholder="https://..."
+                                onSave={(val) => {
+                                    const newProjs = [...data.projects];
+                                    newProjs[i].url = val;
+                                    handleUpdate('projects', newProjs);
+                                }}
+                                className="bg-transparent text-sm"
+                            />
+                         </div>
+                     </div>
+                  </div>
+                  <div>
+                    <p className="text-xl text-neutral-400 font-light leading-relaxed">
+                         <InlineEdit readOnly={!onUpdate} 
+                            value={project.description} 
+                            placeholder="Project description..."
+                            multiline
+                            onSave={(val) => {
+                                const newProjs = [...data.projects];
+                                newProjs[i].description = val;
+                                handleUpdate('projects', newProjs);
+                            }}
+                            className="bg-transparent"
+                        />
+                    </p>
                   </div>
                 </motion.div>
               ))}
@@ -145,87 +264,170 @@ export const StudioTheme = ({ data }: StudioThemeProps) => {
         )}
 
         {/* Experience */}
-        <section id="about" className="py-24 border-t border-neutral-800">
-          <div className="grid md:grid-cols-12 gap-12">
-            <div className="md:col-span-4">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-neutral-500 sticky top-32">Experience</h2>
+        <section className="py-24 border-t border-neutral-800">
+             <div className="flex justify-between items-end mb-16">
+                <h2 className="text-4xl font-bold uppercase tracking-tight">
+                    Experience
+                </h2>
+                 {onUpdate && (
+                    <Button variant="outline" className="border-neutral-700 hover:bg-neutral-800 text-white bg-transparent" onClick={() => {
+                        const newExp = [{
+                            company: "Company Name",
+                            position: "Position",
+                            startDate: "2024",
+                            description: "Job description goes here..."
+                        }, ...data.experience];
+                        handleUpdate('experience', newExp);
+                    }}>
+                        <Plus className="w-3 h-3 mr-1" /> Add
+                    </Button>
+                )}
             </div>
-            <div className="md:col-span-8 space-y-16">
-              {data.experience.map((exp, i) => (
-                <div key={i} className="group">
-                  <div className="flex justify-between items-baseline mb-4">
-                    <h3 className="text-2xl font-bold">{exp.position}</h3>
-                    <span className="text-sm font-medium text-neutral-500">
-                      {exp.startDate} — {exp.endDate || "Present"}
-                    </span>
+
+          <div className="space-y-16">
+            {data.experience.map((exp, i) => (
+              <div key={i} className="group/item relative grid md:grid-cols-[200px_1fr] gap-8">
+                  {onUpdate && (
+                     <Button variant="destructive" 
+                        className="absolute right-0 top-0 "
+                        onClick={() => {
+                            const newExp = [...data.experience];
+                            newExp.splice(i, 1);
+                            handleUpdate('experience', newExp);
+                        }}
+                     >
+                         <Trash2 className="w-5 h-5" />
+                     </Button>
+                    )}
+                <div className="text-neutral-500 font-mono text-sm pt-1 flex gap-1 items-baseline">
+                     <InlineEdit readOnly={!onUpdate} 
+                        value={exp.startDate} 
+                        placeholder="Start"
+                        onSave={(val) => {
+                            const newExp = [...data.experience];
+                            newExp[i].startDate = val;
+                            handleUpdate('experience', newExp);
+                        }}
+                        className="bg-transparent"
+                    />
+                    <span>-</span>
+                    <InlineEdit readOnly={!onUpdate} 
+                        value={exp.endDate} 
+                        placeholder="Present"
+                        onSave={(val) => {
+                            const newExp = [...data.experience];
+                            newExp[i].endDate = val;
+                            handleUpdate('experience', newExp);
+                        }}
+                        className="bg-transparent"
+                    />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white mb-1">
+                      <InlineEdit readOnly={!onUpdate} 
+                        value={exp.position} 
+                        placeholder="Position"
+                        onSave={(val) => {
+                            const newExp = [...data.experience];
+                            newExp[i].position = val;
+                            handleUpdate('experience', newExp);
+                        }}
+                        className="bg-transparent"
+                    />
+                  </h3>
+                  <div className="text-xl text-neutral-400 mb-4">
+                     <InlineEdit readOnly={!onUpdate} 
+                        value={exp.company} 
+                        placeholder="Company"
+                        onSave={(val) => {
+                            const newExp = [...data.experience];
+                            newExp[i].company = val;
+                            handleUpdate('experience', newExp);
+                        }}
+                        className="bg-transparent"
+                    />
                   </div>
-                  <div className="text-lg text-neutral-400 mb-4">{exp.company}</div>
-                  <p className="text-neutral-300 leading-relaxed max-w-2xl">
-                    {exp.description}
+                  <p className="text-neutral-400 leading-relaxed max-w-2xl">
+                     <InlineEdit readOnly={!onUpdate} 
+                        value={exp.description} 
+                        placeholder="Description..."
+                        multiline
+                        onSave={(val) => {
+                            const newExp = [...data.experience];
+                            newExp[i].description = val;
+                            handleUpdate('experience', newExp);
+                        }}
+                        className="bg-transparent"
+                    />
                   </p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* Testimonials */}
-        {data.testimonials && data.testimonials.length > 0 && (
-          <section className="py-24 border-t border-neutral-800">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-neutral-500 mb-16">Testimonials</h2>
-            <div className="grid md:grid-cols-2 gap-12">
-              {data.testimonials.map((testimonial, i) => (
-                <div key={i} className="bg-neutral-900 p-8 relative">
-                  <Quote className="w-8 h-8 text-neutral-700 absolute top-8 left-8" />
-                  <p className="text-xl leading-relaxed mb-8 pt-8 relative z-10">
-                    "{testimonial.content}"
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-neutral-800 rounded-full" />
-                    <div>
-                      <div className="font-bold">{testimonial.name}</div>
-                      <div className="text-sm text-neutral-500">{testimonial.role}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Footer */}
-        <footer id="contact" className="py-24 border-t border-neutral-800">
-          <div className="text-center">
-            <h2 className="text-[8cqw] font-black leading-none uppercase tracking-tighter mb-12 hover:text-neutral-400 transition-colors cursor-pointer">
+        {/* Contact */}
+        <section id="contact" className="py-24 border-t border-neutral-800 mb-20">
+          <div className="max-w-4xl">
+            <h2 className="text-6xl md:text-8xl font-bold uppercase tracking-tighter mb-12">
               Let's Talk
             </h2>
-            <div className="flex justify-center gap-8">
-              {data.personalInfo.email && (
-                <a href={`mailto:${data.personalInfo.email}`} className="flex items-center gap-2 text-lg hover:underline decoration-2 underline-offset-4">
-                  <Mail className="w-5 h-5" /> Email
-                </a>
-              )}
-              {data.personalInfo.linkedin && (
-                <a href={data.personalInfo.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-lg hover:underline decoration-2 underline-offset-4">
-                  <Linkedin className="w-5 h-5" /> LinkedIn
-                </a>
-              )}
-              {data.personalInfo.website && (
-                <a href={data.personalInfo.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-lg hover:underline decoration-2 underline-offset-4">
-                  <Globe className="w-5 h-5" /> Website
-                </a>
-              )}
+            <div className="flex flex-col gap-8 text-xl">
+               <div className="flex items-center gap-4 group">
+                    <Mail className="w-6 h-6 text-neutral-500 group-hover:text-white transition-colors" />
+                    <InlineEdit readOnly={!onUpdate} 
+                        value={data.personalInfo.email} 
+                        placeholder="Email Address"
+                        onSave={(val) => handleUpdate('personalInfo.email', val)} 
+                        className="bg-transparent border-neutral-800"
+                     />
+               </div>
+               <div className="flex items-center gap-4 group">
+                    <Linkedin className="w-6 h-6 text-neutral-500 group-hover:text-white transition-colors" />
+                     <InlineEdit readOnly={!onUpdate} 
+                        value={data.personalInfo.linkedin} 
+                        placeholder="LinkedIn URL"
+                        onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
+                        className="bg-transparent border-neutral-800"
+                     />
+               </div>
+               <div className="flex items-center gap-4 group">
+                    <Globe className="w-6 h-6 text-neutral-500 group-hover:text-white transition-colors" />
+                     <InlineEdit readOnly={!onUpdate} 
+                        value={data.personalInfo.website} 
+                        placeholder="Website URL"
+                        onSave={(val) => handleUpdate('personalInfo.website', val)} 
+                        className="bg-transparent border-neutral-800"
+                     />
+               </div>
             </div>
-            <p className="mt-24 text-neutral-600 text-sm uppercase tracking-widest">
-              © {new Date().getFullYear()} {data.personalInfo.fullName}
-            </p>
+            
+            <div className="mt-20 pt-8 border-t border-neutral-900 text-neutral-600 text-sm flex justify-between items-center">
+                 <div>
+                    <InlineEdit readOnly={!onUpdate} 
+                        value={data.personalInfo.fullName} 
+                        placeholder="Your Name"
+                        onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
+                        className="bg-transparent font-bold"
+                     />
+                    <span> © {new Date().getFullYear()}</span>
+                 </div>
+                 <div>
+                     <InlineEdit readOnly={!onUpdate} 
+                        value={data.personalInfo.location} 
+                        placeholder="Location"
+                        onSave={(val) => handleUpdate('personalInfo.location', val)} 
+                        className="bg-transparent text-right"
+                     />
+                 </div>
+            </div>
           </div>
-        </footer>
+        </section>
       </main>
 
       <style jsx global>{`
         .stroke-text {
-          -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+          -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
         }
       `}</style>
     </div>

@@ -1,8 +1,6 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Wand2, Layout, Share2, Sparkles, Zap, Globe, ArrowRight, CheckCircle2, Trophy, FileText, MonitorCheck, ScanSearch } from "lucide-react";
+import { Wand2, Layout, Share2, Sparkles, Zap, Globe, ArrowRight, CheckCircle2, Trophy, FileText, MonitorCheck, ScanSearch, Loader2 } from "lucide-react";
 import { ResumePreview } from "@/components/resume/ResumePreview";
 import { ResumeData } from "@/lib/schemas/resume";
 import { toast } from "sonner";
@@ -10,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { ResumeBuilderHeader } from "@/components/resume/ResumeBuilderHeader";
 import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
+import { saveDraft } from "@/app/actions/resume";
+import { THEME_DEMOS } from "@/lib/themes";
 
 interface LandingPageProps {
   initialData: { count: number; showcase: any[] };
@@ -190,17 +190,37 @@ export function LandingPage({ initialData }: LandingPageProps) {
   const fadeOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scaleHero = useTransform(scrollYProgress, [0, 0.5], [1, 0.9]);
 
+  const [isCreating, setIsCreating] = useState(false);
+
   const handleCreate = () => {
-    localStorage.removeItem("resume_draft");
-    localStorage.removeItem("resume_theme");
+    // Just navigate to create page to prompt upload
     router.push("/resume-builder/create");
   };
 
-  const handleUseTemplate = (data: ResumeData, theme: string) => {
-    localStorage.setItem("resume_draft", JSON.stringify(data));
-    localStorage.setItem("resume_theme", theme);
-    router.push(`/resume-builder/create?theme=${theme}`);
-    toast.success("Template loaded!");
+  const handleUseTemplate = async (data: ResumeData, theme: string) => {
+    setIsCreating(true);
+    try {
+        const result = await saveDraft({
+            content: data,
+            theme,
+        });
+        if (result.success && result.id) {
+            toast.success("Template loaded!");
+            router.push(`/resume-builder/create?id=${result.id}`);
+        }
+    } catch (e: any) {
+        if (e.message.includes("Unauthorized") || e.message.includes("must be logged in")) {
+            // Redirect to login with a next param that includes the theme and auto-trigger
+            const nextUrl = encodeURIComponent(`/resume-builder/create?theme=${theme}&auto=true`);
+            router.push(`/login?next=${nextUrl}`);
+            setIsCreating(false);
+            return;
+        }
+        
+        toast.error("Failed to load template");
+        console.error(e);
+        setIsCreating(false);
+    }
   };
 
   const showcaseItems = [
@@ -235,95 +255,11 @@ export function LandingPage({ initialData }: LandingPageProps) {
     skills: ["Figma", "React", "UI/UX"],
   };
 
-  const THEME_DEMOS = [
-    {
-      id: "studio",
-      name: "Studio",
-      role: "Graphic Designer",
-      description: "Bold, agency-style layout for creatives.",
-      data: {
-        personalInfo: { fullName: "Alex Morgan", summary: "Visual identity specialist.", email: "alex@design.com", jobTitle: "Graphic Designer" },
-        experience: [{ company: "Design Co", position: "Senior Designer", startDate: "2020", endDate: "Present", description: "Led rebranding projects." }],
-        education: [],
-        skills: ["Typography", "Branding", "Adobe Suite"],
-        projects: [],
-        testimonials: []
-      }
-    },
-    {
-      id: "visual",
-      name: "Visual",
-      role: "Software Engineer",
-      description: "Visual-first dark mode for modern tech.",
-      data: {
-        personalInfo: { fullName: "Sarah Chen", summary: "Full-stack developer building scalable apps.", email: "sarah@tech.com", jobTitle: "Senior Engineer" },
-        experience: [{ company: "Tech Giants", position: "Lead Dev", startDate: "2019", endDate: "Present", description: "Architecture and systems design." }],
-        education: [],
-        skills: ["React", "Node.js", "AWS", "System Design"],
-        projects: [],
-        testimonials: []
-      }
-    },
-    {
-      id: "portfolio",
-      name: "Portfolio",
-      role: "Product Manager",
-      description: "Clean, scrollable digital layout.",
-      data: {
-        personalInfo: { fullName: "Marcus J.", summary: "Product strategist with 7y experience.", email: "marcus@pm.com", jobTitle: "Product Lead" },
-        experience: [{ company: "Startup Inc", position: "Head of Product", startDate: "2021", endDate: "Present", description: "Managed 3 successful launches." }],
-        education: [],
-        skills: ["Strategy", "Analytics", "Roadmapping"],
-        projects: [],
-        testimonials: []
-      }
-    },
-    {
-      id: "modern",
-      name: "Modern",
-      role: "Marketing Director",
-      description: "Professional and clean for corporate roles.",
-      data: {
-        personalInfo: { fullName: "Emily White", summary: "Digital marketing expert driving growth.", email: "emily@growth.com", jobTitle: "Marketing Director" },
-        experience: [{ company: "Global Corp", position: "Marketing VP", startDate: "2018", endDate: "Present", description: "Oversaw $5M ad spend." }],
-        education: [],
-        skills: ["SEO/SEM", "Content Strategy", "Team Leadership"],
-        projects: [],
-        testimonials: []
-      }
-    },
-    {
-      id: "creative",
-      name: "Creative",
-      role: "UX Researcher",
-      description: "Unique split-layout for storytellers.",
-      data: {
-        personalInfo: { fullName: "David Kim", summary: "Understanding user behavior through data.", email: "david@ux.com", jobTitle: "UX Researcher" },
-        experience: [{ company: "Agency X", position: "Senior Researcher", startDate: "2021", endDate: "Present", description: "Conducted 50+ user studies." }],
-        education: [],
-        skills: ["User Testing", "Figma", "Data Analysis"],
-        projects: [],
-        testimonials: []
-      }
-    },
-    {
-      id: "minimal",
-      name: "Minimal",
-      role: "Content Writer",
-      description: "Distraction-free focus on typography.",
-      data: {
-        personalInfo: { fullName: "Lisa Ray", summary: "Crafting compelling narratives for brands.", email: "lisa@writer.com", jobTitle: "Senior Copywriter" },
-        experience: [{ company: "Media House", position: "Editor", startDate: "2019", endDate: "Present", description: "Editorial direction for tech blog." }],
-        education: [],
-        skills: ["Copywriting", "Editing", "SEO"],
-        projects: [],
-        testimonials: []
-      }
-    }
-  ];
+  // THEME_DEMOS imported from @/lib/themes
+
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white overflow-hidden selection:bg-purple-500/30">
+    <div className="min-h-screen bg-slate-950 text-white overflow-hidden selection:bg-purple-500/30 bg-dot-white/[0.2]">
       {/* Dynamic Background */}
       <div className="fixed inset-0 z-0">
          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse" />
@@ -410,12 +346,12 @@ export function LandingPage({ initialData }: LandingPageProps) {
                <p className="text-slate-400 text-lg">Everything you need to showcase your work professionally, without writing a single line of code.</p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6 auto-rows-[250px]">
+            <div className="grid md:grid-cols-3 gap-6">
                {/* Large Card - AI Extraction */}
-               <Card className="md:col-span-3 bg-slate-900/50 border-white/10  overflow-hidden relative group hover:border-white/20 transition-colors">
-                  <div className="relative z-10 h-full flex flex-col md:flex-row  items-center">
+               <Card className="md:col-span-3 bg-slate-900/50 border-white/10 overflow-hidden relative group hover:border-white/20 transition-colors h-auto">
+                  <div className="relative z-10 h-full flex flex-col md:flex-row items-center">
                      <div className="flex-1">
-                      <div className="p-10">
+                      <div className="p-6 md:p-10">
                        <div className="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center my-6">
                          <Wand2 className="w-6 h-6" />
                        </div>
@@ -426,14 +362,14 @@ export function LandingPage({ initialData }: LandingPageProps) {
                        </p>
                        </div>
                      </div>
-                     <div className="flex-1 w-full md:h-[300px] relative aspect-video bg-slate-950 rounded-xl  shadow-2xl overflow-hidden flex items-center justify-center">
+                     <div className="flex-1 w-full h-[250px] md:h-[400px] relative bg-slate-950/50 border-t md:border-t-0 md:border-l border-white/5 flex items-center justify-center">
                         <ExtractionAnimation />
                      </div>
                   </div>
                </Card>
 
                {/* Small Card */}
-               <Card className="bg-slate-900/50 border-white/10 p-8 hover:border-white/20 transition-colors flex flex-col justify-center">
+               <Card className="bg-slate-900/50 border-white/10 p-8 hover:border-white/20 transition-colors flex flex-col justify-center min-h-[250px]">
                   <div className="flex items-center gap-4 mb-4">
                      <div className="w-10 h-10 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center">
                         <Share2 className="w-5 h-5" />
@@ -444,7 +380,7 @@ export function LandingPage({ initialData }: LandingPageProps) {
                </Card>
 
                {/* Small Card */}
-               <Card className="bg-slate-900/50 border-white/10 p-8 hover:border-white/20 transition-colors flex flex-col justify-center">
+               <Card className="bg-slate-900/50 border-white/10 p-8 hover:border-white/20 transition-colors flex flex-col justify-center min-h-[250px]">
                   <div className="flex items-center gap-4 mb-4">
                      <div className="w-10 h-10 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center">
                         <Trophy className="w-5 h-5" />
@@ -454,7 +390,7 @@ export function LandingPage({ initialData }: LandingPageProps) {
                   <p className="text-slate-400">Rank high on google with semantic HTML & meta tags automatically generated.</p>
                </Card>
                
-               <Card className="bg-slate-900/50 border-white/10 p-8 hover:border-white/20 transition-colors flex flex-col justify-center relative overflow-hidden">
+               <Card className="bg-slate-900/50 border-white/10 p-8 hover:border-white/20 transition-colors flex flex-col justify-center relative overflow-hidden min-h-[250px]">
                   <div className="flex items-center gap-4 mb-4">
                      <div className="w-10 h-10 rounded-lg bg-yellow-500/20 text-yellow-400 flex items-center justify-center">
                         <Globe className="w-5 h-5" />
@@ -470,7 +406,6 @@ export function LandingPage({ initialData }: LandingPageProps) {
           </div>
         </section>
 
-        {/* New Dedicated Themes Section */}
         <section className="py-24 bg-black/40 border-y border-white/5">
            <div className="max-w-7xl mx-auto px-6">
               <div className="text-center max-w-2xl mx-auto mb-16">
@@ -480,16 +415,24 @@ export function LandingPage({ initialData }: LandingPageProps) {
 
               <div className="grid md:grid-cols-3 gap-8">
                   {THEME_DEMOS.map((theme) => (
-                    <div 
+                     <div 
                       key={theme.id}
-                      className="group cursor-pointer" 
-                      onClick={() => handleUseTemplate(theme.data as ResumeData, theme.id)}
+                      className="group cursor-default" 
                     >
                        <div className="relative aspect-[4/3] bg-slate-900 rounded-xl overflow-hidden border border-white/10 group-hover:border-white/30 transition-all shadow-2xl">
                           <div className={`absolute inset-0 scale-[0.4] origin-top-left w-[250%] h-[250%] ${theme.id === 'visual' ? 'bg-black' : 'bg-white'} pointer-events-none`}>
-                             <ResumePreview data={theme.data as ResumeData} theme={theme.id as any} />
+                             <ResumePreview data={theme.data as any} theme={theme.id as any} />
                           </div>
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4 backdrop-blur-sm">
+                             <Button 
+                                onClick={() => handleUseTemplate(theme.data as any, theme.id)} 
+                                disabled={isCreating}
+                                className="rounded-full bg-white text-black hover:bg-slate-200"
+                             >
+                                {isCreating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                                Use This Template
+                             </Button>
+                          </div>
                        </div>
                        <div className="mt-5 flex justify-between items-start">
                           <div>
@@ -533,7 +476,12 @@ export function LandingPage({ initialData }: LandingPageProps) {
                              <ResumePreview data={example.data} theme={example.theme as any} />
                           </div>
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4 backdrop-blur-sm">
-                             <Button onClick={() => handleUseTemplate(example.data, example.theme)} className="rounded-full bg-white text-black hover:bg-slate-200">
+                             <Button 
+                                onClick={() => handleUseTemplate(example.data, example.theme)} 
+                                disabled={isCreating}
+                                className="rounded-full bg-white text-black hover:bg-slate-200"
+                             >
+                                {isCreating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                                 Use This Template
                              </Button>
                                 <Button variant="ghost" className="text-white hover:text-white/80 hover:bg-white/10" onClick={() => window.open(`/p/${example.slug}`, '_blank')}>

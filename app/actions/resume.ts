@@ -110,6 +110,75 @@ export async function publishResume(data: {
   return { success: true, url: `/p/${data.slug}` };
 }
 
+export async function saveDraft(data: {
+  content: ResumeData;
+  theme: string;
+  id?: string;
+  slug?: string;
+}) {
+  const supabase = await createClient();
+  const adminSupabase = createServiceClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  // If ID exists, update
+  if (data.id) {
+    // Verify ownership
+    const { data: current } = await adminSupabase
+      .from("resumes")
+      .select("user_id")
+      .eq("id", data.id)
+      .single();
+
+    if (!current || current.user_id !== user.id) {
+      throw new Error("Unauthorized");
+    }
+
+    const { error } = await adminSupabase
+      .from("resumes")
+      .update({
+        content: data.content,
+        theme: data.theme,
+        job_title: data.content.personalInfo.jobTitle,
+        summary: data.content.personalInfo.summary,
+        updated_at: new Date().toISOString(),
+        // We don't change public status here, just save content
+      })
+      .eq("id", data.id);
+
+    if (error) throw new Error("Failed to save draft");
+    
+    revalidatePath("/resume-builder/dashboard");
+    return { success: true, id: data.id, slug: data.slug };
+  } else {
+    // Create new draft
+    const slug = data.slug || `draft-${Date.now()}`;
+    const { data: newResume, error } = await adminSupabase
+      .from("resumes")
+      .insert({
+        user_id: user.id,
+        content: data.content,
+        theme: data.theme,
+        job_title: data.content.personalInfo.jobTitle,
+        summary: data.content.personalInfo.summary,
+        slug: slug,
+        is_public: false, // Default to draft/private
+      })
+      .select("id, slug")
+      .single();
+
+    if (error) {
+        console.error("Save Draft Error", error);
+        throw new Error("Failed to create draft");
+    }
+    
+    return { success: true, id: newResume.id, slug: newResume.slug };
+  }
+}
+
 export async function getLandingPageData() {
   const supabase = createServiceClient();
 
