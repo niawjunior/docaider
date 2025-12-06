@@ -5,13 +5,12 @@ import {
   Mail, 
   Linkedin, 
   Globe,
-  Quote,
-  Plus,
-  Trash2
+  Quote
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InlineEdit } from "@/components/ui/inline-edit";
 import { Button } from "@/components/ui/button";
+import { ThemeAddButton, ThemeDeleteButton } from "./ThemeControls";
 
 interface StudioThemeProps {
   data: ResumeData;
@@ -130,15 +129,17 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
           </div>
           
           <div className="space-y-4">
-             <div className="flex justify-between items-center">
-                 <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-widest">Skills</h3>
-                  {onUpdate && (
-                     <Button variant="ghost" size="sm" className="hover:bg-neutral-800 text-white" onClick={() => {
-                            const newSkills = [...data.skills, "New Skill"];
-                            handleUpdate('skills', newSkills);
-                     }}>
-                         <Plus className="w-4 h-4" />
-                     </Button>
+              <div className="flex justify-between items-center">
+                  <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-widest">Skills</h3>
+                   {onUpdate && (
+                      <ThemeAddButton 
+                        label=""
+                        className="w-6 h-6 p-0 bg-transparent hover:bg-neutral-800 text-white border-neutral-800 hover:text-white"
+                        onClick={() => {
+                             const newSkills = [...data.skills, "New Skill"];
+                             handleUpdate('skills', newSkills);
+                        }}
+                      />
                 )}
              </div>
             <div className="flex flex-wrap gap-4">
@@ -154,16 +155,14 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                         className="bg-transparent"
                      />
                       {onUpdate && (
-                        <button 
+                        <ThemeDeleteButton
                             onClick={() => {
                                 const newSkills = [...data.skills];
                                 newSkills.splice(i, 1);
                                 handleUpdate('skills', newSkills);
                             }}
-                            className="absolute -top-2 -right-2 bg-red-600 rounded-full p-1 opacity-0 group-hover/skill:opacity-100 transition-opacity text-white"
-                        >
-                            <Trash2 className="w-3 h-3" />
-                        </button>
+                            className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 hover:bg-red-700 text-white border-none p-1"
+                        />
                     )}
                 </span>
                 ))}
@@ -179,16 +178,18 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                     Work
                 </h2>
                  {onUpdate && (
-                     <Button variant="outline" className="border-neutral-700 hover:bg-neutral-800 text-white bg-transparent" onClick={() => {
+                     <ThemeAddButton 
+                        label="Add Project"
+                        className="border-neutral-700 hover:bg-neutral-800 text-white bg-transparent hover:text-white"
+                        onClick={() => {
                             const newProj = [{
                                 name: "Project Name",
                                 description: "Description",
                                 technologies: []
                             }, ...data.projects];
                             handleUpdate('projects', newProj);
-                     }}>
-                         <Plus className="w-4 h-4 mr-2" /> Add Project
-                     </Button>
+                        }} 
+                    />
                 )}
              </div>
 
@@ -202,16 +203,14 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                   className="group/item relative py-12 border-t border-neutral-900 grid md:grid-cols-[1fr_2fr] gap-8 hover:bg-neutral-900/50 transition-colors px-4 -mx-4 rounded"
                 >
                      {onUpdate && (
-                     <button 
-                        className="absolute right-4 top-12 opacity-0 group-hover/item:opacity-100 p-2 text-red-500 hover:bg-red-900/50 rounded"
+                     <ThemeDeleteButton
+                        className="absolute right-4 top-12 text-red-500 hover:bg-red-900/50 border-none bg-transparent"
                         onClick={() => {
                             const newProjs = [...data.projects];
                             newProjs.splice(i, 1);
                             handleUpdate('projects', newProjs);
                         }}
-                     >
-                         <Trash2 className="w-5 h-5" />
-                     </button>
+                     />
                     )}
                   <div>
                     <h3 className="text-3xl font-bold mb-2">
@@ -270,17 +269,19 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                     Experience
                 </h2>
                  {onUpdate && (
-                    <Button variant="outline" className="border-neutral-700 hover:bg-neutral-800 text-white bg-transparent" onClick={() => {
-                        const newExp = [{
-                            company: "Company Name",
-                            position: "Position",
-                            startDate: "2024",
-                            description: "Job description goes here..."
-                        }, ...data.experience];
-                        handleUpdate('experience', newExp);
-                    }}>
-                        <Plus className="w-3 h-3 mr-1" /> Add
-                    </Button>
+                    <ThemeAddButton 
+                        label="Add"
+                        className="bg-white text-black hover:bg-neutral-200 border-none"
+                        onClick={() => {
+                            const newExp = [{
+                                company: "Company Name",
+                                position: "Position",
+                                startDate: "2024",
+                                description: "Job description goes here..."
+                            }, ...data.experience];
+                            handleUpdate('experience', newExp);
+                        }}
+                    />
                 )}
             </div>
 
@@ -288,16 +289,14 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
             {data.experience.map((exp, i) => (
               <div key={i} className="group/item relative grid md:grid-cols-[200px_1fr] gap-8">
                   {onUpdate && (
-                     <Button variant="destructive" 
-                        className="absolute right-0 top-0 "
+                     <ThemeDeleteButton 
+                        className="absolute right-0 top-0 bg-red-600 hover:bg-red-700 text-white border-none"
                         onClick={() => {
                             const newExp = [...data.experience];
                             newExp.splice(i, 1);
                             handleUpdate('experience', newExp);
                         }}
-                     >
-                         <Trash2 className="w-5 h-5" />
-                     </Button>
+                     />
                     )}
                 <div className="text-neutral-500 font-mono text-sm pt-1 flex gap-1 items-baseline">
                      <InlineEdit readOnly={!onUpdate} 

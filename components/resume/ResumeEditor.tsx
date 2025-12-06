@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,8 +54,9 @@ export function ResumeEditor() {
   const [isUploading, setIsUploading] = useState(false);
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
   const [slug, setSlug] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const lastSavedData = useRef<string>("");
 
   // Initialize Data
   useEffect(() => {
@@ -68,6 +69,7 @@ export function ResumeEditor() {
              setTheme(data.theme as any);
              setSlug(data.slug);
              setPublishedUrl(null); 
+             lastSavedData.current = JSON.stringify(data.content);
            }
          } catch (e) {
            console.error("Failed to load resume", e);
@@ -96,6 +98,7 @@ export function ResumeEditor() {
                         router.replace(`/resume-builder/create?id=${result.id}`);
                         setResumeData(demoTheme.data as any);
                         setSlug(result.slug || "");
+                        lastSavedData.current = JSON.stringify(demoTheme.data);
                     }
                 } catch(e) {
                      console.error("Auto-create failed", e);
@@ -117,29 +120,10 @@ export function ResumeEditor() {
     loadData();
   }, [idParam, themeParam, searchParams]);
 
-  // Autosave to DB
-  useEffect(() => {
-    if (!resumeData || !idParam) return;
+  // Track unsaved changes
+  const isDirty = JSON.stringify(resumeData) !== lastSavedData.current;
 
-    const timer = setTimeout(async () => {
-        setIsSaving(true);
-        try {
-            await saveDraft({
-                content: resumeData,
-                theme,
-                id: idParam,
-                slug // Keep existing slug
-            });
-            // Quiet success - autosave shouldn't nag
-        } catch (e) {
-            console.error("Autosave Failed", e);
-        } finally {
-            setIsSaving(false);
-        }
-    }, 1000); // 1s debounce
-
-    return () => clearTimeout(timer);
-  }, [resumeData, theme, idParam, slug]);
+  // Cleanup auto-save (removed)
 
   const parseResume = useMutation({
     mutationFn: async (file: File) => {
@@ -237,185 +221,171 @@ export function ResumeEditor() {
         className="bg-transparent border-b border-white/10 relative z-50 backdrop-blur-md"
         theme="dark"
       >
-        <div className="flex gap-2 items-center">
-          {resumeData && (
-            <div className="flex items-center gap-2 mr-4 border-r border-white/10 pr-4">
-               {isSaving && <span className="text-xs text-slate-500 animate-pulse mr-2">Saving...</span>}
-              <span className="text-sm text-slate-400 font-medium hidden sm:inline">Theme:</span>
-              <Select
-                value={theme}
-                onValueChange={(value: any) => setTheme(value)}
-              >
-                <SelectTrigger className="w-[140px] sm:w-[180px]">
-                  <SelectValue placeholder="Select theme" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="modern">Modern</SelectItem>
-                  <SelectItem value="minimal">Minimal</SelectItem>
-                  <SelectItem value="creative">Creative</SelectItem>
-                  <SelectItem value="portfolio">Portfolio (Resume)</SelectItem>
-                  <SelectItem value="studio">Studio (Agency)</SelectItem>
-                  <SelectItem value="visual">Visual (New)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-          
-          <div className="mr-2 flex gap-2">
-            {resumeData && (
-                <>
-                {/* Reset Theme Button */}
-                 <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-                      <RotateCcw className="w-4 h-4 mr-2" />
-                      Reset
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Reset to Theme Defaults?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will reset your content (Experience, Skills, etc.) to the default placeholder text for this theme. Your personal info will be kept.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleResetTheme}>
-                        Reset
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-
-                {/* Upload New Resume Button */}
-                 <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-                      <FileText className="w-4 h-4 mr-2" />
-                      Upload New
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Upload New Resume?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will close the current resume and return to the upload screen. Unsaved changes to the current resume are already saved as a draft.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleUploadResumeReset}>
-                        Go to Upload
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-                </>
+        <div className="flex items-center gap-3">
+             {/* Unsaved Changes Indicator */}
+             {isDirty && (
+                <span className="text-yellow-400 text-xs font-bold uppercase tracking-wider animate-pulse mr-2">
+                    Unsaved
+                </span>
             )}
-          </div>
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button disabled={!resumeData || isLoading}>
-                <Share2 className="w-4 h-4 mr-2" />
-                {idParam ? "Update Resume" : "Publish Resume"}
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{idParam ? "Update your Resume" : "Publish your Resume"}</DialogTitle>
-                <DialogDescription>
-                  {idParam ? "Save changes to your existing resume." : "Choose a unique URL for your resume."}
-                </DialogDescription>
-              </DialogHeader>
-              
-              {!publishedUrl ? (
-                <div className="space-y-4 py-4">
-                  <div className="grid gap-2">
-                    <Label>Public URL</Label>
-                    <div className="flex items-center gap-2">
-                      <span className="text-slate-500 text-sm">docaider.com/p/</span>
-                      <Input 
-                        placeholder="your-name" 
-                        value={slug}
-                        onChange={(e) => setSlug(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="py-6 text-center space-y-4">
-                  <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
-                    <Share2 className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg">{idParam ? "Resume Updated!" : "Resume Published!"}</h3>
-                    <p className="text-slate-500">Your resume is now live at:</p>
-                  </div>
-                  <div className="p-3 bg-slate-100 rounded-lg text-sm font-mono break-all">
-                    <Link href={publishedUrl} target="_blank" className="text-blue-600 hover:underline">
-                      {window.location.origin}{publishedUrl}
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              <DialogFooter>
-                {!publishedUrl ? (
-                  <Button 
-                    onClick={async () => {
-                      if (!resumeData || !slug) return;
-                      setIsPublishing(true);
-                      try {
-                        const result = await saveDraft({
-                          content: resumeData,
-                          theme,
-                          slug,
-                          id: idParam || undefined,
+            {/* Manual Save Button */}
+            <Button 
+                variant={isDirty ? "default" : "secondary"}
+                size="sm"
+                className={isDirty ? "bg-amber-500 hover:bg-amber-600 text-black border-none" : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10"}
+                onClick={async () => {
+                    if (!resumeData || !idParam) return;
+                    setIsSaving(true);
+                    try {
+                        await saveDraft({
+                            content: resumeData,
+                            theme,
+                            id: idParam,
+                            slug 
                         });
-                        // Publish implies setting is_public=true, but saveDraft is draft.
-                        // We actually need publishResume for this specific dialog action to flip the flag.
-                        const pubResult = await publishResume({
-                             content: resumeData,
-                             theme,
-                             slug,
-                             id: idParam || undefined
-                        });
-                        
-                        setPublishedUrl(pubResult.url);
-                        toast.success(idParam ? "Updated successfully!" : "Published successfully!");
-                      } catch (err) {
-                        toast.error("Failed to publish. Slug might be taken.");
-                      } finally {
-                        setIsPublishing(false);
-                      }
-                    }}
-                    disabled={isPublishing || !slug}
-                  >
-                    {isPublishing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    {idParam ? "Update Now" : "Publish Now"}
-                  </Button>
+                        lastSavedData.current = JSON.stringify(resumeData);
+                        toast.success("Saved successfully");
+                    } catch (e) {
+                        console.error("Save Failed", e);
+                        toast.error("Failed to save");
+                    } finally {
+                        setIsSaving(false);
+                    }
+                }}
+                disabled={isSaving || !idParam}
+            >
+                {isSaving ? (
+                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
-                  <Button variant="outline" asChild>
-                    <Link href={publishedUrl} target="_blank">View Live Resume</Link>
-                  </Button>
+                     <Layout className="w-4 h-4 mr-2" />
                 )}
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+                {isSaving ? "Saving..." : "Save"}
+            </Button>
+            
+            <div className="h-6 w-px bg-white/10 mx-2 hidden sm:block" />
+
+            {/* Theme Selector */}
+            <div className="flex items-center space-x-2 hidden sm:flex">
+                <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Theme</span>
+                <Select
+                  value={theme}
+                  onValueChange={(val: any) => setTheme(val)}
+                >
+                  <SelectTrigger className="w-[130px] h-8 bg-white/5 border-white/10 text-slate-200 text-xs">
+                    <SelectValue placeholder="Theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="modern">Modern</SelectItem>
+                    <SelectItem value="minimal">Minimal</SelectItem>
+                    <SelectItem value="creative">Creative</SelectItem>
+                    <SelectItem value="portfolio">Portfolio</SelectItem>
+                    <SelectItem value="studio">Studio</SelectItem>
+                    <SelectItem value="visual">Visual</SelectItem>
+                  </SelectContent>
+                </Select>
+            </div>
+
+            {/* Publish Dialog Trigger */}
+             <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="sm" onClick={() => setPublishedUrl(null)} className="bg-blue-600 hover:bg-blue-500 text-white border-none shadow-lg shadow-blue-900/20 ml-2">
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Publish
+                  </Button>
+                </DialogTrigger>
+                 <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{idParam ? "Update your Resume" : "Publish your Resume"}</DialogTitle>
+                    <DialogDescription>
+                      {idParam ? "Save changes to your existing resume." : "Choose a unique URL for your resume."}
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  {!publishedUrl ? (
+                    <div className="space-y-4 py-4">
+                      <div className="grid gap-2">
+                        <Label>Public URL</Label>
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-500 text-sm">docaider.com/p/</span>
+                          <Input 
+                            placeholder="your-name" 
+                            value={slug}
+                            onChange={(e) => setSlug(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="py-6 text-center space-y-4">
+                      <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+                        <Share2 className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">{idParam ? "Resume Updated!" : "Resume Published!"}</h3>
+                        <p className="text-slate-500">Your resume is now live at:</p>
+                      </div>
+                      <div className="p-3 bg-slate-100 rounded-lg text-sm font-mono break-all">
+                        <Link href={publishedUrl} target="_blank" className="text-blue-600 hover:underline">
+                          {window.location.origin}{publishedUrl}
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+
+                  <DialogFooter>
+                    {!publishedUrl ? (
+                      <Button 
+                        onClick={async () => {
+                          if (!resumeData || !slug) return;
+                          setIsPublishing(true);
+                          try {
+                            const result = await saveDraft({
+                              content: resumeData,
+                              theme,
+                              slug,
+                              id: idParam || undefined,
+                            });
+                            const pubResult = await publishResume({
+                                 content: resumeData,
+                                 theme,
+                                 slug,
+                                 id: idParam || undefined
+                            });
+                            
+                            setPublishedUrl(pubResult.url);
+                            toast.success(idParam ? "Updated successfully!" : "Published successfully!");
+                          } catch (err) {
+                            toast.error("Failed to publish. Slug might be taken.");
+                          } finally {
+                            setIsPublishing(false);
+                          }
+                        }}
+                        disabled={isPublishing || !slug}
+                      >
+                        {isPublishing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                        {idParam ? "Update Now" : "Publish Now"}
+                      </Button>
+                    ) : (
+                      <Button variant="outline" asChild>
+                        <Link href={publishedUrl} target="_blank">View Live Resume</Link>
+                      </Button>
+                    )}
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
         </div>
       </ResumeBuilderHeader>
 
       <main className="flex-1 flex overflow-hidden">
         {/* Full Screen Preview with Inline Edit */}
         <div className="w-full h-[calc(100vh-100px)] bg-slate-950 overflow-y-auto flex items-start justify-center p-8 bg-dot-white/[0.2]">
-            {isLoading ? (
+            {(isLoading || isUploading) ? (
                 <div className="h-full flex items-center justify-center">
                      <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
                 </div>
             ) : resumeData ? (
-                <div className="w-full max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="w-full max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500 light">
                     <div className="bg-slate-900 backdrop-blur rounded-lg p-2 text-center mb-4 text-slate-200 text-sm border border-white/10 w-fit mx-auto sticky top-0 z-40">
                         Click on any text to edit directly.
                     </div>

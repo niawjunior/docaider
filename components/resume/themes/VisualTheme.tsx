@@ -1,8 +1,9 @@
 import { ResumeData } from "@/lib/schemas/resume";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowUpRight, Mail, MapPin, Globe, Linkedin, Plus, Trash2, ExternalLink } from "lucide-react";
+import { ArrowUpRight, Mail, MapPin, Globe, Linkedin, ExternalLink } from "lucide-react";
 import { InlineEdit } from "@/components/ui/inline-edit";
 import { Button } from "@/components/ui/button";
+import { ThemeAddButton, ThemeDeleteButton } from "./ThemeControls";
 
 interface VisualThemeProps {
   data: ResumeData;
@@ -115,16 +116,17 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                 Selected<br/>Works
               </h2>
                {onUpdate && (
-                     <Button variant="outline" className="text-white border-white/20 hover:bg-white/10" onClick={() => {
+                     <ThemeAddButton 
+                        label="Add Project"
+                        className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
+                        onClick={() => {
                             const newProj = [{
                                 name: "Project Name",
                                 description: "Description",
                                 technologies: []
                             }, ...data.projects];
                             handleUpdate('projects', newProj);
-                     }}>
-                         <Plus className="w-5 h-5 mr-2" /> Add Project
-                     </Button>
+                     }} />
                 )}
             </div>
 
@@ -139,17 +141,15 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                   className={`group/item relative ${i % 2 === 1 ? "md:mt-32" : ""}`}
                 >
                      {onUpdate && (
-                     <button 
-                        className="absolute right-0 top-0 z-20 opacity-0 group-hover/item:opacity-100 p-2 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg"
-                        onClick={(e) => {
-                            e.preventDefault();
+                     <ThemeDeleteButton
+                        className="absolute right-0 top-0 z-20 bg-red-600 hover:bg-red-700 text-white border-none"
+                        onClick={() => {
+                            //e.preventDefault(); // StopPropagation handled in component
                             const newProjs = [...data.projects];
                             newProjs.splice(i, 1);
                             handleUpdate('projects', newProjs);
                         }}
-                     >
-                         <Trash2 className="w-4 h-4" />
-                     </button>
+                     />
                     )}
                   <div className="block cursor-default">
                     <div className="aspect-[3/4] mb-8 overflow-hidden bg-neutral-900 relative">
@@ -218,7 +218,10 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
            <div className="flex justify-between items-end mb-12 border-b border-neutral-800 pb-8">
              <h2 className="text-4xl font-bold uppercase tracking-tighter">Experience</h2>
               {onUpdate && (
-                    <Button variant="outline" className="text-white border-white/20 hover:bg-white/10" onClick={() => {
+                    <ThemeAddButton 
+                        label="Add"
+                        className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
+                        onClick={() => {
                         const newExp = [{
                             company: "Company Name",
                             position: "Position",
@@ -226,9 +229,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                             description: "Job description goes here..."
                         }, ...data.experience];
                         handleUpdate('experience', newExp);
-                    }}>
-                        <Plus className="w-4 h-4 mr-2" /> Add
-                    </Button>
+                    }} />
             )}
            </div>
 
@@ -236,16 +237,14 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
             {data.experience.map((exp, i) => (
               <div key={i} className="group/item relative border-l border-neutral-800 pl-8 ml-3">
                  {onUpdate && (
-                     <button 
-                        className="absolute -right-8 top-0 opacity-0 group-hover/item:opacity-100 p-2 text-red-500 hover:bg-red-900/50 rounded"
+                     <ThemeDeleteButton
+                        className="absolute -right-8 top-0 text-red-500 hover:bg-red-900/50 bg-transparent border-none"
                         onClick={() => {
                             const newExp = [...data.experience];
                             newExp.splice(i, 1);
                             handleUpdate('experience', newExp);
                         }}
-                     >
-                         <Trash2 className="w-5 h-5" />
-                     </button>
+                     />
                     )}
                 <div className="absolute -left-[5px] top-2 w-2 h-2 bg-neutral-600 rounded-full" />
                 <div className="flex flex-col md:flex-row md:items-baseline justify-between mb-2">
@@ -320,12 +319,13 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
             <div className="flex justify-between items-center mb-12 border-b border-neutral-800 pb-8">
              <h2 className="text-4xl font-bold uppercase tracking-tighter">Skills</h2>
               {onUpdate && (
-                    <Button variant="ghost" size="sm" onClick={() => {
+                     <ThemeAddButton 
+                        label="Add"
+                        className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
+                        onClick={() => {
                         const newSkills = [...data.skills, "SKILL"];
                         handleUpdate('skills', newSkills);
-                    }}>
-                        <Plus className="w-4 h-4" />
-                    </Button>
+                    }} />
             )}
            </div>
            <div className="flex flex-wrap gap-4">
@@ -342,16 +342,14 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                             className="bg-transparent border-none text-center min-w-[60px]"
                         />
                          {onUpdate && (
-                        <button 
+                        <ThemeDeleteButton
                             onClick={() => {
                                 const newSkills = [...data.skills];
                                 newSkills.splice(i, 1);
                                 handleUpdate('skills', newSkills);
                             }}
-                            className="absolute -top-2 -right-2 bg-red-600 rounded-full p-1 opacity-0 group-hover/skill:opacity-100 transition-opacity text-white"
-                        >
-                            <Trash2 className="w-3 h-3" />
-                        </button>
+                             className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white border-none w-5 h-5 p-1"
+                         />
                     )}
                   </span>
               ))}
@@ -363,7 +361,10 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
             <div className="flex justify-between items-end mb-12 border-b border-neutral-800 pb-8">
              <h2 className="text-4xl font-bold uppercase tracking-tighter">Education</h2>
               {onUpdate && (
-                    <Button variant="outline" className="text-white border-white/20 hover:bg-white/10" onClick={() => {
+                    <ThemeAddButton 
+                        label="Add"
+                        className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
+                        onClick={() => {
                         const newEdu = [{
                             institution: "University",
                             degree: "Degree",
@@ -371,27 +372,23 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                             endDate: "2024"
                         }, ...(data.education || [])];
                         handleUpdate('education', newEdu);
-                    }}>
-                        <Plus className="w-4 h-4 mr-2" /> Add
-                    </Button>
+                    }} />
             )}
            </div>
            
            <div className="space-y-8">
                {data.education.map((edu, i) => (
                    <div key={i} className="group/item relative grid md:grid-cols-[1fr_200px] gap-4 items-end">
-                        {onUpdate && (
-                             <button 
-                                className="absolute -left-12 top-0 opacity-0 group-hover/item:opacity-100 p-2 text-red-500 hover:bg-red-900/50 rounded"
-                                onClick={() => {
-                                    const newEdu = [...data.education];
-                                    newEdu.splice(i, 1);
-                                    handleUpdate('education', newEdu);
-                                }}
-                             >
-                                 <Trash2 className="w-5 h-5" />
-                             </button>
-                        )}
+                         {onUpdate && (
+                              <ThemeDeleteButton
+                                 className="absolute -left-12 top-0 text-red-500 hover:bg-red-900/50 bg-transparent border-none"
+                                 onClick={() => {
+                                     const newEdu = [...data.education];
+                                     newEdu.splice(i, 1);
+                                     handleUpdate('education', newEdu);
+                                 }}
+                              />
+                         )}
                        <div>
                            <h3 className="text-xl font-bold">
                                 <InlineEdit readOnly={!onUpdate} 

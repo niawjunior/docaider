@@ -8,14 +8,15 @@ import {
   Phone, 
   Globe, 
   ExternalLink,
-  Plus,
-  Trash2
+  Trash2,
+  Plus
 } from "lucide-react";
 import { PortfolioTheme } from "./themes/PortfolioTheme";
 import { StudioTheme } from "./themes/StudioTheme";
 import { VisualTheme } from "./themes/VisualTheme";
 import { InlineEdit } from "@/components/ui/inline-edit";
 import { Button } from "@/components/ui/button";
+import { ThemeAddButton, ThemeDeleteButton } from "./themes/ThemeControls";
 
 interface ResumePreviewProps {
   data: ResumeData;
@@ -127,43 +128,43 @@ export function ResumePreview({
           </div>
 
           <div className="space-y-2">
-             <div className="flex justify-between items-center">
-                <h3 className="uppercase tracking-widest text-xs font-bold text-slate-500">Skills</h3>
-                {onUpdate && (
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-slate-500 hover:text-white" onClick={() => {
-                        const newSkills = [...data.skills, "New Skill"];
-                        handleUpdate('skills', newSkills);
-                  }}>
-                      <Plus className="w-3 h-3" />
-                  </Button>
-                )}
-             </div>
-              <div className="flex flex-wrap gap-2">
-                {data.skills.map((skill, index) => (
-                    <div key={index} className="group/skill relative">
-                        <span className="px-2 py-1 bg-slate-800 rounded text-xs block">
-                             <InlineEdit readOnly={!onUpdate} 
-                                value={skill}
-                                onSave={(val) => {
-                                    const newSkills = [...data.skills];
-                                    newSkills[index] = val;
-                                    handleUpdate('skills', newSkills);
-                                }}
-                                className="hover:bg-slate-700"
-                             />
-                        </span>
-                        {onUpdate && (
-                            <button 
+              <div className="flex justify-between items-center">
+                 <h3 className="uppercase tracking-widest text-xs font-bold text-slate-500">Skills</h3>
+                 {onUpdate && (
+                   <ThemeAddButton 
+                        label=""
+                        className="h-6 w-6 p-0 text-slate-500 hover:text-white bg-transparent"
+                        onClick={() => {
+                            const newSkills = [...data.skills, "New Skill"];
+                            handleUpdate('skills', newSkills);
+                        }}
+                    />
+                 )}
+              </div>
+               <div className="flex flex-wrap gap-2">
+                 {data.skills.map((skill, index) => (
+                     <div key={index} className="group/skill relative">
+                         <span className="px-2 py-1 bg-slate-800 rounded text-xs block">
+                              <InlineEdit readOnly={!onUpdate} 
+                                 value={skill}
+                                 onSave={(val) => {
+                                     const newSkills = [...data.skills];
+                                     newSkills[index] = val;
+                                     handleUpdate('skills', newSkills);
+                                 }}
+                                 className="hover:bg-slate-700"
+                              />
+                         </span>
+                         {onUpdate && (
+                             <ThemeDeleteButton
                                 onClick={() => {
                                     const newSkills = [...data.skills];
                                     newSkills.splice(index, 1);
                                     handleUpdate('skills', newSkills);
                                 }}
-                                className="absolute -top-1 -right-1 bg-red-500 rounded-full p-[2px] opacity-0 group-hover/skill:opacity-100 transition-opacity"
-                            >
-                                <Trash2 className="w-2 h-2 text-white" />
-                            </button>
-                        )}
+                                 className="absolute -top-1 -right-1 bg-red-500 rounded-full p-[2px] w-4 h-4 border-none text-white"
+                             />
+                         )}
                     </div>
                 ))}
               </div>
@@ -178,7 +179,10 @@ export function ResumePreview({
                     <span className="w-8 h-1 bg-slate-900 block" /> Experience
                 </h2>
                 {onUpdate && (
-                    <Button variant="outline" size="sm" onClick={() => {
+                    <ThemeAddButton 
+                        label="Add"
+                        className="border-slate-200"
+                        onClick={() => {
                         const newExp = [{
                             company: "Company Name",
                             position: "Position",
@@ -186,9 +190,7 @@ export function ResumePreview({
                             description: "Job description goes here..."
                         }, ...data.experience];
                         handleUpdate('experience', newExp);
-                    }}>
-                        <Plus className="w-3 h-3 mr-1" /> Add
-                    </Button>
+                    }} />
                 )}
              </div>
              
@@ -196,16 +198,14 @@ export function ResumePreview({
                 {data.experience.map((exp, index) => (
                   <div key={index} className="relative group/exp">
                      {onUpdate && (
-                        <button 
-                            className="absolute -right-4 top-0 opacity-0 group-hover/exp:opacity-100 p-2 text-red-500 hover:bg-red-50 rounded"
+                        <ThemeDeleteButton
+                            className="absolute -right-4 top-0 p-2 text-red-500 hover:bg-red-50 rounded bg-transparent border-none shadow-none w-8 h-8"
                             onClick={() => {
                                 const newExp = [...data.experience];
                                 newExp.splice(index, 1);
                                 handleUpdate('experience', newExp);
                             }}
-                        >
-                            <Trash2 className="w-4 h-4" />
-                        </button>
+                        />
                      )}
                     <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-slate-900 border-4 border-white" />
                     <h3 className="font-bold text-lg">
@@ -272,7 +272,10 @@ export function ResumePreview({
                         <span className="w-8 h-1 bg-slate-900 block" /> Education
                     </h2>
                      {onUpdate && (
-                        <Button variant="outline" size="sm" onClick={() => {
+                        <ThemeAddButton 
+                            label="Add"
+                            className="border-slate-200"
+                            onClick={() => {
                             const newEdu = [{
                                 institution: "University",
                                 degree: "Degree",
@@ -280,25 +283,21 @@ export function ResumePreview({
                                 endDate: "2024"
                             }, ...(data.education || [])];
                             handleUpdate('education', newEdu);
-                        }}>
-                             <Plus className="w-3 h-3 mr-1" /> Add
-                        </Button>
+                        }} />
                     )}
                  </div>
                <div className="space-y-4">
                  {data.education.map((edu, index) => (
                    <div key={index} className="group/edu relative">
                      {onUpdate && (
-                        <button 
-                            className="absolute -right-4 top-0 opacity-0 group-hover/edu:opacity-100 p-2 text-red-500 hover:bg-red-50 rounded"
+                        <ThemeDeleteButton
+                            className="absolute -right-4 top-0 p-2 text-red-500 hover:bg-red-50 rounded bg-transparent border-none shadow-none w-8 h-8"
                             onClick={() => {
                                 const newEdu = [...data.education];
                                 newEdu.splice(index, 1);
                                 handleUpdate('education', newEdu);
                             }}
-                        >
-                            <Trash2 className="w-4 h-4" />
-                        </button>
+                        />
                      )}
                      <h3 className="font-bold">
                         <InlineEdit readOnly={!onUpdate} 
@@ -452,7 +451,10 @@ export function ResumePreview({
                 Experience
             </h2>
             {onUpdate && theme !== "minimal" && (
-                 <Button variant="ghost" size="sm" onClick={() => {
+                 <ThemeAddButton 
+                    label=""
+                    className="w-8 h-8 p-0 border-none bg-transparent hover:bg-slate-100 text-slate-500"
+                    onClick={() => {
                         const newExp = [{
                             company: "Company Name",
                             position: "Position",
@@ -460,9 +462,7 @@ export function ResumePreview({
                             description: "Description"
                         }, ...data.experience];
                         handleUpdate('experience', newExp);
-                 }}>
-                     <Plus className="w-4 h-4" />
-                 </Button>
+                 }} />
             )}
         </div>
         
@@ -470,16 +470,14 @@ export function ResumePreview({
         {data.experience.map((exp, index) => (
             <div key={index} className="group/item relative hover:bg-slate-50 p-2 -mx-2 rounded transition-colors">
                 {onUpdate && (
-                     <button 
-                        className="absolute right-0 top-0 opacity-0 group-hover/item:opacity-100 p-2 text-red-400 hover:text-red-600 transition-opacity"
+                     <ThemeDeleteButton
+                        className="absolute right-0 top-0 p-2 text-red-400 hover:text-red-600 transition-opacity bg-transparent border-none shadow-none w-8 h-8"
                         onClick={() => {
                             const newExp = [...data.experience];
                             newExp.splice(index, 1);
                             handleUpdate('experience', newExp);
                         }}
-                     >
-                         <Trash2 className="w-4 h-4" />
-                     </button>
+                     />
                 )}
             <div
                 className={cn(
@@ -569,7 +567,10 @@ export function ResumePreview({
                 Education
             </h2>
              {onUpdate && theme !== "minimal" && (
-                 <Button variant="ghost" size="sm" onClick={() => {
+                 <ThemeAddButton 
+                    label=""
+                    className="w-8 h-8 p-0 border-none bg-transparent hover:bg-slate-100 text-slate-500"
+                    onClick={() => {
                         const newEdu = [{
                             institution: "University",
                             degree: "Degree",
@@ -577,9 +578,7 @@ export function ResumePreview({
                             endDate: "2024"
                         }, ...(data.education || [])];
                         handleUpdate('education', newEdu);
-                 }}>
-                     <Plus className="w-4 h-4" />
-                 </Button>
+                 }} />
             )}
          </div>
           <div className="space-y-4">
@@ -589,16 +588,14 @@ export function ResumePreview({
                   theme === "minimal" && "text-center"
                 )}>
                  {onUpdate && (
-                     <button 
-                        className="absolute right-0 top-0 opacity-0 group-hover/item:opacity-100 p-2 text-red-400 hover:text-red-600 transition-opacity"
+                     <ThemeDeleteButton
+                        className="absolute right-0 top-0 p-2 text-red-400 hover:text-red-600 transition-opacity bg-transparent border-none shadow-none w-8 h-8"
                         onClick={() => {
                             const newEdu = [...data.education];
                             newEdu.splice(index, 1);
                             handleUpdate('education', newEdu);
                         }}
-                     >
-                         <Trash2 className="w-4 h-4" />
-                     </button>
+                     />
                 )}
                 <div
                   className={cn(
@@ -679,12 +676,13 @@ export function ResumePreview({
                 Skills
             </h2>
              {onUpdate && theme !== "minimal" && (
-                 <Button variant="ghost" size="sm" onClick={() => {
+                 <ThemeAddButton 
+                    label=""
+                    className="w-8 h-8 p-0 border-none bg-transparent hover:bg-slate-100 text-slate-500"
+                    onClick={() => {
                         const newSkills = [...data.skills, "New Skill"];
                         handleUpdate('skills', newSkills);
-                 }}>
-                     <Plus className="w-4 h-4" />
-                 </Button>
+                 }} />
             )}
            </div>
           <div
@@ -712,16 +710,14 @@ export function ResumePreview({
                     className={theme === "modern" ? "bg-transparent text-slate-700" : ""}
                 />
                  {onUpdate && (
-                    <button 
+                    <ThemeDeleteButton
                         onClick={() => {
                             const newSkills = [...data.skills];
                             newSkills.splice(index, 1);
                             handleUpdate('skills', newSkills);
                         }}
-                        className="absolute -top-1 -right-1 bg-red-500 rounded-full p-[1px] opacity-0 group-hover/skill:opacity-100 transition-opacity"
-                    >
-                        <Trash2 className="w-3 h-3 text-white" />
-                    </button>
+                        className="absolute -top-1 -right-1 bg-red-500 rounded-full p-[1px] w-4 h-4 text-white border-none"
+                    />
                 )}
               </span>
             ))}
@@ -742,32 +738,31 @@ export function ResumePreview({
                 Projects
             </h2>
              {onUpdate && theme !== "minimal" && (
-                 <Button variant="ghost" size="sm" onClick={() => {
+                 <ThemeAddButton 
+                    label=""
+                    className="w-8 h-8 p-0 border-none bg-transparent hover:bg-slate-100 text-slate-500"
+                    onClick={() => {
                         const newProj = [{
                             name: "Project Name",
                             description: "Description",
                             technologies: []
                         }, ...data.projects];
                         handleUpdate('projects', newProj);
-                 }}>
-                     <Plus className="w-4 h-4" />
-                 </Button>
+                 }} />
             )}
           </div>
           <div className="space-y-4">
             {data.projects.map((project, i) => (
               <div key={i} className="group/item relative hover:bg-slate-50 p-2 -mx-2 rounded transition-colors">
                  {onUpdate && (
-                     <button 
-                        className="absolute right-0 top-0 opacity-0 group-hover/item:opacity-100 p-2 text-red-400 hover:text-red-600 transition-opacity"
+                     <ThemeDeleteButton
+                        className="absolute right-0 top-0 p-2 text-red-400 hover:text-red-600 transition-opacity bg-transparent border-none shadow-none w-8 h-8"
                         onClick={() => {
                             const newProjs = [...data.projects];
                             newProjs.splice(i, 1);
                             handleUpdate('projects', newProjs);
                         }}
-                     >
-                         <Trash2 className="w-4 h-4" />
-                     </button>
+                     />
                 )}
                 <div className="flex justify-between items-baseline mb-1">
                   <h3 className="font-bold">

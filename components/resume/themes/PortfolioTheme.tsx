@@ -11,14 +11,13 @@ import {
   Briefcase,
   GraduationCap,
   Code2,
-  Layout,
-  Plus,
-  Trash2
+  Layout
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { InlineEdit } from "@/components/ui/inline-edit";
+import { ThemeAddButton, ThemeDeleteButton } from "./ThemeControls";
 
 interface PortfolioThemeProps {
   data: ResumeData;
@@ -94,14 +93,13 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
         </div>
       </motion.header>
 
-      <main className="max-w-5xl mx-auto px-6 py-12 space-y-24">
+      <main className="max-w-5xl mx-auto px-8 py-12 space-y-24">
         {/* About / Hero */}
         <motion.section 
           id="about"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="py-12 md:py-20"
         >
           <div className="max-w-3xl">
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 flex flex-wrap gap-2 items-baseline">
@@ -124,46 +122,70 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
                  />
             </p>
             
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 scroll-mt-24" id="contact">
+               {/* Email */}
                <div className="flex items-center gap-2">
-                 <Button variant="outline" className="rounded-full px-4" asChild={false}>
-                    <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4" />
-                        <InlineEdit readOnly={!onUpdate} 
-                            value={data.personalInfo.email} 
-                            placeholder="Email"
-                            onSave={(val) => handleUpdate('personalInfo.email', val)} 
-                            className="bg-transparent border-none p-0 h-auto w-auto min-w-[100px]"
-                        />
-                    </div>
+                 <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={!onUpdate}>
+                    {!onUpdate ? (
+                        <a href={`mailto:${data.personalInfo.email}`} className="flex items-center gap-2">
+                             <Mail className="w-4 h-4" />
+                             <span>{data.personalInfo.email || "Email"}</span>
+                        </a>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4" />
+                            <InlineEdit readOnly={!onUpdate} 
+                                value={data.personalInfo.email} 
+                                placeholder="Email"
+                                onSave={(val) => handleUpdate('personalInfo.email', val)} 
+                                className="bg-transparent border-none p-0 h-auto w-auto min-w-[100px]"
+                            />
+                        </div>
+                    )}
                  </Button>
                </div>
                
+               {/* LinkedIn */}
                <div className="flex items-center gap-2">
-                 <Button variant="outline" className="rounded-full px-4" asChild={false}>
-                    <div className="flex items-center gap-2">
-                        <Linkedin className="w-4 h-4" />
-                        <InlineEdit readOnly={!onUpdate} 
-                            value={data.personalInfo.linkedin} 
-                            placeholder="LinkedIn URL"
-                            onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
-                            className="bg-transparent border-none p-0 h-auto w-auto min-w-[100px]"
-                        />
-                    </div>
+                 <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={!onUpdate}>
+                    {!onUpdate ? (
+                        <a href={data.personalInfo.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                             <Linkedin className="w-4 h-4" />
+                             <span>{data.personalInfo.linkedin?.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '') || "LinkedIn"}</span>
+                        </a>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <Linkedin className="w-4 h-4" />
+                            <InlineEdit readOnly={!onUpdate} 
+                                value={data.personalInfo.linkedin} 
+                                placeholder="LinkedIn URL"
+                                onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
+                                className="bg-transparent border-none p-0 h-auto w-auto min-w-[100px]"
+                            />
+                        </div>
+                    )}
                  </Button>
                </div>
 
+               {/* Website */}
                 <div className="flex items-center gap-2">
-                 <Button variant="outline" className="rounded-full px-4" asChild={false}>
-                    <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4" />
-                        <InlineEdit readOnly={!onUpdate} 
-                            value={data.personalInfo.website} 
-                            placeholder="Website URL"
-                            onSave={(val) => handleUpdate('personalInfo.website', val)} 
-                            className="bg-transparent border-none p-0 h-auto w-auto min-w-[100px]"
-                        />
-                    </div>
+                 <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={!onUpdate}>
+                    {!onUpdate ? (
+                        <a href={data.personalInfo.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                             <Globe className="w-4 h-4" />
+                             <span>{data.personalInfo.website?.replace(/^https?:\/\/(www\.)?/, '') || "Website"}</span>
+                        </a>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <Globe className="w-4 h-4" />
+                            <InlineEdit readOnly={!onUpdate} 
+                                value={data.personalInfo.website} 
+                                placeholder="Website URL"
+                                onSave={(val) => handleUpdate('personalInfo.website', val)} 
+                                className="bg-transparent border-none p-0 h-auto w-auto min-w-[100px]"
+                            />
+                        </div>
+                    )}
                  </Button>
                </div>
             </div>
@@ -182,20 +204,21 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
                     <Code2 className="w-6 h-6 text-blue-600" />
                     Skills
                 </h2>
-                 {onUpdate && (
-                     <Button variant="ghost" size="sm" onClick={() => {
+                {onUpdate && (
+                    <ThemeAddButton 
+                        onClick={() => {
                             const newSkills = [...data.skills, "New Skill"];
                             handleUpdate('skills', newSkills);
-                     }}>
-                         <Plus className="w-4 h-4" />
-                     </Button>
+                        }} 
+                        className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm"
+                    />
                 )}
              </div>
              
              <div className="flex flex-wrap gap-3">
                 {data.skills.map((skill, index) => (
-                    <motion.div key={index} variants={item} className="relative group/skill">
-                        <Badge variant="secondary" className="text-base px-4 py-2 hover:bg-white hover:shadow-md transition-all">
+                    <div key={index} className="relative group/skill">
+                        <Badge variant="default" className="text-base bg-gray-200 text-black px-4 py-2 transition-all">
                              <InlineEdit readOnly={!onUpdate} 
                                 value={skill}
                                 onSave={(val) => {
@@ -207,18 +230,16 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
                              />
                         </Badge>
                          {onUpdate && (
-                            <button 
+                            <ThemeDeleteButton
                                 onClick={() => {
                                     const newSkills = [...data.skills];
                                     newSkills.splice(index, 1);
                                     handleUpdate('skills', newSkills);
                                 }}
-                                className="absolute -top-1 -right-1 bg-red-500 rounded-full p-[2px] opacity-0 group-hover/skill:opacity-100 transition-opacity text-white"
-                            >
-                                <Trash2 className="w-3 h-3" />
-                            </button>
+                                className="absolute -top-2 -right-2 w-6 h-6"
+                            />
                         )}
-                    </motion.div>
+                    </div>
                 ))}
              </div>
         </motion.section>
@@ -237,34 +258,40 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
                     Work Experience
                 </h2>
                 {onUpdate && (
-                    <Button variant="outline" size="sm" onClick={() => {
-                        const newExp = [{
-                            company: "Company Name",
-                            position: "Position",
-                            startDate: "2024",
-                            description: "Job description goes here..."
-                        }, ...data.experience];
-                        handleUpdate('experience', newExp);
-                    }}>
-                        <Plus className="w-3 h-3 mr-1" /> Add
-                    </Button>
+                    <ThemeAddButton 
+                        onClick={() => {
+                            const newExp = [{
+                                company: "Company Name",
+                                position: "Position",
+                                startDate: "2024",
+                                description: "Job description goes here..."
+                            }, ...data.experience];
+                            handleUpdate('experience', newExp);
+                        }} 
+                        className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm"
+                    />
                 )}
              </div>
 
-          <div className="space-y-8 border-l-2 border-slate-200 ml-3 pl-8 relative">
-            {data.experience.map((exp, i) => (
-              <motion.div key={i} variants={item} className="relative group/item">
+            <div className="border-l-2 border-slate-200 ml-3 space-y-12">
+              {(data.experience || []).map((exp, i) => (
+                <motion.div 
+                    key={i} 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: i * 0.1 }}
+                    className="relative pl-8"
+                >
+                    {/* Timeline dot */}
                  {onUpdate && (
-                     <button 
-                        className="absolute -left-14 top-0 opacity-0 group-hover/item:opacity-100 p-2 text-red-500 hover:bg-red-50 rounded"
+                     <ThemeDeleteButton 
+                        className="absolute right-2 top-2 z-10"
                         onClick={() => {
                             const newExp = [...data.experience];
                             newExp.splice(i, 1);
                             handleUpdate('experience', newExp);
                         }}
-                     >
-                         <Trash2 className="w-4 h-4" />
-                     </button>
+                     />
                 )}
                 <span className="absolute -left-[41px] top-2 w-5 h-5 rounded-full border-4 border-white bg-blue-600 shadow-sm" />
                 
@@ -330,13 +357,13 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
                         />
                     </p>
                 </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
           </div>
         </motion.section>
 
         {/* Projects */}
-        {data.projects && data.projects.length > 0 && (
+        {(onUpdate || (data.projects && data.projects.length > 0)) && (
           <motion.section 
             id="projects"
             initial="hidden"
@@ -350,33 +377,39 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
                     Projects
                 </h2>
                  {onUpdate && (
-                     <Button variant="outline" size="sm" onClick={() => {
+                     <ThemeAddButton 
+                        onClick={() => {
                             const newProj = [{
                                 name: "Project Name",
                                 description: "Description",
                                 technologies: []
-                            }, ...data.projects];
+                            }, ...(data.projects || [])];
                             handleUpdate('projects', newProj);
-                     }}>
-                         <Plus className="w-4 h-4" />
-                     </Button>
+                        }} 
+                        className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm"
+                     />
                 )}
              </div>
 
+            {/* Projects Grid Container Adjustment - Add AnimatePresence if desired, but for now just fix item animation */}
             <div className="grid md:grid-cols-2 gap-6">
-              {data.projects.map((project, i) => (
-                <motion.div key={i} variants={item} className="h-full relative group/item">
+              {(data.projects || []).map((project, i) => (
+                <motion.div 
+                    key={i} 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full relative group/item"
+                >
                    {onUpdate && (
-                     <button 
-                        className="absolute -right-2 -top-2 z-10 opacity-0 group-hover/item:opacity-100 p-2 bg-white shadow-md text-red-500 hover:bg-red-50 rounded-full"
+                     <ThemeDeleteButton
+                        className="absolute -right-2 -top-2 z-10"
                         onClick={() => {
                             const newProjs = [...data.projects];
                             newProjs.splice(i, 1);
                             handleUpdate('projects', newProjs);
                         }}
-                     >
-                         <Trash2 className="w-4 h-4" />
-                     </button>
+                     />
                     )}
                   <Card className="h-full p-6 hover:shadow-lg transition-all border-slate-200 bg-white">
                      <div className="flex justify-between items-start mb-4">
@@ -441,34 +474,39 @@ export const PortfolioTheme = ({ data, onUpdate }: PortfolioThemeProps) => {
                     Education
                 </h2>
                  {onUpdate && (
-                    <Button variant="outline" size="sm" onClick={() => {
-                        const newEdu = [{
-                            institution: "University",
-                            degree: "Degree",
-                            startDate: "2020",
-                            endDate: "2024"
-                        }, ...(data.education || [])];
-                        handleUpdate('education', newEdu);
-                    }}>
-                            <Plus className="w-3 h-3 mr-1" /> Add
-                    </Button>
+                    <ThemeAddButton 
+                        onClick={() => {
+                            const newEdu = [{
+                                institution: "University",
+                                degree: "Degree",
+                                startDate: "2020",
+                                endDate: "2024"
+                            }, ...(data.education || [])];
+                            handleUpdate('education', newEdu);
+                        }} 
+                        className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm"
+                    />
                 )}
             </div>
 
-            <div className="space-y-6">
-                {data.education.map((edu, i) => (
-                    <motion.div key={i} variants={item} className="flex flex-col md:flex-row md:items-center justify-between p-6 bg-white border border-slate-100 rounded-xl relative group/item">
-                          {onUpdate && (
-                             <button 
-                                className="absolute top-2 right-2 opacity-0 group-hover/item:opacity-100 p-2 text-red-500 hover:bg-red-50 rounded"
+            <div className="space-y-8">
+                {(data.education || []).map((edu, i) => (
+                    <motion.div 
+                        key={i} 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: i * 0.1 }}
+                        className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-white rounded-lg border border-slate-100 hover:border-blue-100 transition-colors relative group/edu"
+                    >
+                         {onUpdate && (
+                             <ThemeDeleteButton
+                                className="absolute top-2 right-2 z-10"
                                 onClick={() => {
                                     const newEdu = [...data.education];
                                     newEdu.splice(i, 1);
                                     handleUpdate('education', newEdu);
                                 }}
-                             >
-                                 <Trash2 className="w-4 h-4" />
-                             </button>
+                             />
                             )}
                         <div>
                             <h3 className="font-bold text-lg text-slate-900">
