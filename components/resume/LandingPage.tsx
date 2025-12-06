@@ -28,8 +28,8 @@ function ExtractionAnimation() {
   }, []);
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
-       <div className="absolute inset-0 bg-blue-500/5 blur-[50px]" />
+    <div className="relative w-full h-full flex items-center justify-center ">
+       <div className="absolute inset-0  blur-[50px]" />
        <div className="relative z-10 flex flex-col items-center gap-6 w-full max-w-[200px]">
           <div className="relative w-24 h-24 flex items-center justify-center">
              <AnimatePresence mode="wait">
@@ -265,7 +265,7 @@ export function LandingPage({ initialData }: LandingPageProps) {
          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse" />
          <div className="absolute top-[20%] right-[-10%] w-[40%] h-[60%] bg-blue-600/20 rounded-full blur-[120px] animate-pulse delay-1000" />
          <div className="absolute bottom-[-10%] left-[20%] w-[60%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse delay-2000" />
-         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+         <div className="absolute inset-0  bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
       </div>
 
       <ResumeBuilderHeader theme="dark" className="bg-transparent border-b border-white/10 relative z-50 backdrop-blur-md" />
@@ -362,7 +362,7 @@ export function LandingPage({ initialData }: LandingPageProps) {
                        </p>
                        </div>
                      </div>
-                     <div className="flex-1 w-full h-[250px] md:h-[400px] relative bg-slate-950/50 border-t md:border-t-0 md:border-l border-white/5 flex items-center justify-center">
+                     <div className="flex-1 w-full h-[250px] md:h-[400px] relative  border-t md:border-t-0 md:border-l border-white/5 flex items-center justify-center">
                         <ExtractionAnimation />
                      </div>
                   </div>

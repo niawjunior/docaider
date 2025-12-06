@@ -306,9 +306,7 @@ export function ResumeEditor() {
                 </div>
             ) : resumeData ? (
                 <div className="w-full max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500 light">
-                    <div className="bg-slate-900 backdrop-blur rounded-lg p-2 text-center mb-4 text-slate-200 text-sm border border-white/10 w-fit mx-auto sticky top-0 z-40">
-                        Click on any text to edit directly.
-                    </div>
+
                     <ResumePreview 
                         data={resumeData} 
                         theme={theme} 
