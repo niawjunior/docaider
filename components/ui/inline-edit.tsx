@@ -38,10 +38,41 @@ export function InlineEdit({
     if (readOnly) return;
     setIsEditing(false);
     if (contentRef.current) {
-      const newValue = contentRef.current.innerText;
-      // Only save if changed
+      // Use textContent for single-line to avoid CSS artifacts (like text-transform), 
+      // but fallback to innerText for multiline to preserve line breaks correctly.
+      let newValue = !multiline 
+        ? (contentRef.current.textContent || "") 
+        : contentRef.current.innerText;
+      
+      const normalize = (str: string) => {
+          return str
+            .replace(/\u00A0/g, " ") // NBSP -> Space
+            .replace(/[\r\n]+/g, multiline ? "\n" : "") // Handle newlines
+            .replace(/[ \t]+/g, " ") // Collapse horizontal whitespace
+            .trim();
+      };
+
+      const normalizedNew = normalize(newValue);
+      const normalizedOld = normalize(value || "");
+
+      // 1. If normalized values match, it's a phantom change (whitespace spacing) -> Ignore.
+      if (normalizedNew === normalizedOld) {
+          // Optional: Revert DOM to exact value to prevent drift, though visually identical
+          if (contentRef.current.innerText !== (value || "")) {
+             contentRef.current.innerText = value || "";
+          }
+          return;
+      }
+
+      // 2. If genuine change, allow it.
+      // But verify we aren't sending literally the same string (redundant to point 1 but safe)
       if (newValue !== (value || "")) {
-        onSave(newValue);
+         // Prefer saving the sanitized/trimmed version if mostly whitespace
+         // But preserving user intent if they typed specifically.
+         // Actually, for Resume, normalized is usually better.
+         // Let's save the normalized version to clean up the DB.
+         onSave(normalizedNew); 
+         // Note: we save 'normalizedNew' instead of 'newValue' to enforce cleanliness.
       }
     }
   };

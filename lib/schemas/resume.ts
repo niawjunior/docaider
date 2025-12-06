@@ -14,6 +14,7 @@ export const ResumeSchema = z.object({
   coverImage: z.string().optional(),
   experience: z.array(
     z.object({
+      id: z.string().optional(),
       company: z.string().optional(),
       position: z.string().optional(),
       startDate: z.string().optional().describe("YYYY-MM or Present"),
@@ -23,6 +24,7 @@ export const ResumeSchema = z.object({
   ).optional().default([]).describe("Work experience history"),
   education: z.array(
     z.object({
+      id: z.string().optional(),
       institution: z.string().optional(),
       degree: z.string().optional(),
       fieldOfStudy: z.string().optional(),
@@ -33,6 +35,7 @@ export const ResumeSchema = z.object({
   skills: z.array(z.string()).optional().default([]).describe("List of professional skills"),
   projects: z.array(
     z.object({
+      id: z.string().optional(),
       name: z.string().optional(),
       description: z.string().optional(),
       url: z.string().optional(),
@@ -41,6 +44,7 @@ export const ResumeSchema = z.object({
   ).optional().default([]).describe("Notable projects"),
   testimonials: z.array(
     z.object({
+      id: z.string().optional(),
       name: z.string().optional(),
       role: z.string().optional(),
       content: z.string().optional(),

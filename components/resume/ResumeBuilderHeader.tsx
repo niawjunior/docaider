@@ -87,15 +87,24 @@ export function ResumeBuilderHeader({
         <div className="flex items-center gap-4">
           {children}
 
-          {showAuth && !children && (
+          {showAuth && (
             <>
+              {children && session && (
+                <div className={cn(
+                  "h-6 w-px hidden sm:block mx-2",
+                  isDark ? "bg-white/10" : "bg-slate-200"
+                )} />
+              )}
+              
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
               ) : session ? (
                 <>
-                  <Button onClick={handleCreate} className={cn(isDark && "bg-white text-black hover:bg-slate-200")}>
-                    Create Resume
-                  </Button>
+                  {!children && (
+                    <Button onClick={handleCreate} className={cn(isDark && "bg-white text-black hover:bg-slate-200")}>
+                      Create Resume
+                    </Button>
+                  )}
                   <Button 
                     variant="ghost" 
                     onClick={() => router.push("/resume-builder/dashboard")}

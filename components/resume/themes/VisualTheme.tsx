@@ -4,6 +4,9 @@ import { ArrowUpRight, Mail, MapPin, Globe, Linkedin, ExternalLink } from "lucid
 import { InlineEdit } from "@/components/ui/inline-edit";
 import { Button } from "@/components/ui/button";
 import { ThemeAddButton, ThemeDeleteButton } from "./ThemeControls";
+import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
+import { ResumeSectionList } from "@/components/resume/shared/ResumeSectionList";
+import { EmptySectionPlaceholder } from "@/components/resume/shared/EmptySectionPlaceholder";
 
 interface VisualThemeProps {
   data: ResumeData;
@@ -11,23 +14,9 @@ interface VisualThemeProps {
 }
 
 export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
+  const { updateField: handleUpdate } = useResumeUpdate(data, onUpdate);
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-
-  const handleUpdate = (path: string, value: any) => {
-    if (!onUpdate) return;
-    const newData = JSON.parse(JSON.stringify(data));
-    
-    // Helper to set value at path
-    const parts = path.split('.');
-    let current = newData;
-    for (let i = 0; i < parts.length - 1; i++) {
-        current = current[parts[i]];
-    }
-    current[parts[parts.length - 1]] = value;
-    
-    onUpdate(newData);
-  };
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-white selection:text-black">
@@ -131,90 +120,108 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
             </div>
 
             <div className="grid md:grid-cols-2 gap-x-12 gap-y-24">
-              {data.projects.map((project, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-10%" }}
-                  transition={{ duration: 0.6, delay: i % 2 * 0.2 }}
-                  className={`group/item relative ${i % 2 === 1 ? "md:mt-32" : ""}`}
-                >
-                     {onUpdate && (
-                     <ThemeDeleteButton
-                        className="absolute right-0 top-0 z-20 bg-red-600 hover:bg-red-700 text-white border-none"
-                        onClick={() => {
-                            //e.preventDefault(); // StopPropagation handled in component
-                            const newProjs = [...data.projects];
-                            newProjs.splice(i, 1);
-                            handleUpdate('projects', newProjs);
-                        }}
-                     />
-                    )}
-                  <div className="block cursor-default">
-                    <div className="aspect-[3/4] mb-8 overflow-hidden bg-neutral-900 relative">
-                       {/* Placeholder pattern since we don't have project images yet */}
-                      <div className="w-full h-full bg-neutral-800 group-hover/item:scale-105 transition-transform duration-700 ease-out flex items-center justify-center">
-                         <span className="text-neutral-700 text-9xl font-black opacity-20 group-hover/item:opacity-40 transition-opacity">
-                           {String(i + 1).padStart(2, '0')}
-                         </span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-2xl font-bold uppercase tracking-tighter mb-2">
-                             <InlineEdit readOnly={!onUpdate} 
-                                value={project.name} 
-                                onSave={(val) => {
-                                    const newProjs = [...data.projects];
-                                    newProjs[i].name = val;
-                                    handleUpdate('projects', newProjs);
-                                }}
-                                className="bg-transparent border-none"
-                                placeholder="Project Name"
-                             />
-                        </h3>
-                        <p className="text-neutral-500 text-sm mb-4">
-                             <InlineEdit readOnly={!onUpdate} 
-                                value={project.description} 
-                                onSave={(val) => {
-                                    const newProjs = [...data.projects];
-                                    newProjs[i].description = val;
-                                    handleUpdate('projects', newProjs);
-                                }}
-                                multiline
-                                className="bg-transparent border-none h-auto min-h-[40px]"
-                                placeholder="Description"
-                             />
-                        </p>
-                      </div>
-                      
-                      <div className="flex flex-col items-end gap-2 text-neutral-500">
-                          <div className="flex items-center gap-1 group/link">
-                             <ExternalLink className="w-4 h-4" />
-                              <InlineEdit readOnly={!onUpdate} 
-                                value={project.url} 
-                                onSave={(val) => {
-                                    const newProjs = [...data.projects];
-                                    newProjs[i].url = val;
-                                    handleUpdate('projects', newProjs);
-                                }}
-                                className="bg-transparent border-none text-xs text-right"
-                                placeholder="Project URL"
-                             />
+              {(!data.projects || data.projects.length === 0) && onUpdate ? (
+                   <div className="col-span-2">
+                        <EmptySectionPlaceholder 
+                            className="border-white/20 hover:border-white/40 bg-transparent text-white"
+                            message="Add some work to showcase"
+                            onClick={() => {
+                                const newProj = [{
+                                    id: crypto.randomUUID(),
+                                    name: "Project Name",
+                                    description: "Description",
+                                    technologies: []
+                                }, ...(data.projects || [])];
+                                handleUpdate('projects', newProj);
+                            }}
+                        />
+                   </div>
+              ) : (
+                  data.projects.map((project, i) => (
+                    <motion.div
+                      key={project.id || i}
+                      initial={{ opacity: 0, y: 50 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: "-10%" }}
+                      transition={{ duration: 0.6, delay: i % 2 * 0.2 }}
+                      className={`group/item relative ${i % 2 === 1 ? "md:mt-32" : ""}`}
+                    >
+                         {onUpdate && (
+                         <ThemeDeleteButton
+                            className="absolute right-0 top-0 z-20 bg-red-600 hover:bg-red-700 text-white border-none"
+                            onClick={() => {
+                                //e.preventDefault(); // StopPropagation handled in component
+                                const newProjs = [...data.projects];
+                                newProjs.splice(i, 1);
+                                handleUpdate('projects', newProjs);
+                            }}
+                         />
+                        )}
+                      <div className="block cursor-default">
+                        <div className="aspect-[3/4] mb-8 overflow-hidden bg-neutral-900 relative">
+                           {/* Placeholder pattern since we don't have project images yet */}
+                          <div className="w-full h-full bg-neutral-800 group-hover/item:scale-105 transition-transform duration-700 ease-out flex items-center justify-center">
+                             <span className="text-neutral-700 text-9xl font-black opacity-20 group-hover/item:opacity-40 transition-opacity">
+                               {String(i + 1).padStart(2, '0')}
+                             </span>
                           </div>
+                        </div>
+                        
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="text-2xl font-bold uppercase tracking-tighter mb-2">
+                                 <InlineEdit readOnly={!onUpdate} 
+                                    value={project.name} 
+                                    onSave={(val) => {
+                                        const newProjs = [...data.projects];
+                                        newProjs[i].name = val;
+                                        handleUpdate('projects', newProjs);
+                                    }}
+                                    className="bg-transparent border-none"
+                                    placeholder="Project Name"
+                                 />
+                            </h3>
+                            <p className="text-neutral-500 text-sm mb-4">
+                                 <InlineEdit readOnly={!onUpdate} 
+                                    value={project.description} 
+                                    onSave={(val) => {
+                                        const newProjs = [...data.projects];
+                                        newProjs[i].description = val;
+                                        handleUpdate('projects', newProjs);
+                                    }}
+                                    multiline
+                                    className="bg-transparent border-none h-auto min-h-[40px]"
+                                    placeholder="Description"
+                                 />
+                            </p>
+                          </div>
+                          
+                          <div className="flex flex-col items-end gap-2 text-neutral-500">
+                              <div className="flex items-center gap-1 group/link">
+                                 <ExternalLink className="w-4 h-4" />
+                                  <InlineEdit readOnly={!onUpdate} 
+                                    value={project.url} 
+                                    onSave={(val) => {
+                                        const newProjs = [...data.projects];
+                                        newProjs[i].url = val;
+                                        handleUpdate('projects', newProjs);
+                                    }}
+                                    className="bg-transparent border-none text-xs text-right"
+                                    placeholder="Project URL"
+                                 />
+                              </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                    </motion.div>
+                  ))
+              )}
             </div>
           </section>
         )}
 
         {/* Experience */}
-        <section id="about" className="mb-48 max-w-3xl">
+        <section id="about" className="mb-48 w-full">
            <div className="flex justify-between items-end mb-12 border-b border-neutral-800 pb-8">
              <h2 className="text-4xl font-bold uppercase tracking-tighter">Experience</h2>
               {onUpdate && (
@@ -223,6 +230,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                         className="text-white border-white/20 hover:bg-white/10 bg-transparent hover:text-white"
                         onClick={() => {
                         const newExp = [{
+                            id: crypto.randomUUID(),
                             company: "Company Name",
                             position: "Position",
                             startDate: "2024",
@@ -233,85 +241,85 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
             )}
            </div>
 
-          <div className="space-y-12">
-            {data.experience.map((exp, i) => (
-              <div key={i} className="group/item relative border-l border-neutral-800 pl-8 ml-3">
-                 {onUpdate && (
-                     <ThemeDeleteButton
-                        className="absolute -right-8 top-0 text-red-500 hover:bg-red-900/50 bg-transparent border-none"
-                        onClick={() => {
-                            const newExp = [...data.experience];
-                            newExp.splice(i, 1);
-                            handleUpdate('experience', newExp);
-                        }}
-                     />
-                    )}
-                <div className="absolute -left-[5px] top-2 w-2 h-2 bg-neutral-600 rounded-full" />
-                <div className="flex flex-col md:flex-row md:items-baseline justify-between mb-2">
-                  <h3 className="text-2xl font-bold">
-                       <InlineEdit readOnly={!onUpdate} 
-                            value={exp.position} 
-                            placeholder="Position"
-                            onSave={(val) => {
-                                const newExp = [...data.experience];
-                                newExp[i].position = val;
-                                handleUpdate('experience', newExp);
-                            }}
-                            className="bg-transparent border-none"
-                        />
-                  </h3>
-                  <div className="text-neutral-500 font-mono text-sm flex gap-1">
-                     <InlineEdit readOnly={!onUpdate} 
-                            value={exp.startDate} 
-                            placeholder="Start"
-                            onSave={(val) => {
-                                const newExp = [...data.experience];
-                                newExp[i].startDate = val;
-                                handleUpdate('experience', newExp);
-                            }}
-                            className="bg-transparent border-none text-right"
-                        />
-                        <span>-</span>
-                         <InlineEdit readOnly={!onUpdate} 
-                            value={exp.endDate} 
-                            placeholder="Present"
-                            onSave={(val) => {
-                                const newExp = [...data.experience];
-                                newExp[i].endDate = val;
-                                handleUpdate('experience', newExp);
-                            }}
-                            className="bg-transparent border-none"
-                        />
-                  </div>
-                </div>
-                <div className="text-xl text-neutral-400 mb-4">
-                     <InlineEdit readOnly={!onUpdate} 
-                            value={exp.company} 
-                            placeholder="Company"
-                            onSave={(val) => {
-                                const newExp = [...data.experience];
-                                newExp[i].company = val;
-                                handleUpdate('experience', newExp);
-                            }}
-                            className="bg-transparent border-none"
-                        />
-                </div>
-                <p className="text-neutral-400 leading-relaxed">
-                     <InlineEdit readOnly={!onUpdate} 
-                            value={exp.description} 
-                            placeholder="Description"
-                            multiline
-                            onSave={(val) => {
-                                const newExp = [...data.experience];
-                                newExp[i].description = val;
-                                handleUpdate('experience', newExp);
-                            }}
-                            className="bg-transparent border-none"
-                        />
-                </p>
-              </div>
-            ))}
-          </div>
+           {(!data.experience || data.experience.length === 0) && onUpdate ? (
+                <EmptySectionPlaceholder 
+                    className="border-white/20 hover:border-white/40 bg-transparent text-white"
+                    message="Add your past experience"
+                    onClick={() => {
+                        const newExp = [{
+                            id: crypto.randomUUID(),
+                            company: "Company Name",
+                            position: "Position",
+                            startDate: "2024",
+                            description: "Job description goes here..."
+                        }, ...(data.experience || [])];
+                        handleUpdate('experience', newExp);
+                    }}
+                />
+           ) : (
+               <ResumeSectionList
+                 data={data.experience}
+                 onUpdate={(val) => handleUpdate('experience', val)}
+                 className="space-y-12"
+                 renderItem={(exp, i, updateItem, deleteItem) => (
+                    <div className="group/item relative border-l border-neutral-800 pl-8 ml-3">
+                     
+                     <div className="absolute -left-[5px] top-2 w-2 h-2 bg-neutral-600 rounded-full" />
+                     <div className="flex flex-col md:flex-row md:items-baseline justify-between mb-2">
+                          <div className="flex-1">
+                               <h3 className="text-xl font-bold text-white">
+                                 <InlineEdit readOnly={!onUpdate} 
+                                     value={exp.company} 
+                                     onSave={(val) => updateItem({ company: val })} 
+                                     className="bg-transparent"
+                                 />
+                             </h3>
+                          </div>
+                          <div className="flex items-center gap-2">
+                               <span className="text-sm font-mono text-neutral-500">
+                                  <InlineEdit readOnly={!onUpdate} 
+                                     value={exp.startDate} 
+                                     onSave={(val) => updateItem({ startDate: val })}
+                                     className="bg-transparent text-right"
+                                  />
+                                   {" - "}
+                                   <InlineEdit readOnly={!onUpdate} 
+                                     value={exp.endDate} 
+                                     onSave={(val) => updateItem({ endDate: val })} 
+                                     className="bg-transparent text-right"
+                                  />
+                               </span>
+                                {onUpdate && (
+                                  <ThemeDeleteButton
+                                     className="text-red-500 hover:bg-red-900/50 bg-transparent border-none transition-opacity"
+                                     onClick={deleteItem}
+                                  />
+                                 )}
+                          </div>
+                     </div>
+                       <h3 className="text-2xl font-bold">
+                            <InlineEdit readOnly={!onUpdate} 
+                                 value={exp.position} 
+                                 placeholder="Position"
+                                 onSave={(val) => updateItem({ position: val })} 
+                                 className="bg-transparent border-none"
+                             />
+                       </h3>
+     
+     
+                     <p className="text-neutral-400 leading-relaxed">
+                          <InlineEdit readOnly={!onUpdate} 
+                                 value={exp.description} 
+                                 placeholder="Description"
+                                 multiline
+                                 onSave={(val) => updateItem({ description: val })} 
+                                 className="bg-transparent border-none"
+                             />
+                     </p>
+                   </div>
+                 )}
+               />
+           )}
         </section>
 
          {/* Skills - Often forgotten in visual themes but useful */}
@@ -330,7 +338,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
            </div>
            <div className="flex flex-wrap gap-4">
               {data.skills.map((skill, i) => (
-                  <span key={i} className="group/skill relative border border-white/20 px-6 py-3 rounded-full uppercase tracking-widest text-sm hover:bg-white hover:text-black transition-colors">
+                  <span key={i} className="group/skill relative border border-white/20 px-6 py-3 rounded-full uppercase tracking-widest text-sm hover:bg-white hover:text-black transition-colors inline-flex items-center gap-2 pr-2">
                      <InlineEdit readOnly={!onUpdate} 
                             value={skill} 
                             placeholder="SKILL"
@@ -348,7 +356,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
                                 newSkills.splice(i, 1);
                                 handleUpdate('skills', newSkills);
                             }}
-                             className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white border-none w-5 h-5 p-1"
+                             className="bg-red-600 hover:bg-red-700 text-white border-none w-5 h-5 p-1 rounded-full transition-all"
                          />
                     )}
                   </span>
@@ -357,7 +365,7 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
          </section>
 
         {/* Education */}
-        <section className="max-w-3xl">
+        <section className="w-full">
             <div className="flex justify-between items-end mb-12 border-b border-neutral-800 pb-8">
              <h2 className="text-4xl font-bold uppercase tracking-tighter">Education</h2>
               {onUpdate && (
@@ -377,81 +385,98 @@ export const VisualTheme = ({ data, onUpdate }: VisualThemeProps) => {
            </div>
            
            <div className="space-y-8">
-               {data.education.map((edu, i) => (
-                   <div key={i} className="group/item relative grid md:grid-cols-[1fr_200px] gap-4 items-end">
-                         {onUpdate && (
-                              <ThemeDeleteButton
-                                 className="absolute -left-12 top-0 text-red-500 hover:bg-red-900/50 bg-transparent border-none"
-                                 onClick={() => {
-                                     const newEdu = [...data.education];
-                                     newEdu.splice(i, 1);
-                                     handleUpdate('education', newEdu);
-                                 }}
-                              />
-                         )}
-                       <div>
-                           <h3 className="text-xl font-bold">
-                                <InlineEdit readOnly={!onUpdate} 
-                                    value={edu.institution} 
-                                    placeholder="Institution"
-                                    onSave={(val) => {
-                                        const newEdu = [...data.education];
-                                        newEdu[i].institution = val;
-                                        handleUpdate('education', newEdu);
-                                    }}
-                                    className="bg-transparent border-none"
-                                />
-                           </h3>
-                           <p className="text-neutral-400 flex gap-1">
-                                <InlineEdit readOnly={!onUpdate} 
-                                    value={edu.degree} 
-                                    placeholder="Degree"
-                                    onSave={(val) => {
-                                        const newEdu = [...data.education];
-                                        newEdu[i].degree = val;
-                                        handleUpdate('education', newEdu);
-                                    }}
-                                    className="bg-transparent border-none"
-                                />
-                                 <span>-</span>
+                {(!data.education || data.education.length === 0) && onUpdate ? (
+                    <EmptySectionPlaceholder 
+                        className="border-white/20 hover:border-white/40 bg-transparent text-white"
+                        message="Add your education"
+                        onClick={() => {
+                            const newEdu = [{
+                                id: crypto.randomUUID(),
+                                institution: "University",
+                                degree: "Degree",
+                                startDate: "2020",
+                                endDate: "2024"
+                            }, ...(data.education || [])];
+                            handleUpdate('education', newEdu);
+                        }}
+                    />
+                ) : (
+                    data.education.map((edu, i) => (
+                        <div key={edu.id || i} className="group/item relative grid md:grid-cols-[1fr_200px] gap-4 items-end">
+                            <div>
+                                <h3 className="text-xl font-bold">
+                                     <InlineEdit readOnly={!onUpdate} 
+                                        value={edu.institution} 
+                                        placeholder="Institution"
+                                        onSave={(val) => {
+                                            const newEdu = [...data.education];
+                                            newEdu[i].institution = val;
+                                            handleUpdate('education', newEdu);
+                                        }}
+                                        className="bg-transparent border-none"
+                                    />
+                                </h3>
+                                <p className="text-neutral-400 flex gap-1">
+                                     <InlineEdit readOnly={!onUpdate} 
+                                        value={edu.degree} 
+                                        placeholder="Degree"
+                                        onSave={(val) => {
+                                            const newEdu = [...data.education];
+                                            newEdu[i].degree = val;
+                                            handleUpdate('education', newEdu);
+                                        }}
+                                        className="bg-transparent border-none"
+                                    />
+                                   <span>-</span>
+                                     <InlineEdit readOnly={!onUpdate} 
+                                        value={edu.fieldOfStudy} 
+                                        placeholder="Field"
+                                        onSave={(val) => {
+                                            const newEdu = [...data.education];
+                                            newEdu[i].fieldOfStudy = val;
+                                            handleUpdate('education', newEdu);
+                                        }}
+                                        className="bg-transparent border-none"
+                                    />
+                                </p>
+                            </div>
+                            <div className="text-right text-neutral-500 font-mono text-sm flex gap-1 justify-end items-center">
                                  <InlineEdit readOnly={!onUpdate} 
-                                    value={edu.fieldOfStudy} 
-                                    placeholder="Field"
+                                    value={edu.startDate} 
+                                    placeholder="Start"
                                     onSave={(val) => {
                                         const newEdu = [...data.education];
-                                        newEdu[i].fieldOfStudy = val;
+                                        newEdu[i].startDate = val;
+                                        handleUpdate('education', newEdu);
+                                    }}
+                                    className="bg-transparent border-none text-right"
+                                />
+                                <span>-</span>
+                                <InlineEdit readOnly={!onUpdate} 
+                                    value={edu.endDate} 
+                                    placeholder="Present"
+                                    onSave={(val) => {
+                                        const newEdu = [...data.education];
+                                        newEdu[i].endDate = val;
                                         handleUpdate('education', newEdu);
                                     }}
                                     className="bg-transparent border-none"
                                 />
-                           </p>
-                       </div>
-                       <div className="text-right text-neutral-500 font-mono text-sm flex gap-1 justify-end">
-                            <InlineEdit readOnly={!onUpdate} 
-                                value={edu.startDate} 
-                                placeholder="Start"
-                                onSave={(val) => {
-                                    const newEdu = [...data.education];
-                                    newEdu[i].startDate = val;
-                                    handleUpdate('education', newEdu);
-                                }}
-                                className="bg-transparent border-none text-right"
-                            />
-                            <span>-</span>
-                            <InlineEdit readOnly={!onUpdate} 
-                                value={edu.endDate} 
-                                placeholder="Present"
-                                onSave={(val) => {
-                                    const newEdu = [...data.education];
-                                    newEdu[i].endDate = val;
-                                    handleUpdate('education', newEdu);
-                                }}
-                                className="bg-transparent border-none"
-                            />
-                       </div>
-                   </div>
-               ))}
-           </div>
+                                 {onUpdate && (
+                                  <ThemeDeleteButton
+                                     className="text-red-500 hover:bg-red-900/50 bg-transparent border-none ml-2"
+                                     onClick={() => {
+                                         const newEdu = [...data.education];
+                                         newEdu.splice(i, 1);
+                                         handleUpdate('education', newEdu);
+                                     }}
+                                  />
+                             )}
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
         </section>
 
         {/* Contact Footer */}

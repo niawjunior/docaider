@@ -1,0 +1,167 @@
+import { ResumeData } from "@/lib/schemas/resume";
+import { cn } from "@/lib/utils";
+import { InlineEdit } from "@/components/ui/inline-edit";
+import { ThemeAddButton, ThemeDeleteButton } from "../themes/ThemeControls";
+import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
+import { ResumeSectionList } from "@/components/resume/shared/ResumeSectionList";
+import { ResumeSection } from "@/components/resume/shared/ResumeSection";
+import { EmptySectionPlaceholder } from "@/components/resume/shared/EmptySectionPlaceholder";
+
+interface ExperienceSectionProps {
+    data: ResumeData;
+    theme: "modern" | "minimal" | "creative";
+    onUpdate?: (data: ResumeData) => void;
+}
+
+export function ExperienceSection({ data, theme, onUpdate }: ExperienceSectionProps) {
+    const { updateSection } = useResumeUpdate(data, onUpdate);
+
+    const handleUpdate = (newExp: any[]) => {
+        updateSection('experience', newExp);
+    };
+
+    return (
+        <ResumeSection
+            title="Experience"
+            theme={theme}
+            onAdd={onUpdate ? () => {
+                const newExp = [{
+                    id: crypto.randomUUID(),
+                    company: "Company Name",
+                    position: "Position",
+                    startDate: "2024",
+                    description: "Job description goes here..."
+                }, ...data.experience];
+                handleUpdate(newExp);
+            } : undefined}
+        >
+            {(!data.experience || data.experience.length === 0) && onUpdate ? (
+                <EmptySectionPlaceholder
+                    className="mt-4"
+                    message="Add your first experience"
+                    onClick={() => {
+                        const newExp = [{
+                            id: crypto.randomUUID(),
+                            company: "Company Name",
+                            position: "Position",
+                            startDate: "2024",
+                            description: "Job description goes here..."
+                        }, ...(data.experience || [])];
+                        handleUpdate(newExp);
+                    }}
+                />
+            ) : (
+                <ResumeSectionList
+                  data={data.experience}
+                  onUpdate={handleUpdate}
+                  className={cn(
+                      theme === "creative" ? "space-y-8 border-l-2 border-slate-100 pl-6 ml-1" : "space-y-6"
+                  )}
+                  renderItem={(exp, index, updateItem, deleteItem) => (
+                      <div className={cn(
+                          "group/exp relative",
+                          theme !== "creative" && "hover:bg-slate-50 p-2 -mx-2 rounded transition-colors"
+                      )}>
+                        {/* Creative Theme Dot */}
+                        {theme === "creative" && (
+                            <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-slate-900 border-4 border-white" />
+                        )}
+
+                        <div className={cn(
+                            "flex justify-between items-start mb-1 gap-4",
+                            theme === "minimal" && "flex-col items-center text-center relative"
+                        )}>
+                            <h3 className={cn(
+                                "font-bold",
+                                theme === "creative" ? "text-lg" : "text-lg w-full"
+                            )}>
+                                <InlineEdit readOnly={!onUpdate} 
+                                    value={exp.position} 
+                                    placeholder="Position"
+                                    className={theme === "minimal" ? "text-center w-full block" : ""}
+                                    onSave={(val) => updateItem({ position: val })}
+                                />
+                            </h3>
+
+                            <div className={cn(
+                                "flex items-center gap-2",
+                                theme === "minimal" ? "w-full justify-center mt-1" : "shrink-0"
+                            )}>
+                                {theme !== "creative" && (
+                                     <div className="text-sm text-slate-500 whitespace-nowrap flex gap-1">
+                                        <InlineEdit readOnly={!onUpdate} 
+                                            value={exp.startDate} 
+                                            placeholder="Start"
+                                            onSave={(val) => updateItem({ startDate: val })}
+                                        />
+                                        <span>-</span>
+                                        <InlineEdit readOnly={!onUpdate} 
+                                            value={exp.endDate} 
+                                            placeholder="Present"
+                                            onSave={(val) => updateItem({ endDate: val })}
+                                        />
+                                    </div>
+                                )}
+
+                                 {onUpdate && (
+                                    <ThemeDeleteButton
+                                        className={cn(
+                                            "text-red-500 hover:bg-red-50 rounded bg-transparent border-none shadow-none w-6 h-6 p-1 transition-opacity",
+                                            theme === "minimal" ? "absolute right-0 top-0" : ""
+                                        )}
+                                        onClick={deleteItem}
+                                    />
+                                 )}
+                            </div>
+                        </div>
+
+                        <div className={cn(
+                            "text-slate-600",
+                            theme === "minimal" ? "text-center text-sm" : ""
+                        )}>
+                            <div className={cn(
+                                "font-medium mb-1",
+                                theme === "creative" ? "text-slate-500" : ""
+                            )}>
+                                <InlineEdit readOnly={!onUpdate} 
+                                    value={exp.company} 
+                                    placeholder="Company"
+                                    className={theme === "minimal" ? "text-center w-full block" : ""}
+                                    onSave={(val) => updateItem({ company: val })}
+                                />
+                            </div>
+                            
+                            {/* Creative Theme Dates (Below Title) */}
+                            {theme === "creative" && (
+                                <div className="text-xs text-slate-400 mb-2 font-mono">
+                                    <InlineEdit readOnly={!onUpdate} 
+                                        value={exp.startDate} 
+                                        placeholder="Start"
+                                        onSave={(val) => updateItem({ startDate: val })}
+                                    />
+                                    <span> - </span>
+                                    <InlineEdit readOnly={!onUpdate} 
+                                        value={exp.endDate} 
+                                        placeholder="Present"
+                                        onSave={(val) => updateItem({ endDate: val })}
+                                    />
+                                </div>
+                            )}
+
+                            <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                                <InlineEdit readOnly={!onUpdate} 
+                                    value={exp.description} 
+                                    placeholder="Description"
+                                    multiline
+                                    className={theme === "minimal" ? "text-center w-full block" : ""}
+                                    onSave={(val) => updateItem({ description: val })}
+                                />
+                            </div>
+                        </div>
+                      </div>
+                  )}
+              />
+            )}
+        </ResumeSection>
+    );
+}

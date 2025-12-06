@@ -11,6 +11,9 @@ import { cn } from "@/lib/utils";
 import { InlineEdit } from "@/components/ui/inline-edit";
 import { Button } from "@/components/ui/button";
 import { ThemeAddButton, ThemeDeleteButton } from "./ThemeControls";
+import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
+import { ResumeSectionList } from "../shared/ResumeSectionList";
+import { EmptySectionPlaceholder } from "../shared/EmptySectionPlaceholder";
 
 interface StudioThemeProps {
   data: ResumeData;
@@ -18,6 +21,8 @@ interface StudioThemeProps {
 }
 
 export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
+  const { updateField: handleUpdate } = useResumeUpdate(data, onUpdate);
+
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -47,21 +52,6 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
     },
   };
 
-  const handleUpdate = (path: string, value: any) => {
-    if (!onUpdate) return;
-    const newData = JSON.parse(JSON.stringify(data));
-    
-    // Helper to set value at path
-    const parts = path.split('.');
-    let current = newData;
-    for (let i = 0; i < parts.length - 1; i++) {
-        current = current[parts[i]];
-    }
-    current[parts[parts.length - 1]] = value;
-    
-    onUpdate(newData);
-  };
-
   return (
     <div className="min-h-screen w-full bg-black text-white font-sans selection:bg-white selection:text-black overflow-hidden relative">
       {/* Navigation */}
@@ -79,7 +69,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
 
       {/* Hero Marquee */}
       <div className="pt-12 pb-12 border-b border-neutral-800 overflow-hidden whitespace-nowrap">
-        <motion.div 
+        <motion.div
           className="inline-flex gap-8"
           variants={marqueeVariants}
           animate="animate"
@@ -96,14 +86,14 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
             </div>
           ))}
         </motion.div>
-        
+
         {/* Editable Job Title (Outside Marquee for ease of editing) */}
         <div className="px-6 mt-4 text-center">
              <div className="text-sm text-neutral-500 mb-1">MARQUEE TEXT (Edit here):</div>
-             <InlineEdit readOnly={!onUpdate} 
-                value={data.personalInfo.jobTitle} 
+             <InlineEdit readOnly={!onUpdate}
+                value={data.personalInfo.jobTitle}
                 placeholder="CREATIVE DEVELOPER"
-                onSave={(val) => handleUpdate('personalInfo.jobTitle', val?.toUpperCase())} 
+                onSave={(val) => handleUpdate('personalInfo.jobTitle', val?.toUpperCase())}
                 className="text-2xl font-bold uppercase tracking-tighter bg-neutral-900 border-none text-center"
              />
         </div>
@@ -111,7 +101,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
 
       <main className="px-6">
         {/* Intro */}
-        <motion.section 
+        <motion.section
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -119,20 +109,20 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
           id="about"
         >
           <div className="text-4xl md:text-6xl font-bold leading-tight mb-8">
-             <InlineEdit readOnly={!onUpdate} 
-                value={data.personalInfo.summary} 
+             <InlineEdit readOnly={!onUpdate}
+                value={data.personalInfo.summary}
                 placeholder="Your professional summary goes here..."
                 multiline
-                onSave={(val) => handleUpdate('personalInfo.summary', val)} 
+                onSave={(val) => handleUpdate('personalInfo.summary', val)}
                 className="bg-transparent border-neutral-800"
              />
           </div>
-          
+
           <div className="space-y-4">
               <div className="flex justify-between items-center">
                   <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-widest">Skills</h3>
                    {onUpdate && (
-                      <ThemeAddButton 
+                      <ThemeAddButton
                         label=""
                         className="w-6 h-6 p-0 bg-transparent hover:bg-neutral-800 text-white border-neutral-800 hover:text-white"
                         onClick={() => {
@@ -144,8 +134,8 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
              </div>
             <div className="flex flex-wrap gap-4">
                 {data.skills.map((skill, i) => (
-                <span key={i} className="group/skill relative px-4 py-2 border border-neutral-800 rounded-full text-sm uppercase tracking-wider hover:bg-white hover:text-black transition-colors cursor-default">
-                     <InlineEdit readOnly={!onUpdate} 
+                <span key={i} className="group/skill relative inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 text-sm tracking-wider uppercase">
+                     <InlineEdit readOnly={!onUpdate}
                         value={skill}
                         onSave={(val) => {
                             const newSkills = [...data.skills];
@@ -161,7 +151,7 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                                 newSkills.splice(i, 1);
                                 handleUpdate('skills', newSkills);
                             }}
-                            className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 hover:bg-red-700 text-white border-none p-1"
+                            className="w-4 h-4 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border-none p-[2px] rounded-full transition-all"
                         />
                     )}
                 </span>
@@ -178,87 +168,93 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                     Work
                 </h2>
                  {onUpdate && (
-                     <ThemeAddButton 
+                     <ThemeAddButton
                         label="Add Project"
                         className="border-neutral-700 hover:bg-neutral-800 text-white bg-transparent hover:text-white"
                         onClick={() => {
                             const newProj = [{
+                                id: crypto.randomUUID(),
                                 name: "Project Name",
                                 description: "Description",
                                 technologies: []
                             }, ...data.projects];
                             handleUpdate('projects', newProj);
-                        }} 
+                        }}
                     />
                 )}
              </div>
 
-            <div className="grid gap-0">
-              {data.projects.map((project, i) => (
-                <motion.div 
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  key={i} 
-                  className="group/item relative py-12 border-t border-neutral-900 grid md:grid-cols-[1fr_2fr] gap-8 hover:bg-neutral-900/50 transition-colors px-4 -mx-4 rounded"
-                >
-                     {onUpdate && (
-                     <ThemeDeleteButton
-                        className="absolute right-4 top-12 text-red-500 hover:bg-red-900/50 border-none bg-transparent"
-                        onClick={() => {
-                            const newProjs = [...data.projects];
-                            newProjs.splice(i, 1);
-                            handleUpdate('projects', newProjs);
-                        }}
-                     />
-                    )}
-                  <div>
-                    <h3 className="text-3xl font-bold mb-2">
-                        <InlineEdit readOnly={!onUpdate} 
-                            value={project.name} 
-                            placeholder="Project Name"
-                            onSave={(val) => {
-                                const newProjs = [...data.projects];
-                                newProjs[i].name = val;
-                                handleUpdate('projects', newProjs);
-                            }}
-                            className="bg-transparent"
-                        />
-                    </h3>
-                     <div className="flex flex-col gap-1 text-neutral-500">
-                         <div className="flex items-center gap-1">
-                             <span className="text-xs uppercase tracking-wider">URL:</span>
-                             <InlineEdit readOnly={!onUpdate} 
-                                value={project.url} 
-                                placeholder="https://..."
-                                onSave={(val) => {
-                                    const newProjs = [...data.projects];
-                                    newProjs[i].url = val;
-                                    handleUpdate('projects', newProjs);
-                                }}
-                                className="bg-transparent text-sm"
-                            />
+            {(!data.projects || data.projects.length === 0) && onUpdate ? (
+                 <EmptySectionPlaceholder
+                    className="border-neutral-800 hover:border-neutral-600 bg-transparent"
+                    message="Add your first Project"
+                    onClick={() => {
+                        const newProj = [{
+                            id: crypto.randomUUID(),
+                            name: "Project Name",
+                            description: "Description",
+                            technologies: []
+                        }, ...(data.projects || [])];
+                        handleUpdate('projects', newProj);
+                    }}
+                />
+            ) : (
+                <ResumeSectionList
+                  data={data.projects}
+                  onUpdate={(val) => handleUpdate('projects', val)}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16"
+                  renderItem={(project, i, updateItem, deleteItem) => (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.1 }}
+                        className="group/item relative"
+                    >
+                      <div className="border-b border-neutral-800 pb-4 mb-4 flex justify-between items-end">
+                         <div className="flex-1">
+                            <h3 className="text-3xl font-bold flex-1">
+                                <InlineEdit readOnly={!onUpdate}
+                                    value={project.name}
+                                    placeholder="Project Name"
+                                    onSave={(val) => updateItem({ name: val })}
+                                    className="bg-transparent"
+                                />
+                            </h3>
+                            {onUpdate && (
+                                 <ThemeDeleteButton
+                                    className="text-red-500 hover:bg-red-900/50 border-none bg-transparent transition-opacity"
+                                    onClick={deleteItem}
+                                 />
+                            )}
+                        </div>
+                         <div className="flex flex-col gap-1 text-neutral-500">
+                             <div className="flex items-center gap-1">
+                                 <span className="text-xs uppercase tracking-wider">URL:</span>
+                                 <InlineEdit readOnly={!onUpdate}
+                                    value={project.url}
+                                    placeholder="https://..."
+                                    onSave={(val) => updateItem({ url: val })}
+                                    className="bg-transparent text-sm"
+                                />
+                             </div>
                          </div>
-                     </div>
-                  </div>
-                  <div>
-                    <p className="text-xl text-neutral-400 font-light leading-relaxed">
-                         <InlineEdit readOnly={!onUpdate} 
-                            value={project.description} 
-                            placeholder="Project description..."
-                            multiline
-                            onSave={(val) => {
-                                const newProjs = [...data.projects];
-                                newProjs[i].description = val;
-                                handleUpdate('projects', newProjs);
-                            }}
-                            className="bg-transparent"
-                        />
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                      </div>
+                      <div>
+                        <p className="text-xl text-neutral-400 font-light leading-relaxed">
+                             <InlineEdit readOnly={!onUpdate}
+                                value={project.description}
+                                placeholder="Project description..."
+                                multiline
+                                onSave={(val) => updateItem({ description: val })}
+                                className="bg-transparent"
+                            />
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                />
+            )}
           </section>
         )}
 
@@ -269,11 +265,12 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                     Experience
                 </h2>
                  {onUpdate && (
-                    <ThemeAddButton 
+                    <ThemeAddButton
                         label="Add"
                         className="bg-white text-black hover:bg-neutral-200 border-none"
                         onClick={() => {
                             const newExp = [{
+                                id: crypto.randomUUID(),
                                 company: "Company Name",
                                 position: "Position",
                                 startDate: "2024",
@@ -285,84 +282,80 @@ export const StudioTheme = ({ data, onUpdate }: StudioThemeProps) => {
                 )}
             </div>
 
-          <div className="space-y-16">
-            {data.experience.map((exp, i) => (
-              <div key={i} className="group/item relative grid md:grid-cols-[200px_1fr] gap-8">
-                  {onUpdate && (
-                     <ThemeDeleteButton 
-                        className="absolute right-0 top-0 bg-red-600 hover:bg-red-700 text-white border-none"
-                        onClick={() => {
-                            const newExp = [...data.experience];
-                            newExp.splice(i, 1);
-                            handleUpdate('experience', newExp);
-                        }}
-                     />
-                    )}
-                <div className="text-neutral-500 font-mono text-sm pt-1 flex gap-1 items-baseline">
-                     <InlineEdit readOnly={!onUpdate} 
-                        value={exp.startDate} 
-                        placeholder="Start"
-                        onSave={(val) => {
-                            const newExp = [...data.experience];
-                            newExp[i].startDate = val;
-                            handleUpdate('experience', newExp);
-                        }}
-                        className="bg-transparent"
-                    />
-                    <span>-</span>
-                    <InlineEdit readOnly={!onUpdate} 
-                        value={exp.endDate} 
-                        placeholder="Present"
-                        onSave={(val) => {
-                            const newExp = [...data.experience];
-                            newExp[i].endDate = val;
-                            handleUpdate('experience', newExp);
-                        }}
-                        className="bg-transparent"
-                    />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-1">
-                      <InlineEdit readOnly={!onUpdate} 
-                        value={exp.position} 
-                        placeholder="Position"
-                        onSave={(val) => {
-                            const newExp = [...data.experience];
-                            newExp[i].position = val;
-                            handleUpdate('experience', newExp);
-                        }}
-                        className="bg-transparent"
-                    />
-                  </h3>
-                  <div className="text-xl text-neutral-400 mb-4">
-                     <InlineEdit readOnly={!onUpdate} 
-                        value={exp.company} 
-                        placeholder="Company"
-                        onSave={(val) => {
-                            const newExp = [...data.experience];
-                            newExp[i].company = val;
-                            handleUpdate('experience', newExp);
-                        }}
-                        className="bg-transparent"
-                    />
+           {(!data.experience || data.experience.length === 0) && onUpdate ? (
+                <EmptySectionPlaceholder
+                    className="border-neutral-800 hover:border-neutral-600 bg-transparent"
+                    message="Add your first Experience"
+                    onClick={() => {
+                        const newExp = [{
+                            id: crypto.randomUUID(),
+                            company: "Company Name",
+                            position: "Position",
+                            startDate: "2024",
+                            description: "Job description goes here..."
+                        }, ...(data.experience || [])];
+                        handleUpdate('experience', newExp);
+                    }}
+                />
+           ) : (
+            <ResumeSectionList
+              data={data.experience}
+              onUpdate={(val) => handleUpdate('experience', val)}
+              className="space-y-16"
+              renderItem={(exp, i, updateItem, deleteItem) => (
+                <div className="group/item relative grid md:grid-cols-[200px_1fr] gap-8">
+                    {onUpdate && (
+                       <ThemeDeleteButton
+                          className="absolute right-0 top-0 bg-red-600 hover:bg-red-700 text-white border-none"
+                          onClick={deleteItem}
+                       />
+                      )}
+                  <div className="text-neutral-500 font-mono text-sm pt-1 flex gap-1 items-baseline">
+                       <InlineEdit readOnly={!onUpdate}
+                          value={exp.startDate}
+                          placeholder="Start"
+                          onSave={(val) => updateItem({ startDate: val })}
+                          className="bg-transparent"
+                      />
+                      <span>-</span>
+                      <InlineEdit readOnly={!onUpdate}
+                          value={exp.endDate}
+                          placeholder="Present"
+                          onSave={(val) => updateItem({ endDate: val })}
+                          className="bg-transparent"
+                      />
                   </div>
-                  <p className="text-neutral-400 leading-relaxed max-w-2xl">
-                     <InlineEdit readOnly={!onUpdate} 
-                        value={exp.description} 
-                        placeholder="Description..."
-                        multiline
-                        onSave={(val) => {
-                            const newExp = [...data.experience];
-                            newExp[i].description = val;
-                            handleUpdate('experience', newExp);
-                        }}
-                        className="bg-transparent"
-                    />
-                  </p>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white mb-1">
+                        <InlineEdit readOnly={!onUpdate}
+                          value={exp.position}
+                          placeholder="Position"
+                          onSave={(val) => updateItem({ position: val })}
+                          className="bg-transparent"
+                        />
+                    </h3>
+                    <div className="text-xl text-neutral-400 mb-4">
+                        <InlineEdit readOnly={!onUpdate}
+                          value={exp.company}
+                          placeholder="Company"
+                          onSave={(val) => updateItem({ company: val })}
+                          className="bg-transparent"
+                        />
+                    </div>
+                    <p className="text-neutral-400 leading-relaxed max-w-2xl">
+                         <InlineEdit readOnly={!onUpdate}
+                            value={exp.description}
+                            placeholder="Description..."
+                            multiline
+                            onSave={(val) => updateItem({ description: val })}
+                            className="bg-transparent"
+                        />
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              )}
+            />
+           )}
         </section>
 
         {/* Contact */}
