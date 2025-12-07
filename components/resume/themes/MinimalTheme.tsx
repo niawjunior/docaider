@@ -50,7 +50,7 @@ export const MinimalTheme = ({ data, onUpdate, readOnly }: MinimalThemeProps) =>
   };
 
   return (
-    <div id="resume-preview" className="w-[210mm] min-h-[297mm] bg-white shadow-xl mx-auto p-12 md:p-16 space-y-8 text-left">
+    <div id="resume-preview" className="w-[250mm] min-h-[297mm] bg-white shadow-xl mx-auto p-12 md:p-16 space-y-8 text-left">
       <ContactHeader data={data} theme="minimal" onUpdate={onUpdate} readOnly={readOnly} />
       
       {/* Dynamic Order */}

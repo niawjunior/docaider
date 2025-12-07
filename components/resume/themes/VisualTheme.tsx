@@ -1,4 +1,5 @@
 import { ResumeData } from "@/lib/schemas/resume";
+import { cn } from "@/lib/utils";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {  Mail, MapPin, Globe, Linkedin } from "lucide-react";
 import { InlineEdit } from "@/components/ui/inline-edit";
@@ -15,38 +16,52 @@ interface VisualThemeProps {
   data: ResumeData;
   onUpdate?: (data: ResumeData) => void;
   readOnly?: boolean;
-  containerRef?: React.RefObject<HTMLElement>;
+  containerRef?: React.RefObject<any>;
+  isThumbnail?: boolean;
 }
 
-export const VisualTheme = ({ data, onUpdate, readOnly, containerRef }: VisualThemeProps) => {
+export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnail }: VisualThemeProps) => {
   const { updateField: handleUpdate } = useResumeUpdate(data, onUpdate);
   const { scrollYProgress } = useScroll({
-    container: containerRef,
-    layoutEffect: false // Use effect to avoid SSR issues if needed, or default
+    container: containerRef
   });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const [isCoverPickerOpen, setIsCoverPickerOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-white selection:text-black">
-      {/* Navigation */}
-      <nav className="sticky top-0 left-0 right-0 z-50 p-6 flex justify-between items-center mix-blend-difference">
-        <span className="text-xl font-bold tracking-tighter uppercase">
-             {/* Read-only name for nav */}
-            {(data.personalInfo.fullName ?? '').split(' ')[0]}
-        </span>
-        <div className="flex gap-6 text-sm font-medium uppercase tracking-widest bg-black/50 backdrop-blur rounded px-4 py-2">
-          <a href="#work" className="hover:opacity-50 transition-opacity">Work</a>
-          <a href="#about" className="hover:opacity-50 transition-opacity">About</a>
-          <a href="#contact" className="hover:opacity-50 transition-opacity">Contact</a>
-        </div>
-      </nav>
+    <div className={cn(
+      "bg-[#0a0a0a] text-white font-sans selection:bg-white selection:text-black",
+      isThumbnail ? "h-full w-full overflow-hidden" : "min-h-screen"
+    )}>
+      {/* Navigation - Hide in thumbnail */}
+      {!isThumbnail && (
+        <nav className="sticky top-0 left-0 right-0 z-50 p-6 flex justify-between items-center mix-blend-difference">
+          <span className="text-xl font-bold tracking-tighter uppercase">
+               {/* Read-only name for nav */}
+              {(data.personalInfo.fullName ?? '').split(' ')[0]}
+          </span>
+          <div className="flex gap-6 text-sm font-medium uppercase tracking-widest bg-black/50 backdrop-blur rounded px-4 py-2">
+            <a href="#work" className="hover:opacity-50 transition-opacity">Work</a>
+            <a href="#about" className="hover:opacity-50 transition-opacity">About</a>
+            <a href="#contact" className="hover:opacity-50 transition-opacity">Contact</a>
+          </div>
+        </nav>
+      )}
 
       {/* Hero Section */}
-      <header className="relative w-full h-screen flex flex-col justify-end p-6 md:p-12 overflow-hidden">
+      <header className={cn(
+        "relative w-full flex flex-col justify-end overflow-hidden",
+        isThumbnail ? "h-full p-8" : "h-screen p-6 md:p-12"
+      )}>
         <div className="absolute inset-0 z-0">
           {data.coverImage ? (
-            <motion.div style={{ y }} className="w-full h-[120%] -translate-y-[10%]">
+            <motion.div 
+                style={isThumbnail ? undefined : { y }} 
+                className={cn(
+                    "w-full h-[120%] -translate-y-[10%]",
+                    isThumbnail && "h-full translate-y-0" // Reset for thumbnail
+                )}
+            >
               <img 
                 src={data.coverImage} 
                 alt="Cover" 

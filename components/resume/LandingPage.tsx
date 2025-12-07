@@ -373,7 +373,7 @@ export function LandingPage({ initialData }: LandingPageProps) {
                     >
                        <div className="relative aspect-[4/3] bg-slate-900 rounded-xl overflow-hidden border border-white/10 group-hover:border-white/30 transition-all shadow-2xl">
                           <div className={`absolute inset-0 scale-[0.4] origin-top-left w-[250%] h-[250%] ${theme.id === 'visual' ? 'bg-black' : 'bg-white'} pointer-events-none`}>
-                             <ResumePreview data={theme.data as any} theme={theme.id as any} />
+                             <ResumePreview data={theme.data as any} theme={theme.id as any} isThumbnail={true} className="h-full" />
                           </div>
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4 backdrop-blur-sm">
                              <Button 
@@ -425,7 +425,7 @@ export function LandingPage({ initialData }: LandingPageProps) {
                        <div className="relative aspect-video bg-slate-800 rounded-xl overflow-hidden border border-white/10 group-hover:border-blue-500/50 transition-all duration-500">
                           {/* Screenshot Mock */}
                           <div className="absolute inset-0 scale-[0.25] origin-top-left w-[400%] h-[400%] pointer-events-none bg-white">
-                             <ResumePreview data={example.data} theme={example.theme as any} />
+                             <ResumePreview data={example.data} theme={example.theme as any} isThumbnail={true} className="h-full" />
                           </div>
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4 backdrop-blur-sm">
                              <Button 

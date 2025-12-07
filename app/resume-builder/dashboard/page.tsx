@@ -111,6 +111,8 @@ export default function DashboardPage() {
                     <ResumePreview
                       data={resume.content}
                       theme={resume.theme || "modern"}
+                      isThumbnail={true}
+                      className="h-full"
                     />
                   </div>
                   

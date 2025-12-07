@@ -97,7 +97,7 @@ export function ResumeEditor() {
              setVisibility(data.is_public ? "public" : "private");
 
              // setPublishedUrl(null); // Keep existing publishedUrl if any (e.g. from just publishing)
-             lastSavedData.current = JSON.stringify(data.content);
+             lastSavedData.current = JSON.stringify({ content: data.content, theme: data.theme });
            }
          } catch (e) {
            console.error("Failed to load resume", e);
@@ -113,7 +113,8 @@ export function ResumeEditor() {
   }, [idParam]);
 
   // Track unsaved changes
-  const isDirty = JSON.stringify(resumeData) !== lastSavedData.current;
+  // Track unsaved changes (content OR theme)
+  const isDirty = JSON.stringify({ content: resumeData, theme }) !== lastSavedData.current;
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col text-slate-100 dark">
@@ -149,7 +150,7 @@ export function ResumeEditor() {
                                     id: idParam,
                                     slug 
                                 });
-                                lastSavedData.current = JSON.stringify(resumeData);
+                                lastSavedData.current = JSON.stringify({ content: resumeData, theme });
                                 toast.success("Saved successfully");
                             } catch (e) {
                                 console.error("Save Failed", e);
@@ -170,41 +171,37 @@ export function ResumeEditor() {
                     
                     <div className="h-6 w-px bg-white/10 mx-2 hidden sm:block" />
 
-                    {/* Viewport Toggles - Only show for web themes */}
-                    {["portfolio", "studio", "visual"].includes(theme) && (
-                        <>
-                            <div className="flex bg-slate-800/50 rounded-lg p-1 border border-white/5 mr-2">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className={cn("w-8 h-8 rounded-md transition-all", viewport === "desktop" ? "bg-white/10 text-white shadow-sm" : "text-slate-400 hover:text-white hover:bg-white/5")}
-                                    onClick={() => setViewport("desktop")}
-                                    title="Desktop View"
-                                >
-                                    <Monitor className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                    variant="ghost" 
-                                    size="icon"
-                                    className={cn("w-8 h-8 rounded-md transition-all", viewport === "tablet" ? "bg-white/10 text-white shadow-sm" : "text-slate-400 hover:text-white hover:bg-white/5")}
-                                    onClick={() => setViewport("tablet")}
-                                    title="Tablet View"
-                                >
-                                    <Tablet className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="icon" 
-                                    className={cn("w-8 h-8 rounded-md transition-all", viewport === "mobile" ? "bg-white/10 text-white shadow-sm" : "text-slate-400 hover:text-white hover:bg-white/5")}
-                                    onClick={() => setViewport("mobile")}
-                                    title="Mobile View"
-                                >
-                                    <Smartphone className="w-4 h-4" />
-                                </Button>
-                            </div>
-                            <div className="h-6 w-px bg-white/10 mx-2 hidden sm:block" />
-                        </>
-                    )}
+                    {/* Viewport Toggles - Available for ALL themes */}
+                    <div className="flex bg-slate-800/50 rounded-lg p-1 border border-white/5 mr-2">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className={cn("w-8 h-8 rounded-md transition-all", viewport === "desktop" ? "bg-white/10 text-white shadow-sm" : "text-slate-400 hover:text-white hover:bg-white/5")}
+                            onClick={() => setViewport("desktop")}
+                            title="Desktop View"
+                        >
+                            <Monitor className="w-4 h-4" />
+                        </Button>
+                        <Button
+                            variant="ghost" 
+                            size="icon"
+                            className={cn("w-8 h-8 rounded-md transition-all", viewport === "tablet" ? "bg-white/10 text-white shadow-sm" : "text-slate-400 hover:text-white hover:bg-white/5")}
+                            onClick={() => setViewport("tablet")}
+                            title="Tablet View"
+                        >
+                            <Tablet className="w-4 h-4" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon" 
+                            className={cn("w-8 h-8 rounded-md transition-all", viewport === "mobile" ? "bg-white/10 text-white shadow-sm" : "text-slate-400 hover:text-white hover:bg-white/5")}
+                            onClick={() => setViewport("mobile")}
+                            title="Mobile View"
+                        >
+                            <Smartphone className="w-4 h-4" />
+                        </Button>
+                    </div>
+                    <div className="h-6 w-px bg-white/10 mx-2 hidden sm:block" />
 
                     {/* Theme Selector */}
                     <div className="flex items-center space-x-2 hidden sm:flex">
@@ -369,7 +366,7 @@ export function ResumeEditor() {
 
       {/* View Mode Exit Button (Floating) */}
       {isViewMode && (
-          <div className="fixed top-4 right-4 z-50">
+          <div className="fixed top-4 right-6 z-[99]">
               <Button 
                 onClick={() => setIsViewMode(false)}
                 className="bg-black/50 hover:bg-black/80 text-white backdrop-blur-md border border-white/10"
@@ -425,15 +422,19 @@ export function ResumeEditor() {
             ) : (idParam && resumeData) ? (
                 <div className={cn(
                     "animate-in fade-in slide-in-from-bottom-4 duration-500 light transition-all ease-in-out mx-auto shadow-2xl",
-                    // Constrain width only for document-style themes
-                    ["modern", "minimal", "creative"].includes(theme) 
-                        ? "w-full max-w-5xl" 
-                        : cn(
-                            "w-full bg-white dark:bg-slate-950", // Web themes need background in boxed mode
-                            viewport === "desktop" && "w-full",
-                            viewport === "tablet" && "w-[768px] border-x border-white/10 my-8 rounded-lg overflow-hidden min-h-[800px]",
-                            viewport === "mobile" && "w-[375px] border-x border-white/10 my-8 rounded-2xl overflow-hidden min-h-[667px]"
-                        )
+                    // Unified logic: 
+                    // 1. If Tablet/Mobile, enforce specific widths for ALL themes.
+                    // 2. If Desktop, distinguish between "Document" (constrained) and "Web" (full width).
+                    
+                    viewport === "tablet" && "w-[768px] border-x border-white/10 my-8 rounded-lg overflow-hidden min-h-[800px] bg-white dark:bg-slate-950",
+                    viewport === "mobile" && "w-[375px] border-x border-white/10 my-8 rounded-2xl overflow-hidden min-h-[667px] bg-white dark:bg-slate-950",
+                    
+                    viewport === "desktop" && [
+                        // Document Themes: Constrained to A4-ish width
+                        ["modern", "minimal", "creative"].includes(theme) ? "w-full max-w-5xl" : 
+                        // Web Themes: Full width
+                        "w-full bg-white dark:bg-slate-950"
+                    ]
                 )}>
 
                     <ResumePreview 

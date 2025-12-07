@@ -16,7 +16,8 @@ interface ResumePreviewProps {
   className?: string;
   onUpdate?: (data: ResumeData) => void;
   readOnly?: boolean;
-  containerRef?: React.RefObject<HTMLElement>;
+  containerRef?: React.RefObject<any>;
+  isThumbnail?: boolean;
 }
 
 export function ResumePreview({
@@ -25,7 +26,8 @@ export function ResumePreview({
   className,
   onUpdate,
   readOnly,
-  containerRef
+  containerRef,
+  isThumbnail
 }: ResumePreviewProps) {
   
   const content = (() => {
@@ -35,7 +37,7 @@ export function ResumePreview({
       case 'studio':
         return <StudioTheme data={data} onUpdate={onUpdate} readOnly={readOnly} />;
       case 'visual':
-        return <VisualTheme data={data} onUpdate={onUpdate} readOnly={readOnly} containerRef={containerRef} />;
+        return <VisualTheme data={data} onUpdate={onUpdate} readOnly={readOnly} containerRef={containerRef} isThumbnail={isThumbnail} />;
       case 'minimal':
         return <MinimalTheme data={data} onUpdate={onUpdate} readOnly={readOnly} />;
       case 'creative':

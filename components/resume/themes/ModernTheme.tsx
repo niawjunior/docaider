@@ -58,7 +58,7 @@ export const ModernTheme = ({ data, onUpdate, readOnly }: ModernThemeProps) => {
   };
 
   return (
-    <div id="resume-preview" className="w-[210mm] min-h-[297mm] bg-white shadow-xl flex mx-auto">
+    <div id="resume-preview" className="w-[250mm] min-h-[297mm] bg-white shadow-xl flex mx-auto">
       {/* Sidebar */}
       <div className="w-1/3 bg-slate-900 text-white p-8 space-y-8 flex-shrink-0">
         <div className="space-y-4">
