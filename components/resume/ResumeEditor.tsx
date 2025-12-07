@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Share2, Layout } from "lucide-react";
 import { ResumePreview } from "@/components/resume/ResumePreview";
-import { ResumeUploader } from "@/components/resume/ResumeUploader";
 import { ResumeData } from "@/lib/schemas/resume";
 import { toast } from "sonner";
 import {
@@ -34,67 +33,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Upload, Eye, EyeOff, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Eye, EyeOff, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { publishResume, getResumeById, saveDraft } from "@/app/actions/resume";
 import { ResumeBuilderHeader } from "@/components/resume/ResumeBuilderHeader";
 import { SectionManager } from "./shared/SectionManager";
 
-import { getThemeById, THEME_DEMOS } from "@/lib/themes";
-import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
-import { GashaponReveal } from "./shared/GashaponReveal";
-
-function TiltCard({ children, className }: { children: React.ReactNode; className?: string }) {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-    const centerX = left + width / 2;
-    const centerY = top + height / 2;
-    x.set(e.clientX - centerX);
-    y.set(e.clientY - centerY);
-  };
-
-  const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
-  };
-
-  const rotateX = useSpring(useTransform(y, [-300, 300], [10, -10]), { stiffness: 150, damping: 20 });
-  const rotateY = useSpring(useTransform(x, [-300, 300], [-10, 10]), { stiffness: 150, damping: 20 });
-  
-  // Holographic glare effect
-  const glareX = useTransform(x, [-300, 300], [0, 100]);
-  const glareY = useTransform(y, [-300, 300], [0, 100]);
-
-  return (
-    <motion.div
-      style={{ perspective: 1000 }}
-      className={className}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
-      <motion.div
-        style={{ rotateX, rotateY }}
-        className="w-full h-full transform-style-3d relative transition-all duration-200"
-      >
-        {children}
-        
-        {/* Holographic Overlay */}
-        <motion.div 
-            className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none rounded-xl z-50 mix-blend-overlay"
-            style={{ 
-                backgroundPosition: `${glareX}% ${glareY}%`,
-                opacity: useTransform(x, [-300, 0, 300], [0, 0.5, 0]) 
-            }}
-        />
-      </motion.div>
-    </motion.div>
-  );
-}
+import { AnimatePresence, motion } from "framer-motion";
 
 export function ResumeEditor() {
   const router = useRouter();
@@ -113,11 +60,16 @@ export function ResumeEditor() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isViewMode, setIsViewMode] = useState(false);
-  const [isRevealing, setIsRevealing] = useState(false);
-  const [pendingData, setPendingData] = useState<ResumeData | null>(null);
-  const [scannerState, setScannerState] = useState<{ active: boolean; color: string }>({ active: false, color: '' });
+
   // Removed internal import state, now handled via redirection
   const lastSavedData = useRef<string>("");
+
+  // Redirect to Create if no ID
+  useEffect(() => {
+    if (!idParam) {
+       router.replace("/resume-builder/create");
+    }
+  }, [idParam, router]);
 
   // Ensure default theme in URL
   useEffect(() => {
@@ -138,8 +90,7 @@ export function ResumeEditor() {
              setResumeData(data.content);
              setTheme(data.theme as any);
              setSlug(data.slug);
-             setTheme(data.theme as any);
-             setSlug(data.slug);
+
              // setPublishedUrl(null); // Keep existing publishedUrl if any (e.g. from just publishing)
              lastSavedData.current = JSON.stringify(data.content);
            }
@@ -148,124 +99,16 @@ export function ResumeEditor() {
            toast.error("Failed to load resume");
        } finally {
            setIsLoading(false);
-         }
-      } else {
-        const autoCreate = searchParams.get("auto") === "true";
-        
-        if (themeParam && autoCreate && !resumeData) {
-            // Auto-creation flow: Keep loading explicit
-            setTheme(themeParam as any);
-            const { getThemeById } = await import("@/lib/themes");
-            const demoTheme = getThemeById(themeParam);
-            
-            if (demoTheme) {
-                try {
-                    const result = await saveDraft({
-                        content: demoTheme.data as any,
-                        theme: themeParam,
-                    });
-                    if (result.success && result.id) {
-                        toast.success("Template initialized!");
-                        // Redirect to the new dedicated edit route
-                        router.replace(`/resume-builder/${result.id}/edit`);
-                        setResumeData(demoTheme.data as any);
-                        setSlug(result.slug || "");
-                        lastSavedData.current = JSON.stringify(demoTheme.data);
-                    }
-                } catch(e) {
-                     console.error("Auto-create failed", e);
-                } finally {
-                     setIsLoading(false);
-                }
-            } else {
-                setIsLoading(false);
-            }
-        } else {
-            // Standard fresh start
-            setIsLoading(false);
-            if (themeParam) {
-                setTheme(themeParam as any);
-            }
-        }
+          }
       }
     };
-    loadData();
-  }, [idParam, themeParam]); // Removed searchParams to prevent re-renders on unrelated changes
+    if (idParam) {
+        loadData();
+    }
+  }, [idParam]);
 
   // Track unsaved changes
   const isDirty = JSON.stringify(resumeData) !== lastSavedData.current;
-
-  const handleUploadSuccess = async (data: ResumeData) => {
-    // Stage data for reveal
-    setPendingData(data);
-    setIsRevealing(true);
-  };
-
-  const handleRevealComplete = async () => {
-    if (!pendingData) return;
-    
-    // 1. Don't turn off isRevealing yet. We want to hide the transition.
-    // setIsRevealing(false); // <--- REMOVED
-    
-    setIsLoading(true); // Show global loader overlay if Gashapon unmounts (backup)
-
-    try {
-        // 2. Save the pending data as a draft
-        const result = await saveDraft({
-            content: pendingData,
-            theme: theme,
-            slug: slug || `${pendingData.personalInfo.fullName?.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
-        });
-        
-        if (result.success && result.id) {
-            setResumeData(pendingData);
-            // 3. Force hard redirect to the new Edit URL
-            // Prefetch to make it faster
-            router.prefetch(`/resume-builder/${result.id}/edit`);
-            router.push(`/resume-builder/${result.id}/edit`);
-            
-            // NOTE: We do NOT set isRevealing(false) here. 
-            // We let the page navigation unmount this component entirely.
-            // This prevents the "flash" of the Create User Interface.
-        } else {
-            toast.error("Failed to save resume");
-            setIsRevealing(false); // Only close if error
-            setIsLoading(false);
-        }
-    } catch (error) {
-        console.error("Failed to create resume from reveal", error);
-        toast.error("Something went wrong");
-        setIsRevealing(false); // Only close if error
-        setIsLoading(false);
-    }
-  };
-
-  const cycleTheme = (direction: 'next' | 'prev') => {
-      const currentId = themeParam || THEME_DEMOS[0].id;
-      const currentIndex = THEME_DEMOS.findIndex(t => t.id === currentId);
-      
-      let newIndex;
-      if (direction === 'next') {
-          newIndex = (currentIndex + 1) % THEME_DEMOS.length;
-      } else {
-          newIndex = (currentIndex - 1 + THEME_DEMOS.length) % THEME_DEMOS.length;
-      }
-      
-      const newThemeId = THEME_DEMOS[newIndex].id;
-      setTheme(newThemeId as any);
-      router.replace(`/resume-builder/create?theme=${newThemeId}`, { scroll: false });
-  };
-  
-  // Ensure we have a default theme for preview if none selected
-  const activePreviewTheme = themeParam ? getThemeById(themeParam) : getThemeById("modern");
-
-  const handleScannerStateChange = useCallback((active: boolean, color?: string) => {
-    setScannerState(prev => {
-        // Prevent unnecessary state updates
-        if (prev.active === active && prev.color === (color || '')) return prev;
-        return { active, color: color || '' };
-    });
-  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col text-slate-100 dark">
@@ -474,14 +317,12 @@ export function ResumeEditor() {
 
       <main className="flex-1 flex overflow-hidden relative">
         <AnimatePresence>
-            {isRevealing && pendingData && (
-                <GashaponReveal onComplete={handleRevealComplete} data={pendingData} />
-            )}
+
             
             {/* Transition Loader: Shows when we are redirecting after reveal */}
-            {isLoading && isRevealing && (
+            {isLoading && (
                 <motion.div 
-                    initial={{ opacity: 0 }}
+                    initial={{ opacity: 1 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     className="absolute inset-0 z-[110] bg-slate-950 flex flex-col items-center justify-center"
@@ -512,7 +353,7 @@ export function ResumeEditor() {
                 <div className="h-full flex items-center justify-center">
                      <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
                 </div>
-            ) : resumeData ? (
+            ) : (idParam && resumeData) ? (
                 <div className="w-full max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500 light">
 
                     <ResumePreview 
@@ -522,115 +363,9 @@ export function ResumeEditor() {
                         readOnly={isViewMode} // Pass readOnly state
                     />
                 </div>
-            ) : (
-                <div className="w-full h-full flex flex-col md:flex-row items-center justify-center p-6 gap-12 relative overflow-hidden">
-                    {/* Ambient Background */}
-                    {/* Ambient Background */}
-                    <div className="absolute inset-0 opacity-10 blur-3xl scale-110 pointer-events-none transition-all duration-1000">
-                         {activePreviewTheme && (
-                            <div className="scale-[0.5] origin-center opacity-50">
-                                <ResumePreview data={activePreviewTheme.data as any} theme={activePreviewTheme.id as any} />
-                            </div>
-                         )}
-                    </div>
-
-                    {/* 3D Preview Card (Desktop) */}
-                    <div className="hidden lg:block relative z-10 perspective-1000">
-                        {/* Navigation Buttons (Static) */}
-                        <div className="absolute top-1/2 -left-16 -translate-y-1/2 z-50">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => cycleTheme('prev')}
-                                className="rounded-full bg-white/5 hover:bg-white/20 text-white border border-white/10 hover:scale-110 transition-all hover:border-blue-500/50"
-                            >
-                                <ChevronLeft className="w-6 h-6" />
-                            </Button>
-                        </div>
-
-                        <div className="absolute top-1/2 -right-16 -translate-y-1/2 z-50">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => cycleTheme('next')}
-                                className="rounded-full bg-white/5 hover:bg-white/20 text-white border border-white/10 hover:scale-110 transition-all hover:border-blue-500/50"
-                            >
-                                <ChevronRight className="w-6 h-6" />
-                            </Button>
-                        </div>
-
-                        {/* Animated Card */}
-                        <AnimatePresence mode="wait">
-                            <motion.div 
-                                key={activePreviewTheme?.id}
-                                initial={{ opacity: 0, x: -100, rotateY: -20 }}
-                                animate={{ opacity: 1, x: 0, rotateY: 0 }}
-                                exit={{ opacity: 0, x: 100, rotateY: 20 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                className="w-[350px] aspect-[1/1.4]"
-                            >
-                                <TiltCard className="w-full h-full">
-                                <div className={cn(
-                                    "w-full h-full bg-slate-900 rounded-xl overflow-hidden border shadow-2xl relative group ring-1 ring-white/10 transition-all duration-500",
-                                    scannerState.active 
-                                        ? `border-${scannerState.color.split('-')[1]}-500 shadow-[0_0_50px_-10px_rgba(var(--${scannerState.color.split('-')[1]}-500),0.5)]` 
-                                        : "border-white/10"
-                                )}>
-                                     {/* Scanning Laser Effect */ }
-                                     {scannerState.active && (
-                                        <div className="absolute inset-0 z-40 pointer-events-none">
-                                            <motion.div 
-                                                className={cn("absolute top-0 left-0 right-0 h-[2px] shadow-[0_0_20px_2px_currentColor] z-50", scannerState.color.replace('bg-', 'text-').replace('-500', '-400'))}
-                                                animate={{ top: ["0%", "100%"] }}
-                                                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                                            />
-                                            <motion.div 
-                                                className={cn("absolute top-0 left-0 right-0 bg-gradient-to-b from-transparent to-current opacity-20", scannerState.color.replace('bg-', 'text-').replace('-500', '-500'))}
-                                                style={{ height: "20%" }}
-                                                animate={{ top: ["-20%", "100%"] }}
-                                                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                                            />
-                                            {/* Grid overlay that reveals */}
-                                            <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-20 mix-blend-overlay" />
-                                        </div>
-                                     )}
-
-                                     {/* Card High-Res Preview */}
-                                     {activePreviewTheme && (
-                                         <div className={cn(
-                                             "absolute inset-0 w-[200%] h-[200%] scale-[0.5] origin-top-left pointer-events-none bg-slate-950 transition-all duration-500",
-                                             scannerState.active ? "opacity-50 grayscale brightness-150 contrast-125" : "opacity-100"
-                                         )}>
-                                              <ResumePreview 
-                                                data={activePreviewTheme.data as any} 
-                                                theme={activePreviewTheme.id as any} 
-                                              />
-                                         </div>
-                                     )}
-                                     
-                                     {/* Card Info Overlay */}
-                                     <div className="absolute bottom-6 left-6 right-6 z-30">
-                                        <div className="bg-slate-950/80 backdrop-blur-xl border border-white/10 p-4 rounded-xl shadow-xl">
-                                            <h3 className="text-white font-bold text-lg mb-1">{activePreviewTheme?.name}</h3>
-                                            <p className="text-slate-400 text-sm leading-snug">{activePreviewTheme?.description}</p>
-                                        </div>
-                                     </div>
-                                </div>
-                            </TiltCard>
-                            </motion.div>
-                        </AnimatePresence>
-                    </div>
-
-                    {/* Uploader Section */}
-                    <div className="relative z-20 w-full max-w-xl bg-slate-950/80 ml-[40px] backdrop-blur-sm p-8 rounded-3xl border border-white/5 shadow-2xl">
-                        <ResumeUploader 
-                            onUploadSuccess={handleUploadSuccess} 
-                            onLoadingStateChange={handleScannerStateChange}
-                        />
-                    </div>
-                </div>
-            )}
+            ) : null}
         </div>
+
       </main>
     </div>
   );

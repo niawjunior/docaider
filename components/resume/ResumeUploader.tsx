@@ -13,6 +13,7 @@ import { ScanAnimation, CircuitAnimation, SparkleAnimation, RocketAnimation } fr
 
 interface ResumeUploaderProps {
   onUploadSuccess: (data: ResumeData) => void;
+  onReadyToReveal: (data: ResumeData) => void;
   isLoading?: boolean;
   onLoadingStateChange?: (isLoading: boolean, colorClass?: string) => void;
 }
@@ -25,7 +26,7 @@ const PROCESSING_STEPS = [
 ];
 
 export function ResumeUploader(props: ResumeUploaderProps) {
-  const { onUploadSuccess, isLoading: externalLoading } = props;
+  const { onUploadSuccess, onReadyToReveal, isLoading: externalLoading } = props;
   const [file, setFile] = useState<File | null>(null);
   const [processingStep, setProcessingStep] = useState(0);
   const [isFinalizing, setIsFinalizing] = useState(false);
@@ -42,14 +43,12 @@ export function ResumeUploader(props: ResumeUploaderProps) {
       return res.json() as Promise<ResumeData>;
     },
     onSuccess: async (data: ResumeData) => {
-      // Keep loading state visible for at least a moment to show "Finalizing"
-      setIsFinalizing(true);
-      setProcessingStep(3);
-      setTimeout(() => {
-          // Always enforce default cover image, ignoring AI hallucination
-          data.coverImage = "/images/cover.png";
-          onUploadSuccess(data);
-      }, 3000); // Allow time for Finalizing animation to complete
+      // Step 1: Processing Finish -> Trigger Reveal UI
+       // Always enforce default cover image
+      data.coverImage = "/images/cover.png";
+      
+      // Trigger Reveal UI immediately
+      onReadyToReveal(data); 
     },
     onError: (error) => {
       toast.error("Failed to parse resume. Please try again.");
@@ -58,6 +57,8 @@ export function ResumeUploader(props: ResumeUploaderProps) {
       setIsFinalizing(false);
     },
   });
+
+
 
   const isLoading = externalLoading || parseResume.isPending || isFinalizing;
   const { onLoadingStateChange } = props;
@@ -324,6 +325,8 @@ export function ResumeUploader(props: ResumeUploaderProps) {
           </div>
         </div>
       </div>
+
+
     </div>
   );
 }

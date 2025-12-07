@@ -1,7 +1,7 @@
 "use client";
 
-import { ResumeEditor } from "@/components/resume/ResumeEditor";
+import { ResumeCreationWizard } from "@/components/resume/ResumeCreationWizard";
 
 export default function CreateResumePage() {
-  return <ResumeEditor />;
+  return <ResumeCreationWizard />;
 }
