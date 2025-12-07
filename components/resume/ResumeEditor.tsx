@@ -216,7 +216,7 @@ export function ResumeEditor() {
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        <DialogContent>
+                        <DialogContent className="dark text-foreground">
                         <DialogHeader>
                             <DialogTitle>{idParam ? "Update your Resume" : "Publish your Resume"}</DialogTitle>
                             <DialogDescription>
@@ -229,7 +229,7 @@ export function ResumeEditor() {
                             <div className="grid gap-2">
                                 <Label>Public URL</Label>
                                 <div className="flex items-center gap-2">
-                                <span className="text-slate-500 text-sm">docaider.com/p/</span>
+                                <span className="text-slate-400 text-sm">docaider.com/p/</span>
                                 <Input 
                                     placeholder="your-name" 
                                     value={slug}
@@ -240,15 +240,15 @@ export function ResumeEditor() {
                             </div>
                         ) : (
                             <div className="py-6 text-center space-y-4">
-                            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+                            <div className="w-12 h-12 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto">
                                 <Share2 className="w-6 h-6" />
                             </div>
                             <div>
                                 <h3 className="font-bold text-lg">{idParam ? "Resume Updated!" : "Resume Published!"}</h3>
                                 <p className="text-slate-500">Your resume is now live at:</p>
                             </div>
-                            <div className="p-3 bg-slate-100 rounded-lg text-sm font-mono break-all">
-                                <Link href={publishedUrl} target="_blank" className="text-blue-600 hover:underline">
+                            <div className="p-3 bg-slate-800 rounded-lg text-sm font-mono break-all">
+                                <Link href={publishedUrl} target="_blank" className="text-blue-400 hover:underline">
                                 {window.location.origin}{publishedUrl}
                                 </Link>
                             </div>

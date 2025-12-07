@@ -9,6 +9,7 @@ import { GripVertical, Layers, Plus, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
+
 interface SectionManagerProps {
     data: ResumeData;
     onUpdate: (data: ResumeData) => void;
@@ -118,10 +119,10 @@ export function SectionManager({ data, onUpdate }: SectionManagerProps) {
         });
     };
 
-    const handleDeleteCustomSection = (id: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!confirm("Are you sure you want to delete this section?")) return;
-
+    const handleDeleteCustomSection = (id: string) => {
+        // e.stopPropagation() is handled at the trigger level now if needed, 
+        // but strictly speaking we just want to execute logic here.
+        
         const newCustomSections = (data.customSections || []).filter(c => c.id !== id);
         const newOrder = (data.sectionOrder || []).filter(o => o !== id);
 
@@ -141,12 +142,12 @@ export function SectionManager({ data, onUpdate }: SectionManagerProps) {
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="outline" size="sm" className="gap-2 text-slate-300 hover:text-white hover:bg-white/10 dark">
                     <Layers className="w-4 h-4" />
                     Manage Sections
                 </Button>
             </SheetTrigger>
-            <SheetContent className="px-4">
+            <SheetContent className="px-4 dark text-foreground">
                 <SheetHeader className="px-0">
                     <SheetTitle>Manage Sections</SheetTitle>
                     <SheetDescription>
@@ -157,6 +158,7 @@ export function SectionManager({ data, onUpdate }: SectionManagerProps) {
                 <div className="mt-8 space-y-4">
                     <DndContext
                         sensors={sensors}
+                        
                         collisionDetection={closestCenter}
                         onDragStart={(e) => setActiveId(e.active.id as string)}
                         onDragEnd={handleDragEnd}
@@ -169,7 +171,7 @@ export function SectionManager({ data, onUpdate }: SectionManagerProps) {
                                         id={id} 
                                         label={getLabel(id)} 
                                         isCustom={isCustom(id)}
-                                        onDelete={isCustom(id) ? (e) => handleDeleteCustomSection(id, e) : undefined}
+                                        onDelete={isCustom(id) ? () => handleDeleteCustomSection(id) : undefined}
                                     />
                                 ))}
                             </div>
@@ -191,7 +193,7 @@ export function SectionManager({ data, onUpdate }: SectionManagerProps) {
     );
 }
 
-function SortableItem({ id, label, isCustom, onDelete }: { id: string, label: string, isCustom: boolean, onDelete?: (e: React.MouseEvent) => void }) {
+function SortableItem({ id, label, isCustom, onDelete }: { id: string, label: string, isCustom: boolean, onDelete?: () => void }) {
     const {
         attributes,
         listeners,
@@ -209,8 +211,8 @@ function SortableItem({ id, label, isCustom, onDelete }: { id: string, label: st
 
     return (
         <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={cn(
-            "flex items-center justify-between p-3 bg-white border border-slate-200 rounded-md shadow-sm select-none cursor-grab active:cursor-grabbing",
-            isDragging && "shadow-lg scale-[1.02]"
+            "flex items-center justify-between p-3 border border-slate-800 rounded-md shadow-sm select-none cursor-grab active:cursor-grabbing hover:bg-slate-900/50 transition-colors",
+            isDragging && "opacity-50"
         )}>
             <div className="flex items-center gap-3">
                 <GripVertical className="w-4 h-4 text-slate-400" />
@@ -223,7 +225,10 @@ function SortableItem({ id, label, isCustom, onDelete }: { id: string, label: st
                     size="icon" 
                     className="h-8 w-8 text-slate-400 hover:text-red-500"
                     onPointerDown={(e) => e.stopPropagation()} // Prevent drag start
-                    onClick={onDelete}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete();
+                    }}
                 >
                     <Trash2 className="w-4 h-4" />
                 </Button>
@@ -234,9 +239,9 @@ function SortableItem({ id, label, isCustom, onDelete }: { id: string, label: st
 
 function ItemOverlay({ label }: { label: string }) {
      return (
-        <div className="flex items-center gap-3 p-3 bg-white border border-blue-500/50 ring-2 ring-blue-500/20 rounded-md shadow-xl cursor-grabbing">
+        <div className="flex items-center gap-3 p-3 bg-slate-900 border border-slate-700 shadow-xl cursor-grabbing rounded-md">
             <GripVertical className="w-4 h-4 text-slate-400" />
-            <span className="font-medium text-sm">{label}</span>
+            <span className="font-medium text-sm text-slate-200">{label}</span>
         </div>
      );
 }

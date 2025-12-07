@@ -211,7 +211,7 @@ export function LandingPage({ initialData }: LandingPageProps) {
   ].slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white overflow-hidden selection:bg-purple-500/30 bg-dot-white/[0.2]">
+    <div className="min-h-screen bg-slate-950 text-white overflow-hidden selection:bg-purple-500/30 bg-dot-white/[0.2] dark">
       {/* Dynamic Background */}
       <div className="fixed inset-0 z-0">
          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse" />

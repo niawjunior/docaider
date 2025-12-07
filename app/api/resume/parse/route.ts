@@ -57,6 +57,13 @@ export async function POST(req: NextRequest) {
             4. IDs:
                - Generate unique IDs (e.g. "exp-1", "edu-1") for all array items if missing.
 
+            5. Skills:
+               - Extract skills as a FLAT array of strings.
+               - Split categories into individual skills.
+               - Remove prefixes like "Frontend:", "Languages:", "Tools:", etc.
+               - BAD: ["Frontend: React, Vue", "Backend: Node"]
+               - GOOD: ["React", "Vue", "Node"]
+
             TEXT TO PARSE:
             ${text}
             `,

@@ -164,7 +164,7 @@ export default function DashboardPage() {
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
+                      <AlertDialogContent className="dark text-foreground">
                         <AlertDialogHeader>
                           <AlertDialogTitle className="text-slate-900 dark:text-white">Delete Resume?</AlertDialogTitle>
                           <AlertDialogDescription>
@@ -175,7 +175,7 @@ export default function DashboardPage() {
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDelete(resume.id)}
-                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                            className="bg-red-600 hover:bg-red-700 text-white focus:ring-red-600"
                             disabled={deletingId === resume.id}
                           >
                             {deletingId === resume.id ? (

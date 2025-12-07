@@ -75,6 +75,13 @@ export function ResumeCreationWizard() {
   const [scannerState, setScannerState] = useState<{ active: boolean; color: string }>({ active: false, color: '' });
   const [revealData, setRevealData] = useState<ResumeData | null>(null);
 
+  // Ensure URL defaults to modern theme
+  useEffect(() => {
+    if (!themeParam) {
+      router.replace("/resume-builder/create?theme=modern");
+    }
+  }, [themeParam, router]);
+
   // Auto-creation handle
   useEffect(() => {
      const autoCreate = searchParams.get("auto") === "true";
@@ -161,6 +168,29 @@ export function ResumeCreationWizard() {
     });
   }, []);
 
+  const handleCreateFromTemplate = async () => {
+    if (!activePreviewTheme) return;
+    
+    setIsLoading(true);
+    try {
+        const result = await saveDraft({
+            content: activePreviewTheme.data as any,
+            theme: (themeParam || "modern") as any,
+            slug: `${activePreviewTheme.data.personalInfo.fullName?.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
+        });
+        
+        if (result.success && result.id) {
+            toast.success("Template initialized!");
+            router.prefetch(`/resume-builder/${result.id}/edit`);
+            router.push(`/resume-builder/${result.id}/edit`);
+        }
+    } catch(e) {
+         console.error("Template creation failed", e);
+         toast.error("Failed to create template");
+         setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col text-slate-100 dark">
       <ResumeBuilderHeader 
@@ -197,7 +227,7 @@ export function ResumeCreationWizard() {
         </AnimatePresence>
 
       <main className="flex-1 flex overflow-hidden relative">
-        <div className="w-full h-full flex flex-col md:flex-row items-center justify-center p-6 gap-12 relative overflow-hidden">
+        <div className="w-full h-[calc(100vh-70px)] flex flex-col md:flex-row items-center justify-center p-6 gap-12 relative overflow-hidden">
             {/* Ambient Background */}
             <div className="absolute inset-0 opacity-10 blur-3xl scale-110 pointer-events-none transition-all duration-1000">
                     {activePreviewTheme && (
@@ -240,7 +270,7 @@ export function ResumeCreationWizard() {
                         animate={{ opacity: 1, x: 0, rotateY: 0 }}
                         exit={{ opacity: 0, x: 100, rotateY: 20 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        className="w-[350px] aspect-[1/1.4]"
+                        className="w-[400px] aspect-[1/1.4]"
                     >
                         <TiltCard className="w-full h-full">
                         <div className={cn(
@@ -300,6 +330,8 @@ export function ResumeCreationWizard() {
                     onUploadSuccess={handleUploadSuccess} 
                     onReadyToReveal={setRevealData}
                     onLoadingStateChange={handleScannerStateChange}
+                    onCreateFromTemplate={handleCreateFromTemplate}
+                    templateName={activePreviewTheme?.name}
                 />
             </div>
         </div>

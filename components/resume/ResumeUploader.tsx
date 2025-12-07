@@ -16,6 +16,8 @@ interface ResumeUploaderProps {
   onReadyToReveal: (data: ResumeData) => void;
   isLoading?: boolean;
   onLoadingStateChange?: (isLoading: boolean, colorClass?: string) => void;
+  onCreateFromTemplate?: () => void;
+  templateName?: string;
 }
 
 const PROCESSING_STEPS = [
@@ -26,7 +28,7 @@ const PROCESSING_STEPS = [
 ];
 
 export function ResumeUploader(props: ResumeUploaderProps) {
-  const { onUploadSuccess, onReadyToReveal, isLoading: externalLoading } = props;
+  const { onUploadSuccess, onReadyToReveal, isLoading: externalLoading, onCreateFromTemplate, templateName } = props;
   const [file, setFile] = useState<File | null>(null);
   const [processingStep, setProcessingStep] = useState(0);
   const [isFinalizing, setIsFinalizing] = useState(false);
@@ -192,7 +194,7 @@ export function ResumeUploader(props: ResumeUploaderProps) {
         </AnimatePresence>
       </div>
       
-      <div className="w-[400px] max-w-full">
+      <div className="w-[400px] max-w-full space-y-4">
         <div className="relative group">
           {/* Glowing Background Effect - Changes color based on step */}
           <div className={cn(
@@ -324,6 +326,27 @@ export function ResumeUploader(props: ResumeUploaderProps) {
             
           </div>
         </div>
+
+        {onCreateFromTemplate && !isLoading && (
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-4 pt-2"
+            >
+                <div className="flex items-center gap-4 w-full px-4 opacity-30">
+                    <div className="h-px bg-white flex-1" />
+                    <span className="text-xs uppercase font-medium text-white">OR</span>
+                    <div className="h-px bg-white flex-1" />
+                </div>
+                <Button 
+                    variant="outline" 
+                    className="w-full border-white/10 bg-white/5 hover:bg-white/10 hover:text-white text-slate-300"
+                    onClick={onCreateFromTemplate}
+                >
+                    Use {templateName || "Sample"} Sample Data
+                </Button>
+            </motion.div>
+        )}
       </div>
 
 
