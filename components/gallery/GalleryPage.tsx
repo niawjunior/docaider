@@ -125,6 +125,8 @@ export function GalleryPage({ initialData }: GalleryPageProps) {
                     <ResumePreview
                       data={item.content}
                       theme={item.theme as any}
+                      isThumbnail={true}
+                      className="h-full"
                     />
                   </div>
                   

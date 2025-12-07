@@ -158,6 +158,7 @@ export const THEME_DEMOS = [
             website: "sarahchen.dev",
             jobTitle: "Senior Software Engineer" 
         },
+        coverImage: "/images/covers/photo-1618005182384-a83a8bd57fbe.avif",
         experience: [
             { 
                 id: "exp-1",

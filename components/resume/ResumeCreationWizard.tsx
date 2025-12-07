@@ -290,6 +290,8 @@ export function ResumeCreationWizard() {
                                         <ResumePreview 
                                         data={activePreviewTheme.data as any} 
                                         theme={activePreviewTheme.id as any} 
+                                        isThumbnail={true}
+                                        className="h-full"
                                         />
                                     </div>
                                 )}

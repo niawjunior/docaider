@@ -5,18 +5,7 @@ import { useState, useCallback } from "react";
 import { Briefcase, Code2, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Typewriter } from "./Typewriter";
-
-interface ResumeData {
-  personalInfo: {
-    fullName?: string;
-    jobTitle?: string;
-  };
-  skills?: string[];
-  experience?: Array<{
-    company?: string;
-    position?: string;
-  }>;
-}
+import { ResumeData } from "@/lib/schemas/resume";
 
 interface GashaponRevealProps {
   onComplete: () => void;
@@ -27,9 +16,9 @@ interface GashaponRevealProps {
 
 export function GashaponReveal({ onComplete, data }: GashaponRevealProps) {
   // Extract personalization
-  const fullName = data.personalInfo.fullName || "User";
+  const fullName = data.personalInfo?.fullName || "User";
   const firstName = fullName.split(' ')[0];
-  const jobTitle = data.personalInfo.jobTitle || "Professional";
+  const jobTitle = data.personalInfo?.jobTitle || "Professional";
   const company = data.experience?.[0]?.company || "your current role";
   const topSkills = data.skills?.slice(0, 3).join(", ") || "key technologies";
   
