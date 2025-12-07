@@ -170,25 +170,8 @@ export function ResumeCreationWizard() {
 
   const handleCreateFromTemplate = async () => {
     if (!activePreviewTheme) return;
-    
-    setIsLoading(true);
-    try {
-        const result = await saveDraft({
-            content: activePreviewTheme.data as any,
-            theme: (themeParam || "modern") as any,
-            slug: `${activePreviewTheme.data.personalInfo.fullName?.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
-        });
-        
-        if (result.success && result.id) {
-            toast.success("Template initialized!");
-            router.prefetch(`/resume-builder/${result.id}/edit`);
-            router.push(`/resume-builder/${result.id}/edit`);
-        }
-    } catch(e) {
-         console.error("Template creation failed", e);
-         toast.error("Failed to create template");
-         setIsLoading(false);
-    }
+    // Trigger the reveal animation with the template data
+    setRevealData(activePreviewTheme.data as any);
   };
 
   return (
@@ -207,7 +190,7 @@ export function ResumeCreationWizard() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute inset-0 z-[110] bg-slate-950 flex flex-col items-center justify-center"
+                    className="absolute inset-0 z-[999999] bg-slate-950 flex flex-col items-center justify-center"
                 >
                     <div className="relative">
                         <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full" />

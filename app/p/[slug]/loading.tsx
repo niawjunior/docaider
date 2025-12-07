@@ -1,81 +1,17 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
 
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-slate-50 flex items-start justify-center pt-8 pb-8">
-      <div className="w-[210mm] min-h-[297mm] bg-white shadow-xl flex mx-auto animate-pulse">
-        {/* Sidebar Skeleton */}
-        <div className="w-1/3 bg-slate-900/5 p-8 space-y-8 flex-shrink-0 border-r border-slate-100">
-           <div className="space-y-4 flex flex-col items-center">
-                <Skeleton className="h-32 w-32 rounded-full" />
-                <Skeleton className="h-8 w-48" />
-                <Skeleton className="h-4 w-32" />
-           </div>
-           
-           <div className="space-y-6 pt-8">
-               <Skeleton className="h-4 w-24 bg-slate-200" />
-               <div className="space-y-3">
-                   <Skeleton className="h-3 w-full" />
-                   <Skeleton className="h-3 w-full" />
-                   <Skeleton className="h-3 w-3/4" />
-               </div>
-           </div>
-
-           <div className="space-y-6 pt-4">
-               <Skeleton className="h-4 w-24 bg-slate-200" />
-               <div className="flex flex-wrap gap-2">
-                   <Skeleton className="h-6 w-16 rounded-full" />
-                   <Skeleton className="h-6 w-20 rounded-full" />
-                   <Skeleton className="h-6 w-14 rounded-full" />
-                   <Skeleton className="h-6 w-24 rounded-full" />
-               </div>
-           </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center space-y-4">
+      <div className="relative">
+        <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full" />
+        <div className="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center relative z-10 animate-bounce-slight">
+           <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
         </div>
-
-        {/* Main Content Skeleton */}
-        <div className="w-2/3 p-8 space-y-12">
-            {/* Header / Summary */}
-            <div className="space-y-4">
-                <Skeleton className="h-12 w-3/4" />
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-5/6" />
-                </div>
-            </div>
-
-            {/* Experience Block 1 */}
-            <div className="space-y-6">
-                 <Skeleton className="h-8 w-40" />
-                 <div className="space-y-4 border-l-2 border-slate-100 pl-4">
-                     <div className="flex justify-between">
-                         <Skeleton className="h-6 w-48" />
-                         <Skeleton className="h-4 w-24" />
-                     </div>
-                     <Skeleton className="h-5 w-32" />
-                     <div className="space-y-2 pt-2">
-                         <Skeleton className="h-3 w-full" />
-                         <Skeleton className="h-3 w-11/12" />
-                         <Skeleton className="h-3 w-4/5" />
-                     </div>
-                 </div>
-            </div>
-
-            {/* Experience Block 2 */}
-            <div className="space-y-6">
-                 <div className="space-y-4 border-l-2 border-slate-100 pl-4">
-                     <div className="flex justify-between">
-                         <Skeleton className="h-6 w-48" />
-                         <Skeleton className="h-4 w-24" />
-                     </div>
-                     <Skeleton className="h-5 w-32" />
-                     <div className="space-y-2 pt-2">
-                         <Skeleton className="h-3 w-full" />
-                         <Skeleton className="h-3 w-11/12" />
-                     </div>
-                 </div>
-            </div>
-        </div>
+      </div>
+      <div className="text-center space-y-2 animate-in fade-in duration-500 delay-150 fill-mode-forwards opacity-0">
+          <h3 className="text-lg font-semibold text-slate-900">Loading Profile</h3>
+          <p className="text-sm text-slate-500">Preparing document...</p>
       </div>
     </div>
   );

@@ -1,131 +1,219 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import { Sparkles, CheckCircle2, ArrowRight } from "lucide-react";
+import { useState, useCallback } from "react";
+import { Briefcase, Code2, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Typewriter } from "./Typewriter";
 
 interface ResumeData {
   personalInfo: {
     fullName?: string;
     jobTitle?: string;
   };
+  skills?: string[];
+  experience?: Array<{
+    company?: string;
+    position?: string;
+  }>;
 }
 
 interface GashaponRevealProps {
   onComplete: () => void;
-  onRevealStart?: () => void;
+  // onRevealStart is optional but not used in new design really, can keep for compat
+  onRevealStart?: () => void; 
   data: ResumeData;
 }
 
-type RevealStatus = 'ready' | 'finalizing' | 'exiting';
-
-export function GashaponReveal({ onComplete, onRevealStart, data }: GashaponRevealProps) {
-  const [status, setStatus] = useState<RevealStatus>('ready');
-
+export function GashaponReveal({ onComplete, data }: GashaponRevealProps) {
   // Extract personalization
-  const firstName = data.personalInfo.fullName?.split(' ')[0] || "User";
+  const fullName = data.personalInfo.fullName || "User";
+  const firstName = fullName.split(' ')[0];
+  const jobTitle = data.personalInfo.jobTitle || "Professional";
+  const company = data.experience?.[0]?.company || "your current role";
+  const topSkills = data.skills?.slice(0, 3).join(", ") || "key technologies";
+  
+  // Sequencing state
+  const [sequenceStep, setSequenceStep] = useState(0);
 
-  const handleReveal = () => {
-    setStatus('finalizing');
-    if (onRevealStart) onRevealStart();
-    
-    // Simulate final polish/loading
-    setTimeout(() => {
-        // Trigger parent loading state immediately (Transition to Workspace)
-        onComplete();
-    }, 1500);
+  const nextStep = useCallback(() => {
+    setSequenceStep(prev => prev + 1);
+  }, []);
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } },
+    exit: { opacity: 0, scale: 1.05, filter: "blur(10px)", transition: { duration: 0.5 } }
   };
 
-  const showLoading = status === 'finalizing' || status === 'exiting';
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center font-sans">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 font-sans">
       <AnimatePresence>
-        {status !== 'exiting' && (
-          <motion.div
-             key="reveal-overlay"
-             initial={{ opacity: 0 }}
-             animate={{ opacity: 1 }}
-             exit={{ opacity: 0, scale: 1.05, filter: "blur(20px)" }}
-             transition={{ duration: 0.8, ease: "easeInOut" }}
-             className="absolute inset-0 bg-black/60 backdrop-blur-2xl flex items-center justify-center p-6"
-          >
-              <motion.div 
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-                className="relative max-w-sm w-full bg-white/5 border border-white/10 p-8 rounded-3xl shadow-2xl backdrop-blur-md overflow-hidden"
-              >
-                 {/* Decorative Gradient Blob */}
-                 <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
-                 <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+        <motion.div
+           key="main-card"
+           variants={containerVariants}
+           initial="hidden"
+           animate="visible"
+           exit="exit"
+           className="bg-white dark:bg-slate-900 w-full max-w-5xl min-h-[500px] rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col md:flex-row"
+        >
+            {/* Illustration Section */}
+            <div className="w-full md:w-5/12 bg-slate-50 dark:bg-slate-800/50 p-12 flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
+                
+                {/* Abstract Composition */}
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3, duration: 0.8 }}
+                    className="relative z-10 w-full max-w-xs aspect-square"
+                >
+                     <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+                     
+                     {/* Floating Icons Configuration */}
+                     <div className="relative z-10 h-full w-full">
+                        <motion.div 
+                            initial={{ x: -20, y: 20, opacity: 0 }}
+                            animate={{ 
+                                x: 0, 
+                                y: [0, -10, 0],
+                                opacity: 1 
+                            }}
+                            transition={{ 
+                                delay: 0.5,
+                                y: {
+                                    duration: 4,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }
+                            }}
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            className="absolute top-0 right-0 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center gap-2 w-24 h-24 cursor-pointer"
+                        >
+                            <Briefcase className="w-8 h-8 text-blue-500" />
+                            <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">Work</span>
+                        </motion.div>
 
-                 <div className="relative z-10 flex flex-col items-center text-center space-y-6">
-                    {/* Icon */}
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center shadow-inner relative">
-                        {showLoading ? (
-                             <motion.div
-                                key="loading"
-                                initial={{ opacity: 0, scale: 0.5 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                            >
-                                <Sparkles className="w-8 h-8 text-blue-400 animate-pulse" />
-                            </motion.div>
-                        ) : (
-                             <motion.div
-                                key="ready"
-                                initial={{ opacity: 0, scale: 0.5 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                            >
-                                <Sparkles className="w-8 h-8 text-white/80" />
-                            </motion.div>
+                        <motion.div 
+                             initial={{ x: 20, y: 20, opacity: 0 }}
+                             animate={{ 
+                                 x: 0, 
+                                 y: [0, 10, 0],
+                                 opacity: 1 
+                             }}
+                             transition={{ 
+                                 delay: 0.6,
+                                 y: {
+                                     duration: 5,
+                                     repeat: Infinity,
+                                     ease: "easeInOut",
+                                     delay: 1 // offset
+                                 }
+                             }}
+                             whileHover={{ scale: 1.1, rotate: -5 }}
+                             className="absolute bottom-8 left-0 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center gap-2 w-24 h-24 cursor-pointer"
+                        >
+                            <Code2 className="w-8 h-8 text-purple-500" />
+                            <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">Skills</span>
+                        </motion.div>
+
+                        <motion.div 
+                             initial={{ y: -20, opacity: 0 }}
+                             animate={{ 
+                                 y: [0, -8, 0],
+                                 opacity: 1 
+                             }}
+                             transition={{ 
+                                 delay: 0.7,
+                                 y: {
+                                     duration: 3.5,
+                                     repeat: Infinity,
+                                     ease: "easeInOut",
+                                     delay: 0.5
+                                 }
+                             }}
+                             whileHover={{ scale: 1.1, rotate: 10 }}
+                             className="absolute bottom-0 right-8 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center gap-2 w-20 h-20 cursor-pointer"
+                        >
+                            <GraduationCap className="w-6 h-6 text-emerald-500" />
+                        </motion.div>
+                     </div>
+                </motion.div>
+            </div>
+
+            {/* Assessment Section */}
+            <div className="w-full md:w-7/12 p-8 md:p-12 flex flex-col justify-center bg-white dark:bg-slate-900">
+                <div className="space-y-8 max-w-lg mx-auto md:mx-0 min-h-[300px]">
+                    <motion.div variants={itemVariants} initial="hidden" animate="visible" transition={{ delay: 0.4 }} onAnimationComplete={() => { if(sequenceStep === 0) nextStep(); }}>
+                        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-3">
+                            Hi, {firstName}! <br/>Let's get started.
+                        </h1>
+                        <div className="h-1.5 w-24 bg-indigo-500 rounded-full" />
+                    </motion.div>
+
+                    <div className="space-y-6 text-slate-600 dark:text-slate-300 leading-relaxed text-base md:text-lg">
+                        {sequenceStep >= 1 && (
+                            <Typewriter 
+                                segments={[
+                                    { text: "You are currently a " },
+                                    { text: jobTitle, className: "text-slate-900 dark:text-white font-semibold" },
+                                    { text: " at " },
+                                    { text: company, className: "text-slate-900 dark:text-white font-semibold" },
+                                    { text: ", where you design impactful solutions and drive technical excellence." }
+                                ]}
+                                speed={15}
+                                onComplete={nextStep}
+                            />
+                        )}
+                        
+                        {sequenceStep >= 2 && (
+                             <Typewriter 
+                                segments={[
+                                    { text: "Your strong skills in " },
+                                    { text: topSkills, className: "text-slate-900 dark:text-white font-semibold" },
+                                    { text: " demonstrate your ability to enhance user experience and business impact." }
+                                ]}
+                                speed={15}
+                                onComplete={nextStep}
+                            />
+                        )}
+
+                        {sequenceStep >= 3 && (
+                             <Typewriter 
+                                segments={[
+                                    { text: "We have tailored your resume-building experience to emphasize your background in " },
+                                    { text: jobTitle, className: "text-slate-900 dark:text-white font-semibold" },
+                                    { text: "." }
+                                ]}
+                                speed={15}
+                                onComplete={nextStep}
+                            />
                         )}
                     </div>
 
-                    {/* Text */}
-                    <div className="space-y-2">
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-medium tracking-wide uppercase">
-                            <CheckCircle2 className="w-3 h-3" />
-                            {showLoading ? "Finalizing..." : "Optimization Complete"}
-                        </div>
-                        <h2 className="text-2xl font-semibold text-white tracking-tight">
-                            {showLoading ? "Polishing details..." : `Ready for you, ${firstName}`}
-                        </h2>
-                        <p className="text-sm text-neutral-400 leading-relaxed min-h-[40px]">
-                            {showLoading 
-                                ? "Applying final formatting touches and verifying data integrity."
-                                : "Your professional profile has been synthesized and optimized for this workspace."
-                            }
-                        </p>
-                    </div>
-
-                    {/* Action */}
-                    <Button 
-                        onClick={handleReveal}
-                        disabled={showLoading}
-                        className="w-full h-12 bg-white hover:bg-neutral-200 text-black font-medium rounded-xl transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] disabled:opacity-80 disabled:cursor-wait"
-                    >
-                        {showLoading ? (
-                            <span className="flex items-center gap-2">
-                                <motion.div 
-                                    animate={{ rotate: 360 }}
-                                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                    className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full"
-                                />
-                                Finalizing...
-                            </span>
-                        ) : (
-                            <>
-                                Reveal Resume
-                                <ArrowRight className="w-4 h-4 ml-2 opacity-60" />
-                            </>
-                        )}
-                    </Button>
-                 </div>
-              </motion.div>
-          </motion.div>
-        )}
+                    {sequenceStep >= 4 && (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="pt-4"
+                        >
+                            <Button 
+                                onClick={onComplete}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-10 py-6 text-lg font-bold shadow-xl shadow-indigo-900/10 hover:shadow-indigo-600/20 transition-all hover:scale-105"
+                            >
+                                Continue
+                            </Button>
+                        </motion.div>
+                    )}
+                </div>
+            </div>
+        </motion.div>
       </AnimatePresence>
     </div>
   );
