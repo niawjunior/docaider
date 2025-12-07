@@ -7,18 +7,25 @@ import { ThemeAddButton, ThemeDeleteButton } from "./ThemeControls";
 import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
 import { EmptySectionPlaceholder } from "@/components/resume/shared/EmptySectionPlaceholder";
 import { CustomSectionRenderer } from "@/components/resume/shared/CustomSectionRenderer";
-import { Plus } from "lucide-react";
+import { Plus, ImageIcon } from "lucide-react";
+import { useState } from "react";
+import { CoverImagePicker } from "@/components/resume/shared/CoverImagePicker";
 
 interface VisualThemeProps {
   data: ResumeData;
   onUpdate?: (data: ResumeData) => void;
   readOnly?: boolean;
+  containerRef?: React.RefObject<HTMLElement>;
 }
 
-export const VisualTheme = ({ data, onUpdate, readOnly }: VisualThemeProps) => {
+export const VisualTheme = ({ data, onUpdate, readOnly, containerRef }: VisualThemeProps) => {
   const { updateField: handleUpdate } = useResumeUpdate(data, onUpdate);
-  const { scrollYProgress } = useScroll();
+  const { scrollYProgress } = useScroll({
+    container: containerRef,
+    layoutEffect: false // Use effect to avoid SSR issues if needed, or default
+  });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const [isCoverPickerOpen, setIsCoverPickerOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans selection:bg-white selection:text-black">
@@ -39,7 +46,7 @@ export const VisualTheme = ({ data, onUpdate, readOnly }: VisualThemeProps) => {
       <header className="relative w-full h-screen flex flex-col justify-end p-6 md:p-12 overflow-hidden">
         <div className="absolute inset-0 z-0">
           {data.coverImage ? (
-            <motion.div style={{ y }} className="w-full h-[120%] -y-[10%]">
+            <motion.div style={{ y }} className="w-full h-[120%] -translate-y-[10%]">
               <img 
                 src={data.coverImage} 
                 alt="Cover" 
@@ -50,7 +57,28 @@ export const VisualTheme = ({ data, onUpdate, readOnly }: VisualThemeProps) => {
             <div className="w-full h-full bg-neutral-900" />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+          
+          {onUpdate && !readOnly && (
+             <div className="absolute top-24 right-6 z-20">
+                 <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="bg-black/50 hover:bg-black/80 text-white border-white/20 backdrop-blur-sm"
+                    onClick={() => setIsCoverPickerOpen(true)}
+                 >
+                     <ImageIcon className="w-4 h-4 mr-2" />
+                     Change Cover
+                 </Button>
+             </div>
+          )}
         </div>
+        
+        <CoverImagePicker 
+            open={isCoverPickerOpen} 
+            onOpenChange={setIsCoverPickerOpen}
+            onSelect={(url) => handleUpdate('coverImage', url)}
+            currentCover={data.coverImage}
+        />
 
         <div className="relative z-10 max-w-7xl w-full mx-auto">
           <motion.div 

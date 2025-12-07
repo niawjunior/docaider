@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Share2, Layout } from "lucide-react";
+import { Loader2, Share2, Layout, Monitor, Tablet, Smartphone } from "lucide-react";
 import { ResumePreview } from "@/components/resume/ResumePreview";
 import { ResumeData } from "@/lib/schemas/resume";
 import { toast } from "sonner";
@@ -62,9 +62,11 @@ export function ResumeEditor() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isViewMode, setIsViewMode] = useState(false);
+  const [viewport, setViewport] = useState<"desktop" | "tablet" | "mobile">("desktop");
 
   // Removed internal import state, now handled via redirection
   const lastSavedData = useRef<string>("");
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Redirect to Create if no ID
   useEffect(() => {
@@ -167,6 +169,42 @@ export function ResumeEditor() {
                     </Button>
                     
                     <div className="h-6 w-px bg-white/10 mx-2 hidden sm:block" />
+
+                    {/* Viewport Toggles - Only show for web themes */}
+                    {["portfolio", "studio", "visual"].includes(theme) && (
+                        <>
+                            <div className="flex bg-slate-800/50 rounded-lg p-1 border border-white/5 mr-2">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={cn("w-8 h-8 rounded-md transition-all", viewport === "desktop" ? "bg-white/10 text-white shadow-sm" : "text-slate-400 hover:text-white hover:bg-white/5")}
+                                    onClick={() => setViewport("desktop")}
+                                    title="Desktop View"
+                                >
+                                    <Monitor className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                    variant="ghost" 
+                                    size="icon"
+                                    className={cn("w-8 h-8 rounded-md transition-all", viewport === "tablet" ? "bg-white/10 text-white shadow-sm" : "text-slate-400 hover:text-white hover:bg-white/5")}
+                                    onClick={() => setViewport("tablet")}
+                                    title="Tablet View"
+                                >
+                                    <Tablet className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon" 
+                                    className={cn("w-8 h-8 rounded-md transition-all", viewport === "mobile" ? "bg-white/10 text-white shadow-sm" : "text-slate-400 hover:text-white hover:bg-white/5")}
+                                    onClick={() => setViewport("mobile")}
+                                    title="Mobile View"
+                                >
+                                    <Smartphone className="w-4 h-4" />
+                                </Button>
+                            </div>
+                            <div className="h-6 w-px bg-white/10 mx-2 hidden sm:block" />
+                        </>
+                    )}
 
                     {/* Theme Selector */}
                     <div className="flex items-center space-x-2 hidden sm:flex">
@@ -372,22 +410,38 @@ export function ResumeEditor() {
         </AnimatePresence>
         
         {/* Full Screen Preview with Inline Edit */}
-        <div className={cn(
+        <div 
+         ref={scrollContainerRef}
+         className={cn(
              "w-full bg-slate-950 overflow-y-auto flex items-start justify-center bg-dot-white/[0.2]",
-             isViewMode ? "h-screen p-0" : "h-[calc(100vh-100px)] p-8"
+             isViewMode ? "h-screen p-0" : "h-[calc(100vh-100px)]",
+             // Add padding only for document-style themes
+             !isViewMode && ["modern", "minimal", "creative"].includes(theme) ? "p-8" : "p-0"
         )}>
             {isLoading ? (
                 <div className="h-full flex items-center justify-center">
                      <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
                 </div>
             ) : (idParam && resumeData) ? (
-                <div className="w-full max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500 light">
+                <div className={cn(
+                    "animate-in fade-in slide-in-from-bottom-4 duration-500 light transition-all ease-in-out mx-auto shadow-2xl",
+                    // Constrain width only for document-style themes
+                    ["modern", "minimal", "creative"].includes(theme) 
+                        ? "w-full max-w-5xl" 
+                        : cn(
+                            "w-full bg-white dark:bg-slate-950", // Web themes need background in boxed mode
+                            viewport === "desktop" && "w-full",
+                            viewport === "tablet" && "w-[768px] border-x border-white/10 my-8 rounded-lg overflow-hidden min-h-[800px]",
+                            viewport === "mobile" && "w-[375px] border-x border-white/10 my-8 rounded-2xl overflow-hidden min-h-[667px]"
+                        )
+                )}>
 
                     <ResumePreview 
                         data={resumeData} 
                         theme={theme} 
                         onUpdate={(newData) => setResumeData(newData)}
                         readOnly={isViewMode} // Pass readOnly state
+                        containerRef={scrollContainerRef}
                     />
                 </div>
             ) : null}
