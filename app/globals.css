@@ -246,3 +246,31 @@ button {
   0%, 100% { opacity: 1; transform: translateY(0); }
   50% { opacity: 0.5; transform: translateY(3px); }
 }
+
+@keyframes scan-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    border-color: rgba(168, 85, 247, 0.4);
+    box-shadow: 0 0 5px rgba(168, 85, 247, 0.2);
+  }
+  50% {
+    border-color: rgba(168, 85, 247, 1);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+  }
+}
+
+.animate-scan {
+  background: linear-gradient(110deg, transparent 30%, rgba(168, 85, 247, 0.2) 40%, rgba(236, 72, 153, 0.4) 45%, rgba(168, 85, 247, 0.5) 50%, rgba(56, 189, 248, 0.4) 55%, rgba(168, 85, 247, 0.2) 60%, transparent 70%);
+  background-size: 250% 100%;
+  animation: scan-shimmer 2.5s infinite linear, pulse-glow 2s infinite ease-in-out;
+  border-radius: 6px;
+  border: 2px solid rgba(168, 85, 247, 0.4);
+}

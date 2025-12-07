@@ -2,11 +2,12 @@
 
 import { useEditorContext } from "./EditorContext";
 import { Button } from "@/components/ui/button";
-import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Sparkles, Loader2, ArrowUp, CheckCircle2, Minimize2, Maximize2, CornerDownLeft, Languages } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
 import { ResumeData } from "@/lib/schemas/resume";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, useEffect } from "react";
 
 interface FormattingToolbarProps {
   resumeData: ResumeData;
@@ -15,13 +16,104 @@ interface FormattingToolbarProps {
 }
 
 export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToolbarProps) {
-  const { focusedField, hasSelection } = useEditorContext();
+  const { focusedField, hasSelection, setAiProcessingField } = useEditorContext();
   const { updateField } = useResumeUpdate(resumeData, onUpdate);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
 
+  // Focus lock for AI input
+  const [aiOpen, setAiOpen] = useState(false);
+  const [lockedField, setLockedField] = useState<string | null>(null);
+  
+  const [aiInstruction, setAiInstruction] = useState("");
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState<string | null>(null);
+
+  // Helper to get current value
+  const getCurrentValue = () => {
+    const target = lockedField || focusedField;
+    if (!target) return "";
+    const parts = target.split(/[.\[\]]/).filter(Boolean);
+    let current = resumeData as any;
+    for (const part of parts) {
+        if (current === undefined || current === null) return "";
+        const index = parseInt(part);
+        if (!isNaN(index)) {
+             current = current[index];
+        } else {
+             current = current[part];
+        }
+    }
+    return typeof current === 'string' ? current : "";
+  };
+
+  const handleAskAi = async (overrideInstruction?: string) => {
+      const currentText = getCurrentValue();
+      console.log("Asking AI:", { currentText, overrideInstruction, aiInstruction });
+      if (!currentText) return;
+      
+      const instructionToUse = overrideInstruction || aiInstruction;
+      const targetField = lockedField || focusedField;
+
+      setIsAiLoading(true);
+      setAiProcessingField(targetField);
+      
+      try {
+          const res = await fetch("/api/improve-writing", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ 
+                  text: currentText, 
+                  instruction: instructionToUse 
+              })
+          });
+          const data = await res.json();
+          if (data.improvedText) {
+              setAiResult(data.improvedText);
+          }
+      } catch (e) {
+          console.error(e);
+      } finally {
+          setIsAiLoading(false);
+          setAiProcessingField(null);
+      }
+  };
+
+  const handleAcceptAi = () => {
+      const target = lockedField || focusedField;
+      if (aiResult && target) {
+          updateField(target, aiResult);
+          setAiOpen(false);
+          setLockedField(null);
+          setAiResult(null);
+          setAiInstruction("");
+      }
+  };
+
+  // Click outside to dismiss
+  useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+          if (toolbarRef.current && !toolbarRef.current.contains(event.target as Node)) {
+              if (aiOpen) {
+                  setAiOpen(false);
+                  setLockedField(null);
+                  setAiResult(null);
+                  setAiInstruction("");
+              }
+          }
+      };
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+          document.removeEventListener("mousedown", handleClickOutside);
+      };
+  }, [aiOpen]);
+
   useLayoutEffect(() => {
     const updatePosition = () => {
+        // If AI is open, keep the toolbar static so it doesn't jump around or follow focus to the input
+        if (aiOpen) return;
+        
         if (!focusedField || !hasSelection) return;
 
         const selection = window.getSelection();
@@ -29,12 +121,6 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
 
         const range = selection.getRangeAt(0);
         const selectionRect = range.getBoundingClientRect();
-        
-        // Sticky Logic:
-        // 1. Natural position: Top of container - toolbar height (45)
-        // 2. Sticky constraints: 
-        //    - Min Top: ~80px (below header)
-        //    - Max Bottom: Container bottom - toolbar height (ensure it doesn't float below the container)
         
         let containerRect = selectionRect;
         const anchorNode = selection.anchorNode;
@@ -51,12 +137,8 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
         if (selectionRect.width === 0 && selectionRect.height === 0) return;
         
         const toolbarHeight = 45;
-        const stickyTop = 80; // Offset for header
+        const stickyTop = 80;
         const naturalTop = containerRect.top - toolbarHeight;
-        
-        // Stick to top if scrolled past, but stop if container ends
-        // Math.max(naturalTop, stickyTop) -> Standard sticky
-        // Math.min(..., containerRect.bottom - toolbarHeight) -> Stop at bottom
         
         const calculatedTop = Math.min(
             Math.max(naturalTop, stickyTop),
@@ -69,10 +151,7 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
         });
     };
 
-    // Initial calculation
     updatePosition();
-
-    // Listen to scroll globally (capture phase to catch inner scrolls)
     window.addEventListener("scroll", updatePosition, { capture: true });
     window.addEventListener("resize", updatePosition);
 
@@ -80,89 +159,85 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
         window.removeEventListener("scroll", updatePosition, { capture: true });
         window.removeEventListener("resize", updatePosition);
     };
-  }, [focusedField, hasSelection]);
+  }, [focusedField, hasSelection, aiOpen]);
 
-  if (!focusedField || !hasSelection) return null;
+  // Determine current alignment based on focused field path
+  const activeTarget = lockedField || focusedField;
+
+  if (!aiOpen && (!focusedField || !hasSelection)) return null;
+  // If AI IS open, we render even if selection is lost, using lockedField if available
 
   // Helper to determine effective alignment
   const getEffectiveAlignment = (val?: string | null) => {
       return val || (theme === "minimal" ? "center" : "left");
   };
 
-  // Determine current alignment based on focused field path
-  // Structure: "experience[0].description" or "summary" etc.
-  
-  // We need to find where the "alignment" property lives relative to the focused attribute.
-  // 1. If path is "summary", alignment is "personalInfo.summaryAlignment"
-  // 2. If path is "experience[0].description", alignment is "experience[0].alignment"
-  // 3. If path is "education[0].degree", alignment is "education[0].alignment"
-  
   let alignmentPath = "";
   let currentAlignment = "left";
+  const targetField = activeTarget || "";
 
-  if (focusedField === "personalInfo.summary") {
+  if (targetField === "personalInfo.summary") {
       alignmentPath = "personalInfo.summaryAlignment";
       currentAlignment = getEffectiveAlignment((resumeData.personalInfo as any)?.summaryAlignment);
-  } else if (focusedField === "personalInfo.headerSummary") {
+  } else if (targetField === "personalInfo.headerSummary") {
       alignmentPath = "personalInfo.headerSummaryAlignment";
       currentAlignment = getEffectiveAlignment((resumeData.personalInfo as any)?.headerSummaryAlignment);
-  } else if (focusedField.includes("experience")) {
-       const match = focusedField.match(/experience\[(\d+)\]/);
+  } else if (targetField.includes("experience")) {
+       const match = targetField.match(/experience\[(\d+)\]/);
        if (match) {
            const index = parseInt(match[1]);
            const item = resumeData.experience?.[index] as any;
            
-           if (focusedField.includes("description")) {
+           if (targetField.includes("description")) {
                alignmentPath = `experience[${index}].alignment`;
                currentAlignment = getEffectiveAlignment(item?.alignment);
-           } else if (focusedField.includes("company")) {
+           } else if (targetField.includes("company")) {
                alignmentPath = `experience[${index}].companyAlignment`;
                currentAlignment = getEffectiveAlignment(item?.companyAlignment);
-           } else if (focusedField.includes("position")) {
+           } else if (targetField.includes("position")) {
                alignmentPath = `experience[${index}].positionAlignment`;
                currentAlignment = getEffectiveAlignment(item?.positionAlignment);
-           } else if (focusedField.includes("startDate") || focusedField.includes("endDate")) {
+           } else if (targetField.includes("startDate") || targetField.includes("endDate")) {
                alignmentPath = `experience[${index}].dateAlignment`;
                currentAlignment = getEffectiveAlignment(item?.dateAlignment);
            }
        }
-  } else if (focusedField.includes("education")) {
-       const match = focusedField.match(/education\[(\d+)\]/);
+  } else if (targetField.includes("education")) {
+       const match = targetField.match(/education\[(\d+)\]/);
        if (match) {
            const index = parseInt(match[1]);
            const item = resumeData.education?.[index] as any;
 
-           if (focusedField.includes("description") || focusedField.includes("fieldOfStudy")) {
+           if (targetField.includes("description") || targetField.includes("fieldOfStudy")) {
                alignmentPath = `education[${index}].alignment`;
                currentAlignment = getEffectiveAlignment(item?.alignment);
-           } else if (focusedField.includes("institution")) {
+           } else if (targetField.includes("institution")) {
                alignmentPath = `education[${index}].institutionAlignment`;
                currentAlignment = getEffectiveAlignment(item?.institutionAlignment);
-           } else if (focusedField.includes("degree")) {
+           } else if (targetField.includes("degree")) {
                alignmentPath = `education[${index}].degreeAlignment`;
                currentAlignment = getEffectiveAlignment(item?.degreeAlignment);
-           } else if (focusedField.includes("startDate") || focusedField.includes("endDate")) {
+           } else if (targetField.includes("startDate") || targetField.includes("endDate")) {
                alignmentPath = `education[${index}].dateAlignment`;
                currentAlignment = getEffectiveAlignment(item?.dateAlignment);
            }
        }
-  } else if (focusedField.includes("projects")) {
-        const match = focusedField.match(/projects\[(\d+)\]/);
+  } else if (targetField.includes("projects")) {
+        const match = targetField.match(/projects\[(\d+)\]/);
         if (match) {
             const index = parseInt(match[1]);
             const item = resumeData.projects?.[index] as any;
 
-            if (focusedField.includes("description")) {
+            if (targetField.includes("description")) {
                 alignmentPath = `projects[${index}].alignment`;
                 currentAlignment = getEffectiveAlignment(item?.alignment);
-            } else if (focusedField.includes("name")) {
+            } else if (targetField.includes("name")) {
                 alignmentPath = `projects[${index}].nameAlignment`;
                 currentAlignment = getEffectiveAlignment(item?.nameAlignment);
             }
         }
-  } else if (focusedField.includes("customSections")) {
-       // customSections[0].items[0].content -> we probably want alignment on the ITEM level
-       const match = focusedField.match(/customSections\[(\d+)\]\.items\[(\d+)\]/);
+  } else if (targetField.includes("customSections")) {
+       const match = targetField.match(/customSections\[(\d+)\]\.items\[(\d+)\]/);
        if (match) {
            const sectionIndex = parseInt(match[1]);
            const itemIndex = parseInt(match[2]);
@@ -171,54 +246,226 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
        }
   }
 
-  // If we couldn't resolve a valid alignment target (e.g. focusing on a date or title that doesn't support alignment), hide toolbar
-  if (!alignmentPath) return null;
+  // If we couldn't resolve a valid alignment target, AND we're not just in AI mode...
+  // Actually if AI is open we still want to show the toolbar even if alignmentPath isn't resolved? 
+  // No, AI needs a field context. But we have activeTarget. IF activeTarget is valid but alignmentPath is empty (unsupported field), we usually return null.
+  // But if AI is open, we stick around to show the AI popup.
+  if (!alignmentPath && !aiOpen) return null;
 
   return (
     <div 
         ref={toolbarRef}
-        className="fixed z-[9] flex items-center space-x-1 bg-slate-900 text-white rounded-lg p-1 border border-slate-700 shadow-2xl backdrop-blur-md"
+        className="fixed z-[500] flex items-center space-x-1 bg-slate-900 text-white rounded-lg p-1 border border-slate-700 shadow-2xl backdrop-blur-md"
         style={{ 
             top: position.top, 
             left: position.left,
-            transform: "translateX(-50%)" // Center align relative to left coord
+            transform: "translateX(-50%)" 
         }}
     >
-      <ToolbarButton 
-        icon={AlignLeft} 
-        isActive={currentAlignment === "left" || !currentAlignment} 
-        onClick={() => updateField(alignmentPath, "left")}
+      <ToolbarButton
+        icon={AlignLeft}
+        isActive={currentAlignment === "left" || !currentAlignment}
+        onClick={() => alignmentPath && updateField(alignmentPath, "left")}
       />
-      <ToolbarButton 
-        icon={AlignCenter} 
-        isActive={currentAlignment === "center"} 
-        onClick={() => updateField(alignmentPath, "center")}
+      <ToolbarButton
+        icon={AlignCenter}
+        isActive={currentAlignment === "center"}
+        onClick={() => alignmentPath && updateField(alignmentPath, "center")}
       />
-      <ToolbarButton 
-        icon={AlignRight} 
-        isActive={currentAlignment === "right"} 
-        onClick={() => updateField(alignmentPath, "right")}
+      <ToolbarButton
+        icon={AlignRight}
+        isActive={currentAlignment === "right"}
+        onClick={() => alignmentPath && updateField(alignmentPath, "right")}
       />
-      <ToolbarButton 
-        icon={AlignJustify} 
-        isActive={currentAlignment === "justify"} 
-        onClick={() => updateField(alignmentPath, "justify")}
+      <ToolbarButton
+        icon={AlignJustify}
+        isActive={currentAlignment === "justify"}
+        onClick={() => alignmentPath && updateField(alignmentPath, "justify")}
       />
+      
+      <div className="w-[1px] h-4 bg-slate-700 mx-1" />
+      
+      <ToolbarButton
+        icon={Sparkles}
+        isActive={aiOpen}
+        onClick={() => {
+            if (!aiOpen) {
+                setLockedField(focusedField);
+                setAiOpen(true);
+            } else {
+                setAiOpen(false);
+                setLockedField(null);
+            }
+        }}
+        className="text-purple-400 hover:text-purple-300 hover:bg-purple-900/30"
+      />
+
+      {aiOpen && (
+        <div className="absolute top-full left-0 mt-2 w-[500px] bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden z-[501] animate-in fade-in zoom-in-95 duration-200 flex flex-col text-slate-800">
+           {!aiResult ? (
+             <>
+                <div className="p-3 border-b border-slate-100 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-600" />
+                    <Input 
+                        value={aiInstruction}
+                        onChange={(e) => setAiInstruction(e.target.value)}
+                        placeholder="Ask AI anything..."
+                        className="border-none shadow-none focus-visible:ring-0 px-0 h-9 text-base bg-transparent placeholder:text-slate-400 flex-1"
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleAskAi();
+                        }}
+                        autoFocus
+                        disabled={isAiLoading}
+                    />
+                    <div className="flex items-center gap-1 text-slate-400">
+                        {isAiLoading ? (
+                             <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
+                        ) : (
+                             <button 
+                                onClick={() => handleAskAi()}
+                                className="p-1 hover:bg-slate-100 rounded-md transition-colors"
+                             >
+                                <CornerDownLeft className="w-4 h-4" />
+                             </button>
+                        )}
+                    </div>
+                </div>
+                
+                <div className="p-2 bg-slate-50/50">
+                    <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 py-1.5 mb-1">
+                        Suggested
+                    </div>
+                    <div className="space-y-0.5">
+                        <button 
+                            className="w-full flex items-center justify-between px-2 py-1.5 text-sm text-slate-600 hover:bg-purple-50 hover:text-purple-700 rounded-md transition-colors group text-left"
+                            onClick={() => {
+                                setAiInstruction("Improve writing");
+                                handleAskAi("Improve writing");
+                            }}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-purple-500 group-hover:text-purple-600" />
+                                <span>Improve writing</span>
+                            </div>
+                        </button>
+                        
+                        <button 
+                            className="w-full flex items-center justify-between px-2 py-1.5 text-sm text-slate-600 hover:bg-purple-50 hover:text-purple-700 rounded-md transition-colors group text-left"
+                            onClick={() => {
+                                setAiInstruction("Fix spelling & grammar");
+                                handleAskAi("Fix spelling & grammar");
+                            }}
+                        >
+                            <div className="flex items-center gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                <span>Fix spelling & grammar</span>
+                            </div>
+                        </button>
+
+                         <button 
+                            className="w-full flex items-center justify-between px-2 py-1.5 text-sm text-slate-600 hover:bg-purple-50 hover:text-purple-700 rounded-md transition-colors group text-left"
+                            onClick={() => {
+                                setAiInstruction("Make shorter");
+                                handleAskAi("Make shorter");
+                            }}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Minimize2 className="w-4 h-4 text-orange-500" />
+                                <span>Make shorter</span>
+                            </div>
+                        </button>
+
+                         <button 
+                            className="w-full flex items-center justify-between px-2 py-1.5 text-sm text-slate-600 hover:bg-purple-50 hover:text-purple-700 rounded-md transition-colors group text-left"
+                            onClick={() => {
+                                setAiInstruction("Make longer");
+                                handleAskAi("Make longer");
+                            }}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Maximize2 className="w-4 h-4 text-blue-500" />
+                                <span>Make longer</span>
+                            </div>
+                        </button>
+
+                         <button 
+                            className="w-full flex items-center justify-between px-2 py-1.5 text-sm text-slate-600 hover:bg-purple-50 hover:text-purple-700 rounded-md transition-colors group text-left"
+                            onClick={() => {
+                                setAiInstruction("Translate to English");
+                                handleAskAi("Translate to English");
+                            }}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Languages className="w-4 h-4 text-sky-500" />
+                                <span>Translate to English</span>
+                            </div>
+                        </button>
+
+                         <button 
+                            className="w-full flex items-center justify-between px-2 py-1.5 text-sm text-slate-600 hover:bg-purple-50 hover:text-purple-700 rounded-md transition-colors group text-left"
+                            onClick={() => {
+                                setAiInstruction("Translate to Thai");
+                                handleAskAi("Translate to Thai");
+                            }}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Languages className="w-4 h-4 text-pink-500" />
+                                <span>Translate to Thai</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+             </>
+           ) : (
+             <div className="p-4 bg-slate-50">
+                 <div className="mb-3 text-sm text-slate-600 bg-white p-3 rounded-md border border-slate-200">
+                     {isAiLoading ? (
+                        <div className="flex items-center gap-2 text-slate-400">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Thinking...
+                        </div>
+                     ) : aiResult}
+                 </div>
+                 <div className="flex gap-2 justify-end">
+                     <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        onClick={() => {
+                            setAiResult(null);
+                            setAiInstruction("");
+                        }}
+                        className="text-slate-500 hover:text-slate-700"
+                     >
+                        Discard
+                     </Button>
+                     <Button 
+                        size="sm" 
+                        onClick={handleAcceptAi}
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                     >
+                        Replace Selection
+                     </Button>
+                 </div>
+             </div>
+           )}
+        </div>
+      )}
     </div>
   );
 }
 
-function ToolbarButton({ icon: Icon, isActive, onClick }: { icon: any, isActive: boolean, onClick: () => void }) {
+function ToolbarButton({ icon: Icon, isActive, onClick, className }: { icon: any, isActive: boolean, onClick: () => void, className?: string }) {
     return (
         <Button
             variant="ghost"
             size="icon"
             className={cn(
                 "w-7 h-7 rounded-sm transition-all",
-                isActive ? "bg-blue-500 text-white shadow-sm" : "hover:bg-slate-700 text-slate-400 hover:text-slate-200"
+                isActive ? "bg-blue-500 text-white shadow-sm" : "hover:bg-slate-700 text-slate-400 hover:text-slate-200",
+                className
             )}
             onMouseDown={(e) => {
-                e.preventDefault(); // Prevent focus loss on mouse down
+                e.preventDefault(); 
             }}
             onClick={(e) => {
                 e.preventDefault();

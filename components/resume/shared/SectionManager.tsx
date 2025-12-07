@@ -32,7 +32,9 @@ export function SectionManager({ data, onUpdate }: SectionManagerProps) {
             const defaultOrder = ["experience", "education", "projects", "skills"];
             // Add existing custom sections
             if (data.customSections) {
-                data.customSections.forEach(s => defaultOrder.push(s.id));
+                data.customSections.forEach(s => {
+                    if (s.id) defaultOrder.push(s.id);
+                });
             }
             updateField('sectionOrder', defaultOrder);
         } else {

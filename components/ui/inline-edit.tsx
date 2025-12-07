@@ -33,11 +33,13 @@ export function InlineEdit({
   // Use context safely (it might not be available in some contexts like preview modal)
   let setFocusedField: ((path: string | null) => void) | undefined;
   let setHasSelection: ((hasSelection: boolean) => void) | undefined;
+  let aiProcessingField: string | null = null;
   try {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const context = useEditorContext();
       setFocusedField = context.setFocusedField;
       setHasSelection = context.setHasSelection;
+      aiProcessingField = context.aiProcessingField;
   } catch (e) {
       // Context not present, ignore
   }
@@ -198,6 +200,9 @@ export function InlineEdit({
         // Read-only state
         readOnly && "cursor-default min-w-0 px-0 mx-0 border-none",
         
+        // AI Processing state
+        path && aiProcessingField === path && "animate-scan cursor-wait",
+
         // Alignment
         alignment === "left" && "text-left",
         alignment === "center" && "text-center",

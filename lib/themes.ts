@@ -11,6 +11,7 @@ export const THEME_DEMOS = [
         personalInfo: { 
             fullName: "Emily White", 
             summary: "Data-driven Marketing Director with 10+ years of experience scaling global brands. Proven track record in digital strategy, team leadership, and revenue growth. Passionate about connecting products with people through compelilng storytelling.", 
+            headerSummary: "Data-driven Marketing Director with 10+ years of experience scaling global brands. Proven track record in digital strategy, team leadership, and revenue growth. Passionate about connecting products with people through compelilng storytelling.", 
             email: "emily.white@example.com", 
             phone: "+1 (555) 123-4567",
             location: "New York, NY",
@@ -72,7 +73,7 @@ export const THEME_DEMOS = [
             }
         ],
         testimonials: [],
-        sectionOrder: ["experience", "education", "skills", "projects", "summary"],
+        sectionOrder: ["summary", "experience", "education", "skills", "projects"],
         customSections: []
       }
     },
@@ -85,6 +86,7 @@ export const THEME_DEMOS = [
         personalInfo: { 
             fullName: "Alex Morgan", 
             summary: "Multidisciplinary Graphic Designer with a focus on brand identity and typography. Believes in design as a problem-solving tool. obsessed with details and crafting visual systems that scale.", 
+            headerSummary: "Multidisciplinary Graphic Designer with a focus on brand identity and typography. Believes in design as a problem-solving tool. obsessed with details and crafting visual systems that scale.", 
             email: "alex@morgandesign.com", 
             phone: "+1 (555) 987-6543",
             location: "San Francisco, CA",
@@ -138,7 +140,7 @@ export const THEME_DEMOS = [
             }
         ],
         testimonials: [],
-        sectionOrder: ["projects", "experience", "skills", "education", "summary"],
+        sectionOrder: ["summary", "projects", "experience", "skills", "education"],
         customSections: []
       }
     },
@@ -151,6 +153,7 @@ export const THEME_DEMOS = [
         personalInfo: { 
             fullName: "Sarah Chen", 
             summary: "Full-stack engineer passionate about building scalable, user-centric applications. specialized in React ecosystem and cloud infrastructure. Open source contributor and tech speaker.", 
+            headerSummary: "Full-stack engineer passionate about building scalable, user-centric applications. specialized in React ecosystem and cloud infrastructure. Open source contributor and tech speaker.", 
             email: "sarah.chen@dev.io", 
             phone: "+1 (555) 246-8101",
             location: "Seattle, WA",
@@ -205,7 +208,7 @@ export const THEME_DEMOS = [
             }
         ],
         testimonials: [],
-        sectionOrder: ["skills", "experience", "projects", "education", "summary"],
+        sectionOrder: ["summary", "skills", "experience", "projects", "education"],
         customSections: []
       }
     },
@@ -218,6 +221,7 @@ export const THEME_DEMOS = [
         personalInfo: { 
             fullName: "Marcus Jenkins", 
             summary: "Strategic Product Manager with 7 years of experience in B2B SaaS. Expert in roadmap planning, agile methodologies, and cross-functional collaboration. Driven by data and customer empathy.", 
+            headerSummary: "Strategic Product Manager with 7 years of experience in B2B SaaS. Expert in roadmap planning, agile methodologies, and cross-functional collaboration. Driven by data and customer empathy.", 
             email: "marcus.j@pm.io", 
             phone: "+1 (555) 369-2580",
             location: "Austin, TX",
@@ -279,7 +283,7 @@ export const THEME_DEMOS = [
             }
         ],
         testimonials: [],
-        sectionOrder: ["experience", "projects", "skills", "education", "summary"],
+        sectionOrder: ["summary", "experience", "projects", "skills", "education"],
         customSections: []
       }
     },
@@ -366,6 +370,7 @@ export const THEME_DEMOS = [
         personalInfo: { 
             fullName: "Lisa Ray", 
             summary: "Senior Copywriter and Content Strategist with a knack for brand storytelling. I turn complex ideas into clear, compelling narratives that resonate with audiences.", 
+            headerSummary: "Senior Copywriter and Content Strategist with a knack for brand storytelling. I turn complex ideas into clear, compelling narratives that resonate with audiences.", 
             email: "lisa.ray@write.com", 
             phone: "+1 (555) 654-3210",
             location: "London, UK",

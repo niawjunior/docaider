@@ -7,6 +7,8 @@ interface EditorContextType {
   setFocusedField: (path: string | null) => void;
   hasSelection: boolean;
   setHasSelection: (hasSelection: boolean) => void;
+  aiProcessingField: string | null;
+  setAiProcessingField: (path: string | null) => void;
 }
 
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
@@ -14,9 +16,10 @@ const EditorContext = createContext<EditorContextType | undefined>(undefined);
 export function EditorProvider({ children }: { children: ReactNode }) {
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [hasSelection, setHasSelection] = useState(false);
+  const [aiProcessingField, setAiProcessingField] = useState<string | null>(null);
 
   return (
-    <EditorContext.Provider value={{ focusedField, setFocusedField, hasSelection, setHasSelection }}>
+    <EditorContext.Provider value={{ focusedField, setFocusedField, hasSelection, setHasSelection, aiProcessingField, setAiProcessingField }}>
       {children}
     </EditorContext.Provider>
   );

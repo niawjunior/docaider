@@ -109,8 +109,8 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
             </h1>
             <p className="text-xl md:text-2xl text-slate-600 leading-relaxed mb-8">
                <InlineEdit readOnly={readOnly || !onUpdate} 
-                    value={data.personalInfo.summary} 
-                    onSave={(val) => handleUpdate('personalInfo.summary', val)} 
+                    value={data.personalInfo.headerSummary} 
+                    onSave={(val) => handleUpdate('personalInfo.headerSummary', val)} 
                     placeholder="Brief bio or summary..."
                     multiline
                     path="personalInfo.headerSummary"

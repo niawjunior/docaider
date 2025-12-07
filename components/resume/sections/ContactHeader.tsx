@@ -42,8 +42,8 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
                     </h1>
                     <div className="text-slate-400 text-sm">
                         <InlineEdit readOnly={readOnly || !onUpdate} 
-                            value={data.personalInfo.summary} 
-                            onSave={(val) => handleUpdate('personalInfo.summary', val)} 
+                            value={data.personalInfo.headerSummary} 
+                            onSave={(val) => handleUpdate('personalInfo.headerSummary', val)} 
                             multiline
                             path="personalInfo.headerSummary"
                             alignment={(data.personalInfo as any).headerSummaryAlignment}
@@ -129,10 +129,10 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
                 )}
             >
                 <InlineEdit readOnly={readOnly || !onUpdate} 
-                    value={data.personalInfo.summary} 
+                    value={data.personalInfo.headerSummary} 
                     placeholder="Professional Summary"
                     multiline
-                    onSave={(val) => handleUpdate('personalInfo.summary', val)} 
+                    onSave={(val) => handleUpdate('personalInfo.headerSummary', val)} 
                     path="personalInfo.headerSummary"
                     alignment={(data.personalInfo as any).headerSummaryAlignment || (theme === "minimal" ? "center" : undefined)}
                     className={theme === "minimal" ? "w-full block" : ""}

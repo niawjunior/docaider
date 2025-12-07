@@ -11,6 +11,7 @@ export const ResumeSchema = z.object({
     location: z.string().nullish().describe("City, Country"),
     summary: z.string().nullish().describe("A brief professional summary or bio"),
     summaryAlignment: z.enum(["left", "center", "right", "justify"]).nullish(),
+    headerSummary: z.string().nullish().describe("Summary displayed in the header"),
     headerSummaryAlignment: z.enum(["left", "center", "right", "justify"]).nullish(),
   }).nullish().transform(v => v ?? {}).describe("Personal contact information"),
   
