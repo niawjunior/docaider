@@ -3,6 +3,8 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+import { useEditorContext } from "@/components/resume/editor/EditorContext";
+
 interface InlineEditProps extends React.HTMLAttributes<HTMLElement> {
   value: string | undefined | null;
   onSave: (value: string) => void;
@@ -10,6 +12,8 @@ interface InlineEditProps extends React.HTMLAttributes<HTMLElement> {
   placeholder?: string;
   className?: string;
   readOnly?: boolean;
+  path?: string;
+  alignment?: "left" | "center" | "right" | "justify";
 }
 
 export function InlineEdit({ 
@@ -19,10 +23,49 @@ export function InlineEdit({
   placeholder = "Click to edit", 
   className,
   readOnly = false,
+  path,
+  alignment,
   ...props 
 }: InlineEditProps) {
   const contentRef = React.useRef<HTMLElement>(null);
   const [isEditing, setIsEditing] = React.useState(false);
+  
+  // Use context safely (it might not be available in some contexts like preview modal)
+  let setFocusedField: ((path: string | null) => void) | undefined;
+  let setHasSelection: ((hasSelection: boolean) => void) | undefined;
+  try {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const context = useEditorContext();
+      setFocusedField = context.setFocusedField;
+      setHasSelection = context.setHasSelection;
+  } catch (e) {
+      // Context not present, ignore
+  }
+
+  // Monitor selection changes when editing
+  React.useEffect(() => {
+     if (!isEditing || !setHasSelection) return;
+
+     const checkSelection = () => {
+         const selection = window.getSelection();
+         const hasContent = selection && 
+                            !selection.isCollapsed && 
+                            selection.toString().trim().length > 0 &&
+                            contentRef.current && 
+                            contentRef.current.contains(selection.anchorNode);
+        
+         setHasSelection(!!hasContent);
+     };
+
+     document.addEventListener('selectionchange', checkSelection);
+     // Initial check
+     checkSelection();
+
+     return () => {
+         document.removeEventListener('selectionchange', checkSelection);
+         setHasSelection && setHasSelection(false);
+     };
+  }, [isEditing, setHasSelection]);
 
   // Sync value to DOM when not editing to ensure external updates are reflected
   React.useEffect(() => {
@@ -37,6 +80,7 @@ export function InlineEdit({
   const handleBlur = () => {
     if (readOnly) return;
     setIsEditing(false);
+    if (setHasSelection) setHasSelection(false);
     if (contentRef.current) {
       // Use textContent for single-line to avoid CSS artifacts (like text-transform), 
       // but fallback to innerText for multiline to preserve line breaks correctly.
@@ -80,6 +124,9 @@ export function InlineEdit({
   const handleFocus = () => {
       if (readOnly) return;
       setIsEditing(true);
+      if (path && setFocusedField) {
+          setFocusedField(path);
+      }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -150,6 +197,13 @@ export function InlineEdit({
         
         // Read-only state
         readOnly && "cursor-default min-w-0 px-0 mx-0 border-none",
+        
+        // Alignment
+        alignment === "left" && "text-left",
+        alignment === "center" && "text-center",
+        alignment === "right" && "text-right",
+        alignment === "justify" && "text-justify",
+        
         className
       )}
       data-placeholder={placeholder}

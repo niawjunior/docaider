@@ -97,9 +97,11 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                                         placeholder="Project Name"
                                         className={cn(
                                             "bg-transparent",
-                                            theme === "minimal" && "text-center w-full block"
+                                            theme === "minimal" && "w-full block"
                                         )}
                                         onSave={(val) => updateItem({ name: val })}
+                                        path={`projects[i].name`}
+                                        alignment={(project as any).nameAlignment || (theme === "minimal" ? "center" : undefined)}
                                     />
                                  </h3>
                                  
@@ -140,6 +142,8 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                                     placeholder="Project description" 
                                     multiline
                                     onSave={(val) => updateItem({ description: val })}
+                                    path={`projects[i].description`}
+                                    alignment={(project as any).alignment || (theme === "minimal" ? "center" : undefined)}
                                 />
                             </div>
                             

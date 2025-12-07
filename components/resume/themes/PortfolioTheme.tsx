@@ -101,6 +101,7 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                  <InlineEdit readOnly={readOnly || !onUpdate} 
                     value={data.personalInfo.fullName} 
                     onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
+                    path="personalInfo.fullName"
                     placeholder="Your Name"
                     className="min-w-[200px]"
                  />
@@ -112,6 +113,8 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                     onSave={(val) => handleUpdate('personalInfo.summary', val)} 
                     placeholder="Brief bio or summary..."
                     multiline
+                    path="personalInfo.headerSummary"
+                    alignment={(data.personalInfo as any).headerSummaryAlignment}
                  />
             </p>
             
@@ -132,6 +135,7 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                                 value={data.personalInfo.email}
                                 placeholder="Email"
                                 onSave={(val) => handleUpdate('personalInfo.email', val)}
+                                path="personalInfo.email"
                                 className="bg-transparent border-none p-0 h-auto w-auto min-w-[100px]"
                             />
                         </div>
@@ -143,9 +147,9 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                <div className="flex items-center gap-2">
                  <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={!onUpdate}>
                     {!onUpdate ? (
-                        <a href={data.personalInfo.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                        <a href={(data.personalInfo.linkedin as string)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                              <Linkedin className="w-4 h-4" />
-                             <span>{data.personalInfo.linkedin?.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '') || "LinkedIn"}</span>
+                             <span>{(data.personalInfo.linkedin as string)?.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '') || "LinkedIn"}</span>
                         </a>
                     ) : (
                         <div className="flex items-center gap-2">
@@ -154,6 +158,7 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                                 value={data.personalInfo.linkedin} 
                                 placeholder="LinkedIn URL"
                                 onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
+                                path="personalInfo.linkedin"
                                 className="bg-transparent border-none p-0 h-auto w-auto min-w-[100px]"
                             />
                         </div>
@@ -165,9 +170,9 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                 <div className="flex items-center gap-2">
                  <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={!onUpdate}>
                     {!onUpdate ? (
-                        <a href={data.personalInfo.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                        <a href={(data.personalInfo.website as string)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                              <Globe className="w-4 h-4" />
-                             <span>{data.personalInfo.website?.replace(/^https?:\/\/(www\.)?/, '') || "Website"}</span>
+                             <span>{(data.personalInfo.website as string)?.replace(/^https?:\/\/(www\.)?/, '') || "Website"}</span>
                         </a>
                     ) : (
                         <div className="flex items-center gap-2">
@@ -176,6 +181,7 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                                 value={data.personalInfo.website} 
                                 placeholder="Website URL"
                                 onSave={(val) => handleUpdate('personalInfo.website', val)} 
+                                path="personalInfo.website"
                                 className="bg-transparent border-none p-0 h-auto w-auto min-w-[100px]"
                             />
                         </div>

@@ -16,7 +16,7 @@ interface SummarySectionProps {
 export const SummarySection = ({ data, theme, onUpdate, className, readOnly }: SummarySectionProps) => {
   const { updateField: handleUpdate } = useResumeUpdate(data, onUpdate);
 
-  if (!onUpdate && !data.personalInfo.summary) return null;
+  if (!onUpdate && !(data.personalInfo as any).summary) return null;
 
   return (
     <section className={cn("mb-6", className)}>
@@ -31,11 +31,13 @@ export const SummarySection = ({ data, theme, onUpdate, className, readOnly }: S
       <div className="text-sm leading-relaxed text-slate-700">
         <InlineEdit
           readOnly={readOnly || !onUpdate}
-          value={data.personalInfo.summary}
+          value={(data.personalInfo as any).summary}
           placeholder="Write a professional summary..."
           multiline
           onSave={(val) => handleUpdate('personalInfo.summary', val)}
-          className="w-full bg-transparent border-none p-0 focus:ring-0"
+          path="personalInfo.summary"
+          alignment={(data.personalInfo as any).summaryAlignment || (theme === "minimal" ? "center" : undefined)}
+          className={cn("w-full bg-transparent border-none p-0 focus:ring-0", theme === "minimal" && "w-full block")}
         />
       </div>
     </section>

@@ -35,8 +35,6 @@ interface ResumeSectionListProps<T> {
   readOnly?: boolean;
 }
 
-// Extends T with potential ID for internal use
-type ItemWithId = { id?: string } & Record<string, any>;
 
 function SortableItem({ 
     id, 
@@ -81,7 +79,12 @@ function SortableItem({
   );
 }
 
-export function ResumeSectionList<T extends { id?: string }>({
+// Extends T with potential ID for internal use
+type ItemWithId = { id?: string | null } & Record<string, any>;
+
+// ...
+
+export function ResumeSectionList<T extends { id?: string | null }>({
     title,
     data,
     onUpdate,

@@ -15,7 +15,9 @@ export function useResumeUpdate(data: ResumeData, onUpdate?: (data: ResumeData) 
         // Create a deep copy to ensure immutability
         const newData = JSON.parse(JSON.stringify(data));
         
-        const parts = path.split('.');
+        // Convert bracket notation to dot notation (e.g. "experience[0].company" -> "experience.0.company")
+        const normalizedPath = path.replace(/\[(\w+)\]/g, '.$1'); 
+        const parts = normalizedPath.split('.');
         let current = newData;
         
         // Traverse to the parent key

@@ -78,11 +78,14 @@ export function EducationSection({ data, theme, onUpdate, readOnly }: EducationS
                                     theme !== "creative" && "w-full",
                                     theme === "studio" ? "text-white text-xl tracking-tight" : "text-slate-900"
                                 )}>
-                                    <InlineEdit readOnly={readOnly || !onUpdate} 
+                                    <InlineEdit
+                                        readOnly={readOnly || !onUpdate}
                                         value={edu.institution} 
                                         placeholder="Institution"
-                                        className={theme === "minimal" ? "text-center w-full block" : ""}
-                                        onSave={(val) => updateItem({ institution: val })}
+                                        className={cn(theme === "minimal" && "w-full block")}
+                                        onSave={(val: string) => updateItem({ institution: val })}
+                                        path={`education[${index}].institution`}
+                                        alignment={(edu as any).institutionAlignment || (theme === "minimal" ? "center" : undefined)}
                                     />
                                 </h3>
                                 
@@ -99,12 +102,16 @@ export function EducationSection({ data, theme, onUpdate, readOnly }: EducationS
                                                 value={edu.startDate} 
                                                 placeholder="Start"
                                                 onSave={(val) => updateItem({ startDate: val })}
+                                                path={`education[${index}].startDate`}
+                                                alignment={(edu as any).dateAlignment}
                                             />
                                             <span>-</span>
                                             <InlineEdit readOnly={readOnly || !onUpdate} 
                                                 value={edu.endDate} 
                                                 placeholder="Present"
                                                 onSave={(val) => updateItem({ endDate: val })}
+                                                path={`education[${index}].endDate`}
+                                                alignment={(edu as any).dateAlignment}
                                             />
                                         </div>
                                     )}
@@ -131,12 +138,16 @@ export function EducationSection({ data, theme, onUpdate, readOnly }: EducationS
                                      value={edu.degree} 
                                      placeholder="Degree"
                                      onSave={(val) => updateItem({ degree: val })}
+                                     path={`education[${index}].degree`}
+                                     alignment={(edu as any).degreeAlignment}
                                  />
                                  <span>in</span>
                                 <InlineEdit readOnly={readOnly || !onUpdate} 
                                      value={edu.fieldOfStudy} 
                                      placeholder="Field of Study"
                                      onSave={(val) => updateItem({ fieldOfStudy: val })}
+                                     path={`education[${index}].fieldOfStudy`}
+                                     alignment={(edu as any).alignment}
                                  />
                             </div>
                             

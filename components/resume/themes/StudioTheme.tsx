@@ -72,16 +72,19 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
           ))}
         </motion.div>
 
-        {/* Editable Job Title (Outside Marquee for ease of editing) */}
-        <div className="px-6 mt-4 text-center">
-             <div className="text-sm text-neutral-500 mb-1">MARQUEE TEXT (Edit here):</div>
-             <InlineEdit readOnly={readOnly || !onUpdate}
-                value={data.personalInfo.jobTitle}
-                placeholder="CREATIVE DEVELOPER"
-                onSave={(val) => handleUpdate('personalInfo.jobTitle', val?.toUpperCase())}
-                className="text-2xl font-bold uppercase tracking-tighter bg-neutral-900 border-none text-center"
-             />
-        </div>
+
+        {onUpdate && (
+          <div className="px-6 mt-4 text-center">
+              <div className="text-sm text-neutral-500 mb-1">MARQUEE TEXT (Edit here):</div>
+              <InlineEdit readOnly={readOnly || !onUpdate}
+                  value={data.personalInfo.jobTitle}
+                  placeholder="CREATIVE DEVELOPER"
+                  onSave={(val) => handleUpdate('personalInfo.jobTitle', val?.toUpperCase())}
+                  path="personalInfo.jobTitle"
+                  className="text-2xl font-bold uppercase tracking-tighter bg-neutral-900 border-none text-center"
+              />
+          </div>
+        )}
       </div>
 
       <main className="px-6">
@@ -104,6 +107,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                 placeholder="Your professional summary goes here..."
                                 multiline
                                 onSave={(val) => handleUpdate('personalInfo.summary', val)}
+                                path="personalInfo.summary"
+                                alignment={(data.personalInfo as any).summaryAlignment}
                                 className="bg-transparent border-neutral-800"
                              />
                            </div>
@@ -224,6 +229,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                                 value={project.name}
                                                 placeholder="Project Name"
                                                 onSave={(val) => updateItem({ name: val })}
+                                                path={`projects[${i}].name`}
+                                                alignment={(project as any).nameAlignment}
                                                 className="bg-transparent"
                                             />
                                         </h3>
@@ -241,6 +248,7 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                                 value={project.url}
                                                 placeholder="https://..."
                                                 onSave={(val) => updateItem({ url: val })}
+                                                path={`projects[${i}].url`}
                                                 className="bg-transparent text-sm"
                                             />
                                          </div>
@@ -253,6 +261,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                             placeholder="Project description..."
                                             multiline
                                             onSave={(val) => updateItem({ description: val })}
+                                            path={`projects[${i}].description`}
+                                            alignment={(project as any).alignment}
                                             className="bg-transparent"
                                         />
                                     </p>
@@ -319,6 +329,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                                     value={exp.company}
                                                     placeholder="Company"
                                                     onSave={(val) => updateItem({ company: val })}
+                                                    path={`experience[${i}].company`}
+                                                    alignment={(exp as any).companyAlignment}
                                                     className="bg-transparent"
                                                 />
                                             </h3>
@@ -327,6 +339,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                                     value={exp.startDate}
                                                     placeholder="Start"
                                                     onSave={(val) => updateItem({ startDate: val })}
+                                                    path={`experience[${i}].startDate`}
+                                                    alignment={(exp as any).dateAlignment}
                                                     className="bg-transparent text-right"
                                                 />
                                                 {" — "}
@@ -334,6 +348,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                                     value={exp.endDate}
                                                     placeholder="Present"
                                                     onSave={(val) => updateItem({ endDate: val })}
+                                                    path={`experience[${i}].endDate`}
+                                                    alignment={(exp as any).dateAlignment}
                                                     className="bg-transparent text-right"
                                                 />
                                             </div>
@@ -351,6 +367,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                                     value={exp.position}
                                                     placeholder="Position"
                                                     onSave={(val) => updateItem({ position: val })}
+                                                    path={`experience[${i}].position`}
+                                                    alignment={(exp as any).positionAlignment}
                                                     className="bg-transparent"
                                                 />
                                             </h4>
@@ -360,6 +378,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                                     placeholder="Description..."
                                                     multiline
                                                     onSave={(val) => updateItem({ description: val })}
+                                                    path={`experience[${i}].description`}
+                                                    alignment={(exp as any).alignment}
                                                     className="bg-transparent"
                                                 />
                                             </p>
@@ -425,6 +445,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                                     value={edu.institution}
                                                     placeholder="School/University"
                                                     onSave={(val) => updateItem({ institution: val })}
+                                                    path={`education[${i}].institution`}
+                                                    alignment={(edu as any).institutionAlignment}
                                                     className="bg-transparent"
                                                 />
                                             </h3>
@@ -433,6 +455,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                                     value={edu.endDate}
                                                     placeholder="Year"
                                                     onSave={(val) => updateItem({ endDate: val })}
+                                                    path={`education[${i}].endDate`}
+                                                    alignment={(edu as any).dateAlignment}
                                                     className="bg-transparent text-right"
                                                 />
                                             </div>
@@ -450,6 +474,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                                     value={edu.degree}
                                                     placeholder="Degree/Certificate"
                                                     onSave={(val) => updateItem({ degree: val })}
+                                                    path={`education[${i}].degree`}
+                                                    alignment={(edu as any).degreeAlignment}
                                                     className="bg-transparent"
                                                 />
                                             </p>
@@ -518,6 +544,7 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                         value={data.personalInfo.email} 
                         placeholder="Email Address"
                         onSave={(val) => handleUpdate('personalInfo.email', val)} 
+                        path="personalInfo.email"
                         className="bg-transparent border-neutral-800"
                      />
                </div>
@@ -527,6 +554,7 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                         value={data.personalInfo.linkedin} 
                         placeholder="LinkedIn URL"
                         onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
+                        path="personalInfo.linkedin"
                         className="bg-transparent border-neutral-800"
                      />
                </div>
@@ -536,6 +564,7 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                         value={data.personalInfo.website} 
                         placeholder="Website URL"
                         onSave={(val) => handleUpdate('personalInfo.website', val)} 
+                        path="personalInfo.website"
                         className="bg-transparent border-neutral-800"
                      />
                </div>
@@ -547,6 +576,7 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                         value={data.personalInfo.fullName} 
                         placeholder="Your Name"
                         onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
+                        path="personalInfo.fullName"
                         className="bg-transparent font-bold"
                      />
                     <span> © {new Date().getFullYear()}</span>
@@ -556,6 +586,7 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                         value={data.personalInfo.location} 
                         placeholder="Location"
                         onSave={(val) => handleUpdate('personalInfo.location', val)} 
+                        path="personalInfo.location"
                         className="bg-transparent text-right"
                      />
                  </div>

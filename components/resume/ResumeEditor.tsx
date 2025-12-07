@@ -11,6 +11,8 @@ import { ResumeBuilderHeader } from "@/components/resume/ResumeBuilderHeader";
 import { AnimatePresence, motion } from "framer-motion";
 import { ResumeEditorControls } from "./editor/ResumeEditorControls";
 import { ResumeEditorPreviewArea } from "./editor/ResumeEditorPreviewArea";
+import { EditorProvider } from "./editor/EditorContext";
+import { FormattingToolbar } from "./editor/FormattingToolbar";
 
 export function ResumeEditor() {
   const router = useRouter();
@@ -103,7 +105,11 @@ export function ResumeEditor() {
   };
 
   return (
+    <EditorProvider>
     <div className="min-h-screen bg-slate-950 text-white flex flex-col text-slate-100 dark">
+      {resumeData && (
+           <FormattingToolbar resumeData={resumeData} onUpdate={setResumeData} theme={theme} />
+      )}
       {!isViewMode && (
       <ResumeBuilderHeader 
         maxWidth="max-w-full" 
@@ -111,27 +117,29 @@ export function ResumeEditor() {
         className="bg-transparent border-b border-white/10 relative z-50 backdrop-blur-md"
         theme="dark"
       >
-        <ResumeEditorControls 
-            resumeData={resumeData}
-            setResumeData={setResumeData}
-            isDirty={isDirty}
-            isSaving={isSaving}
-            onSave={handleSave}
-            viewport={viewport}
-            setViewport={setViewport}
-            theme={theme}
-            setTheme={setTheme}
-            isPublishing={isPublishing}
-            setIsPublishing={setIsPublishing}
-            publishedUrl={publishedUrl}
-            setPublishedUrl={setPublishedUrl}
-            visibility={visibility}
-            setVisibility={setVisibility}
-            slug={slug}
-            setSlug={setSlug}
-            idParam={idParam}
-            setIsViewMode={setIsViewMode}
-        />
+        <div className="flex items-center justify-between w-full">
+            <ResumeEditorControls 
+                resumeData={resumeData}
+                setResumeData={setResumeData}
+                isDirty={isDirty}
+                isSaving={isSaving}
+                onSave={handleSave}
+                viewport={viewport}
+                setViewport={setViewport}
+                theme={theme}
+                setTheme={setTheme}
+                isPublishing={isPublishing}
+                setIsPublishing={setIsPublishing}
+                publishedUrl={publishedUrl}
+                setPublishedUrl={setPublishedUrl}
+                visibility={visibility}
+                setVisibility={setVisibility}
+                slug={slug}
+                setSlug={setSlug}
+                idParam={idParam}
+                setIsViewMode={setIsViewMode}
+            />
+        </div>
       </ResumeBuilderHeader>
       )}
 
@@ -187,5 +195,6 @@ export function ResumeEditor() {
         />
       </main>
     </div>
+    </EditorProvider>
   );
 }

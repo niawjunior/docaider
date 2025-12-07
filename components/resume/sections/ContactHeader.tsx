@@ -45,6 +45,8 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
                             value={data.personalInfo.summary} 
                             onSave={(val) => handleUpdate('personalInfo.summary', val)} 
                             multiline
+                            path="personalInfo.headerSummary"
+                            alignment={(data.personalInfo as any).headerSummaryAlignment}
                             className="text-slate-400 hover:bg-white/10"
                         />
                     </div>
@@ -116,6 +118,7 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
                     value={data.personalInfo.fullName} 
                     placeholder="Your Name"
                     onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
+                    path="personalInfo.fullName"
                     className={theme === "minimal" ? "text-center w-full block" : ""}
                 />
             </div>
@@ -130,7 +133,9 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
                     placeholder="Professional Summary"
                     multiline
                     onSave={(val) => handleUpdate('personalInfo.summary', val)} 
-                    className={theme === "minimal" ? "text-center w-full block" : ""}
+                    path="personalInfo.headerSummary"
+                    alignment={(data.personalInfo as any).headerSummaryAlignment || (theme === "minimal" ? "center" : undefined)}
+                    className={theme === "minimal" ? "w-full block" : ""}
                 />
             </div>
 
@@ -147,6 +152,7 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
                             value={data.personalInfo.email} 
                             placeholder="Email"
                             onSave={(val) => handleUpdate('personalInfo.email', val)} 
+                            path="personalInfo.email"
                         />
                     </div>
                 )}
@@ -157,6 +163,7 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
                             value={data.personalInfo.phone} 
                             placeholder="Phone"
                             onSave={(val) => handleUpdate('personalInfo.phone', val)} 
+                            path="personalInfo.phone"
                         />
                     </div>
                 )}
@@ -167,6 +174,7 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
                             value={data.personalInfo.location} 
                             placeholder="Location"
                             onSave={(val) => handleUpdate('personalInfo.location', val)} 
+                            path="personalInfo.location"
                         />
                     </div>
                 )}
@@ -177,6 +185,7 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
                             value={data.personalInfo.website} 
                             placeholder="Website"
                             onSave={(val) => handleUpdate('personalInfo.website', val)} 
+                            path="personalInfo.website"
                         />
                     </div>
                 )}

@@ -22,6 +22,7 @@ interface VisualThemeProps {
 
 export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnail }: VisualThemeProps) => {
   const { updateField: handleUpdate } = useResumeUpdate(data, onUpdate);
+  const personalInfo = data.personalInfo as any;
   const { scrollYProgress } = useScroll({
     container: containerRef
   });
@@ -38,7 +39,7 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
         <nav className="sticky top-0 left-0 right-0 z-50 p-6 flex justify-between items-center mix-blend-difference">
           <span className="text-xl font-bold tracking-tighter uppercase">
                {/* Read-only name for nav */}
-              {(data.personalInfo.fullName ?? '').split(' ')[0]}
+              {(personalInfo.fullName ?? '').split(' ')[0]}
           </span>
           <div className="flex gap-6 text-sm font-medium uppercase tracking-widest bg-black/50 backdrop-blur rounded px-4 py-2">
             <a href="#work" className="hover:opacity-50 transition-opacity">Work</a>
@@ -105,8 +106,9 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
              {/* Edit full name here */}
              <div className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl leading-[0.85] font-black uppercase tracking-tighter break-words">
                  <InlineEdit readOnly={readOnly || !onUpdate} 
-                    value={data.personalInfo.fullName} 
+                    value={personalInfo.fullName} 
                     onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
+                    path="personalInfo.fullName"
                     className="bg-transparent border-none w-full"
                     placeholder="YOUR NAME"
                  />
@@ -121,8 +123,9 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
           >
             <div className="text-xl md:text-2xl font-light uppercase tracking-wide max-w-md mb-8 md:mb-0">
                <InlineEdit readOnly={readOnly || !onUpdate} 
-                    value={data.personalInfo.jobTitle} 
+                    value={personalInfo.jobTitle} 
                     onSave={(val) => handleUpdate('personalInfo.jobTitle', val)} 
+                    path="personalInfo.jobTitle"
                     placeholder="Job Title"
                     className="bg-transparent border-none"
                  />
@@ -145,12 +148,14 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                             transition={{ duration: 0.8 }}
                         >
                           <div className="text-2xl md:text-4xl leading-relaxed font-light text-neutral-300">
-                             <InlineEdit readOnly={readOnly || !onUpdate}
-                                value={data.personalInfo.summary}
+                                <InlineEdit readOnly={readOnly || !onUpdate}
+                                value={personalInfo.summary}
                                 placeholder="Write a short bio about yourself..."
                                 multiline
                                 onSave={(val) => handleUpdate('personalInfo.summary', val)}
-                                className="bg-transparent text-center border-none focus:ring-0 w-full"
+                                path="personalInfo.summary"
+                                alignment={personalInfo.summaryAlignment || "center"} // Default to center for summary in this theme
+                                className="bg-transparent border-none focus:ring-0 w-full"
                              />
                           </div>
                         </motion.section>
@@ -210,7 +215,7 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                            <div className="border-l-2 border-white/20 pl-8 md:pl-16 ml-4 md:ml-0 transition-colors group-hover/item:border-white">
                                                <div className="flex justify-between items-start mb-6">
                                                    <h3 className="text-4xl md:text-5xl font-bold">
-                                                        <InlineEdit readOnly={readOnly || !onUpdate}
+                                                    <InlineEdit readOnly={readOnly || !onUpdate}
                                                             value={project.name}
                                                             placeholder="Project Name"
                                                             onSave={(val) => {
@@ -218,6 +223,8 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                                 newProj[i].name = val;
                                                                 handleUpdate('projects', newProj);
                                                             }}
+                                                            path={`projects[${i}].name`}
+                                                            alignment={(project as any).nameAlignment}
                                                             className="bg-transparent border-none w-full"
                                                         />
                                                    </h3>
@@ -243,6 +250,8 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                             newProj[i].description = val;
                                                             handleUpdate('projects', newProj);
                                                         }}
+                                                        path={`projects[${i}].description`}
+                                                        alignment={(project as any).alignment}
                                                         className="bg-transparent border-none w-full"
                                                     />
                                                </div>
@@ -258,6 +267,7 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                                 newProj[i].url = val;
                                                                 handleUpdate('projects', newProj);
                                                             }}
+                                                            path={`projects[${i}].url`}
                                                             className="bg-transparent border-none min-w-[100px]"
                                                         />
                                                     </div>
@@ -324,6 +334,8 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                             newExp[i].startDate = val;
                                                             handleUpdate('experience', newExp);
                                                         }}
+                                                        path={`experience[${i}].startDate`}
+                                                        alignment={(exp as any).dateAlignment}
                                                         className="bg-transparent border-none text-right"
                                                     />
                                                      <span>-</span>
@@ -335,6 +347,8 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                             newExp[i].endDate = val;
                                                             handleUpdate('experience', newExp);
                                                         }}
+                                                        path={`experience[${i}].endDate`}
+                                                        alignment={(exp as any).dateAlignment}
                                                         className="bg-transparent border-none"
                                                     />
                                                  </div>
@@ -359,6 +373,8 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                         newExp[i].company = val;
                                                         handleUpdate('experience', newExp);
                                                     }}
+                                                    path={`experience[${i}].company`}
+                                                    alignment={(exp as any).companyAlignment}
                                                     className="bg-transparent border-none"
                                                 />
                                             </h3>
@@ -371,6 +387,8 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                         newExp[i].position = val;
                                                         handleUpdate('experience', newExp);
                                                     }}
+                                                    path={`experience[${i}].position`}
+                                                    alignment={(exp as any).positionAlignment}
                                                     className="bg-transparent border-none"
                                                 />
                                             </div>
@@ -385,7 +403,9 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                         newExp[i].description = val;
                                                         handleUpdate('experience', newExp);
                                                     }}
-                                                    className="bg-transparent border-none"
+                                                    path={`experience[${i}].description`}
+                                                    alignment={(exp as any).alignment}
+                                                    className="bg-transparent border-none w-full"
                                                 />
                                             </p>
                                         </div>
@@ -423,6 +443,7 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                 newSkills[i] = val;
                                                 handleUpdate('skills', newSkills);
                                             }}
+                                            path={`skills[${i}]`}
                                             className="bg-transparent border-none text-center min-w-[60px]"
                                         />
                                          {onUpdate && !readOnly && (
@@ -493,11 +514,13 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                             newEdu[i].institution = val;
                                                             handleUpdate('education', newEdu);
                                                         }}
+                                                        path={`education[${i}].institution`}
+                                                        alignment={(edu as any).institutionAlignment}
                                                         className="bg-transparent border-none"
                                                     />
                                                 </h3>
                                                  <p className="text-neutral-400 flex gap-1 items-center">
-                                                     <InlineEdit readOnly={readOnly || !onUpdate} 
+                                                      <InlineEdit readOnly={readOnly || !onUpdate} 
                                                         value={edu.degree} 
                                                         placeholder="Degree"
                                                         onSave={(val) => {
@@ -505,10 +528,12 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                             newEdu[i].degree = val;
                                                             handleUpdate('education', newEdu);
                                                         }}
+                                                        path={`education[${i}].degree`}
+                                                        alignment={(edu as any).degreeAlignment}
                                                         className="bg-transparent border-none"
                                                     />
                                                    <span>-</span>
-                                                     <InlineEdit readOnly={readOnly || !onUpdate} 
+                                                      <InlineEdit readOnly={readOnly || !onUpdate} 
                                                         value={edu.fieldOfStudy} 
                                                         placeholder="Field"
                                                         onSave={(val) => {
@@ -516,6 +541,8 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                             newEdu[i].fieldOfStudy = val;
                                                             handleUpdate('education', newEdu);
                                                         }}
+                                                        path={`education[${i}].fieldOfStudy`}
+                                                        alignment={(edu as any).alignment}
                                                         className="bg-transparent border-none"
                                                     />
                                                 </p>
@@ -529,6 +556,8 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                         newEdu[i].startDate = val;
                                                         handleUpdate('education', newEdu);
                                                     }}
+                                                    path={`education[${i}].startDate`}
+                                                    alignment={(edu as any).dateAlignment}
                                                     className="bg-transparent border-none text-right"
                                                 />
                                                 <span>-</span>
@@ -540,6 +569,8 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                         newEdu[i].endDate = val;
                                                         handleUpdate('education', newEdu);
                                                     }}
+                                                    path={`education[${i}].endDate`}
+                                                    alignment={(edu as any).dateAlignment}
                                                     className="bg-transparent border-none"
                                                 />
                                                  {onUpdate && !readOnly && (
@@ -589,36 +620,40 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
              <div className="flex items-center gap-2">
                  <Mail className="w-6 h-6" />
                  <InlineEdit readOnly={readOnly || !onUpdate} 
-                    value={data.personalInfo.email} 
+                    value={personalInfo.email} 
                     placeholder="Email Address"
                     onSave={(val) => handleUpdate('personalInfo.email', val)} 
+                    path="personalInfo.email"
                     className="bg-transparent border-none text-center"
                  />
              </div>
              <div className="flex items-center gap-2">
                   <Linkedin className="w-6 h-6" />
                   <InlineEdit readOnly={readOnly || !onUpdate} 
-                    value={data.personalInfo.linkedin} 
+                    value={personalInfo.linkedin} 
                     placeholder="LinkedIn"
                     onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
+                    path="personalInfo.linkedin"
                     className="bg-transparent border-none text-center text-lg"
                  />
              </div>
              <div className="flex items-center gap-2">
                  <Globe className="w-6 h-6" />
                    <InlineEdit readOnly={readOnly || !onUpdate} 
-                    value={data.personalInfo.website} 
+                    value={personalInfo.website} 
                     placeholder="Website"
                     onSave={(val) => handleUpdate('personalInfo.website', val)} 
+                    path="personalInfo.website"
                     className="bg-transparent border-none text-center text-lg"
                  />
              </div>
              <div className="flex items-center gap-2 mt-4 text-lg">
                  <MapPin className="w-5 h-5" />
                    <InlineEdit readOnly={readOnly || !onUpdate} 
-                    value={data.personalInfo.location} 
+                    value={personalInfo.location} 
                     placeholder="Location"
                     onSave={(val) => handleUpdate('personalInfo.location', val)} 
+                    path="personalInfo.location"
                     className="bg-transparent border-none text-center"
                  />
              </div>

@@ -85,11 +85,14 @@ export function ExperienceSection({ data, theme, onUpdate, readOnly }: Experienc
                                 theme === "creative" ? "text-lg" : "text-lg w-full",
                                 theme === "studio" ? "text-white text-xl tracking-tight" : "text-slate-900" 
                             )}>
-                                <InlineEdit readOnly={readOnly || !onUpdate} 
+                                <InlineEdit
+                                    readOnly={readOnly || !onUpdate}
                                     value={exp.position} 
                                     placeholder="Position"
-                                    className={theme === "minimal" ? "text-center w-full block" : ""}
+                                    className={cn(theme === "minimal" && "w-full block")}
                                     onSave={(val) => updateItem({ position: val })}
+                                    path={`experience[${index}].position`}
+                                    alignment={(exp as any).positionAlignment || (theme === "minimal" ? "center" : undefined)}
                                 />
                             </h3>
 
@@ -106,12 +109,16 @@ export function ExperienceSection({ data, theme, onUpdate, readOnly }: Experienc
                                             value={exp.startDate} 
                                             placeholder="Start"
                                             onSave={(val) => updateItem({ startDate: val })}
+                                            path={`experience[${index}].startDate`}
+                                            alignment={(exp as any).dateAlignment}
                                         />
                                         <span>-</span>
                                         <InlineEdit readOnly={readOnly || !onUpdate} 
                                             value={exp.endDate} 
                                             placeholder="Present"
                                             onSave={(val) => updateItem({ endDate: val })}
+                                            path={`experience[${index}].endDate`}
+                                            alignment={(exp as any).dateAlignment}
                                         />
                                     </div>
                                 )}
@@ -139,11 +146,14 @@ export function ExperienceSection({ data, theme, onUpdate, readOnly }: Experienc
                                 theme === "creative" && "text-slate-500",
                                 theme === "studio" ? "text-neutral-500" : "text-slate-700"
                             )}>
-                                <InlineEdit readOnly={readOnly || !onUpdate} 
+                                <InlineEdit
+                                    readOnly={readOnly || !onUpdate}
                                     value={exp.company} 
                                     placeholder="Company"
-                                    className={theme === "minimal" ? "text-center w-full block" : ""}
+                                    className={cn(theme === "minimal" && "w-full block")}
                                     onSave={(val) => updateItem({ company: val })}
+                                    path={`experience[${index}].company`}
+                                    alignment={(exp as any).companyAlignment || (theme === "minimal" ? "center" : undefined)}
                                 />
                             </div>
                             
@@ -160,17 +170,22 @@ export function ExperienceSection({ data, theme, onUpdate, readOnly }: Experienc
                                         value={exp.endDate} 
                                         placeholder="Present"
                                         onSave={(val) => updateItem({ endDate: val })}
+                                        path={`experience[${index}].endDate`}
+                                        alignment={(exp as any).dateAlignment}
                                     />
                                 </div>
                             )}
 
                             <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                                <InlineEdit readOnly={readOnly || !onUpdate} 
+                                <InlineEdit
+                                    readOnly={readOnly || !onUpdate}
                                     value={exp.description} 
                                     placeholder="Description"
                                     multiline
-                                    className={theme === "minimal" ? "text-center w-full block" : ""}
+                                    className={cn(theme === "minimal" && "w-full block")}
                                     onSave={(val) => updateItem({ description: val })}
+                                    path={`experience[${index}].description`}
+                                    alignment={(exp as any).alignment || (theme === "minimal" ? "center" : undefined)}
                                 />
                             </div>
                         </div>

@@ -79,7 +79,8 @@ export function CustomSectionRenderer({
                                     id: crypto.randomUUID(),
                                     title: "New Item",
                                     subtitle: section.type === "list" ? "Subtitle" : "",
-                                    content: "Description or content goes here..."
+                                    content: "Description or content goes here...",
+                                    alignment: "left" as const
                                 });
                                 
                                 const newItems = [createItem(), ...(section.items || [])];
@@ -105,7 +106,8 @@ export function CustomSectionRenderer({
                             id: crypto.randomUUID(),
                             title: "New Item",
                             subtitle: section.type === "list" ? "Subtitle" : "",
-                            content: "Description or content goes here..."
+                            content: "Description or content goes here...",
+                            alignment: "left" as const
                         }, ...(section.items || [])];
                         handleUpdateSection({ ...section, items: newItems });
                     }}
@@ -174,8 +176,10 @@ export function CustomSectionRenderer({
                                 placeholder="Content..."
                                 multiline
                                 onSave={(val) => updateItem({ content: val })}
-                                className="bg-transparent"
-                            />
+                                path={`customSections[${index}].items[${i}].content`}
+                                alignment={(item as any).alignment}
+                                className="bg-transparent w-full"
+                             />
                         </div>
                     </div>
                   )}
