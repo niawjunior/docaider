@@ -2,7 +2,7 @@ import { ResumeData } from "@/lib/schemas/resume";
 import { cn } from "@/lib/utils";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {  Mail, MapPin, Globe, Linkedin } from "lucide-react";
-import { InlineEdit } from "@/components/ui/inline-edit";
+import { InlineEdit } from "@/components/resume/editor/InlineEdit";
 import { Button } from "@/components/ui/button";
 import { ThemeAddButton, ThemeDeleteButton } from "./ThemeControls";
 import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
@@ -149,12 +149,12 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                         >
                           <div className="text-2xl md:text-4xl leading-relaxed font-light text-neutral-300">
                                 <InlineEdit readOnly={readOnly || !onUpdate}
-                                value={personalInfo.summary}
+                                value={personalInfo.summary.content}
                                 placeholder="Write a short bio about yourself..."
                                 multiline
-                                onSave={(val) => handleUpdate('personalInfo.summary', val)}
-                                path="personalInfo.summary"
-                                alignment={personalInfo.summaryAlignment || "center"} // Default to center for summary in this theme
+                                onSave={(val) => handleUpdate('personalInfo.summary.content', val)}
+                                path="personalInfo.summary.content"
+                                alignment={personalInfo.summary.alignment || "center"}
                                 className="bg-transparent border-none focus:ring-0 w-full"
                              />
                           </div>

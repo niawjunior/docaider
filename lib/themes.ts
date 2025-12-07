@@ -1,7 +1,14 @@
-
 import { ResumeData } from "@/lib/schemas/resume";
 
-export const THEME_DEMOS = [
+export interface ThemeDemo {
+  id: string;
+  name: string;
+  role: string;
+  description: string;
+  data: ResumeData;
+}
+
+export const THEME_DEMOS: ThemeDemo[] = [
     {
       id: "modern",
       name: "Modern",
@@ -10,8 +17,8 @@ export const THEME_DEMOS = [
       data: {
         personalInfo: { 
             fullName: "Emily White", 
-            summary: "Data-driven Marketing Director with 10+ years of experience scaling global brands. Proven track record in digital strategy, team leadership, and revenue growth. Passionate about connecting products with people through compelilng storytelling.", 
-            headerSummary: "Data-driven Marketing Director with 10+ years of experience scaling global brands. Proven track record in digital strategy, team leadership, and revenue growth. Passionate about connecting products with people through compelilng storytelling.", 
+            summary: { content: "Data-driven Marketing Director with 10+ years of experience scaling global brands. Proven track record in digital strategy, team leadership, and revenue growth. Passionate about connecting products with people through compelling storytelling.", alignment: "left" },
+            headerSummary: { content: "Experienced Marketing Director with a proven track record in digital strategy and revenue growth.", alignment: "left" },
             email: "emily.white@example.com", 
             phone: "+1 (555) 123-4567",
             location: "New York, NY",
@@ -85,8 +92,8 @@ export const THEME_DEMOS = [
       data: {
         personalInfo: { 
             fullName: "Alex Morgan", 
-            summary: "Multidisciplinary Graphic Designer with a focus on brand identity and typography. Believes in design as a problem-solving tool. obsessed with details and crafting visual systems that scale.", 
-            headerSummary: "Multidisciplinary Graphic Designer with a focus on brand identity and typography. Believes in design as a problem-solving tool. obsessed with details and crafting visual systems that scale.", 
+            summary: { content: "Multidisciplinary Graphic Designer with 8+ years of experience specializing in brand identity, UI/UX, and typography. Passionate about crafting visually compelling and functional designs that solve complex problems and elevate brands.", alignment: "left" }, 
+            headerSummary: { content: "Creative Graphic Designer passionate about brand identity and UI/UX.", alignment: "left" }, 
             email: "alex@morgandesign.com", 
             phone: "+1 (555) 987-6543",
             location: "San Francisco, CA",
@@ -152,8 +159,8 @@ export const THEME_DEMOS = [
       data: {
         personalInfo: { 
             fullName: "Sarah Chen", 
-            summary: "Full-stack engineer passionate about building scalable, user-centric applications. specialized in React ecosystem and cloud infrastructure. Open source contributor and tech speaker.", 
-            headerSummary: "Full-stack engineer passionate about building scalable, user-centric applications. specialized in React ecosystem and cloud infrastructure. Open source contributor and tech speaker.", 
+            summary: { content: "Full-stack engineer passionate about building scalable, user-centric applications. Specialized in the React ecosystem and cloud infrastructure. Open source contributor and tech speaker, with a focus on delivering high-quality, maintainable code and fostering collaborative team environments.", alignment: "left" }, 
+            headerSummary: { content: "Experienced Full-stack engineer specializing in React and cloud infrastructure. Passionate about scalable, user-centric applications and open-source contributions.", alignment: "left" }, 
             email: "sarah.chen@dev.io", 
             phone: "+1 (555) 246-8101",
             location: "Seattle, WA",
@@ -220,8 +227,8 @@ export const THEME_DEMOS = [
       data: {
         personalInfo: { 
             fullName: "Marcus Jenkins", 
-            summary: "Strategic Product Manager with 7 years of experience in B2B SaaS. Expert in roadmap planning, agile methodologies, and cross-functional collaboration. Driven by data and customer empathy.", 
-            headerSummary: "Strategic Product Manager with 7 years of experience in B2B SaaS. Expert in roadmap planning, agile methodologies, and cross-functional collaboration. Driven by data and customer empathy.", 
+            summary: { content: "Strategic Product Manager with 7 years of experience in B2B SaaS. Expert in roadmap planning, agile methodologies, and cross-functional collaboration. Driven by data and customer empathy.", alignment: "left" }, 
+            headerSummary: { content: "Strategic Product Manager with 7 years of experience in B2B SaaS. Expert in roadmap planning, agile methodologies, and cross-functional collaboration. Driven by data and customer empathy.", alignment: "left" }, 
             email: "marcus.j@pm.io", 
             phone: "+1 (555) 369-2580",
             location: "Austin, TX",
@@ -295,7 +302,8 @@ export const THEME_DEMOS = [
       data: {
         personalInfo: { 
             fullName: "David Kim", 
-            summary: "Empathetic User Researcher dedicated to understanding human behavior and translating insights into actionable design improvements. Experience in qualitative and quantitative methods.", 
+            summary: { content: "Empathetic User Researcher dedicated to understanding human behavior and translating insights into actionable design improvements. Experience in qualitative and quantitative methods.", alignment: "left" }, 
+            headerSummary: { content: "Experienced User Researcher with a focus on qualitative and quantitative methods. Passionate about understanding human behavior and translating insights into actionable design improvements.", alignment: "left" }, 
             email: "david.kim@uxr.com", 
             phone: "+1 (555) 789-0123",
             location: "Chicago, IL",
@@ -357,7 +365,7 @@ export const THEME_DEMOS = [
             }
         ],
         testimonials: [],
-        sectionOrder: ["experience", "projects", "education", "skills", "summary"],
+        sectionOrder: ["summary", "experience", "projects", "education", "skills"],
         customSections: []
       }
     },
@@ -367,16 +375,15 @@ export const THEME_DEMOS = [
       role: "Content Writer",
       description: "Distraction-free focus on typography.",
       data: {
-        personalInfo: { 
-            fullName: "Lisa Ray", 
-            summary: "Senior Copywriter and Content Strategist with a knack for brand storytelling. I turn complex ideas into clear, compelling narratives that resonate with audiences.", 
-            headerSummary: "Senior Copywriter and Content Strategist with a knack for brand storytelling. I turn complex ideas into clear, compelling narratives that resonate with audiences.", 
-            email: "lisa.ray@write.com", 
+        personalInfo: {
+            fullName: "Lisa Ray",
+            summary: { content: "Senior Copywriter and Content Strategist with a knack for brand storytelling. I turn complex ideas into clear, compelling narratives that resonate with audiences.", alignment: "left" },
+            headerSummary: { content: "Senior Copywriter and Content Strategist with a knack for brand storytelling. I turn complex ideas into clear, compelling narratives that resonate with audiences.", alignment: "left" },
+            email: "lisa.ray@write.com",
             phone: "+1 (555) 654-3210",
             location: "London, UK",
             linkedin: "linkedin.com/in/lisaray-writer",
             website: "lisarayportfolio.com",
-            jobTitle: "Senior Copywriter" 
         },
         experience: [
             { 
@@ -424,11 +431,11 @@ export const THEME_DEMOS = [
             }
         ],
         testimonials: [],
-        sectionOrder: ["experience", "projects", "education", "skills", "summary"],
+        sectionOrder: ["summary", "experience", "projects", "education", "skills"],
         customSections: []
       }
     }
-] as const;
+];
 
 export function getThemeById(id: string) {
     return THEME_DEMOS.find(t => t.id === id);

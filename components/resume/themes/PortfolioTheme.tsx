@@ -7,7 +7,7 @@ import {
   Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { InlineEdit } from "@/components/ui/inline-edit";
+import { InlineEdit } from "@/components/resume/editor/InlineEdit";
 import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
 import { ExperienceSection } from "@/components/resume/sections/ExperienceSection";
 import { EducationSection } from "@/components/resume/sections/EducationSection";
@@ -109,12 +109,12 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
             </h1>
             <p className="text-xl md:text-2xl text-slate-600 leading-relaxed mb-8">
                <InlineEdit readOnly={readOnly || !onUpdate} 
-                    value={data.personalInfo.headerSummary} 
-                    onSave={(val) => handleUpdate('personalInfo.headerSummary', val)} 
+                    value={data.personalInfo.headerSummary?.content} 
+                    onSave={(val) => handleUpdate('personalInfo.headerSummary.content', val)} 
                     placeholder="Brief bio or summary..."
                     multiline
-                    path="personalInfo.headerSummary"
-                    alignment={(data.personalInfo as any).headerSummaryAlignment}
+                    path="personalInfo.headerSummary.content"
+                    alignment={data.personalInfo.headerSummary?.alignment || undefined}
                  />
             </p>
             

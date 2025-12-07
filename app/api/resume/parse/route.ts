@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Use AI to extract structured data
+    console.log(text);
     // Use AI to extract structured data
     const { object } = await generateObject({
       model: openai("gpt-4o-mini"),
@@ -63,6 +63,13 @@ export async function POST(req: NextRequest) {
                - Remove prefixes like "Frontend:", "Languages:", "Tools:", etc.
                - BAD: ["Frontend: React, Vue", "Backend: Node"]
                - GOOD: ["React", "Vue", "Node"]
+
+            6. Summary & Header Summary:
+               - These are OBJECTS with "content" and "alignment".
+               - Extract the resume's "Summary", "Profile", or "Objective" section text into "personalInfo.summary.content".
+               - CRITICAL: Also populate "personalInfo.headerSummary.content" with the SAME text.
+               - Default "alignment" to "left" for both.
+               - Do NOT return a simple string for either.
 
             TEXT TO PARSE:
             ${text}

@@ -1,7 +1,6 @@
 "use client";
 
 import { ResumeData } from "@/lib/schemas/resume";
-import { cn } from "@/lib/utils";
 import { ContactHeader } from "@/components/resume/sections/ContactHeader";
 import { ExperienceSection } from "@/components/resume/sections/ExperienceSection";
 import { EducationSection } from "@/components/resume/sections/EducationSection";

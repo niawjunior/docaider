@@ -1,6 +1,6 @@
 import { ResumeData } from "@/lib/schemas/resume";
 import { cn } from "@/lib/utils";
-import { InlineEdit } from "@/components/ui/inline-edit";
+import { InlineEdit } from "@/components/resume/editor/InlineEdit";
 import { MapPin, Mail, Phone, Globe } from "lucide-react";
 
 interface ContactHeaderProps {
@@ -42,11 +42,11 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
                     </h1>
                     <div className="text-slate-400 text-sm">
                         <InlineEdit readOnly={readOnly || !onUpdate} 
-                            value={data.personalInfo.headerSummary} 
-                            onSave={(val) => handleUpdate('personalInfo.headerSummary', val)} 
+                            value={data.personalInfo.headerSummary?.content} 
+                            onSave={(val) => handleUpdate('personalInfo.headerSummary.content', val)} 
                             multiline
-                            path="personalInfo.headerSummary"
-                            alignment={(data.personalInfo as any).headerSummaryAlignment}
+                            path="personalInfo.headerSummary.content"
+                            alignment={data.personalInfo.headerSummary?.alignment || undefined}
                             className="text-slate-400 hover:bg-white/10"
                         />
                     </div>
@@ -129,12 +129,12 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
                 )}
             >
                 <InlineEdit readOnly={readOnly || !onUpdate} 
-                    value={data.personalInfo.headerSummary} 
+                    value={data.personalInfo.headerSummary?.content} 
                     placeholder="Professional Summary"
                     multiline
-                    onSave={(val) => handleUpdate('personalInfo.headerSummary', val)} 
-                    path="personalInfo.headerSummary"
-                    alignment={(data.personalInfo as any).headerSummaryAlignment || (theme === "minimal" ? "center" : undefined)}
+                    onSave={(val) => handleUpdate('personalInfo.headerSummary.content', val)} 
+                    path="personalInfo.headerSummary.content"
+                    alignment={data.personalInfo.headerSummary?.alignment || (theme === "minimal" ? "center" : undefined)}
                     className={theme === "minimal" ? "w-full block" : ""}
                 />
             </div>

@@ -104,6 +104,19 @@ export function ResumeEditor() {
       }
   };
 
+  // Keyboard shortcut for saving
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSave]);
+
   return (
     <EditorProvider>
     <div className="min-h-screen bg-slate-950 text-white flex flex-col text-slate-100 dark">

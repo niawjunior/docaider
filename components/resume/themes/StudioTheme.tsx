@@ -5,7 +5,7 @@ import {
   Linkedin, 
   Globe,
 } from "lucide-react";
-import { InlineEdit } from "@/components/ui/inline-edit";
+import { InlineEdit } from "@/components/resume/editor/InlineEdit";
 import { Button } from "@/components/ui/button";
 import { ThemeAddButton, ThemeDeleteButton } from "./ThemeControls";
 import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
@@ -103,12 +103,12 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                         >
                            <div className="text-4xl md:text-6xl font-bold leading-tight mb-8">
                              <InlineEdit readOnly={readOnly || !onUpdate}
-                                value={data.personalInfo.summary}
+                                value={data.personalInfo.summary?.content}
                                 placeholder="Your professional summary goes here..."
                                 multiline
-                                onSave={(val) => handleUpdate('personalInfo.summary', val)}
-                                path="personalInfo.summary"
-                                alignment={(data.personalInfo as any).summaryAlignment}
+                                onSave={(val) => handleUpdate('personalInfo.summary.content', val)}
+                                path="personalInfo.summary.content"
+                                alignment={data.personalInfo.summary?.alignment || undefined}
                                 className="bg-transparent border-neutral-800"
                              />
                            </div>

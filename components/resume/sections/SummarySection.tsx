@@ -1,7 +1,7 @@
 "use client";
 
 import { ResumeData } from "@/lib/schemas/resume";
-import { InlineEdit } from "@/components/ui/inline-edit";
+import { InlineEdit } from "@/components/resume/editor/InlineEdit";
 import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +16,7 @@ interface SummarySectionProps {
 export const SummarySection = ({ data, theme, onUpdate, className, readOnly }: SummarySectionProps) => {
   const { updateField: handleUpdate } = useResumeUpdate(data, onUpdate);
 
-  if (!onUpdate && !(data.personalInfo as any).summary) return null;
+  if (!onUpdate && !data.personalInfo?.summary?.content) return null;
 
   return (
     <section className={cn("mb-6", className)}>
@@ -31,12 +31,12 @@ export const SummarySection = ({ data, theme, onUpdate, className, readOnly }: S
       <div className="text-sm leading-relaxed text-slate-700">
         <InlineEdit
           readOnly={readOnly || !onUpdate}
-          value={(data.personalInfo as any).summary}
+          value={data.personalInfo?.summary?.content}
           placeholder="Write a professional summary..."
           multiline
-          onSave={(val) => handleUpdate('personalInfo.summary', val)}
-          path="personalInfo.summary"
-          alignment={(data.personalInfo as any).summaryAlignment || (theme === "minimal" ? "center" : undefined)}
+          onSave={(val) => handleUpdate('personalInfo.summary.content', val)}
+          path="personalInfo.summary.content"
+          alignment={data.personalInfo?.summary?.alignment || (theme === "minimal" ? "center" : undefined)}
           className={cn("w-full bg-transparent border-none p-0 focus:ring-0", theme === "minimal" && "w-full block")}
         />
       </div>

@@ -1,6 +1,6 @@
 import { ResumeData } from "@/lib/schemas/resume";
 import { cn } from "@/lib/utils";
-import { InlineEdit } from "@/components/ui/inline-edit";
+import { InlineEdit } from "@/components/resume/editor/InlineEdit";
 import { ThemeAddButton, ThemeDeleteButton } from "../themes/ThemeControls";
 import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
 

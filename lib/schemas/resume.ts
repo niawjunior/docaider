@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+const RichTextFieldSchema = z.object({
+  content: z.string().nullish().describe("Text content"),
+  alignment: z.enum(["left", "center", "right", "justify"]).nullish().describe("Text alignment"),
+  color: z.string().nullish().describe("Text color"),
+  fontSize: z.string().nullish().describe("Text font size"),
+}).nullish();
+
 export const ResumeSchema = z.object({
   personalInfo: z.object({
     fullName: z.string().nullish().describe("The full name of the person"),
@@ -9,10 +16,8 @@ export const ResumeSchema = z.object({
     website: z.string().nullish().describe("Personal website or portfolio URL"),
     linkedin: z.string().nullish().describe("LinkedIn profile URL"),
     location: z.string().nullish().describe("City, Country"),
-    summary: z.string().nullish().describe("A brief professional summary or bio"),
-    summaryAlignment: z.enum(["left", "center", "right", "justify"]).nullish(),
-    headerSummary: z.string().nullish().describe("Summary displayed in the header"),
-    headerSummaryAlignment: z.enum(["left", "center", "right", "justify"]).nullish(),
+    summary: RichTextFieldSchema.describe("A brief professional summary or bio"),
+    headerSummary: RichTextFieldSchema.describe("Summary displayed in the header"),
   }).nullish().transform(v => v ?? {}).describe("Personal contact information"),
   
   coverImage: z.string().nullish(),

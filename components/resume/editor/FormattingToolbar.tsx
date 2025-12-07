@@ -176,12 +176,12 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
   let currentAlignment = "left";
   const targetField = activeTarget || "";
 
-  if (targetField === "personalInfo.summary") {
-      alignmentPath = "personalInfo.summaryAlignment";
-      currentAlignment = getEffectiveAlignment((resumeData.personalInfo as any)?.summaryAlignment);
-  } else if (targetField === "personalInfo.headerSummary") {
-      alignmentPath = "personalInfo.headerSummaryAlignment";
-      currentAlignment = getEffectiveAlignment((resumeData.personalInfo as any)?.headerSummaryAlignment);
+  if (targetField === "personalInfo.summary.content") {
+      alignmentPath = "personalInfo.summary.alignment";
+      currentAlignment = getEffectiveAlignment((resumeData.personalInfo as any)?.summary?.alignment);
+  } else if (targetField === "personalInfo.headerSummary.content") {
+      alignmentPath = "personalInfo.headerSummary.alignment";
+      currentAlignment = getEffectiveAlignment((resumeData.personalInfo as any)?.headerSummary?.alignment);
   } else if (targetField.includes("experience")) {
        const match = targetField.match(/experience\[(\d+)\]/);
        if (match) {
