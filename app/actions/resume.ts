@@ -10,9 +10,11 @@ export async function publishResume(data: {
   theme: string;
   slug: string;
   id?: string;
+  isPublic?: boolean;
 }) {
   const supabase = await createClient();
   const adminSupabase = createServiceClient();
+  const isPublic = data.isPublic ?? false; // Default to private if not specified
 
   const {
     data: { user },
@@ -56,7 +58,7 @@ export async function publishResume(data: {
         slug: data.slug, // Allow updating slug
         job_title: data.content.personalInfo.jobTitle,
         summary: data.content.personalInfo.summary,
-        is_public: true,
+        is_public: isPublic,
         updated_at: new Date().toISOString(),
       })
       .eq("id", data.id);
@@ -79,7 +81,7 @@ export async function publishResume(data: {
         theme: data.theme,
         job_title: data.content.personalInfo.jobTitle,
         summary: data.content.personalInfo.summary,
-        is_public: true,
+        is_public: isPublic,
         updated_at: new Date().toISOString(),
       })
       .eq("id", existingResume.id);
@@ -97,7 +99,7 @@ export async function publishResume(data: {
       theme: data.theme,
       job_title: data.content.personalInfo.jobTitle,
       summary: data.content.personalInfo.summary,
-      is_public: true,
+      is_public: isPublic,
     });
 
     if (error) {

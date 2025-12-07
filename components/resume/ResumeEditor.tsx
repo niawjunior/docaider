@@ -33,7 +33,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Eye, EyeOff, ChevronDown } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Eye, EyeOff, ChevronDown, Lock, Globe } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { publishResume, getResumeById, saveDraft } from "@/app/actions/resume";
@@ -57,6 +58,7 @@ export function ResumeEditor() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
   const [slug, setSlug] = useState("");
+  const [visibility, setVisibility] = useState<"public" | "private">("private");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isViewMode, setIsViewMode] = useState(false);
@@ -90,6 +92,7 @@ export function ResumeEditor() {
              setResumeData(data.content);
              setTheme(data.theme as any);
              setSlug(data.slug);
+             setVisibility(data.is_public ? "public" : "private");
 
              // setPublishedUrl(null); // Keep existing publishedUrl if any (e.g. from just publishing)
              lastSavedData.current = JSON.stringify(data.content);
@@ -196,7 +199,7 @@ export function ResumeEditor() {
                     <Dialog>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button size="sm" className="bg-blue-600 hover:bg-blue-500 text-white border-none shadow-lg shadow-blue-900/20 ml-2 gap-2">
+                                <Button size="sm" className="bg-blue-600 hover:bg-blue-500 text-white border-none shadow-lg shadow-blue-900/20 ml-2 gap-2 w-[120px] flex">
                                     Finish
                                     <ChevronDown className="w-3 h-3 opacity-50" />
                                 </Button>
@@ -225,8 +228,31 @@ export function ResumeEditor() {
                         </DialogHeader>
                         
                         {!publishedUrl ? (
-                            <div className="space-y-4 py-4">
-                            <div className="grid gap-2">
+                            <div className="space-y-6 py-4">
+                                <div className="space-y-4">
+                                    <Label>Visibility</Label>
+                                    <div className="flex items-center justify-between bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                                        <div className="flex items-center gap-3">
+                                            <div className={cn("p-2 rounded-lg", visibility === "public" ? "bg-green-500/20 text-green-400" : "bg-slate-700/50 text-slate-400")}>
+                                                {visibility === "public" ? <Globe className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+                                            </div>
+                                            <div className="space-y-0.5">
+                                                <div className="font-medium text-sm text-white">
+                                                    {visibility === "public" ? "Public Profile" : "Private Link"}
+                                                </div>
+                                                <div className="text-xs text-slate-400">
+                                                    {visibility === "public" ? "Visible in gallery & search engines" : "Only accessible via direct link"}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <Switch 
+                                            checked={visibility === "public"}
+                                            onCheckedChange={(checked) => setVisibility(checked ? "public" : "private")}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
                                 <Label>Public URL</Label>
                                 <div className="flex items-center gap-2">
                                 <span className="text-slate-400 text-sm">docaider.com/p/</span>
@@ -236,7 +262,7 @@ export function ResumeEditor() {
                                     onChange={(e) => setSlug(e.target.value)}
                                 />
                                 </div>
-                            </div>
+                                </div>
                             </div>
                         ) : (
                             <div className="py-6 text-center space-y-4">
@@ -272,7 +298,8 @@ export function ResumeEditor() {
                                         content: resumeData,
                                         theme,
                                         slug,
-                                        id: idParam || undefined
+                                        id: idParam || undefined,
+                                        isPublic: visibility === "public"
                                     });
                                     
                                     setPublishedUrl(pubResult.url);
@@ -286,7 +313,7 @@ export function ResumeEditor() {
                                 disabled={isPublishing || !slug}
                             >
                                 {isPublishing && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                                {idParam ? "Update Now" : "Publish Now"}
+                                {idParam ? "Update Settings" : "Publish Now"}
                             </Button>
                             ) : (
                             <Button variant="outline" asChild>

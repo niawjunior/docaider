@@ -15,7 +15,6 @@ export default async function PublicResumePage({ params }: PageProps) {
     .from("resumes")
     .select("*")
     .eq("slug", slug)
-    .eq("is_public", true)
     .single();
 
   if (error || !resume) {

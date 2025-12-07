@@ -9,7 +9,15 @@ import { useTranslations } from "next-intl";
 
 const LoginComponent = () => {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callback_url") || searchParams.get("next") || "/dashboard";
+  let callbackUrl = searchParams.get("callback_url") || searchParams.get("next") || searchParams.get("redirect_to") || "/dashboard";
+
+  // Preserve theme parameter if present
+  const theme = searchParams.get("theme");
+  if (theme) {
+     const separator = callbackUrl.includes("?") ? "&" : "?";
+     callbackUrl = `${callbackUrl}${separator}theme=${theme}`;
+  }
+
   const t = useTranslations("login");
   return (
     <div className="h-[calc(100dvh-250px)] flex items-center justify-center text-foreground overflow-hidden px-4">

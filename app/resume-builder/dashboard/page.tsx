@@ -117,10 +117,18 @@ export default function DashboardPage() {
                   {/* Overlay Actions */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   { !resume.is_public ? (
-                     <Button variant="secondary" size="sm" onClick={() => handleEdit(resume)}>
+                    <>
+                      <Button variant="secondary" size="sm" asChild>
+                      <Link href={`/p/${resume.slug}`} target="_blank">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        View Private
+                      </Link>
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={() => handleEdit(resume)}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
                     </Button>
+                  </>
                   ) : (
                     <>
                       <Button variant="secondary" size="sm" asChild>

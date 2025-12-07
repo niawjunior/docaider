@@ -125,7 +125,7 @@ export function ResumeBuilderHeader({
                 <>
                    <Button 
                     variant="ghost" 
-                    onClick={() => router.push("/login")}
+                    onClick={() => router.push("/login?redirect_to=/resume-builder")}
                     className={cn(isDark && "text-slate-300 hover:text-white hover:bg-white/10")}
                   >
                     Sign In
