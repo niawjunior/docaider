@@ -78,7 +78,7 @@ export function CustomSectionRenderer({
                                 const createItem = () => ({
                                     id: crypto.randomUUID(),
                                     title: "New Item",
-                                    subtitle: section.type === "list" ? "Subtitle" : undefined,
+                                    subtitle: section.type === "list" ? "Subtitle" : "",
                                     content: "Description or content goes here..."
                                 });
                                 
@@ -104,7 +104,7 @@ export function CustomSectionRenderer({
                         const newItems = [{
                             id: crypto.randomUUID(),
                             title: "New Item",
-                            subtitle: section.type === "list" ? "Subtitle" : undefined,
+                            subtitle: section.type === "list" ? "Subtitle" : "",
                             content: "Description or content goes here..."
                         }, ...(section.items || [])];
                         handleUpdateSection({ ...section, items: newItems });
