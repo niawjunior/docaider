@@ -45,7 +45,7 @@ export function SectionManager({ data, onUpdate }: SectionManagerProps) {
              
              // Add missing custom sections
              data.customSections?.forEach(s => {
-                 if (!currentIds.has(s.id)) {
+                 if (s.id && !currentIds.has(s.id)) {
                      newOrder.push(s.id);
                      hasMissing = true;
                  }
@@ -171,7 +171,7 @@ export function SectionManager({ data, onUpdate }: SectionManagerProps) {
                                     <SortableItem 
                                         key={id} 
                                         id={id} 
-                                        label={getLabel(id)} 
+                                        label={getLabel(id) || "Untitled"} 
                                         isCustom={isCustom(id)}
                                         onDelete={isCustom(id) ? () => handleDeleteCustomSection(id) : undefined}
                                     />
@@ -180,7 +180,7 @@ export function SectionManager({ data, onUpdate }: SectionManagerProps) {
                         </SortableContext>
                         <DragOverlay>
                              {activeId ? (
-                                <ItemOverlay label={getLabel(activeId)} />
+                                <ItemOverlay label={getLabel(activeId) || "Untitled"} />
                              ) : null}
                         </DragOverlay>
                     </DndContext>
