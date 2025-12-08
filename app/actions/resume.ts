@@ -2,6 +2,7 @@
 
 import { createServiceClient, createClient } from "@/app/utils/supabase/server";
 import { ResumeData } from "@/lib/schemas/resume";
+import { normalizeResumeData } from "@/lib/utils/resume-normalization";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -321,6 +322,6 @@ export async function getResumeById(id: string) {
 
   return {
     ...data,
-    content: data.content as ResumeData
+    content: normalizeResumeData(data.content as ResumeData)
   };
 }
