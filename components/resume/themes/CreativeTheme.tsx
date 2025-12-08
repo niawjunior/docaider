@@ -51,7 +51,7 @@ export const CreativeTheme = ({ data, onUpdate, readOnly }: CreativeThemeProps) 
   };
 
   return (
-      <div className="w-full max-w-full min-h-[1100px] bg-white text-slate-900 shadow-xl mx-auto print:shadow-none group/resume text-left p-0 flex">
+      <div className="w-full max-w-5xl min-h-[1100px] bg-white text-slate-900 shadow-xl mx-auto print:shadow-none group/resume text-left p-0 flex">
         {/* Sidebar */}
         <div className="w-1/3 bg-slate-900 text-white p-8 space-y-8 text-left">
            <ContactHeader data={data} theme="creative" onUpdate={onUpdate} readOnly={readOnly} />

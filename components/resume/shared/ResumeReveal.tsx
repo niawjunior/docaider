@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Typewriter } from "./Typewriter";
 import { ResumeData } from "@/lib/schemas/resume";
 
-interface GashaponRevealProps {
+interface RevealProps {
   onComplete: () => void;
   // onRevealStart is optional but not used in new design really, can keep for compat
   onRevealStart?: () => void; 
   data: ResumeData;
 }
 
-export function GashaponReveal({ onComplete, data }: GashaponRevealProps) {
+export function Reveal({ onComplete, data }: RevealProps) {
   // Extract personalization
   const fullName = data.personalInfo?.fullName || "User";
   const firstName = fullName.split(' ')[0];

@@ -24,7 +24,7 @@ const PROCESSING_STEPS = [
     { text: "Scanning Document...", icon: ScanAnimation, color: "text-blue-400", subtext: "Analyzing structure and layout..." },
     { text: "Extracting Details...", icon: CircuitAnimation, color: "text-purple-400", subtext: "Identifying skills, experience, and projects..." },
     { text: "Enhancing Content...", icon: SparkleAnimation, color: "text-yellow-400", subtext: "Polishing your professional profile..." },
-    { text: "Finalizing...", icon: RocketAnimation, color: "text-green-400", subtext: "Preparing your editor..." }
+    { text: "Finalizing...", icon: RocketAnimation, color: "text-green-400", subtext: "Preparing your workspace..." }
 ];
 
 export function ResumeUploader(props: ResumeUploaderProps) {
@@ -45,12 +45,19 @@ export function ResumeUploader(props: ResumeUploaderProps) {
       return res.json() as Promise<ResumeData>;
     },
     onSuccess: async (data: ResumeData) => {
-      // Step 1: Processing Finish -> Trigger Reveal UI
-       // Always enforce default cover image
-      data.coverImage = "/images/cover.png";
-      
-      // Trigger Reveal UI immediately
-      onReadyToReveal(data); 
+      // Step 1: Processing Finish -> Show Finalizing Step
+      setIsFinalizing(true);
+      setProcessingStep(3); // "Finalizing..." (Rocket)
+
+      // Allow the user to see the "Finalizing" state for 2 seconds
+      setTimeout(() => {
+          // Always enforce default cover image
+          data.coverImage = "/images/cover.png";
+          
+          // Trigger Reveal UI
+          onReadyToReveal(data); 
+          setIsFinalizing(false);
+      }, 2000);
     },
     onError: (error) => {
       toast.error("Failed to parse resume. Please try again.");

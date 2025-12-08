@@ -444,7 +444,7 @@ export function LandingPage({ initialData }: LandingPageProps) {
                        <div className="mt-4 flex justify-between items-center">
                           <div>
                              <h3 className="font-bold text-lg">{example.role}</h3>
-                             <p className="text-sm text-slate-500 line-clamp-1">{example.data.personalInfo.summary}</p>
+                             <p className="text-sm text-slate-500 line-clamp-1">{example.data.personalInfo.summary?.content}</p>
                           </div>
                           <span className="text-xs font-mono px-2 py-1 bg-white/10 rounded uppercase tracking-wider text-slate-400 group-hover:text-white transition-colors">
                              {example.theme}

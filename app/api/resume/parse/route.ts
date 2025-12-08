@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { ResumeSchema } from "@/lib/schemas/resume";
+import { normalizeResumeData } from "@/lib/utils/resume-normalization";
 import pdf from "pdf-parse";
 import mammoth from "mammoth";
 
@@ -48,7 +49,8 @@ export async function POST(req: NextRequest) {
                - Strings belong in "sectionOrder".
             
             2. "sectionOrder": This MUST be an array of STRINGS representing the keys of sections.
-               - e.g. ["personalInfo", "experience", "education", "customSections"]
+               - e.g. ["summary", "experience", "education", "customSections"]
+               - valid keys: "summary", "experience", "education", "projects", "skills", "customSections"
             
             3. Fallbacks:
                - If the text is empty or unparsable, return a valid empty object with defaults (e.g. empty arrays for experience/education).
@@ -76,7 +78,10 @@ export async function POST(req: NextRequest) {
             `,
     });
 
-    return NextResponse.json(object);
+    // Normalize the data to ensure robustness (fix missing sections, order, etc.)
+    const normalizedData = normalizeResumeData(object);
+
+    return NextResponse.json(normalizedData);
   } catch (error) {
     console.error("Error parsing resume:", error);
     return NextResponse.json(

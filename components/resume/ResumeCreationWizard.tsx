@@ -12,7 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { saveDraft } from "@/app/actions/resume";
 import { ResumeBuilderHeader } from "@/components/resume/ResumeBuilderHeader";
 import { getThemeById, THEME_DEMOS } from "@/lib/themes";
-import { GashaponReveal } from "@/components/resume/shared/GashaponReveal";
+import { Reveal } from "@/components/resume/shared/ResumeReveal";
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 function TiltCard({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -323,7 +323,7 @@ export function ResumeCreationWizard() {
       </main>
       
       {revealData && (
-        <GashaponReveal 
+        <Reveal 
             data={revealData} 
             onComplete={() => handleUploadSuccess(revealData)} 
         />
