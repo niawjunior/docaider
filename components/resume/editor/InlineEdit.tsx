@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { ScrambleText } from "@/components/ui/scramble-text";
 
 import { useEditorContext } from "@/components/resume/editor/EditorContext";
 
@@ -34,12 +35,16 @@ export function InlineEdit({
   let setFocusedField: ((path: string | null) => void) | undefined;
   let setHasSelection: ((hasSelection: boolean) => void) | undefined;
   let aiProcessingField: string | null = null;
+  let enableTextAnimations = false;
+  let scrambleLoop = false;
   try {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const context = useEditorContext();
       setFocusedField = context.setFocusedField;
       setHasSelection = context.setHasSelection;
       aiProcessingField = context.aiProcessingField;
+      enableTextAnimations = context.enableTextAnimations || false;
+      scrambleLoop = context.scrambleLoop || false;
   } catch (e) {
       // Context not present, ignore
   }
@@ -172,6 +177,45 @@ export function InlineEdit({
       selection.addRange(range);
   };
 
+  const commonClasses = cn(
+    "outline-none min-w-[20px] inline-block transition-all duration-200 border border-transparent",
+    // Base state (interactive vs read-only)
+    !readOnly && "px-1 -mx-1 rounded cursor-text", 
+    !readOnly && "hover:border-blue-500/50 hover:bg-blue-500/5",
+    !readOnly && "focus:ring-1 focus:ring-blue-500/30",
+    
+    // Placeholder state
+    !readOnly && "empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 empty:before:italic",
+    !readOnly && !value && !isEditing && "text-slate-400 italic bg-blue-500/10 border-dashed border-blue-300",
+    
+    // Read-only state
+    readOnly && "cursor-default min-w-0 px-0 mx-0 border-none",
+    
+    // AI Processing state
+    path && aiProcessingField === path && "animate-scan cursor-wait",
+
+    // Alignment
+    alignment === "left" && "text-left",
+    alignment === "center" && "text-center",
+    alignment === "right" && "text-right",
+    alignment === "justify" && "text-justify",
+    
+    className
+  );
+
+  if (enableTextAnimations && !isEditing && value) {
+      return (
+          <ScrambleText 
+            text={value}
+            className={commonClasses}
+            onClick={props.onClick}
+            loop={scrambleLoop}
+            duration={scrambleLoop ? 0 : 800} // If looping, don't enforce extra duration
+            {...props}
+          />
+      );
+  }
+
   return (
     <span
       ref={contentRef}
@@ -186,31 +230,7 @@ export function InlineEdit({
       onFocus={handleFocus}
       onKeyDown={handleKeyDown}
       onPaste={handlePaste}
-      className={cn(
-        "outline-none min-w-[20px] inline-block transition-all duration-200 border border-transparent",
-        // Base state (interactive vs read-only)
-        !readOnly && "px-1 -mx-1 rounded cursor-text", 
-        !readOnly && "hover:border-blue-500/50 hover:bg-blue-500/5",
-        !readOnly && "focus:ring-1 focus:ring-blue-500/30",
-        
-        // Placeholder state
-        !readOnly && "empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 empty:before:italic",
-        !readOnly && !value && !isEditing && "text-slate-400 italic bg-blue-500/10 border-dashed border-blue-300",
-        
-        // Read-only state
-        readOnly && "cursor-default min-w-0 px-0 mx-0 border-none",
-        
-        // AI Processing state
-        path && aiProcessingField === path && "animate-scan cursor-wait",
-
-        // Alignment
-        alignment === "left" && "text-left",
-        alignment === "center" && "text-center",
-        alignment === "right" && "text-right",
-        alignment === "justify" && "text-justify",
-        
-        className
-      )}
+      className={commonClasses}
       data-placeholder={placeholder}
       {...props}
     />

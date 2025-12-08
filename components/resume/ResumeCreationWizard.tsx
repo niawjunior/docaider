@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { EditorProvider } from "@/components/resume/editor/EditorContext";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { ResumePreview } from "@/components/resume/ResumePreview";
@@ -13,7 +15,6 @@ import { saveDraft } from "@/app/actions/resume";
 import { ResumeBuilderHeader } from "@/components/resume/ResumeBuilderHeader";
 import { getThemeById, THEME_DEMOS } from "@/lib/themes";
 import { Reveal } from "@/components/resume/shared/ResumeReveal";
-import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 function TiltCard({ children, className }: { children: React.ReactNode; className?: string }) {
   const x = useMotionValue(0);
@@ -168,6 +169,22 @@ export function ResumeCreationWizard() {
     });
   }, []);
 
+  // Handle text effect lifecycle
+  const [showTextEffect, setShowTextEffect] = useState(false);
+  
+  useEffect(() => {
+      let timeout: NodeJS.Timeout;
+      if (scannerState.active) {
+          setShowTextEffect(true);
+      } else {
+          // Keep effect enabled briefly after scanning stops to allow "Reveal" animation to finish
+          timeout = setTimeout(() => {
+              setShowTextEffect(false);
+          }, 2000);
+      }
+      return () => clearTimeout(timeout);
+  }, [scannerState.active]);
+
   const handleCreateFromTemplate = async () => {
     if (!activePreviewTheme) return;
     // Trigger the reveal animation with the template data
@@ -287,12 +304,17 @@ export function ResumeCreationWizard() {
                                         "absolute inset-0 w-[200%] h-[200%] scale-[0.5] origin-top-left pointer-events-none bg-slate-950 transition-all duration-500",
                                         scannerState.active ? "opacity-50 grayscale brightness-150 contrast-125" : "opacity-100"
                                     )}>
-                                        <ResumePreview 
-                                        data={activePreviewTheme.data as any} 
-                                        theme={activePreviewTheme.id as any} 
-                                        isThumbnail={true}
-                                        className="h-full"
-                                        />
+                                        <EditorProvider 
+                                            enableTextAnimations={showTextEffect} 
+                                            scrambleLoop={scannerState.active}
+                                        >
+                                            <ResumePreview 
+                                            data={activePreviewTheme.data as any} 
+                                            theme={activePreviewTheme.id as any} 
+                                            isThumbnail={true}
+                                            className="h-full"
+                                            />
+                                        </EditorProvider>
                                     </div>
                                 )}
                                 

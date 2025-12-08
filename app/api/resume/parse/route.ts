@@ -35,7 +35,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log(text);
     // Use AI to extract structured data
     const { object } = await generateObject({
       model: openai("gpt-4o-mini"),
