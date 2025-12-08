@@ -14,6 +14,14 @@ export async function POST(req: NextRequest) {
     // Helper to format resume context
     const getContext = () => {
         if (!resumeData) return "";
+        
+        // Helper to extract text from potential objects (RichTextFieldSchema)
+        const getText = (val: any): string => {
+            if (!val) return "";
+            if (typeof val === "string") return val;
+            return val.content || "";
+        }
+
         let ctx = "RESUME CONTEXT (Use this to write personalized content):\n";
         
         const r = resumeData;
@@ -25,15 +33,23 @@ export async function POST(req: NextRequest) {
         if (r.experience && Array.isArray(r.experience) && r.experience.length > 0) {
             ctx += "\nEXPERIENCE:\n";
             r.experience.slice(0, 3).forEach((exp: any) => {
-                ctx += `- ${exp.position} at ${exp.company} (${exp.startDate || ""} - ${exp.endDate || "Present"})\n`;
-                if (exp.description) ctx += `  Desc: ${exp.description.substring(0, 100)}...\n`;
+                const position = getText(exp.position);
+                const company = getText(exp.company);
+                const start = getText(exp.startDate);
+                const end = getText(exp.endDate) || "Present";
+                
+                ctx += `- ${position} at ${company} (${start} - ${end})\n`;
+                const desc = getText(exp.description);
+                if (desc) ctx += `  Desc: ${desc.substring(0, 100)}...\n`;
             });
         }
         
         if (r.education && Array.isArray(r.education) && r.education.length > 0) {
             ctx += "\nEDUCATION:\n";
             r.education.slice(0, 2).forEach((edu: any) => {
-               ctx += `- ${edu.degree} from ${edu.institution}\n`;
+                const degree = getText(edu.degree);
+                const institution = getText(edu.institution);
+               ctx += `- ${degree} from ${institution}\n`;
             });
         }
         

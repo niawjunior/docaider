@@ -25,30 +25,22 @@ export const ResumeSchema = z.object({
   experience: z.array(
     z.object({
       id: z.string().nullish().describe("Unique identifier for the experience entry"),
-      company: z.string().nullish().describe("Name of the company or organization"),
-      position: z.string().nullish().describe("Job title or role held"),
-      startDate: z.string().nullish().describe("Start date (YYYY-MM or Present)"),
-      endDate: z.string().nullish().describe("End date (YYYY-MM or Present)"),
-      description: z.string().nullish().describe("Bullet points or detailed description of responsibilities and achievements"),
-      alignment: z.enum(["left", "center", "right", "justify"]).nullish(), // For Description
-      companyAlignment: z.enum(["left", "center", "right", "justify"]).nullish(),
-      positionAlignment: z.enum(["left", "center", "right", "justify"]).nullish(),
-      dateAlignment: z.enum(["left", "center", "right", "justify"]).nullish(),
+      company: RichTextFieldSchema.describe("Name of the company or organization"),
+      position: RichTextFieldSchema.describe("Job title or role held"),
+      startDate: RichTextFieldSchema.describe("Start date (YYYY-MM or Present)"),
+      endDate: RichTextFieldSchema.describe("End date (YYYY-MM or Present)"),
+      description: RichTextFieldSchema.describe("Bullet points or detailed description of responsibilities and achievements"),
     })
   ).nullish().transform(v => v ?? []).describe("Work experience history"),
   
   education: z.array(
     z.object({
       id: z.string().nullish().describe("Unique identifier for the education entry"),
-      institution: z.string().nullish().describe("Name of the university, college, or school"),
-      degree: z.string().nullish().describe("Degree or certificate obtained (e.g. Bachelor of Science)"),
-      fieldOfStudy: z.string().nullish().describe("Major or field of study"),
-      startDate: z.string().nullish().describe("Start date (YYYY-MM)"),
-      endDate: z.string().nullish().describe("End date or Graduation date (YYYY-MM)"),
-      alignment: z.enum(["left", "center", "right", "justify"]).nullish(), // For FieldOfStudy/Description
-      institutionAlignment: z.enum(["left", "center", "right", "justify"]).nullish(),
-      degreeAlignment: z.enum(["left", "center", "right", "justify"]).nullish(),
-      dateAlignment: z.enum(["left", "center", "right", "justify"]).nullish(),
+      institution: RichTextFieldSchema.describe("Name of the university, college, or school"),
+      degree: RichTextFieldSchema.describe("Degree or certificate obtained"),
+      fieldOfStudy: RichTextFieldSchema.describe("Major or field of study"),
+      startDate: RichTextFieldSchema.describe("Start date (YYYY-MM)"),
+      endDate: RichTextFieldSchema.describe("End date or Graduation date (YYYY-MM)"),
     })
   ).nullish().transform(v => v ?? []).describe("Educational background"),
   
@@ -57,12 +49,10 @@ export const ResumeSchema = z.object({
   projects: z.array(
     z.object({
       id: z.string().nullish().describe("Unique identifier for the project"),
-      name: z.string().nullish().describe("Name of the project"),
-      description: z.string().nullish().describe("Brief description of the project and your role"),
-      url: z.string().nullish().describe("URL to the project (e.g. GitHub link or live demo)"),
+      name: RichTextFieldSchema.describe("Name of the project"),
+      description: RichTextFieldSchema.describe("Brief description of the project and your role"),
+      url: z.string().nullish().describe("URL to the project"),
       technologies: z.array(z.string()).nullish().describe("List of technologies used in the project"),
-      alignment: z.enum(["left", "center", "right", "justify"]).nullish(),
-      nameAlignment: z.enum(["left", "center", "right", "justify"]).nullish(),
     })
   ).nullish().transform(v => v ?? []).describe("Notable projects"),
   
@@ -77,18 +67,17 @@ export const ResumeSchema = z.object({
   
   customSections: z.array(
     z.object({
-      id: z.string().nullish().default(() => `cs-${Math.random().toString(36).slice(2, 9)}`).describe("Unique identifier for the custom section"),
-      title: z.string().nullish().default("Untitled Section").describe("Title of the custom section (e.g. 'Volunteering', 'Awards')"),
-      type: z.enum(["list", "text"]).nullish().default("text").describe("Type of content: 'list' for items with titles/subtitles, 'text' for paragraphs"),
+      id: z.string().nullish().default(() => `cs-${Math.random().toString(36).slice(2, 9)}`),
+      title: z.string().nullish().default("Untitled Section"),
+      type: z.enum(["list", "text"]).nullish().default("text"),
       items: z.array(
         z.object({
-          id: z.string().nullish().default(() => `item-${Math.random().toString(36).slice(2, 9)}`).describe("Unique identifier for the item"),
-          title: z.string().nullish().default("").describe("Main title of the item (e.g. Award Name)"),
-          subtitle: z.string().nullish().default("").describe("Subtitle of the item (e.g. Date, Organization)"),
-          content: z.string().nullish().default("").describe("Description or content of the item"),
-          alignment: z.enum(["left", "center", "right", "justify"]).nullish(),
+          id: z.string().nullish().default(() => `item-${Math.random().toString(36).slice(2, 9)}`),
+          title: RichTextFieldSchema.describe("Main title of the item"),
+          subtitle: RichTextFieldSchema.describe("Subtitle of the item"),
+          content: RichTextFieldSchema.describe("Description or content of the item"),
         })
-      ).nullish().transform(v => v ?? []).describe("List of items in this section")
+      ).nullish().transform(v => v ?? [])
     })
   ).nullish().transform(v => v ?? []).describe("Custom user-defined sections"),
   

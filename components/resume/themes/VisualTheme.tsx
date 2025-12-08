@@ -176,8 +176,8 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                         onClick={() => {
                                         const newProj = [{
                                             id: crypto.randomUUID(),
-                                            name: "Project Name",
-                                            description: "Short description",
+                                            name: { content: "Project Name" },
+                                            description: { content: "Short description" },
                                             url: "https://project.com",
                                             technologies: []
                                         }, ...data.projects];
@@ -194,8 +194,8 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                         onClick={() => {
                                             const newProj = [{
                                                 id: crypto.randomUUID(),
-                                                name: "Project Name",
-                                                description: "Short description",
+                                                name: { content: "Project Name" },
+                                                description: { content: "Short description" },
                                                 url: "https://project.com",
                                                 technologies: []
                                             }, ...(data.projects || [])];
@@ -216,15 +216,15 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                <div className="flex justify-between items-start mb-6">
                                                    <h3 className="text-4xl md:text-5xl font-bold">
                                                     <InlineEdit readOnly={readOnly || !onUpdate}
-                                                            value={project.name}
+                                                            value={project.name?.content}
                                                             placeholder="Project Name"
                                                             onSave={(val) => {
                                                                 const newProj = [...data.projects];
-                                                                newProj[i].name = val;
+                                                                newProj[i].name = { ...newProj[i].name, content: val };
                                                                 handleUpdate('projects', newProj);
                                                             }}
-                                                            path={`projects[${i}].name`}
-                                                            alignment={(project as any).nameAlignment}
+                                                            path={`projects[${i}].name.content`}
+                                                            alignment={project.name?.alignment || undefined}
                                                             className="bg-transparent border-none w-full"
                                                         />
                                                    </h3>
@@ -242,16 +242,16 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                                
                                                <div className="text-xl md:text-2xl text-neutral-400 font-light mb-8 max-w-2xl">
                                                     <InlineEdit readOnly={readOnly || !onUpdate}
-                                                        value={project.description}
+                                                        value={project.description?.content}
                                                         placeholder="Description..."
                                                         multiline
                                                         onSave={(val) => {
                                                             const newProj = [...data.projects];
-                                                            newProj[i].description = val;
+                                                            newProj[i].description = { ...newProj[i].description, content: val };
                                                             handleUpdate('projects', newProj);
                                                         }}
-                                                        path={`projects[${i}].description`}
-                                                        alignment={(project as any).alignment}
+                                                        path={`projects[${i}].description.content`}
+                                                        alignment={project.description?.alignment || undefined}
                                                         className="bg-transparent border-none w-full"
                                                     />
                                                </div>
@@ -293,10 +293,10 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                         onClick={() => {
                                         const newExp = [{
                                             id: crypto.randomUUID(),
-                                            company: "Company",
-                                            position: "Role",
-                                            startDate: "2024",
-                                            description: "Description"
+                                            company: { content: "Company" },
+                                            position: { content: "Role" },
+                                            startDate: { content: "2024" },
+                                            description: { content: "Description" }
                                         }, ...data.experience];
                                         handleUpdate('experience', newExp);
                                     }} />
@@ -312,10 +312,10 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                             onClick={() => {
                                                 const newExp = [{
                                                     id: crypto.randomUUID(),
-                                                    company: "Company",
-                                                    position: "Role",
-                                                    startDate: "2024",
-                                                    description: "Description"
+                                                    company: { content: "Company" },
+                                                    position: { content: "Role" },
+                                                    startDate: { content: "2024" },
+                                                    description: { content: "Description" }
                                                 }, ...(data.experience || [])];
                                                 handleUpdate('experience', newExp);
                                             }}
@@ -327,28 +327,28 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                              <div className="flex justify-between items-start">
                                                  <div className="text-neutral-500 font-mono text-sm mb-2 flex gap-1">
                                                       <InlineEdit readOnly={readOnly || !onUpdate}
-                                                        value={exp.startDate}
+                                                        value={exp.startDate?.content}
                                                         placeholder="Start"
                                                         onSave={(val) => {
                                                             const newExp = [...data.experience];
-                                                            newExp[i].startDate = val;
+                                                            newExp[i].startDate = { ...newExp[i].startDate, content: val };
                                                             handleUpdate('experience', newExp);
                                                         }}
-                                                        path={`experience[${i}].startDate`}
-                                                        alignment={(exp as any).dateAlignment}
+                                                        path={`experience[${i}].startDate.content`}
+                                                        alignment={exp.startDate?.alignment || undefined}
                                                         className="bg-transparent border-none text-right"
                                                     />
                                                      <span>-</span>
                                                       <InlineEdit readOnly={readOnly || !onUpdate}
-                                                        value={exp.endDate}
+                                                        value={exp.endDate?.content}
                                                         placeholder="Present"
                                                         onSave={(val) => {
                                                             const newExp = [...data.experience];
-                                                            newExp[i].endDate = val;
+                                                            newExp[i].endDate = { ...newExp[i].endDate, content: val };
                                                             handleUpdate('experience', newExp);
                                                         }}
-                                                        path={`experience[${i}].endDate`}
-                                                        alignment={(exp as any).dateAlignment}
+                                                        path={`experience[${i}].endDate.content`}
+                                                        alignment={exp.endDate?.alignment || undefined}
                                                         className="bg-transparent border-none"
                                                     />
                                                  </div>
@@ -366,45 +366,45 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                             
                                             <h3 className="text-2xl font-bold mb-1">
                                                  <InlineEdit readOnly={readOnly || !onUpdate}
-                                                    value={exp.company}
+                                                    value={exp.company?.content}
                                                     placeholder="Company"
                                                     onSave={(val) => {
                                                         const newExp = [...data.experience];
-                                                        newExp[i].company = val;
+                                                        newExp[i].company = { ...newExp[i].company, content: val };
                                                         handleUpdate('experience', newExp);
                                                     }}
-                                                    path={`experience[${i}].company`}
-                                                    alignment={(exp as any).companyAlignment}
+                                                    path={`experience[${i}].company.content`}
+                                                    alignment={exp.company?.alignment || undefined}
                                                     className="bg-transparent border-none"
                                                 />
                                             </h3>
                                             <div className="text-lg text-neutral-400 mb-4">
                                                  <InlineEdit readOnly={readOnly || !onUpdate}
-                                                    value={exp.position}
+                                                    value={exp.position?.content}
                                                     placeholder="Position"
                                                     onSave={(val) => {
                                                         const newExp = [...data.experience];
-                                                        newExp[i].position = val;
+                                                        newExp[i].position = { ...newExp[i].position, content: val };
                                                         handleUpdate('experience', newExp);
                                                     }}
-                                                    path={`experience[${i}].position`}
-                                                    alignment={(exp as any).positionAlignment}
+                                                    path={`experience[${i}].position.content`}
+                                                    alignment={exp.position?.alignment || undefined}
                                                     className="bg-transparent border-none"
                                                 />
                                             </div>
                                             
                                             <p className="text-neutral-400 leading-relaxed text-sm">
                                                  <InlineEdit readOnly={readOnly || !onUpdate}
-                                                    value={exp.description}
+                                                    value={exp.description?.content}
                                                     placeholder="Description..."
                                                     multiline
                                                     onSave={(val) => {
                                                         const newExp = [...data.experience];
-                                                        newExp[i].description = val;
+                                                        newExp[i].description = { ...newExp[i].description, content: val };
                                                         handleUpdate('experience', newExp);
                                                     }}
-                                                    path={`experience[${i}].description`}
-                                                    alignment={(exp as any).alignment}
+                                                    path={`experience[${i}].description.content`}
+                                                    alignment={exp.description?.alignment || undefined}
                                                     className="bg-transparent border-none w-full"
                                                 />
                                             </p>
@@ -475,10 +475,10 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                         onClick={() => {
                                         const newEdu = [{
                                             id: crypto.randomUUID(),
-                                            institution: "University",
-                                            degree: "Degree",
-                                            startDate: "2020",
-                                            endDate: "2024"
+                                            institution: { content: "University" },
+                                            degree: { content: "Degree" },
+                                            startDate: { content: "2020" },
+                                            endDate: { content: "2024" }
                                         }, ...data.education];
                                         handleUpdate('education', newEdu);
                                     }} />
@@ -493,10 +493,10 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                         onClick={() => {
                                             const newEdu = [{
                                                 id: crypto.randomUUID(),
-                                                institution: "University",
-                                                degree: "Degree",
-                                                startDate: "2020",
-                                                endDate: "2024"
+                                                institution: { content: "University" },
+                                                degree: { content: "Degree" },
+                                                startDate: { content: "2020" },
+                                                endDate: { content: "2024" }
                                             }, ...(data.education || [])];
                                             handleUpdate('education', newEdu);
                                         }}
@@ -507,70 +507,70 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                                             <div>
                                                  <h3 className="text-xl font-bold">
                                                      <InlineEdit readOnly={readOnly || !onUpdate} 
-                                                        value={edu.institution} 
+                                                        value={edu.institution?.content} 
                                                         placeholder="Institution"
                                                         onSave={(val) => {
                                                             const newEdu = [...data.education];
-                                                            newEdu[i].institution = val;
+                                                            newEdu[i].institution = { ...newEdu[i].institution, content: val };
                                                             handleUpdate('education', newEdu);
                                                         }}
-                                                        path={`education[${i}].institution`}
-                                                        alignment={(edu as any).institutionAlignment}
+                                                        path={`education[${i}].institution.content`}
+                                                        alignment={edu.institution?.alignment || undefined}
                                                         className="bg-transparent border-none"
                                                     />
                                                 </h3>
                                                  <p className="text-neutral-400 flex gap-1 items-center">
                                                       <InlineEdit readOnly={readOnly || !onUpdate} 
-                                                        value={edu.degree} 
+                                                        value={edu.degree?.content} 
                                                         placeholder="Degree"
                                                         onSave={(val) => {
                                                             const newEdu = [...data.education];
-                                                            newEdu[i].degree = val;
+                                                            newEdu[i].degree = { ...newEdu[i].degree, content: val };
                                                             handleUpdate('education', newEdu);
                                                         }}
-                                                        path={`education[${i}].degree`}
-                                                        alignment={(edu as any).degreeAlignment}
+                                                        path={`education[${i}].degree.content`}
+                                                        alignment={edu.degree?.alignment || undefined}
                                                         className="bg-transparent border-none"
                                                     />
                                                    <span>-</span>
                                                       <InlineEdit readOnly={readOnly || !onUpdate} 
-                                                        value={edu.fieldOfStudy} 
+                                                        value={edu.fieldOfStudy?.content} 
                                                         placeholder="Field"
                                                         onSave={(val) => {
                                                             const newEdu = [...data.education];
-                                                            newEdu[i].fieldOfStudy = val;
+                                                            newEdu[i].fieldOfStudy = { ...newEdu[i].fieldOfStudy, content: val };
                                                             handleUpdate('education', newEdu);
                                                         }}
-                                                        path={`education[${i}].fieldOfStudy`}
-                                                        alignment={(edu as any).alignment}
+                                                        path={`education[${i}].fieldOfStudy.content`}
+                                                        alignment={edu.fieldOfStudy?.alignment || undefined}
                                                         className="bg-transparent border-none"
                                                     />
                                                 </p>
                                             </div>
                                             <div className="text-right text-neutral-500 font-mono text-sm flex gap-1 justify-end items-center">
                                                  <InlineEdit readOnly={readOnly || !onUpdate} 
-                                                    value={edu.startDate} 
+                                                    value={edu.startDate?.content} 
                                                     placeholder="Start"
                                                     onSave={(val) => {
                                                         const newEdu = [...data.education];
-                                                        newEdu[i].startDate = val;
+                                                        newEdu[i].startDate = { ...newEdu[i].startDate, content: val };
                                                         handleUpdate('education', newEdu);
                                                     }}
-                                                    path={`education[${i}].startDate`}
-                                                    alignment={(edu as any).dateAlignment}
+                                                    path={`education[${i}].startDate.content`}
+                                                    alignment={edu.startDate?.alignment || undefined}
                                                     className="bg-transparent border-none text-right"
                                                 />
                                                 <span>-</span>
                                                 <InlineEdit readOnly={readOnly || !onUpdate} 
-                                                    value={edu.endDate} 
+                                                    value={edu.endDate?.content} 
                                                     placeholder="Present"
                                                     onSave={(val) => {
                                                         const newEdu = [...data.education];
-                                                        newEdu[i].endDate = val;
+                                                        newEdu[i].endDate = { ...newEdu[i].endDate, content: val };
                                                         handleUpdate('education', newEdu);
                                                     }}
-                                                    path={`education[${i}].endDate`}
-                                                    alignment={(edu as any).dateAlignment}
+                                                    path={`education[${i}].endDate.content`}
+                                                    alignment={edu.endDate?.alignment || undefined}
                                                     className="bg-transparent border-none"
                                                 />
                                                  {onUpdate && !readOnly && (

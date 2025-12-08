@@ -77,10 +77,10 @@ export function CustomSectionRenderer({
                             onClick={() => {
                                 const createItem = () => ({
                                     id: crypto.randomUUID(),
-                                    title: "New Item",
-                                    subtitle: section.type === "list" ? "Subtitle" : "",
-                                    content: "Description or content goes here...",
-                                    alignment: "left" as const
+                                    title: { content: "New Item" },
+                                    subtitle: section.type === "list" ? { content: "Subtitle" } : { content: "" },
+                                    content: { content: "Description or content goes here..." },
+                                    alignment: undefined // Default
                                 });
                                 
                                 const newItems = [createItem(), ...(section.items || [])];
@@ -104,10 +104,9 @@ export function CustomSectionRenderer({
                     onClick={() => {
                         const newItems = [{
                             id: crypto.randomUUID(),
-                            title: "New Item",
-                            subtitle: section.type === "list" ? "Subtitle" : "",
-                            content: "Description or content goes here...",
-                            alignment: "left" as const
+                            title: { content: "New Item" },
+                            subtitle: section.type === "list" ? { content: "Subtitle" } : { content: "" },
+                            content: { content: "Description or content goes here..." }
                         }, ...(section.items || [])];
                         handleUpdateSection({ ...section, items: newItems });
                     }}
@@ -145,9 +144,11 @@ export function CustomSectionRenderer({
                                  (theme === "studio" || theme === "visual") ? "text-white" : "text-slate-900"
                              )}>
                                  <InlineEdit readOnly={readOnly || !onUpdate}
-                                    value={item.title}
+                                    value={item.title?.content}
                                     placeholder="Title"
-                                    onSave={(val) => updateItem({ title: val })}
+                                    onSave={(val) => updateItem({ title: { ...item.title, content: val } })}
+                                    path={`customSections[${index}].items[${i}].title.content`}
+                                    alignment={item.title?.alignment || undefined}
                                     className="bg-transparent"
                                  />
                              </div>
@@ -157,9 +158,11 @@ export function CustomSectionRenderer({
                                       (theme === "studio" || theme === "visual") ? "text-neutral-400" : (theme === "minimal" ? "text-slate-700" : "text-blue-600")
                                  )}>
                                      <InlineEdit readOnly={readOnly || !onUpdate}
-                                        value={item.subtitle}
+                                        value={item.subtitle?.content}
                                         placeholder="Subtitle"
-                                        onSave={(val) => updateItem({ subtitle: val })}
+                                        onSave={(val) => updateItem({ subtitle: { ...item.subtitle, content: val } })}
+                                        path={`customSections[${index}].items[${i}].subtitle.content`}
+                                        alignment={item.subtitle?.alignment || undefined}
                                         className="bg-transparent"
                                      />
                                  </div>
@@ -172,12 +175,12 @@ export function CustomSectionRenderer({
                              (theme === "studio" || theme === "visual") ? "text-neutral-400" : "text-slate-600"
                         )}>
                             <InlineEdit readOnly={readOnly || !onUpdate}
-                                value={item.content}
+                                value={item.content?.content}
                                 placeholder="Content..."
                                 multiline
-                                onSave={(val) => updateItem({ content: val })}
-                                path={`customSections[${index}].items[${i}].content`}
-                                alignment={(item as any).alignment}
+                                onSave={(val) => updateItem({ content: { ...item.content, content: val } })}
+                                path={`customSections[${index}].items[${i}].content.content`}
+                                alignment={item.content?.alignment || undefined}
                                 className="bg-transparent w-full"
                              />
                         </div>

@@ -184,10 +184,10 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                     onClick={() => {
                                         const newProj = [{
                                             id: crypto.randomUUID(),
-                                            name: "Project Name",
-                                            description: "Description",
+                                            name: { content: "Project Name" },
+                                            description: { content: "Description" },
                                             technologies: []
-                                        }, ...data.projects];
+                                        }, ...data.projects ];
                                         handleUpdate('projects', newProj);
                                     }}
                                 />
@@ -201,8 +201,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                 onClick={() => {
                                     const newProj = [{
                                         id: crypto.randomUUID(),
-                                        name: "Project Name",
-                                        description: "Description",
+                                        name: { content: "Project Name" },
+                                        description: { content: "Description" },
                                         technologies: []
                                     }, ...(data.projects || [])];
                                     handleUpdate('projects', newProj);
@@ -226,11 +226,11 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                     <div className="flex-1 flex items-start gap-2">
                                         <h3 className="text-3xl font-bold">
                                             <InlineEdit readOnly={readOnly || !onUpdate}
-                                                value={project.name}
+                                                value={project.name?.content}
                                                 placeholder="Project Name"
-                                                onSave={(val) => updateItem({ name: val })}
-                                                path={`projects[${i}].name`}
-                                                alignment={(project as any).nameAlignment}
+                                                onSave={(val) => updateItem({ name: { ...project.name, content: val } })}
+                                                path={`projects[${i}].name.content`}
+                                                alignment={project.name?.alignment || undefined}
                                                 className="bg-transparent"
                                             />
                                         </h3>
@@ -257,12 +257,12 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                   <div>
                                     <p className="text-xl text-neutral-400 font-light leading-relaxed">
                                          <InlineEdit readOnly={readOnly || !onUpdate}
-                                            value={project.description}
+                                            value={project.description?.content}
                                             placeholder="Project description..."
                                             multiline
-                                            onSave={(val) => updateItem({ description: val })}
-                                            path={`projects[${i}].description`}
-                                            alignment={(project as any).alignment}
+                                            onSave={(val) => updateItem({ description: { ...project.description, content: val } })}
+                                            path={`projects[${i}].description.content`}
+                                            alignment={project.description?.alignment || undefined}
                                             className="bg-transparent"
                                         />
                                     </p>
@@ -289,10 +289,10 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                         onClick={() => {
                                             const newExp = [{
                                                 id: crypto.randomUUID(),
-                                                company: "Company Name",
-                                                position: "Position",
-                                                startDate: "2024",
-                                                description: "Job description goes here..."
+                                                company: { content: "Company Name" },
+                                                position: { content: "Position" },
+                                                startDate: { content: "2024" },
+                                                description: { content: "Job description goes here..." }
                                             }, ...data.experience];
                                             handleUpdate('experience', newExp);
                                         }}
@@ -307,10 +307,10 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                     onClick={() => {
                                         const newExp = [{
                                             id: crypto.randomUUID(),
-                                            company: "Company Name",
-                                            position: "Position",
-                                            startDate: "2024",
-                                            description: "Job description goes here..."
+                                            company: { content: "Company Name" },
+                                            position: { content: "Position" },
+                                            startDate: { content: "2024" },
+                                            description: { content: "Job description goes here..." }
                                         }, ...(data.experience || [])];
                                         handleUpdate('experience', newExp);
                                     }}
@@ -326,30 +326,30 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                         <div className="flex flex-col md:flex-row md:items-baseline justify-between mb-4 relative pr-8">
                                             <h3 className="text-2xl font-bold text-white">
                                                 <InlineEdit readOnly={readOnly || !onUpdate}
-                                                    value={exp.company}
+                                                    value={exp.company?.content}
                                                     placeholder="Company"
-                                                    onSave={(val) => updateItem({ company: val })}
-                                                    path={`experience[${i}].company`}
-                                                    alignment={(exp as any).companyAlignment}
+                                                    onSave={(val) => updateItem({ company: { ...exp.company, content: val } })}
+                                                    path={`experience[${i}].company.content`}
+                                                    alignment={exp.company?.alignment || undefined}
                                                     className="bg-transparent"
                                                 />
                                             </h3>
                                              <div className="text-neutral-500 font-mono text-sm mr-2">
                                                 <InlineEdit readOnly={readOnly || !onUpdate}
-                                                    value={exp.startDate}
+                                                    value={exp.startDate?.content}
                                                     placeholder="Start"
-                                                    onSave={(val) => updateItem({ startDate: val })}
-                                                    path={`experience[${i}].startDate`}
-                                                    alignment={(exp as any).dateAlignment}
+                                                    onSave={(val) => updateItem({ startDate: { ...exp.startDate, content: val } })}
+                                                    path={`experience[${i}].startDate.content`}
+                                                    alignment={exp.startDate?.alignment || undefined}
                                                     className="bg-transparent text-right"
                                                 />
                                                 {" — "}
                                                 <InlineEdit readOnly={readOnly || !onUpdate}
-                                                    value={exp.endDate}
+                                                    value={exp.endDate?.content}
                                                     placeholder="Present"
-                                                    onSave={(val) => updateItem({ endDate: val })}
-                                                    path={`experience[${i}].endDate`}
-                                                    alignment={(exp as any).dateAlignment}
+                                                    onSave={(val) => updateItem({ endDate: { ...exp.endDate, content: val } })}
+                                                    path={`experience[${i}].endDate.content`}
+                                                    alignment={exp.endDate?.alignment || undefined}
                                                     className="bg-transparent text-right"
                                                 />
                                             </div>
@@ -364,22 +364,22 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                         <div className="bg-neutral-900/50 p-6 rounded-lg border border-neutral-800/50">
                                             <h4 className="text-xl text-neutral-300 mb-4">
                                                 <InlineEdit readOnly={readOnly || !onUpdate}
-                                                    value={exp.position}
+                                                    value={exp.position?.content}
                                                     placeholder="Position"
-                                                    onSave={(val) => updateItem({ position: val })}
-                                                    path={`experience[${i}].position`}
-                                                    alignment={(exp as any).positionAlignment}
+                                                    onSave={(val) => updateItem({ position: { ...exp.position, content: val } })}
+                                                    path={`experience[${i}].position.content`}
+                                                    alignment={exp.position?.alignment || undefined}
                                                     className="bg-transparent"
                                                 />
                                             </h4>
                                             <p className="text-neutral-400 leading-relaxed font-light">
                                                  <InlineEdit readOnly={readOnly || !onUpdate}
-                                                    value={exp.description}
+                                                    value={exp.description?.content}
                                                     placeholder="Description..."
                                                     multiline
-                                                    onSave={(val) => updateItem({ description: val })}
-                                                    path={`experience[${i}].description`}
-                                                    alignment={(exp as any).alignment}
+                                                    onSave={(val) => updateItem({ description: { ...exp.description, content: val } })}
+                                                    path={`experience[${i}].description.content`}
+                                                    alignment={exp.description?.alignment || undefined}
                                                     className="bg-transparent"
                                                 />
                                             </p>
@@ -407,9 +407,9 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                         onClick={() => {
                                             const newEdu = [{
                                                 id: crypto.randomUUID(),
-                                                school: "University",
-                                                degree: "Degree",
-                                                year: "2024"
+                                                institution: { content: "University" },
+                                                degree: { content: "Degree" },
+                                                endDate: { content: "2024" }
                                             }, ...data.education];
                                             handleUpdate('education', newEdu);
                                         }}
@@ -424,9 +424,9 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                     onClick={() => {
                                         const newEdu = [{
                                             id: crypto.randomUUID(),
-                                            school: "University",
-                                            degree: "Degree",
-                                            year: "2024"
+                                            institution: { content: "University" },
+                                            degree: { content: "Degree" },
+                                            endDate: { content: "2024" }
                                         }, ...(data.education || [])];
                                         handleUpdate('education', newEdu);
                                     }}
@@ -442,21 +442,21 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                         <div className="flex flex-col md:flex-row md:items-baseline justify-between mb-4 relative pr-8">
                                             <h3 className="text-2xl font-bold text-white">
                                                 <InlineEdit readOnly={readOnly || !onUpdate}
-                                                    value={edu.institution}
+                                                    value={edu.institution?.content}
                                                     placeholder="School/University"
-                                                    onSave={(val) => updateItem({ institution: val })}
-                                                    path={`education[${i}].institution`}
-                                                    alignment={(edu as any).institutionAlignment}
+                                                    onSave={(val) => updateItem({ institution: { ...edu.institution, content: val } })}
+                                                    path={`education[${i}].institution.content`}
+                                                    alignment={edu.institution?.alignment || undefined}
                                                     className="bg-transparent"
                                                 />
                                             </h3>
                                              <div className="text-neutral-500 font-mono text-sm mr-2">
                                                 <InlineEdit readOnly={readOnly || !onUpdate}
-                                                    value={edu.endDate}
+                                                    value={edu.endDate?.content}
                                                     placeholder="Year"
-                                                    onSave={(val) => updateItem({ endDate: val })}
-                                                    path={`education[${i}].endDate`}
-                                                    alignment={(edu as any).dateAlignment}
+                                                    onSave={(val) => updateItem({ endDate: { ...edu.endDate, content: val } })}
+                                                    path={`education[${i}].endDate.content`}
+                                                    alignment={edu.endDate?.alignment || undefined}
                                                     className="bg-transparent text-right"
                                                 />
                                             </div>
@@ -471,11 +471,11 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                         <div className="bg-neutral-900/50 p-6 rounded-lg border border-neutral-800/50">
                                             <p className="text-xl text-neutral-400 font-light">
                                                  <InlineEdit readOnly={readOnly || !onUpdate}
-                                                    value={edu.degree}
+                                                    value={edu.degree?.content}
                                                     placeholder="Degree/Certificate"
-                                                    onSave={(val) => updateItem({ degree: val })}
-                                                    path={`education[${i}].degree`}
-                                                    alignment={(edu as any).degreeAlignment}
+                                                    onSave={(val) => updateItem({ degree: { ...edu.degree, content: val } })}
+                                                    path={`education[${i}].degree.content`}
+                                                    alignment={edu.degree?.alignment || undefined}
                                                     className="bg-transparent"
                                                 />
                                             </p>

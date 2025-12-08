@@ -184,68 +184,27 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
   } else if (targetField === "personalInfo.headerSummary.content") {
       alignmentPath = "personalInfo.headerSummary.alignment";
       currentAlignment = getEffectiveAlignment((resumeData.personalInfo as any)?.headerSummary?.alignment);
-  } else if (targetField.includes("experience")) {
-       const match = targetField.match(/experience\[(\d+)\]/);
-       if (match) {
-           const index = parseInt(match[1]);
-           const item = resumeData.experience?.[index] as any;
-           
-           if (targetField.includes("description")) {
-               alignmentPath = `experience[${index}].alignment`;
-               currentAlignment = getEffectiveAlignment(item?.alignment);
-           } else if (targetField.includes("company")) {
-               alignmentPath = `experience[${index}].companyAlignment`;
-               currentAlignment = getEffectiveAlignment(item?.companyAlignment);
-           } else if (targetField.includes("position")) {
-               alignmentPath = `experience[${index}].positionAlignment`;
-               currentAlignment = getEffectiveAlignment(item?.positionAlignment);
-           } else if (targetField.includes("startDate") || targetField.includes("endDate")) {
-               alignmentPath = `experience[${index}].dateAlignment`;
-               currentAlignment = getEffectiveAlignment(item?.dateAlignment);
-           }
-       }
-  } else if (targetField.includes("education")) {
-       const match = targetField.match(/education\[(\d+)\]/);
-       if (match) {
-           const index = parseInt(match[1]);
-           const item = resumeData.education?.[index] as any;
-
-           if (targetField.includes("description") || targetField.includes("fieldOfStudy")) {
-               alignmentPath = `education[${index}].alignment`;
-               currentAlignment = getEffectiveAlignment(item?.alignment);
-           } else if (targetField.includes("institution")) {
-               alignmentPath = `education[${index}].institutionAlignment`;
-               currentAlignment = getEffectiveAlignment(item?.institutionAlignment);
-           } else if (targetField.includes("degree")) {
-               alignmentPath = `education[${index}].degreeAlignment`;
-               currentAlignment = getEffectiveAlignment(item?.degreeAlignment);
-           } else if (targetField.includes("startDate") || targetField.includes("endDate")) {
-               alignmentPath = `education[${index}].dateAlignment`;
-               currentAlignment = getEffectiveAlignment(item?.dateAlignment);
-           }
-       }
-  } else if (targetField.includes("projects")) {
-        const match = targetField.match(/projects\[(\d+)\]/);
-        if (match) {
-            const index = parseInt(match[1]);
-            const item = resumeData.projects?.[index] as any;
-
-            if (targetField.includes("description")) {
-                alignmentPath = `projects[${index}].alignment`;
-                currentAlignment = getEffectiveAlignment(item?.alignment);
-            } else if (targetField.includes("name")) {
-                alignmentPath = `projects[${index}].nameAlignment`;
-                currentAlignment = getEffectiveAlignment(item?.nameAlignment);
-            }
-        }
-  } else if (targetField.includes("customSections")) {
-       const match = targetField.match(/customSections\[(\d+)\]\.items\[(\d+)\]/);
-       if (match) {
-           const sectionIndex = parseInt(match[1]);
-           const itemIndex = parseInt(match[2]);
-           alignmentPath = `customSections[${sectionIndex}].items[${itemIndex}].alignment`;
-           currentAlignment = getEffectiveAlignment((resumeData.customSections?.[sectionIndex]?.items?.[itemIndex] as any)?.alignment);
-       }
+  } else if (targetField.endsWith(".content")) {
+      // Generic handler for RichTextField which always stores data in { content, alignment }
+      // and whose value path ends in ".content"
+      alignmentPath = targetField.replace(/\.content$/, ".alignment");
+      
+      // Resolve current alignment value from path
+      const parts = alignmentPath.split(/[.\[\]]/).filter(Boolean);
+      let val: any = resumeData;
+      for (const part of parts) {
+          if (val === undefined || val === null) {
+              val = undefined;
+              break;
+          }
+          const index = parseInt(part);
+          if (!isNaN(index)) {
+              val = val[index];
+          } else {
+              val = val[part];
+          }
+      }
+      currentAlignment = getEffectiveAlignment(val as string | null);
   }
 
   // If we couldn't resolve a valid alignment target, AND we're not just in AI mode...

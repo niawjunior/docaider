@@ -17,12 +17,18 @@ interface TypewriterProps {
 }
 
 export function Typewriter({ 
-  segments, 
+  segments: rawSegments, 
   delay = 0, 
   speed = 30, 
   onComplete,
   className 
 }: TypewriterProps) {
+  // Defensive: Ensure text is always a string, handling RichTextFieldSchema objects if passed by mistake
+  const segments = rawSegments.map(s => ({
+    ...s,
+    text: typeof s.text === 'string' ? s.text : (s.text as any)?.content || ""
+  }));
+
   const [displayedSegments, setDisplayedSegments] = useState<TextSegment[]>([]);
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
   const [currentCharIndex, setCurrentCharIndex] = useState(0);

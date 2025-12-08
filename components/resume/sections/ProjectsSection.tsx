@@ -35,8 +35,8 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
             onAdd={onUpdate && !readOnly ? () => {
                 const newProj = [{
                     id: crypto.randomUUID(),
-                    name: "Project Name",
-                    description: "Description",
+                    name: { content: "Project Name" },
+                    description: { content: "Description" },
                     technologies: []
                 }, ...(data.projects || [])];
                 handleUpdate(newProj);
@@ -49,8 +49,8 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                     onClick={() => {
                         const newProj = [{
                             id: crypto.randomUUID(),
-                            name: "Project Name",
-                            description: "Description",
+                            name: { content: "Project Name" },
+                            description: { content: "Description" },
                             technologies: []
                         }, ...(data.projects || [])];
                         handleUpdate(newProj);
@@ -74,7 +74,7 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                             theme === "modern" && "p-4 bg-slate-50 rounded-lg border border-slate-100 hover:border-slate-200 transition-all",
                             theme === "portfolio" && "p-0",
                             theme === "minimal" && "text-center mb-6"
-                        )}>
+                        )} key={project.id || i}>
                            {/* Creative Theme Dot */}
                             {theme === "creative" && (
                                 <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-slate-900 border-4 border-white" />
@@ -93,15 +93,15 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                                     theme === "studio" && "text-xl tracking-tight text-white",
                                  )}>
                                         <InlineEdit readOnly={readOnly || !onUpdate} 
-                                        value={project.name} 
+                                        value={project.name?.content} 
                                         placeholder="Project Name"
                                         className={cn(
                                             "bg-transparent",
                                             theme === "minimal" && "w-full block"
                                         )}
-                                        onSave={(val) => updateItem({ name: val })}
-                                        path={`projects[i].name`}
-                                        alignment={(project as any).nameAlignment || (theme === "minimal" ? "center" : undefined)}
+                                        onSave={(val) => updateItem({ name: { ...project.name, content: val } })}
+                                        path={`projects[${i}].name.content`}
+                                        alignment={project.name?.alignment || (theme === "minimal" ? "center" : undefined)}
                                     />
                                  </h3>
                                  
@@ -138,12 +138,12 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                                 theme === "studio" && "text-neutral-400"
                             )}>
                                  <InlineEdit readOnly={readOnly || !onUpdate} 
-                                    value={project.description} 
+                                    value={project.description?.content} 
                                     placeholder="Project description" 
                                     multiline
-                                    onSave={(val) => updateItem({ description: val })}
-                                    path={`projects[i].description`}
-                                    alignment={(project as any).alignment || (theme === "minimal" ? "center" : undefined)}
+                                    onSave={(val) => updateItem({ description: { ...project.description, content: val } })}
+                                    path={`projects[${i}].description.content`}
+                                    alignment={project.description?.alignment || (theme === "minimal" ? "center" : undefined)}
                                 />
                             </div>
                             

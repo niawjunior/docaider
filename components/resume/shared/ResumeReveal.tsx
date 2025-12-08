@@ -19,7 +19,7 @@ export function Reveal({ onComplete, data }: RevealProps) {
   const fullName = data.personalInfo?.fullName || "User";
   const firstName = fullName.split(' ')[0];
   const jobTitle = data.personalInfo?.jobTitle || "Professional";
-  const company = data.experience?.[0]?.company || "your current role";
+  const company = data.experience?.[0]?.company?.content || "your current role";
   const topSkills = data.skills?.slice(0, 3).join(", ") || "key technologies";
   
   // Sequencing state

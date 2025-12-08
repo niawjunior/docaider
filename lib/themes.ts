@@ -29,52 +29,52 @@ export const THEME_DEMOS: ThemeDemo[] = [
         experience: [
             { 
                 id: "exp-1",
-                company: "Global Tech Corp", 
-                position: "Marketing Director", 
-                startDate: "2019-03", 
-                endDate: "Present", 
-                description: "• Spearheaded global marketing strategy, resulting in a 40% increase in annual revenue.\n• Managed a cross-functional team of 25 marketers, designers, and developers.\n• Oversaw a $5M annual advertising budget, optimizing ROI by 25% year-over-year.\n• Launched 3 major product lines, each achieving top market position within 6 months." 
+                company: { content: "Global Tech Corp" }, 
+                position: { content: "Marketing Director" }, 
+                startDate: { content: "2019-03" }, 
+                endDate: { content: "Present" }, 
+                description: { content: "• Spearheaded global marketing strategy, resulting in a 40% increase in annual revenue.\n• Managed a cross-functional team of 25 marketers, designers, and developers.\n• Oversaw a $5M annual advertising budget, optimizing ROI by 25% year-over-year.\n• Launched 3 major product lines, each achieving top market position within 6 months." } 
             },
             { 
                 id: "exp-2",
-                company: "Growth Agcy", 
-                position: "Senior Marketing Manager", 
-                startDate: "2015-06", 
-                endDate: "2019-02", 
-                description: "• Led digital acquisition campaigns for Fortune 500 clients.\n• Increased client retention rate by 30% through improved account management processes.\n• Developed and executed content marketing strategies that drove 1M+ monthly unique visitors." 
+                company: { content: "Growth Agcy" }, 
+                position: { content: "Senior Marketing Manager" }, 
+                startDate: { content: "2015-06" }, 
+                endDate: { content: "2019-02" }, 
+                description: { content: "• Led digital acquisition campaigns for Fortune 500 clients.\n• Increased client retention rate by 30% through improved account management processes.\n• Developed and executed content marketing strategies that drove 1M+ monthly unique visitors." } 
             }
         ],
         education: [
             {
                 id: "edu-1",
-                institution: "Columbia University",
-                degree: "Master of Business Administration (MBA)",
-                fieldOfStudy: "Marketing & Strategy",
-                startDate: "2013-09",
-                endDate: "2015-05"
+                institution: { content: "Columbia University" },
+                degree: { content: "Master of Business Administration (MBA)" },
+                fieldOfStudy: { content: "Marketing & Strategy" },
+                startDate: { content: "2013-09" },
+                endDate: { content: "2015-05" }
             },
             {
                 id: "edu-2",
-                institution: "New York University",
-                degree: "Bachelor of Science",
-                fieldOfStudy: "Communications",
-                startDate: "2009-09",
-                endDate: "2013-05"
+                institution: { content: "New York University" },
+                degree: { content: "Bachelor of Science" },
+                fieldOfStudy: { content: "Communications" },
+                startDate: { content: "2009-09" },
+                endDate: { content: "2013-05" }
             }
         ],
         skills: ["Digital Strategy", "Brand Management", "Team Leadership", "Data Analytics", "SEO/SEM", "Content Marketing", "Budget Management", "Public Relations"],
         projects: [
             {
                 id: "proj-1",
-                name: "Rebrand Initiative 2023",
-                description: "Led the comprehensive rebranding of Global Tech Corp, resulting in a 15% increase in brand sentiment.",
+                name: { content: "Rebrand Initiative 2023" },
+                description: { content: "Led the comprehensive rebranding of Global Tech Corp, resulting in a 15% increase in brand sentiment." },
                 url: "globaltech.com/rebrand",
                 technologies: ["Brand Strategy", "Design Systems", "Market Research"]
             },
             {
                 id: "proj-2",
-                name: "Growth Engine Launch",
-                description: "Designed and implemented an automated lead generation engine contributing $2M in pipeline.",
+                name: { content: "Growth Engine Launch" },
+                description: { content: "Designed and implemented an automated lead generation engine contributing $2M in pipeline." },
                 url: "emilywhite.com/growth",
                 technologies: ["HubSpot", "Salesforce", "Marketo"]
             }
@@ -104,44 +104,44 @@ export const THEME_DEMOS: ThemeDemo[] = [
         experience: [
             { 
                 id: "exp-1",
-                company: "Creative Studio", 
-                position: "Senior Designer", 
-                startDate: "2020-01", 
-                endDate: "Present", 
-                description: "• Leading brand identity projects for tech startups and lifestyle brands.\n• Mentoring junior designers and establishing studio design standards.\n• Created award-winning packaging designs featured in Design Weekly." 
+                company: { content: "Creative Studio" }, 
+                position: { content: "Senior Designer" }, 
+                startDate: { content: "2020-01" }, 
+                endDate: { content: "Present" }, 
+                description: { content: "• Leading brand identity projects for tech startups and lifestyle brands.\n• Mentoring junior designers and establishing studio design standards.\n• Created award-winning packaging designs featured in Design Weekly." } 
             },
             { 
                 id: "exp-2",
-                company: "Freelance", 
-                position: "Visual Designer", 
-                startDate: "2017-05", 
-                endDate: "2019-12", 
-                description: "• Collaborated with diverse clients to deliver logos, websites, and marketing collateral.\n• Managed end-to-end design process from concept to final delivery." 
+                company: { content: "Freelance" }, 
+                position: { content: "Visual Designer" }, 
+                startDate: { content: "2017-05" }, 
+                endDate: { content: "2019-12" }, 
+                description: { content: "• Collaborated with diverse clients to deliver logos, websites, and marketing collateral.\n• Managed end-to-end design process from concept to final delivery." } 
             }
         ],
         education: [
             {
                 id: "edu-1",
-                institution: "Rhode Island School of Design",
-                degree: "Bachelor of Fine Arts",
-                fieldOfStudy: "Graphic Design",
-                startDate: "2013-09",
-                endDate: "2017-06"
+                institution: { content: "Rhode Island School of Design" },
+                degree: { content: "Bachelor of Fine Arts" },
+                fieldOfStudy: { content: "Graphic Design" },
+                startDate: { content: "2013-09" },
+                endDate: { content: "2017-06" }
             }
         ],
         skills: ["Typography", "Brand Identity", "Adobe Creative Suite", "Figma", "Motion Design", "Packaging Design", "Art Direction"],
         projects: [
             {
                 id: "proj-1",
-                name: "Lumina Brand System",
-                description: "Complete identity system for a sustainable energy startup, including logo, guidelines, and web assets.",
+                name: { content: "Lumina Brand System" },
+                description: { content: "Complete identity system for a sustainable energy startup, including logo, guidelines, and web assets." },
                 url: "morgandesign.com/lumina",
                 technologies: ["Illustrator", "Figma", "After Effects"]
             },
             {
                 id: "proj-2",
-                name: "Type Collection Vol. 1",
-                description: "A self-initiated exploration of experimental typography and layout design.",
+                name: { content: "Type Collection Vol. 1" },
+                description: { content: "A self-initiated exploration of experimental typography and layout design." },
                 url: "morgandesign.com/type",
                 technologies: ["InDesign", "Typography", "Print"]
             }
@@ -172,44 +172,44 @@ export const THEME_DEMOS: ThemeDemo[] = [
         experience: [
             { 
                 id: "exp-1",
-                company: "Cloud Systems Inc.", 
-                position: "Senior Frontend Engineer", 
-                startDate: "2021-02", 
-                endDate: "Present", 
-                description: "• Architecting the core design system used by 15+ product teams.\n• Improved application performance by 35% through code splitting and optimization strategies.\n• Led the migration of legacy codebase to Next.js and TypeScript." 
+                company: { content: "Cloud Systems Inc." }, 
+                position: { content: "Senior Frontend Engineer" }, 
+                startDate: { content: "2021-02" }, 
+                endDate: { content: "Present" }, 
+                description: { content: "• Architecting the core design system used by 15+ product teams.\n• Improved application performance by 35% through code splitting and optimization strategies.\n• Led the migration of legacy codebase to Next.js and TypeScript." } 
             },
             { 
                 id: "exp-2",
-                company: "Startupify", 
-                position: "Full Stack Developer", 
-                startDate: "2018-06", 
-                endDate: "2021-01", 
-                description: "• Built and deployed MVP features for a high-growth fintech platform.\n• Integrated Stripe API for payment processing and subscription management.\n• Collaborated closely with product and design to iterate on user feedback." 
+                company: { content: "Startupify" }, 
+                position: { content: "Full Stack Developer" }, 
+                startDate: { content: "2018-06" }, 
+                endDate: { content: "2021-01" }, 
+                description: { content: "• Built and deployed MVP features for a high-growth fintech platform.\n• Integrated Stripe API for payment processing and subscription management.\n• Collaborated closely with product and design to iterate on user feedback." } 
             }
         ],
         education: [
             {
                 id: "edu-1",
-                institution: "University of Washington",
-                degree: "Bachelor of Science",
-                fieldOfStudy: "Computer Science",
-                startDate: "2014-09",
-                endDate: "2018-06"
+                institution: { content: "University of Washington" },
+                degree: { content: "Bachelor of Science" },
+                fieldOfStudy: { content: "Computer Science" },
+                startDate: { content: "2014-09" },
+                endDate: { content: "2018-06" }
             }
         ],
         skills: ["React", "TypeScript", "Next.js", "Node.js", "AWS", "GraphQL", "Tailwind CSS", "PostgreSQL", "System Design"],
         projects: [
             {
                 id: "proj-1",
-                name: "DocuBuild SaaS",
-                description: "A collaborative documentation platform for engineering teams. Real-time editing and version control.",
+                name: { content: "DocuBuild SaaS" },
+                description: { content: "A collaborative documentation platform for engineering teams. Real-time editing and version control." },
                 url: "github.com/sarahchen/docubuild",
                 technologies: ["Next.js", "WebSockets", "Redis", "Tailwind"]
             },
             {
                 id: "proj-2",
-                name: "OpenUI Library",
-                description: "An open-source accessible UI component library for React applications. 2k+ stars on GitHub.",
+                name: { content: "OpenUI Library" },
+                description: { content: "An open-source accessible UI component library for React applications. 2k+ stars on GitHub." },
                 url: "github.com/sarahchen/openui",
                 technologies: ["React", "Storybook", "A11y"]
             }
@@ -239,52 +239,52 @@ export const THEME_DEMOS: ThemeDemo[] = [
         experience: [
             { 
                 id: "exp-1",
-                company: "Innovate SaaS", 
-                position: "Group Product Manager", 
-                startDate: "2021-08", 
-                endDate: "Present", 
-                description: "• Define and execute the product vision for the Enterprise Analytics suite.\n• Mentoring a team of 4 PMs and coordinating with engineering leads.\n• Launched 'Insights Pro', generating $3M ARR in the first year." 
+                company: { content: "Innovate SaaS" }, 
+                position: { content: "Group Product Manager" }, 
+                startDate: { content: "2021-08" }, 
+                endDate: { content: "Present" }, 
+                description: { content: "• Define and execute the product vision for the Enterprise Analytics suite.\n• Mentoring a team of 4 PMs and coordinating with engineering leads.\n• Launched 'Insights Pro', generating $3M ARR in the first year." } 
             },
             { 
                 id: "exp-2",
-                company: "FinTech Sol", 
-                position: "Product Manager", 
-                startDate: "2017-04", 
-                endDate: "2021-07", 
-                description: "• Managed the mobile app product lifecycle from concept to launch.\n• Conducted user research and A/B testing to optimize onboarding flow, increasing conversion by 20%." 
+                company: { content: "FinTech Sol" }, 
+                position: { content: "Product Manager" }, 
+                startDate: { content: "2017-04" }, 
+                endDate: { content: "2021-07" }, 
+                description: { content: "• Managed the mobile app product lifecycle from concept to launch.\n• Conducted user research and A/B testing to optimize onboarding flow, increasing conversion by 20%." } 
             }
         ],
         education: [
             {
                 id: "edu-1",
-                institution: "University of Texas at Austin",
-                degree: "Master of Business Administration",
-                fieldOfStudy: "Entrepreneurship",
-                startDate: "2015-08",
-                endDate: "2017-05"
+                institution: { content: "University of Texas at Austin" },
+                degree: { content: "Master of Business Administration" },
+                fieldOfStudy: { content: "Entrepreneurship" },
+                startDate: { content: "2015-08" },
+                endDate: { content: "2017-05" }
             },
              {
                 id: "edu-2",
-                institution: "Rice University",
-                degree: "Bachelor of Arts",
-                fieldOfStudy: "Economics",
-                startDate: "2011-08",
-                endDate: "2015-05"
+                institution: { content: "Rice University" },
+                degree: { content: "Bachelor of Arts" },
+                fieldOfStudy: { content: "Economics" },
+                startDate: { content: "2011-08" },
+                endDate: { content: "2015-05" }
             }
         ],
         skills: ["Product Strategy", "Agile/Scrum", "Jira & Confluence", "Data Analysis", "User Research", "Roadmapping", "Stakeholder Management"],
         projects: [
             {
                 id: "proj-1",
-                name: "Analytics Dashboard Redesign",
-                description: "Overhauled the core analytics interface based on customer feedback, improving daily active usage by 15%.",
+                name: { content: "Analytics Dashboard Redesign" },
+                description: { content: "Overhauled the core analytics interface based on customer feedback, improving daily active usage by 15%." },
                 url: "marcusj.io/case-study/analytics",
                 technologies: ["Product Design", "Data Viz", "User Testing"]
             },
             {
                 id: "proj-2",
-                name: "Mobile Onboarding Flow",
-                description: "Led the redesign of the mobile signup process to reduce friction and improve time-to-value.",
+                name: { content: "Mobile Onboarding Flow" },
+                description: { content: "Led the redesign of the mobile signup process to reduce friction and improve time-to-value." },
                 url: "marcusj.io/case-study/mobile",
                 technologies: ["Mobile UX", "Growth Hacking", "A/B Testing"]
             }
@@ -314,52 +314,52 @@ export const THEME_DEMOS: ThemeDemo[] = [
         experience: [
             { 
                 id: "exp-1",
-                company: "Agency X", 
-                position: "Senior UX Researcher", 
-                startDate: "2020-05", 
-                endDate: "Present", 
-                description: "• Lead research initiatives for major retail and banking clients.\n• Plan and conduct usability studies, interviews, and diary studies.\n• Present findings to executive stakeholders to influence product strategy." 
+                company: { content: "Agency X" }, 
+                position: { content: "Senior UX Researcher" }, 
+                startDate: { content: "2020-05" }, 
+                endDate: { content: "Present" }, 
+                description: { content: "• Lead research initiatives for major retail and banking clients.\n• Plan and conduct usability studies, interviews, and diary studies.\n• Present findings to executive stakeholders to influence product strategy." } 
             },
             { 
                 id: "exp-2",
-                company: "Digital Insights", 
-                position: "UX Researcher", 
-                startDate: "2018-01", 
-                endDate: "2020-04", 
-                description: "• Supported the design team with rapid usability testing and heuristic evaluations.\n• Created personas and customer journey maps to guide feature development." 
+                company: { content: "Digital Insights" }, 
+                position: { content: "UX Researcher" }, 
+                startDate: { content: "2018-01" }, 
+                endDate: { content: "2020-04" }, 
+                description: { content: "• Supported the design team with rapid usability testing and heuristic evaluations.\n• Created personas and customer journey maps to guide feature development." } 
             }
         ],
         education: [
              {
                 id: "edu-1",
-                institution: "DePaul University",
-                degree: "Master of Science",
-                fieldOfStudy: "Human-Computer Interaction",
-                startDate: "2016-09",
-                endDate: "2018-06"
+                institution: { content: "DePaul University" },
+                degree: { content: "Master of Science" },
+                fieldOfStudy: { content: "Human-Computer Interaction" },
+                startDate: { content: "2016-09" },
+                endDate: { content: "2018-06" }
             },
             {
                 id: "edu-2",
-                institution: "University of Illinois",
-                degree: "Bachelor of Science",
-                fieldOfStudy: "Psychology",
-                startDate: "2012-09",
-                endDate: "2016-05"
+                institution: { content: "University of Illinois" },
+                degree: { content: "Bachelor of Science" },
+                fieldOfStudy: { content: "Psychology" },
+                startDate: { content: "2012-09" },
+                endDate: { content: "2016-05" }
             }
         ],
         skills: ["Usability Testing", "User Interviews", "Survey Design", "Data Analysis", "Persona Creation", "Journey Mapping", "Figma"],
         projects: [
             {
                 id: "proj-1",
-                name: "E-commerce Checkout Study",
-                description: "A comprehensive study on cart abandonment reasons, leading to a 10% lift in conversion rates.",
+                name: { content: "E-commerce Checkout Study" },
+                description: { content: "A comprehensive study on cart abandonment reasons, leading to a 10% lift in conversion rates." },
                 url: "davidkimresearch.com/checkout",
                 technologies: ["UserTesting.com", "Surveys", "Heatmaps"]
             },
             {
                 id: "proj-2",
-                name: "Banking App Accessibility",
-                description: "Audit and user testing with diverse user groups to improve app accessibility compliance.",
+                name: { content: "Banking App Accessibility" },
+                description: { content: "Audit and user testing with diverse user groups to improve app accessibility compliance." },
                 url: "davidkimresearch.com/a11y",
                 technologies: ["WCAG", "Assistive Tech", "Auditing"]
             }
@@ -384,48 +384,49 @@ export const THEME_DEMOS: ThemeDemo[] = [
             location: "London, UK",
             linkedin: "linkedin.com/in/lisaray-writer",
             website: "lisarayportfolio.com",
+            jobTitle: "Senior Copywriter"
         },
         experience: [
             { 
                 id: "exp-1",
-                company: "Media House", 
-                position: "Senior Editor", 
-                startDate: "2019-11", 
-                endDate: "Present", 
-                description: "• Manage the editorial calendar and content strategy for a leading tech publication.\n• Edit and proofread articles from a team of 10 freelance writers.\n• Increased newsletter open rates by 20% through A/B testing subject lines." 
+                company: { content: "Media House" }, 
+                position: { content: "Senior Editor" }, 
+                startDate: { content: "2019-11" }, 
+                endDate: { content: "Present" }, 
+                description: { content: "• Manage the editorial calendar and content strategy for a leading tech publication.\n• Edit and proofread articles from a team of 10 freelance writers.\n• Increased newsletter open rates by 20% through A/B testing subject lines." } 
             },
             { 
                 id: "exp-2",
-                company: "Brand Agency", 
-                position: "Copywriter", 
-                startDate: "2016-08", 
-                endDate: "2019-10", 
-                description: "• Wrote copy for websites, advertising campaigns, and social media.\n• Developed brand voice guidelines for startups and established companies.\n• Collaborated with designers to ensure copy and visuals worked in harmony." 
+                company: { content: "Brand Agency" }, 
+                position: { content: "Copywriter" }, 
+                startDate: { content: "2016-08" }, 
+                endDate: { content: "2019-10" }, 
+                description: { content: "• Wrote copy for websites, advertising campaigns, and social media.\n• Developed brand voice guidelines for startups and established companies.\n• Collaborated with designers to ensure copy and visuals worked in harmony." } 
             }
         ],
         education: [
             {
                 id: "edu-1",
-                institution: "University of Oxford",
-                degree: "Bachelor of Arts",
-                fieldOfStudy: "English Literature",
-                startDate: "2013-10",
-                endDate: "2016-06"
+                institution: { content: "University of Oxford" },
+                degree: { content: "Bachelor of Arts" },
+                fieldOfStudy: { content: "English Literature" },
+                startDate: { content: "2013-10" },
+                endDate: { content: "2016-06" }
             }
         ],
         skills: ["Copywriting", "Editing", "Content Strategy", "SEO", "Creative Writing", "Social Media", "Brand Voice"],
         projects: [
             {
                 id: "proj-1",
-                name: "Tech Blog Launch",
-                description: "Developed the content strategy and wrote foundational articles for a new tech blog reaching 50k monthly readers.",
+                name: { content: "Tech Blog Launch" },
+                description: { content: "Developed the content strategy and wrote foundational articles for a new tech blog reaching 50k monthly readers." },
                 url: "lisarayportfolio.com/tech-blog",
                 technologies: ["WordPress", "SEO", "Content Planning"]
             },
             {
                 id: "proj-2",
-                name: "Rebranding Campaign",
-                description: "Created the tagline and brand manifesto for a major retail rebrand.",
+                name: { content: "Rebranding Campaign" },
+                description: { content: "Created the tagline and brand manifesto for a major retail rebrand." },
                 url: "lisarayportfolio.com/rebrand",
                 technologies: ["Creative Direction", "Copywriting", "Branding"]
             }
