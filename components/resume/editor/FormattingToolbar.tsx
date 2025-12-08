@@ -16,15 +16,14 @@ interface FormattingToolbarProps {
 }
 
 export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToolbarProps) {
-  const { focusedField, hasSelection, setAiProcessingField } = useEditorContext();
+  const { 
+      focusedField, hasSelection, setAiProcessingField,
+      aiOpen, setAiOpen, lockedField, setLockedField 
+  } = useEditorContext();
   const { updateField } = useResumeUpdate(resumeData, onUpdate);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
 
-  // Focus lock for AI input
-  const [aiOpen, setAiOpen] = useState(false);
-  const [lockedField, setLockedField] = useState<string | null>(null);
-  
   const [aiInstruction, setAiInstruction] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiResult, setAiResult] = useState<string | null>(null);
@@ -49,10 +48,12 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
 
   const handleAskAi = async (overrideInstruction?: string) => {
       const currentText = getCurrentValue();
-      console.log("Asking AI:", { currentText, overrideInstruction, aiInstruction });
-      if (!currentText) return;
-      
       const instructionToUse = overrideInstruction || aiInstruction;
+
+      console.log("Asking AI:", { currentText, overrideInstruction, aiInstruction });
+      
+      // If we have no text AND no instruction, we can't do anything
+      if (!currentText && !instructionToUse) return;
       const targetField = lockedField || focusedField;
 
       setIsAiLoading(true);
@@ -64,7 +65,8 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ 
                   text: currentText, 
-                  instruction: instructionToUse 
+                  instruction: instructionToUse,
+                  resumeData // Pass full context
               })
           });
           const data = await res.json();

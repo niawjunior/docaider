@@ -8,7 +8,9 @@ interface ScrambleTextProps {
   className?: string;
   scrambleSpeed?: number;
   duration?: number;
+  revealSpeed?: number;
   loop?: boolean;
+  onComplete?: () => void;
 }
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";

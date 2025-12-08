@@ -32,22 +32,22 @@ export function InlineEdit({
   const [isEditing, setIsEditing] = React.useState(false);
   
   // Use context safely (it might not be available in some contexts like preview modal)
-  let setFocusedField: ((path: string | null) => void) | undefined;
-  let setHasSelection: ((hasSelection: boolean) => void) | undefined;
-  let aiProcessingField: string | null = null;
-  let enableTextAnimations = false;
-  let scrambleLoop = false;
+  // Use context safely (it might not be available in some contexts like preview modal)
+  let contextSafe: any = null;
   try {
       // eslint-disable-next-line react-hooks/rules-of-hooks
-      const context = useEditorContext();
-      setFocusedField = context.setFocusedField;
-      setHasSelection = context.setHasSelection;
-      aiProcessingField = context.aiProcessingField;
-      enableTextAnimations = context.enableTextAnimations || false;
-      scrambleLoop = context.scrambleLoop || false;
+      contextSafe = useEditorContext();
   } catch (e) {
       // Context not present, ignore
   }
+
+  const setFocusedField = contextSafe?.setFocusedField;
+  const setHasSelection = contextSafe?.setHasSelection;
+  const aiProcessingField = contextSafe?.aiProcessingField;
+  const enableTextAnimations = contextSafe?.enableTextAnimations || false;
+  const scrambleLoop = contextSafe?.scrambleLoop || false;
+  const setAiOpen = contextSafe?.setAiOpen;
+  const setLockedField = contextSafe?.setLockedField;
 
   // Monitor selection changes when editing
   React.useEffect(() => {
@@ -138,6 +138,22 @@ export function InlineEdit({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (readOnly) return;
+    
+    // Quick AI Trigger: Press Space on empty field
+    // Check actual DOM content because 'value' prop might be stale while editing
+    const currentText = contentRef.current?.innerText || "";
+    // Normalize to handle potential zero-width spaces or newlines that appear empty
+    const isVisuallyEmpty = currentText.replace(/[\u200B\u00A0\n\r]/g, "").trim() === "";
+
+    if (e.key === " " && isVisuallyEmpty) {
+        e.preventDefault();
+        if (setAiOpen && setLockedField && path) {
+            setLockedField(path);
+            setAiOpen(true);
+        }
+        return;
+    }
+
     if (e.key === "Enter" && !multiline) {
       e.preventDefault();
       contentRef.current?.blur();
@@ -150,6 +166,7 @@ export function InlineEdit({
           contentRef.current.blur();
       }
       setIsEditing(false);
+      if (setAiOpen) setAiOpen(false);
     }
   };
 
