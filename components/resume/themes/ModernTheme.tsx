@@ -8,6 +8,8 @@ import { SkillsSection } from "@/components/resume/sections/SkillsSection";
 import { ProjectsSection } from "@/components/resume/sections/ProjectsSection";
 import { SummarySection } from "@/components/resume/sections/SummarySection";
 import { CustomSectionRenderer } from "@/components/resume/shared/CustomSectionRenderer";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface ModernThemeProps {
   data: ResumeData;
@@ -79,6 +81,24 @@ export const ModernTheme = ({ data, onUpdate, readOnly }: ModernThemeProps) => {
              if (id === 'skills') return null; // In sidebar
              return renderSection(id);
          })}
+
+         {onUpdate && !readOnly && (
+            <div className="mt-8 border-t border-slate-200 pt-8 flex justify-center">
+                <Button variant="outline" className="text-slate-900 border-slate-200 hover:bg-slate-100" onClick={() => {
+                    const newSection = {
+                        id: crypto.randomUUID(),
+                        title: "New Section",
+                        type: "list" as const,
+                        items: []
+                    };
+                    const newSections = [...(data.customSections || []), newSection];
+                    onUpdate({ ...data, customSections: newSections });
+                }}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Custom Section
+                </Button>
+            </div>
+         )}
       </div>
     </div>
   );

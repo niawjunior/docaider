@@ -38,16 +38,20 @@ export function SkillsSection({ data, theme, onUpdate, readOnly }: SkillsSection
     // We should probably rely on the layout grid to position it, but visually the header is different.
     // Let's settle for the Standard Creative Header (2xl) for consistency unless user complains.
 
+    // Determine if this section is in the sidebar (Modern and Creative themes put Skills in sidebar)
+    const isSidebar = theme === 'modern' || theme === 'creative';
+    const sectionTheme = isSidebar ? `${theme}-sidebar` : theme;
+
     return (
         <ResumeSection
             title="Skills"
-            theme={theme}
+            theme={sectionTheme}
             // Add Button integrated into ResumeSection header
             onAdd={onUpdate && !readOnly ? () => {
                 const newSkills = [...(data.skills || []), "New Skill"];
                 handleUpdate(newSkills);
             } : undefined}
-            className={theme === "creative" ? "space-y-4" : ""} // Override wrapper? Creative skills had space-y-2
+            className={theme === "creative" ? "space-y-4" : ""}
         >
              <div className={styles.container}>
                 {(data.skills || []).map((skill, index) => (

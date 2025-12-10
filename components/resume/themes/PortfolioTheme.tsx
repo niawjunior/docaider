@@ -74,13 +74,26 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                 }}
                 className="pointer-events-none" 
              />
-             <span>{(data.personalInfo.fullName ?? '').split(' ')[0]}</span>
             <span className="text-blue-600">.</span>
           </div>
           <nav className="hidden md:flex gap-6 text-sm font-medium text-slate-600">
             <a href="#about" className="hover:text-blue-600 transition-colors">About</a>
-            <a href="#experience" className="hover:text-blue-600 transition-colors">Experience</a>
-            <a href="#projects" className="hover:text-blue-600 transition-colors">Projects</a>
+            {order.map(sectionId => {
+                const isCustom = data.customSections?.find(c => c.id === sectionId);
+                const isStandard = ['summary', 'experience', 'projects', 'education', 'skills', 'about', 'contact'].includes(sectionId);
+                
+                if (!isCustom && !isStandard) return null;
+
+                const label = isCustom 
+                    ? isCustom.title 
+                    : sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
+                
+                return (
+                    <a key={sectionId} href={`#${sectionId}`} className="hover:text-blue-600 transition-colors">
+                        {label}
+                    </a>
+                );
+            })}
             <a href="#contact" className="hover:text-blue-600 transition-colors">Contact</a>
           </nav>
         </div>
@@ -95,15 +108,15 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <div className="max-w-3xl">
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 flex flex-wrap gap-2 items-baseline">
-              <span>Hi, I'm</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 flex flex-wrap md:flex-nowrap gap-x-3 gap-y-1 items-baseline">
+              <span className="shrink-0">Hi, I&apos;m</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 min-w-0 flex-1">
                  <InlineEdit readOnly={readOnly || !onUpdate} 
                     value={data.personalInfo.fullName} 
                     onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
                     path="personalInfo.fullName"
                     placeholder="Your Name"
-                    className="min-w-[200px]"
+                    className="w-full bg-transparent border-none p-0 focus:ring-0"
                  />
               </span>
             </h1>
@@ -119,7 +132,7 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
             </p>
             
 
-            <div className="flex flex-wrap gap-4 scroll-mt-24" id="contact">
+            <div className="flex flex-wrap gap-4 scroll-mt-24">
                {/* Email */}
                <div className="flex items-center gap-2">
                  <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={!onUpdate}>
@@ -196,14 +209,17 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
         {order.map(id => (
             <motion.div
                 key={id}
+                id={id} // Add ID for anchor scrolling
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
+                className="scroll-mt-24" // Offset for sticky header
             >
                 {renderSection(id)}
             </motion.div>
         ))}
+
 
         {onUpdate && !readOnly && (
            <div className="mt-8 border-t border-slate-200 pt-8 flex justify-center print:hidden">
@@ -222,6 +238,54 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                </Button>
            </div>
        )}
+
+        {/* Contact Footer */}
+        <section id="contact" className="py-24 border-t border-slate-200 mt-24">
+            <div className="max-w-3xl mx-auto text-center">
+                <h2 className="text-4xl font-bold tracking-tight text-slate-900 mb-8">Get in Touch</h2>
+                <div className="flex flex-col gap-6 items-center text-lg text-slate-600">
+                     <p className="max-w-xl mx-auto leading-relaxed">
+                        I&apos;m always open to discussing new projects, creative ideas or opportunities to be part of your visions.
+                     </p>
+                     
+                     <div className="flex flex-wrap justify-center gap-4 scroll-mt-24">
+                         {/* Email */}
+                         <div className="flex items-center gap-2">
+                             <Mail className="w-5 h-5 text-slate-400" />
+                              <InlineEdit readOnly={readOnly || !onUpdate} 
+                                value={data.personalInfo.email} 
+                                placeholder="Email"
+                                onSave={(val) => handleUpdate('personalInfo.email', val)} 
+                                path="personalInfo.email"
+                                className="bg-transparent border-none text-slate-900 font-medium"
+                             />
+                         </div>
+                         {/* LinkedIn */}
+                         <div className="flex items-center gap-2">
+                             <Linkedin className="w-5 h-5 text-slate-400" />
+                              <InlineEdit readOnly={readOnly || !onUpdate} 
+                                value={data.personalInfo.linkedin} 
+                                placeholder="LinkedIn"
+                                onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
+                                path="personalInfo.linkedin"
+                                className="bg-transparent border-none text-slate-900 font-medium"
+                             />
+                         </div>
+                         {/* Website */}
+                         <div className="flex items-center gap-2">
+                             <Globe className="w-5 h-5 text-slate-400" />
+                              <InlineEdit readOnly={readOnly || !onUpdate} 
+                                value={data.personalInfo.website} 
+                                placeholder="Website"
+                                onSave={(val) => handleUpdate('personalInfo.website', val)} 
+                                path="personalInfo.website"
+                                className="bg-transparent border-none text-slate-900 font-medium"
+                             />
+                         </div>
+                     </div>
+                </div>
+            </div>
+        </section>
 
       </main>
     </div>

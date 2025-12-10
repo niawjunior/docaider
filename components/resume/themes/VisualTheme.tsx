@@ -42,9 +42,31 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
               {(personalInfo.fullName ?? '').split(' ')[0]}
           </span>
           <div className="flex gap-6 text-sm font-medium uppercase tracking-widest bg-black/50 backdrop-blur rounded px-4 py-2">
-            <a href="#work" className="hover:opacity-50 transition-opacity">Work</a>
-            <a href="#about" className="hover:opacity-50 transition-opacity">About</a>
-            <a href="#contact" className="hover:opacity-50 transition-opacity">Contact</a>
+             {(data.sectionOrder && data.sectionOrder.length > 0 ? data.sectionOrder : ["summary", "projects", "experience", "skills", "education"]).map(sectionId => {
+                 const isCustom = data.customSections?.find(c => c.id === sectionId);
+                 const isStandard = ['summary', 'experience', 'projects', 'education', 'skills', 'about', 'contact'].includes(sectionId);
+                 
+                 if (!isCustom && !isStandard) return null;
+
+                 let label = isCustom ? isCustom.title : sectionId;
+                 let href = `#${sectionId}`;
+
+                 if (sectionId === 'summary') {
+                     label = 'About';
+                     href = '#about';
+                 }
+                 if (sectionId === 'projects') {
+                     label = 'Work';
+                     href = '#work';
+                 }
+
+                 return (
+                     <a key={sectionId} href={href} className="hover:opacity-50 transition-opacity">
+                         {label}
+                     </a>
+                 );
+             })}
+             <a href="#contact" className="hover:opacity-50 transition-opacity">Contact</a>
           </div>
         </nav>
       )}
@@ -142,7 +164,8 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                     return (
                         <motion.section
                             key="summary"
-                            className="py-12 md:py-24 max-w-4xl mx-auto text-center"
+                            id="about"
+                            className="py-12 md:py-24 max-w-4xl mx-auto text-center scroll-mt-24"
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8 }}
@@ -164,7 +187,7 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                 case 'projects':
                     if (!onUpdate && (!data.projects || data.projects.length === 0)) return null;
                     return (
-                        <section key="projects" id="work" className="py-24 w-full">
+                        <section key="projects" id="work" className="py-24 w-full scroll-mt-24">
                            <div className="flex justify-between items-end mb-16 border-b border-white/20 pb-8">
                              <h2 className="text-6xl md:text-8xl font-black uppercase tracking-tighter text-transparent stroke-text-white">
                                 Selected Works
@@ -283,7 +306,7 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                 case 'experience':
                     if (!onUpdate && (!data.experience || data.experience.length === 0)) return null;
                     return (
-                        <section key="experience" className="py-24 w-full">
+                        <section key="experience" id="experience" className="py-24 w-full scroll-mt-24">
                            <div className="flex justify-between items-end mb-12 border-b border-white/20 pb-8">
                              <h2 className="text-4xl font-bold uppercase tracking-tighter">Experience</h2>
                               {onUpdate && !readOnly && (
@@ -418,7 +441,7 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                 case 'skills':
                     if (!onUpdate && (!data.skills || data.skills.length === 0)) return null;
                     return (
-                        <section key="skills" className="py-12 w-full border-t border-white/10">
+                        <section key="skills" id="skills" className="py-12 w-full border-t border-white/10 scroll-mt-24">
                            <div className="flex justify-between items-center mb-8">
                              <h3 className="text-sm font-bold text-neutral-500 uppercase tracking-widest">Stack</h3>
                               {onUpdate && !readOnly && (
@@ -465,7 +488,7 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                 case 'education':
                     if (!onUpdate && (!data.education || data.education.length === 0)) return null;
                     return (
-                        <section key="education" className="w-full py-12">
+                        <section key="education" id="education" className="w-full py-12 scroll-mt-24">
                             <div className="flex justify-between items-end mb-12 border-b border-neutral-800 pb-8">
                              <h2 className="text-4xl font-bold uppercase tracking-tighter">Education</h2>
                               {onUpdate && !readOnly && (
@@ -595,7 +618,7 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                     const custom = data.customSections?.find(c => c.id === id);
                     if (custom) {
                         return (
-                             <section key={id} className="mb-48 border-t border-white/20 pt-24">
+                             <section key={id} id={id} className="mb-48 border-t border-white/20 pt-24 scroll-mt-24">
                                 <CustomSectionRenderer 
                                     section={custom} 
                                     index={data.customSections?.indexOf(custom) || 0} 
@@ -610,6 +633,26 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
                     return null;
             }
         })}
+
+
+
+        {onUpdate && !readOnly && (
+            <div className="flex justify-center mb-48 pt-12 print:hidden">
+               <Button variant="outline" onClick={() => {
+                   const newSection = {
+                       id: crypto.randomUUID(),
+                       title: "New Section",
+                       type: "list" as const,
+                       items: []
+                   };
+                   const newSections = [...(data.customSections || []), newSection];
+                   handleUpdate('customSections', newSections);
+               }} className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white">
+                   <Plus className="w-4 h-4 mr-2" />
+                   Add Section
+               </Button>
+            </div>
+        )}
 
         {/* Contact Footer */}
         <section id="contact" className="py-48 flex flex-col items-center justify-center text-center">
@@ -660,37 +703,6 @@ export const VisualTheme = ({ data, onUpdate, readOnly, containerRef, isThumbnai
           </div>
         </section>
 
-        {/* Custom Sections */}
-        {data.customSections?.map((section, index) => (
-             <section key={section.id} className="mb-48 border-t border-white/20 pt-24">
-                <CustomSectionRenderer 
-                    section={section} 
-                    index={index} 
-                    data={data} 
-                    onUpdate={onUpdate} 
-                    theme="visual"
-                    readOnly={readOnly}
-                />
-             </section>
-        ))}
-
-        {onUpdate && !readOnly && (
-            <div className="flex justify-center mb-48 pt-12 print:hidden">
-               <Button variant="outline" onClick={() => {
-                   const newSection = {
-                       id: crypto.randomUUID(),
-                       title: "New Section",
-                       type: "list" as const,
-                       items: []
-                   };
-                   const newSections = [...(data.customSections || []), newSection];
-                   handleUpdate('customSections', newSections);
-               }} className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white">
-                   <Plus className="w-4 h-4 mr-2" />
-                   Add Section
-               </Button>
-            </div>
-        )}
 
       </main>
     </div>

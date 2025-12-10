@@ -48,8 +48,14 @@ export function ResumeEditorPreviewArea({
                 // 1. If Tablet/Mobile, enforce specific widths for ALL themes.
                 // 2. If Desktop, distinguish between "Document" (constrained) and "Web" (full width).
                 
-                viewport === "tablet" && "w-[768px] border-x border-white/10 my-8 rounded-lg overflow-hidden min-h-[800px] bg-white dark:bg-slate-950",
-                viewport === "mobile" && "w-[375px] border-x border-white/10 my-8 rounded-2xl overflow-hidden min-h-[667px] bg-white dark:bg-slate-950",
+                viewport === "tablet" && cn(
+                    "w-[768px] border-x border-white/10 my-8 rounded-lg overflow-hidden min-h-[800px]",
+                    isDocumentTheme(theme) ? "" : "bg-white dark:bg-slate-950" // Document themes handle their own background
+                ),
+                viewport === "mobile" && cn(
+                    "w-[375px] border-x border-white/10 my-8 rounded-2xl overflow-hidden min-h-[667px]",
+                    isDocumentTheme(theme) ? "" : "bg-white dark:bg-slate-950"
+                ),
                 
                 viewport === "desktop" && [
                     // Document Themes: Constrained to A4-ish width

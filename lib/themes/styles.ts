@@ -113,12 +113,15 @@ export const EXPERIENCE_STYLES: ThemeToSectionConfig = {
     }
   },
   visual: {
-     ...DEFAULT_THEME_STYLE, // Visual might have larger fonts
+     ...DEFAULT_THEME_STYLE, 
       styles: {
       ...DEFAULT_THEME_STYLE.styles,
       container: "space-y-12",
-      title: "font-bold text-2xl tracking-tighter text-slate-900 flex-1 min-w-0", // Added flex-1
-      item: "group/item relative border-l-4 border-slate-900 pl-6 py-2",
+      title: "font-bold text-2xl tracking-tighter text-white flex-1 min-w-0",
+      item: "group/item relative border-l-4 border-white/20 pl-6 py-2",
+      description: "text-neutral-300 text-sm leading-relaxed",
+      metadata: "text-sm text-neutral-400 whitespace-nowrap flex gap-1",
+      subtitle: "font-medium text-neutral-400",
     }
   }
 };
@@ -263,7 +266,7 @@ export const SKILLS_STYLES: ThemeToSectionConfig = {
      creative: {
         styles: {
             container: "flex flex-wrap gap-2",
-            item: "px-2 py-1 bg-slate-800 rounded text-xs flex items-center gap-2 hover:bg-slate-700 transition-colors text-slate-300",
+            item: "px-2 py-1 bg-slate-700 rounded text-xs flex items-center gap-2 hover:bg-slate-600 transition-colors text-white",
             header: "hidden", // We might use custom header style or ResumeSection? Creative in Skills had different header look (small upper). 
             // ResumeSection 'creative' header is bold 2xl. Skills was "uppercase tracking-widest text-xs".
             // This implies Skills section in Creative theme MIGHT need its own header style override passed to ResumeSection?
@@ -283,13 +286,13 @@ export const SKILLS_STYLES: ThemeToSectionConfig = {
     studio: { // Fallback/Similar
         styles: {
             container: "flex flex-wrap gap-2",
-            item: "text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 bg-white/10 text-white rounded-full hover:bg-white/20 transition-colors",
+            item: "text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 bg-slate-900/5 text-slate-900 dark:bg-white/10 dark:text-white rounded-full hover:bg-slate-900/10 dark:hover:bg-white/20 transition-colors",
              header: "",
              title: "", 
              subtitle: "",
              metadata: "",
              description: "",
-             deleteButton: "w-4 h-4 text-white/50 hover:text-white bg-transparent p-0 border-none transition-opacity"
+             deleteButton: "w-4 h-4 text-slate-500 hover:text-red-500 dark:text-white/50 dark:hover:text-white bg-transparent p-0 border-none transition-opacity"
         },
         strategy: {
              layout: 'list',
@@ -310,7 +313,7 @@ export const SKILLS_STYLES: ThemeToSectionConfig = {
          ...DEFAULT_THEME_STYLE,
           styles: {
             container: "flex flex-wrap gap-2",
-            item: "text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 border border-slate-900 text-slate-900 rounded-none hover:bg-slate-900 hover:text-white transition-colors",
+            item: "text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 border border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100 rounded-none hover:bg-slate-900 hover:text-white dark:hover:bg-slate-100 dark:hover:text-slate-900 transition-colors",
             header: "", title: "", subtitle: "", metadata: "", description: ""
          }
     }
@@ -362,15 +365,14 @@ export const SUMMARY_STYLES: ThemeToSectionConfig = {
 export const HEADER_STYLES: ThemeToSectionConfig = {
     modern: {
         styles: {
-            container: "mb-8 border-b-2 border-slate-900 pb-6 text-left",
-            title: "font-bold uppercase tracking-tight mb-2 w-full text-4xl",
-            subtitle: "text-lg text-slate-500 mb-4 w-full",
-            metadata: "flex flex-wrap gap-4 text-sm text-slate-500",
+            container: "mb-8 pb-6 text-left border-b border-slate-700/50", // Subtle separator
+            title: "font-bold uppercase tracking-tight mb-2 w-full text-4xl text-white", // White Title
+            subtitle: "text-lg text-slate-300 mb-4 w-full", // Light Subtitle
+            metadata: "flex flex-wrap gap-4 text-sm text-slate-400", // Light Meta
             item: "flex items-center gap-1",
             header: "", description: "" // Unused
         },
         strategy: { layout: 'list', datesPosition: 'inline', alignment: 'left' } 
-        // layout: 'list' works as 'top' logic here
     },
     minimal: {
         styles: {
@@ -430,7 +432,7 @@ export const HEADER_STYLES: ThemeToSectionConfig = {
 }
 
 export function getSectionTheme(theme: string, section: 'experience' | 'projects' | 'education' | 'custom' | 'skills' | 'summary' | 'header'): SectionThemeConfig {
-  if (section === 'experience' || section === 'custom') {
+  if (section === 'experience' || section === 'custom' || section === 'education') {
     return EXPERIENCE_STYLES[theme] || EXPERIENCE_STYLES['modern'];
   }
   if (section === 'projects') {
@@ -465,11 +467,17 @@ export const SECTION_STYLES: Record<string, SectionHeaderStyles> = {
         title: "font-bold uppercase flex items-center gap-2 text-xl",
         addButton: "w-8 h-8 p-0 border-none bg-transparent hover:bg-slate-100 text-slate-500"
     },
+    'modern-sidebar': {
+        wrapper: "mb-8 text-left text-white", // White wrapper text default for sidebar
+        header: "flex justify-between items-center mb-4 border-b pb-2 border-slate-700/50",
+        title: "font-bold uppercase flex items-center gap-2 text-sm tracking-widest text-white/90", // Elegant Sidebar Header
+        addButton: "w-6 h-6 p-0 border-none bg-transparent hover:bg-white/10 text-slate-400"
+    },
     minimal: {
         wrapper: "mb-8 text-left text-slate-900",
-        header: "flex justify-center items-center mb-6 border-b pb-2 border-slate-200", // Center align header
+        header: "flex justify-center items-center mb-6 border-b pb-2 border-slate-200 relative", // Center align header
         title: "font-bold uppercase flex items-center gap-2 text-sm tracking-widest text-center w-full border-none justify-center", // Centered title
-        addButton: "absolute right-0 top-0 w-8 h-8 p-0 border-none bg-transparent hover:bg-slate-100 text-slate-500" // Maybe absolute? Minimal usually hides add button from header or puts it below?
+        addButton: "absolute right-8 top-0 w-8 h-8 p-0 border-none bg-transparent hover:bg-slate-100 text-slate-500" // Maybe absolute? Minimal usually hides add button from header or puts it below?
         // Original code didn't strictly handle Add Button position for minimal in header well, let's keep it simple or hide it.
         // Actually the Add Button in header is mainly for custom sections or if explicit.
         // Let's stick to a safe default.
@@ -481,6 +489,13 @@ export const SECTION_STYLES: Record<string, SectionHeaderStyles> = {
         addButton: "border-slate-200",
         decoration: true // Uses the darker dot/dash
     },
+    'creative-sidebar': {
+         wrapper: "mb-8 text-left text-white",
+         header: "flex justify-between items-center mb-6 border-b pb-2 border-slate-700/50",
+         title: "font-bold uppercase flex items-center gap-2 text-sm tracking-[0.2em] text-white", // Premium tracking
+         addButton: "border-slate-700 hover:bg-slate-700 text-slate-300 w-6 h-6",
+         // decoration removed for sidebar alignment
+    },
     studio: {
         wrapper: "mb-8 text-left",
         header: "flex justify-between items-center mb-6 border-none pb-0", // No border
@@ -490,8 +505,8 @@ export const SECTION_STYLES: Record<string, SectionHeaderStyles> = {
     visual: {
         wrapper: "mb-12 text-left",
         header: "flex justify-between items-center mb-8 border-none pb-0",
-        title: "font-bold uppercase flex items-center gap-2 text-4xl md:text-6xl tracking-tighter text-slate-900",
-        addButton: "bg-transparent text-slate-400 border-slate-200 hover:bg-slate-50"
+        title: "font-bold uppercase flex items-center gap-2 text-4xl md:text-6xl tracking-tighter text-white", // Solid White
+        addButton: "bg-transparent text-neutral-400 border-neutral-700 hover:bg-neutral-800"
     },
     portfolio: {
         wrapper: "mb-8 text-left text-slate-900",

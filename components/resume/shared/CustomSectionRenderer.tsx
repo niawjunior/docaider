@@ -60,7 +60,7 @@ export function CustomSectionRenderer({
                     <InlineEdit readOnly={readOnly || !onUpdate}
                         value={section.title}
                         onSave={(val) => handleUpdateSection({ ...section, title: val })}
-                        className="bg-transparent"
+                        className="bg-transparent w-full break-normal" // Allow full width, standard break
                         path={`customSections[${index}].title`}
                     />
                 </div>

@@ -45,10 +45,36 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
            {/* Static Logo from Name */}
           {(data.personalInfo.fullName ?? '').split(' ')[0]}
         </div>
-        <div className="flex gap-6 text-sm font-medium uppercase tracking-widest hidden sm:flex">
-          <a href="#work" className="hover:underline decoration-2 underline-offset-4">Work</a>
-          <a href="#about" className="hover:underline decoration-2 underline-offset-4">About</a>
-          <a href="#contact" className="hover:underline decoration-2 underline-offset-4">Contact</a>
+          <div className="flex gap-6 text-sm font-medium uppercase tracking-widest hidden sm:flex">
+             {/* Map dynamic sections */}
+             {(data.sectionOrder && data.sectionOrder.length > 0 ? data.sectionOrder : ["summary", "skills", "projects", "experience", "education"]).map(sectionId => {
+                 const isCustom = data.customSections?.find(c => c.id === sectionId);
+                 const isStandard = ['summary', 'experience', 'projects', 'education', 'skills', 'about', 'contact'].includes(sectionId);
+                 
+                 if (!isCustom && !isStandard) return null;
+
+                 // Map 'summary' to 'About' label if desired, or keep as is.
+                 // Studio theme had 'Work', 'About', 'Contact'.
+                 // Let's stick to section names for clarity in dynamic mode.
+                 let label = isCustom ? isCustom.title : sectionId;
+                 let href = `#${sectionId}`;
+                 
+                 if (sectionId === 'summary') {
+                     label = 'About';
+                     href = '#about';
+                 }
+                 if (sectionId === 'projects') {
+                     label = 'Work';
+                     href = '#work';
+                 }
+
+                 return (
+                     <a key={sectionId} href={href} className="hover:underline decoration-2 underline-offset-4 capitalize">
+                         {label}
+                     </a>
+                 );
+             })}
+             <a href="#contact" className="hover:underline decoration-2 underline-offset-4">Contact</a>
         </div>
       </nav>
 
@@ -98,8 +124,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                           initial={{ opacity: 0, y: 50 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.8 }}
-                          className="py-24 max-w-4xl border-t border-neutral-800"
-                          id="about"
+                          className="py-24 max-w-4xl border-t border-neutral-800 scroll-mt-24"
+                          id="about" // Summary acts as About
                         >
                            <div className="text-4xl md:text-6xl font-bold leading-tight mb-8">
                              <InlineEdit readOnly={readOnly || !onUpdate}
@@ -120,7 +146,8 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                     return (
                         <motion.section 
                             key="skills"
-                            className="py-12 max-w-4xl border-t border-neutral-800"
+                            id="skills"
+                            className="py-12 max-w-4xl border-t border-neutral-800 scroll-mt-24"
                             initial={{ opacity: 0 }}
                             whileInView={{ opacity: 1 }}
                             viewport={{ once: true }}
@@ -133,19 +160,19 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                          label=""
                                          className="w-6 h-6 p-0 bg-transparent hover:bg-neutral-800 text-white border-neutral-800 hover:text-white"
                                          onClick={() => {
-                                              const newSkills = [...data.skills, "New Skill"];
+                                              const newSkills = [...(data.skills || []), "New Skill"];
                                               handleUpdate('skills', newSkills);
                                          }}
                                        />
                                  )}
                               </div>
                              <div className="flex flex-wrap gap-4">
-                                 {data.skills.map((skill, i) => (
+                                 {(data.skills || []).map((skill, i) => (
                                  <span key={i} className="group/skill relative inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 text-sm tracking-wider uppercase">
                                       <InlineEdit readOnly={readOnly || !onUpdate}
                                          value={skill}
                                          onSave={(val) => {
-                                             const newSkills = [...data.skills];
+                                             const newSkills = [...(data.skills || [])];
                                              newSkills[i] = val;
                                              handleUpdate('skills', newSkills);
                                          }}
@@ -154,7 +181,7 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                                        {onUpdate && !readOnly && (
                                          <ThemeDeleteButton
                                              onClick={() => {
-                                                 const newSkills = [...data.skills];
+                                                 const newSkills = [...(data.skills || [])];
                                                  newSkills.splice(i, 1);
                                                  handleUpdate('skills', newSkills);
                                              }}
@@ -277,7 +304,7 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                 case 'experience':
                     if (!onUpdate && (!data.experience || data.experience.length === 0)) return null;
                     return (
-                        <section key="experience" className="py-24 border-t border-neutral-800">
+                        <section key="experience" id="experience" className="py-24 border-t border-neutral-800 scroll-mt-24">
                              <div className="flex justify-between items-end mb-16">
                                 <h2 className="text-4xl font-bold uppercase tracking-tight">
                                     Experience
@@ -395,7 +422,7 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                     // Add Education Section for Studio Theme
                     if (!onUpdate && (!data.education || data.education.length === 0)) return null;
                     return (
-                        <section key="education" className="py-24 border-t border-neutral-800">
+                        <section key="education" id="education" className="py-24 border-t border-neutral-800 scroll-mt-24">
                              <div className="flex justify-between items-end mb-16">
                                 <h2 className="text-4xl font-bold uppercase tracking-tight">
                                     Education
@@ -491,7 +518,7 @@ export const StudioTheme = ({ data, onUpdate, readOnly }: StudioThemeProps) => {
                     const custom = data.customSections?.find(c => c.id === id);
                     if (custom) {
                         return (
-                             <section key={id} className="py-24 border-t border-neutral-800">
+                             <section key={id} id={id} className="py-24 border-t border-neutral-800 scroll-mt-24">
                                 <CustomSectionRenderer
                                     section={custom}
                                     index={data.customSections?.indexOf(custom) || 0}
