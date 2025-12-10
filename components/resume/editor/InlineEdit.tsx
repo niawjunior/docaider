@@ -1,10 +1,10 @@
-"use client";
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { ScrambleText } from "@/components/ui/scramble-text";
 
 import { useEditorContext } from "@/components/resume/editor/EditorContext";
+import { useSelectionMonitor } from "./hooks/useSelectionMonitor";
+import { useSmartInput } from "./hooks/useSmartInput";
 
 interface InlineEditProps extends React.HTMLAttributes<HTMLElement> {
   value: string | undefined | null;
@@ -31,14 +31,12 @@ export function InlineEdit({
   const contentRef = React.useRef<HTMLElement>(null);
   const [isEditing, setIsEditing] = React.useState(false);
   
-  // Use context safely (it might not be available in some contexts like preview modal)
-  // Use context safely (it might not be available in some contexts like preview modal)
+  // Use context safely
   let contextSafe: any = null;
   try {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
       contextSafe = useEditorContext();
   } catch (e) {
-      // Context not present, ignore
+      // Ignore
   }
 
   const setFocusedField = contextSafe?.setFocusedField;
@@ -50,32 +48,29 @@ export function InlineEdit({
   const setLockedField = contextSafe?.setLockedField;
   const lockedField = contextSafe?.lockedField;
 
-  // Monitor selection changes when editing
-  React.useEffect(() => {
-     if (!isEditing || !setHasSelection) return;
+  // 1. Monitor Selection
+  useSelectionMonitor({
+      isEditing,
+      setHasSelection,
+      contentRef
+  });
 
-     const checkSelection = () => {
-         const selection = window.getSelection();
-         const hasContent = selection && 
-                            !selection.isCollapsed && 
-                            selection.toString().trim().length > 0 &&
-                            contentRef.current && 
-                            contentRef.current.contains(selection.anchorNode);
-        
-         setHasSelection(!!hasContent);
-     };
+  // 2. Smart Input Handling
+  const { handleBlur, handleFocus, handleKeyDown, handlePaste } = useSmartInput({
+      value,
+      multiline,
+      readOnly,
+      path,
+      onSave,
+      contentRef,
+      setIsEditing,
+      setAiOpen,
+      setLockedField,
+      setFocusedField,
+      setHasSelection
+  });
 
-     document.addEventListener('selectionchange', checkSelection);
-     // Initial check
-     checkSelection();
-
-     return () => {
-         document.removeEventListener('selectionchange', checkSelection);
-         setHasSelection && setHasSelection(false);
-     };
-  }, [isEditing, setHasSelection]);
-
-  // Sync value to DOM when not editing to ensure external updates are reflected
+  // Sync value to DOM when not editing
   React.useEffect(() => {
     if (contentRef.current && !isEditing) {
         const currentText = contentRef.current.innerText;
@@ -85,126 +80,16 @@ export function InlineEdit({
     }
   }, [value, isEditing]);
 
-  const handleBlur = () => {
-    if (readOnly) return;
-    setIsEditing(false);
-    if (setHasSelection) setHasSelection(false);
-    if (contentRef.current) {
-      // Use textContent for single-line to avoid CSS artifacts (like text-transform), 
-      // but fallback to innerText for multiline to preserve line breaks correctly.
-      let newValue = !multiline 
-        ? (contentRef.current.textContent || "") 
-        : contentRef.current.innerText;
-      
-      const normalize = (str: string) => {
-          return str
-            .replace(/\u00A0/g, " ") // NBSP -> Space
-            .replace(/[\r\n]+/g, multiline ? "\n" : "") // Handle newlines
-            .replace(/[ \t]+/g, " ") // Collapse horizontal whitespace
-            .trim();
-      };
-
-      const normalizedNew = normalize(newValue);
-      const normalizedOld = normalize(value || "");
-
-      // 1. If normalized values match, it's a phantom change (whitespace spacing) -> Ignore.
-      if (normalizedNew === normalizedOld) {
-          // Optional: Revert DOM to exact value to prevent drift, though visually identical
-          if (contentRef.current.innerText !== (value || "")) {
-             contentRef.current.innerText = value || "";
-          }
-          return;
-      }
-
-      // 2. If genuine change, allow it.
-      // But verify we aren't sending literally the same string (redundant to point 1 but safe)
-      if (newValue !== (value || "")) {
-         // Prefer saving the sanitized/trimmed version if mostly whitespace
-         // But preserving user intent if they typed specifically.
-         // Actually, for Resume, normalized is usually better.
-         // Let's save the normalized version to clean up the DB.
-         onSave(normalizedNew); 
-         // Note: we save 'normalizedNew' instead of 'newValue' to enforce cleanliness.
-      }
-    }
-  };
-
-  const handleFocus = () => {
-      if (readOnly) return;
-      setIsEditing(true);
-      if (path && setFocusedField) {
-          setFocusedField(path);
-      }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (readOnly) return;
-    
-    // Quick AI Trigger: Press Space on empty field
-    // Check actual DOM content because 'value' prop might be stale while editing
-    const currentText = contentRef.current?.innerText || "";
-    // Normalize to handle potential zero-width spaces or newlines that appear empty
-    const isVisuallyEmpty = currentText.replace(/[\u200B\u00A0\n\r]/g, "").trim() === "";
-
-    if (e.key === " " && isVisuallyEmpty) {
-        e.preventDefault();
-        if (setAiOpen && setLockedField && path) {
-            setLockedField(path);
-            setAiOpen(true);
-        }
-        return;
-    }
-
-    if (e.key === "Enter" && !multiline) {
-      e.preventDefault();
-      contentRef.current?.blur();
-    }
-    if (e.key === "Escape") {
-      e.preventDefault();
-      // Revert content
-      if (contentRef.current) {
-          contentRef.current.innerText = value || "";
-          contentRef.current.blur();
-      }
-      setIsEditing(false);
-      if (setAiOpen) setAiOpen(false);
-    }
-  };
-
-  // Sanitize paste to prevent HTML injection
-  const handlePaste = (e: React.ClipboardEvent) => {
-      if (readOnly) {
-          e.preventDefault();
-          return;
-      }
-      e.preventDefault();
-      const text = e.clipboardData.getData("text/plain");
-      // Insert text at cursor position
-      const selection = window.getSelection();
-      if (!selection || !selection.rangeCount) return;
-      
-      const range = selection.getRangeAt(0);
-      range.deleteContents();
-      const textNode = document.createTextNode(text);
-      range.insertNode(textNode);
-      
-      // Move cursor to end of inserted text
-      range.setStartAfter(textNode);
-      range.setEndAfter(textNode);
-      selection.removeAllRanges();
-      selection.addRange(range);
-  };
-  
   const isLocked = !readOnly && path && lockedField === path;
 
   const commonClasses = cn(
     "outline-none min-w-[20px] inline-block transition-all duration-200 border border-transparent",
-    // Base state (interactive vs read-only)
+    // Base state
     !readOnly && "px-1 -mx-1 rounded cursor-text", 
     !readOnly && "hover:border-blue-500/50 hover:bg-blue-500/5",
     !readOnly && "focus:ring-1 focus:ring-blue-500/30",
     
-    // Locked/Active state (AI Popup open)
+    // Locked/Active state
     isLocked && "ring-1 ring-blue-500/30 bg-blue-500/5 border-blue-500/50",
     
     // Placeholder state
@@ -233,7 +118,7 @@ export function InlineEdit({
             className={commonClasses}
             onClick={props.onClick}
             loop={scrambleLoop}
-            duration={scrambleLoop ? 0 : 800} // If looping, don't enforce extra duration
+            duration={scrambleLoop ? 0 : 800}
             {...props}
           />
       );
