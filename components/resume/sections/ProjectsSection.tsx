@@ -1,3 +1,4 @@
+
 import { ResumeData } from "@/lib/schemas/resume";
 import { cn } from "@/lib/utils";
 import { InlineEdit } from "@/components/resume/editor/InlineEdit";
@@ -6,16 +7,21 @@ import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
 import { ResumeSectionList } from "@/components/resume/shared/ResumeSectionList";
 import { ResumeSection } from "@/components/resume/shared/ResumeSection";
 import { EmptySectionPlaceholder } from "@/components/resume/shared/EmptySectionPlaceholder";
+import { getSectionTheme } from "@/lib/themes/styles";
 
 interface ProjectsSectionProps {
     data: ResumeData;
-    theme: "modern" | "minimal" | "creative" | "portfolio" | "studio" | "visual";
+    theme: string;
     onUpdate?: (data: ResumeData) => void;
     readOnly?: boolean;
 }
 
 export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSectionProps) {
     const { updateSection } = useResumeUpdate(data, onUpdate);
+
+    // Get Theme Config
+    const config = getSectionTheme(theme, 'projects');
+    const { styles, strategy } = config;
 
     if (!onUpdate && (!data.projects || data.projects.length === 0)) {
         return null;
@@ -31,7 +37,7 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
     return (
         <ResumeSection
             title="Projects"
-            theme={theme}
+            theme={theme} // Still passed for fallback or specialized hook usage inside ResumeSection
             onAdd={onUpdate && !readOnly ? () => {
                 const newProj = [{
                     id: crypto.randomUUID(),
@@ -61,56 +67,30 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                     data={data.projects}
                     onUpdate={handleUpdate}
                     readOnly={readOnly}
-                    className={cn(
-                        "grid gap-4",
-                        theme === "modern" && "grid-cols-1",
-                        theme === "portfolio" && "grid-cols-1 md:grid-cols-2",
-                        theme === "creative" && "space-y-8 border-l-2 border-slate-100 pl-6 ml-1 block"
-                    )}
-                    strategy={theme === "portfolio" ? "rect" : "vertical"}
+                    className={styles.container}
+                    strategy={strategy.layout === 'grid' ? 'rect' : 'vertical'}
                     renderItem={(project, i, updateItem, deleteItem) => (
-                        <div className={cn(
-                            "break-inside-avoid space-y-2 group/item relative min-w-0",
-                            theme === "modern" && "p-4 bg-slate-50 rounded-lg border border-slate-100 hover:border-slate-200 transition-all",
-                            theme === "portfolio" && "p-0",
-                            theme === "minimal" && "text-center mb-6"
-                        )} key={project.id || i}>
+                        <div className={cn("min-w-0", styles.item)} key={project.id || i}>
                            {/* Creative Theme Dot */}
-                            {theme === "creative" && (
+                           {strategy.showDecorations && (
                                 <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-slate-900 border-4 border-white" />
                             )}
     
-                            <div className={cn(
-                                "flex justify-between items-start gap-3",
-                                theme === "minimal" && "flex-col items-center relative"
-                            )}>
-                                 <h3 className={cn(
-                                    "font-bold text-slate-900",
-                                    theme === "modern" && "text-base",
-                                    theme === "portfolio" && "text-lg",
-                                    theme === "portfolio" && "text-lg",
-                                    theme === "creative" && "text-lg",
-                                    theme === "studio" && "text-xl tracking-tight text-white",
-                                 )}>
+                            <div className={styles.header}>
+                                 <h3 className={styles.title}>
                                         <InlineEdit readOnly={readOnly || !onUpdate} 
                                         value={project.name?.content} 
                                         placeholder="Project Name"
-                                        className={cn(
-                                            "bg-transparent",
-                                            theme === "minimal" && "w-full block"
-                                        )}
+                                        className="bg-transparent"
                                         onSave={(val) => updateItem({ name: { ...project.name, content: val } })}
                                         path={`projects[${i}].name.content`}
-                                        alignment={project.name?.alignment || (theme === "minimal" ? "center" : undefined)}
+                                        alignment={project.name?.alignment || (strategy.alignment === "center" ? "center" : undefined)}
                                     />
                                  </h3>
                                  
-                                 <div className={cn(
-                                     "flex items-center gap-2",
-                                     theme === "minimal" ? "w-full justify-center mt-1" : "shrink-0"
-                                 )}>
+                                 <div className={cn("flex items-center gap-2", theme === "minimal" && "w-full justify-center")}>
                                     {project.url && (
-                                       <a href={project.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline text-sm truncate max-w-[150px]">
+                                       <a href={project.url} target="_blank" rel="noopener noreferrer" className={styles.metadata}>
                                              <InlineEdit readOnly={readOnly || !onUpdate} 
                                             value={project.url} 
                                             placeholder="URL"
@@ -121,36 +101,27 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                                     
                                      {onUpdate && !readOnly && (
                                          <ThemeDeleteButton
-                                            className={cn(
-                                              "bg-transparent hover:bg-red-50 text-slate-400 hover:text-red-500 p-1 w-6 h-6 border-none transition-opacity",
-                                              theme === "minimal" && "absolute right-0 top-0",
-                                              theme === "studio" && "text-red-400 hover:bg-white/10 ml-2 relative top-0 right-0"
-                                            )}
+                                            className={styles.deleteButton || "bg-transparent hover:bg-red-50 text-slate-400 hover:text-red-500 p-1 w-6 h-6 border-none transition-opacity"}
                                             onClick={deleteItem}
                                          />
                                      )}
                                  </div>
                             </div>
     
-                            <div className={cn(
-                                "text-slate-600 text-sm leading-relaxed",
-                                theme === "minimal" && "text-center",
-                                theme === "studio" && "text-neutral-400"
-                            )}>
+                            <div className={styles.description}>
                                  <InlineEdit readOnly={readOnly || !onUpdate} 
-                                    value={project.description?.content}
+                                    value={project.description?.content} 
                                     placeholder="Project description" 
                                     multiline
                                     onSave={(val) => updateItem({ description: { ...project.description, content: val } })}
                                     path={`projects[${i}].description.content`}
-                                    alignment={project.description?.alignment || (theme === "minimal" ? "center" : undefined)}
-                                    className={cn(theme === "minimal" && "w-full block")}
+                                    alignment={project.description?.alignment || (strategy.alignment === "center" ? "center" : undefined)}
                                 />
                             </div>
                             
                              <div className={cn(
                                  "flex flex-wrap gap-1 mt-2",
-                                 theme === "minimal" && "justify-center"
+                                 strategy.alignment === "center" && "justify-center"
                              )}>
                                 {(project.technologies || []).map((tech, tIndex) => (
                                     <span key={tIndex} className="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full flex items-center gap-1">

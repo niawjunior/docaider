@@ -1,3 +1,4 @@
+
 import { ResumeData } from "@/lib/schemas/resume";
 import { cn } from "@/lib/utils";
 import { InlineEdit } from "@/components/resume/editor/InlineEdit";
@@ -6,16 +7,27 @@ import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
 import { ResumeSectionList } from "@/components/resume/shared/ResumeSectionList";
 import { ResumeSection } from "@/components/resume/shared/ResumeSection";
 import { EmptySectionPlaceholder } from "@/components/resume/shared/EmptySectionPlaceholder";
+import { getSectionTheme } from "@/lib/themes/styles";
 
 interface EducationSectionProps {
     data: ResumeData;
-    theme: "modern" | "minimal" | "creative" | "portfolio" | "studio" | "visual";
+    theme: string;
     onUpdate?: (data: ResumeData) => void;
     readOnly?: boolean;
 }
 
 export function EducationSection({ data, theme, onUpdate, readOnly }: EducationSectionProps) {
     const { updateSection } = useResumeUpdate(data, onUpdate);
+    
+    // Get Theme Config
+    // Education uses the 'Experience' styles usually (List format), but we map it as 'education' to allow future divergence if needed, 
+    // or rely on the fallback in styles.ts which currently maps 'education' usually to experience styles or similar.
+    // In styles.ts we mapped 'education' explicitly check inside getSectionTheme?
+    // Actually getSectionTheme signature is currently: section: 'experience' | 'projects' | 'education' | 'custom'
+    // And implementation returns EXPERIENCE_STYLES for implicit education fallthrough or if I add it explicitly.
+    // Let's assume it maps to EXPERIENCE_STYLES as per my previous edit or default.
+    const config = getSectionTheme(theme, 'education');
+    const { styles, strategy } = config;
 
     if (!onUpdate && (!data.education || data.education.length === 0)) {
         return null;
@@ -62,42 +74,30 @@ export function EducationSection({ data, theme, onUpdate, readOnly }: EducationS
                     data={data.education}
                     onUpdate={handleUpdate}
                     readOnly={readOnly}
-                    className="space-y-4"
+                    className={styles.container}
                     renderItem={(edu, index, updateItem, deleteItem) => (
-                        <div className={cn(
-                            "group/edu relative",
-                            theme !== "creative" && "hover:bg-slate-50 p-2 -mx-2 rounded transition-colors",
-                            theme === "minimal" && "text-center"
-                        )}>
-                            <div className={cn(
-                                "flex justify-between items-start mb-1 gap-4",
-                                theme === "minimal" && "flex-col items-center text-center relative"
-                            )}>
-                                <h3 className={cn(
-                                    "font-bold",
-                                    theme !== "creative" && "w-full",
-                                    theme === "studio" ? "text-white text-xl tracking-tight" : "text-slate-900"
-                                )}>
+                        <div className={styles.item}>
+                            {/* Decoration (Creative Dot) */}
+                            {strategy.showDecorations && (
+                                <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-slate-900 border-4 border-white" />
+                            )}
+
+                            <div className={styles.header}>
+                                <h3 className={styles.title}>
                                     <InlineEdit
                                         readOnly={readOnly || !onUpdate}
                                         value={edu.institution?.content} 
                                         placeholder="Institution"
-                                        className={cn(theme === "minimal" && "w-full block")}
+                                        className="bg-transparent"
                                         onSave={(val: string) => updateItem({ institution: { ...edu.institution, content: val } })}
                                         path={`education[${index}].institution.content`}
-                                        alignment={edu.institution?.alignment || (theme === "minimal" ? "center" : undefined)}
+                                        alignment={edu.institution?.alignment || (strategy.alignment === "center" ? "center" : undefined)}
                                     />
                                 </h3>
                                 
-                                <div className={cn(
-                                    "flex items-center gap-2",
-                                    theme === "minimal" ? "w-full justify-center mt-1" : "shrink-0"
-                                )}>
-                                    {theme !== "creative" && (
-                                        <div className={cn(
-                                            "text-sm flex gap-1 whitespace-nowrap",
-                                            theme === "studio" ? "text-neutral-400" : "text-slate-500"
-                                        )}>
+                                <div className={cn("flex items-center gap-2", theme === "minimal" && "w-full justify-center")}>
+                                     {strategy.datesPosition === 'inline' && (
+                                        <div className={styles.metadata}>
                                             <InlineEdit readOnly={readOnly || !onUpdate} 
                                                 value={edu.startDate?.content} 
                                                 placeholder="Start"
@@ -118,25 +118,23 @@ export function EducationSection({ data, theme, onUpdate, readOnly }: EducationS
 
                                      {onUpdate && !readOnly && (
                                         <ThemeDeleteButton
-                                            className={cn(
-                                                "text-red-500 hover:bg-red-50 rounded bg-transparent border-none shadow-none w-6 h-6 p-1 transition-opacity",
-                                                theme === "minimal" && "absolute right-0 top-0",
-                                                theme === "studio" && "text-red-400 hover:bg-white/10 ml-2"
-                                            )}
+                                            className={styles.deleteButton || "text-red-500 hover:bg-red-50 rounded bg-transparent border-none shadow-none w-6 h-6 p-1"}
                                             onClick={deleteItem}
                                         />
                                      )}
                                 </div>
                             </div>
                             
+                            {/* Subtitle / Degree Wrapper */}
                             <div className={cn(
-                                "text-slate-600 flex gap-1",
-                                theme === "minimal" && "justify-center",
-                                theme === "studio" && "text-neutral-500"
+                                styles.subtitle,
+                                "flex flex-wrap gap-1", // Ensure degree parts flow together
+                                strategy.alignment === 'center' ? "justify-center" : ""
                             )}>
                                  <InlineEdit readOnly={readOnly || !onUpdate} 
                                      value={edu.degree?.content} 
                                      placeholder="Degree"
+                                     className="bg-transparent"
                                      onSave={(val) => updateItem({ degree: { ...edu.degree, content: val } })}
                                      path={`education[${index}].degree.content`}
                                      alignment={edu.degree?.alignment || undefined}
@@ -145,6 +143,7 @@ export function EducationSection({ data, theme, onUpdate, readOnly }: EducationS
                                 <InlineEdit readOnly={readOnly || !onUpdate} 
                                      value={edu.fieldOfStudy?.content} 
                                      placeholder="Field of Study"
+                                     className="bg-transparent"
                                      onSave={(val) => updateItem({ fieldOfStudy: { ...edu.fieldOfStudy, content: val } })}
                                      path={`education[${index}].fieldOfStudy.content`}
                                      alignment={edu.fieldOfStudy?.alignment || undefined}
@@ -152,8 +151,8 @@ export function EducationSection({ data, theme, onUpdate, readOnly }: EducationS
                             </div>
                             
                             {/* Creative Theme Date Location */}
-                            {theme === "creative" && (
-                                <div className="text-xs text-slate-400 mt-1 uppercase tracking-wider flex gap-1">
+                            {strategy.datesPosition === 'below-title' && (
+                                <div className={styles.metadata}>
                                     <InlineEdit readOnly={readOnly || !onUpdate} 
                                         value={edu.startDate?.content} 
                                         placeholder="Start"

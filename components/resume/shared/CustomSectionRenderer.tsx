@@ -1,11 +1,13 @@
+
 import { ResumeData } from "@/lib/schemas/resume";
 import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
 import { ThemeAddButton, ThemeDeleteButton } from "@/components/resume/themes/ThemeControls";
 import { InlineEdit } from "@/components/resume/editor/InlineEdit";
 import { ResumeSectionList } from "./ResumeSectionList";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import { EmptySectionPlaceholder } from "./EmptySectionPlaceholder";
+import { ResumeSection } from "./ResumeSection";
+import { getSectionTheme } from "@/lib/themes/styles";
 
 interface CustomSectionRendererProps {
     section: NonNullable<ResumeData['customSections']>[number];
@@ -23,10 +25,14 @@ export function CustomSectionRenderer({
     data, 
     onUpdate, 
     className,
-    theme,
+    theme = "modern",
     readOnly
 }: CustomSectionRendererProps) {
     const { updateField } = useResumeUpdate(data, onUpdate);
+    
+    // Get Theme Config
+    const config = getSectionTheme(theme, 'custom');
+    const { styles, strategy } = config;
 
     const handleUpdateSection = (updatedSection: typeof section) => {
         const newSections = [...(data.customSections || [])];
@@ -46,59 +52,41 @@ export function CustomSectionRenderer({
     }
 
     return (
-        <div className={cn("relative group/section mb-12", className)}>
-             <div className="flex justify-between items-center mb-6 border-b border-slate-200 pb-2">
-                <h2 className={cn(
-                    "font-bold uppercase flex-1 flex items-center gap-2",
-                    theme === "creative" && "text-2xl text-slate-900",
-                    theme === "modern" && "text-xl text-slate-900 border-none pb-0", 
-                    theme === "minimal" && "text-sm tracking-widest text-center text-slate-900",
-                    theme === "studio" && "text-4xl tracking-tight border-none pb-0",
-                    theme === "visual" && "text-4xl md:text-6xl tracking-tighter border-none pb-0",
-                    theme === "portfolio" && "text-2xl text-slate-900",
-                )}>
-                    {theme === "creative" && <span className="w-8 h-1 bg-slate-900 block" />}
+        <ResumeSection
+            theme={theme}
+            className={cn("group/section", className)}
+            title={
+                <div className="flex-1">
                     <InlineEdit readOnly={readOnly || !onUpdate}
                         value={section.title}
                         onSave={(val) => handleUpdateSection({ ...section, title: val })}
                         className="bg-transparent"
                         path={`customSections[${index}].title`}
                     />
-                </h2>
-                 {onUpdate && !readOnly && (
-                    <div className="flex items-center gap-2">
-                         <ThemeAddButton 
-                            label={theme !== "minimal" ? "Add Item" : ""}
-                            className={cn(
-                                "flex-none",
-                                (theme === "modern" || theme === "minimal") && "bg-transparent text-slate-500 hover:bg-slate-100",
-                                theme === "studio" && "bg-transparent text-white border-white/20 hover:bg-white/10",
-                                theme === "visual" && "bg-transparent text-white border-white/20 hover:bg-white/10"
-                            )}
-                            onClick={() => {
-                                const createItem = () => ({
-                                    id: crypto.randomUUID(),
-                                    title: { content: "New Item" },
-                                    subtitle: section.type === "list" ? { content: "Subtitle" } : { content: "" },
-                                    content: { content: "Description or content goes here..." },
-                                    alignment: undefined // Default
-                                });
-                                
-                                const newItems = [createItem(), ...(section.items || [])];
-                                handleUpdateSection({ ...section, items: newItems });
-                            }} 
-                        />
-                        <ThemeDeleteButton 
-                            onClick={handleDeleteSection}
-                            className={cn(
-                                "bg-red-50 text-red-600 hover:bg-red-100 border-red-200",
-                                (theme === "studio" || theme === "visual") && "bg-red-900/20 text-red-400 border-none hover:bg-red-900/50"
-                            )}
-                        />
-                    </div>
-                )}
-            </div>
-
+                </div>
+            }
+            actions={onUpdate && !readOnly && (
+                 <ThemeDeleteButton 
+                    onClick={handleDeleteSection}
+                    className={cn(
+                        styles.deleteButton || "bg-transparent text-slate-400 hover:text-red-500 p-1 border-none"
+                    )}
+                />
+            )}
+            onAdd={onUpdate && !readOnly ? () => {
+                 const createItem = () => ({
+                    id: crypto.randomUUID(),
+                    title: { content: "New Item" },
+                    subtitle: section.type === "list" ? { content: "Subtitle" } : { content: "" },
+                    content: { content: "Description or content goes here..." },
+                    alignment: undefined // Default
+                });
+                
+                const newItems = [createItem(), ...(section.items || [])];
+                handleUpdateSection({ ...section, items: newItems });
+            } : undefined}
+        >
+            
             {(!section.items || section.items.length === 0) && onUpdate && !readOnly ? (
                  <EmptySectionPlaceholder 
                     message={`Add items to ${section.title}`}
@@ -111,84 +99,68 @@ export function CustomSectionRenderer({
                         }, ...(section.items || [])];
                         handleUpdateSection({ ...section, items: newItems });
                     }}
-                    className={cn(
-                         (theme === "studio" || theme === "visual") && "bg-transparent border-white/20 text-white hover:border-white/40"
-                    )}
+                    className="mt-4"
                 />
             ) : (
                 <ResumeSectionList
                   data={section.items}
                   readOnly={readOnly}
                   onUpdate={(val) => handleUpdateSection({ ...section, items: val })}
-                  className={cn(
-                      "space-y-6", 
-                      section.type === "list" && "grid gap-6",
-                      // Theme specific grid adjustments could go here if needed
-                  )}
+                  className={styles.container}
                   renderItem={(item, i, updateItem, deleteItem) => (
-                    <div className={cn(
-                        "relative group/item",
-                        theme === "portfolio" && "bg-white p-6 rounded-xl shadow-sm border border-slate-100",
-                        (theme === "studio" || theme === "visual") && "border-l border-white/20 pl-6 ml-2"
-                    )}>
-                         {onUpdate && (
-                             <ThemeDeleteButton 
-                                className="absolute right-0 top-0 z-10 opacity-0 group-hover/item:opacity-100 transition-opacity"
-                                onClick={deleteItem}
-                             />
+                    <div className={cn("min-w-0", styles.item)} key={item.id || i}>
+                        {strategy.showDecorations && (
+                            <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-slate-900 border-4 border-white" />
                         )}
-                        
-                        {/* Title & Subtitle */}
-                        <div className="mb-2">
-                             <div className={cn(
-                                 "font-bold text-lg",
-                                 (theme === "studio" || theme === "visual") ? "text-white" : "text-slate-900"
-                             )}>
+
+                        <div className={styles.header}>
+                             <div className={styles.title}> {/* Flex box sometimes */}
                                  <InlineEdit readOnly={readOnly || !onUpdate}
                                     value={item.title?.content}
                                     placeholder="Title"
+                                    className="bg-transparent"
                                     onSave={(val) => updateItem({ title: { ...item.title, content: val } })}
                                     path={`customSections[${index}].items[${i}].title.content`}
-                                    alignment={item.title?.alignment || undefined}
-                                    className="bg-transparent"
+                                    alignment={item.title?.alignment || (strategy.alignment === "center" ? "center" : undefined)}
                                  />
                              </div>
+                             
                              {section.type === "list" && (
-                                 <div className={cn(
-                                     "text-sm font-medium",
-                                      (theme === "studio" || theme === "visual") ? "text-neutral-400" : (theme === "minimal" ? "text-slate-700" : "text-blue-600")
-                                 )}>
+                                 <div className={styles.subtitle}>
                                      <InlineEdit readOnly={readOnly || !onUpdate}
                                         value={item.subtitle?.content}
                                         placeholder="Subtitle"
+                                        className="bg-transparent"
                                         onSave={(val) => updateItem({ subtitle: { ...item.subtitle, content: val } })}
                                         path={`customSections[${index}].items[${i}].subtitle.content`}
-                                        alignment={item.subtitle?.alignment || undefined}
-                                        className="bg-transparent"
+                                        alignment={item.subtitle?.alignment || (strategy.alignment === "center" ? "center" : undefined)}
                                      />
                                  </div>
+                             )}
+
+                             {onUpdate && !readOnly && (
+                                 <ThemeDeleteButton 
+                                    className={styles.deleteButton || "opacity-0 group-hover/item:opacity-100 transition-opacity absolute right-0 top-0"}
+                                    onClick={deleteItem}
+                                 />
                              )}
                         </div>
 
                         {/* Content */}
-                        <div className={cn(
-                            "text-sm leading-relaxed",
-                             (theme === "studio" || theme === "visual") ? "text-neutral-400" : "text-slate-600"
-                        )}>
+                        <div className={styles.description}>
                             <InlineEdit readOnly={readOnly || !onUpdate}
                                 value={item.content?.content}
                                 placeholder="Content..."
                                 multiline
                                 onSave={(val) => updateItem({ content: { ...item.content, content: val } })}
                                 path={`customSections[${index}].items[${i}].content.content`}
-                                alignment={item.content?.alignment || undefined}
-                                className="bg-transparent w-full"
+                                alignment={item.content?.alignment || (strategy.alignment === "center" ? "center" : undefined)}
                              />
                         </div>
                     </div>
                   )}
                 />
             )}
-        </div>
+        </ResumeSection>
     );
 }
