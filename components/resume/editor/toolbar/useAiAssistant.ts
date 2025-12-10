@@ -22,7 +22,8 @@ export function useAiAssistant({
 }: UseAiAssistantProps) {
     const [aiInstruction, setAiInstruction] = useState("");
     const [isAiLoading, setIsAiLoading] = useState(false);
-    const [aiResult, setAiResult] = useState<string | null>(null);
+    const [aiResults, setAiResults] = useState<string[]>([]);
+    const [resultIndex, setResultIndex] = useState(0);
     const [showDiscardDialog, setShowDiscardDialog] = useState(false);
 
     // Helper to get current value
@@ -58,6 +59,8 @@ export function useAiAssistant({
 
         setIsAiLoading(true);
         setAiProcessingField(targetField);
+        setAiResults([]);
+        setResultIndex(0);
         
         try {
             const res = await fetch("/api/improve-writing", {
@@ -71,8 +74,13 @@ export function useAiAssistant({
                 })
             });
             const data = await res.json();
-            if (data.improvedText) {
-                setAiResult(data.improvedText);
+            if (data.options && Array.isArray(data.options)) {
+                setAiResults(data.options);
+                setResultIndex(0);
+            } else if (data.improvedText) {
+                // Fallback for old API
+                setAiResults([data.improvedText]);
+                setResultIndex(0);
             }
         } catch (e) {
             console.error(e);
@@ -84,17 +92,28 @@ export function useAiAssistant({
 
     const handleAcceptAi = () => {
         const target = lockedField || focusedField;
-        if (aiResult && target) {
-            updateField(target, aiResult);
+        const currentResult = aiResults[resultIndex];
+        
+        if (currentResult && target) {
+            updateField(target, currentResult);
             // Close logic
             closeAi();
         }
     };
 
+    const handleNextResult = () => {
+        setResultIndex((prev) => (prev + 1) % aiResults.length);
+    };
+
+    const handlePrevResult = () => {
+        setResultIndex((prev) => (prev - 1 + aiResults.length) % aiResults.length);
+    };
+
     const closeAi = () => {
         setAiOpen(false);
         setLockedField(null);
-        setAiResult(null);
+        setAiResults([]);
+        setResultIndex(0);
         setAiInstruction("");
         setIsAiLoading(false);
         setShowDiscardDialog(false);
@@ -104,13 +123,17 @@ export function useAiAssistant({
         aiInstruction,
         setAiInstruction,
         isAiLoading,
-        aiResult,
-        setAiResult,
+        aiResults,
+        resultIndex,
+        currentResult: aiResults[resultIndex] || null,
+        handleNextResult,
+        handlePrevResult,
         showDiscardDialog,
         setShowDiscardDialog,
         handleAskAi,
         handleAcceptAi,
         closeAi,
+        setAiResults,
         // Expose explicit setters for specialized reset logic if needed
         setIsAiLoading
     };

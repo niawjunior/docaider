@@ -14,6 +14,7 @@ interface UseSmartInputProps {
     setLockedField?: (field: string | null) => void;
     setFocusedField?: (field: string | null) => void;
     setHasSelection?: (has: boolean) => void;
+    disableAi?: boolean;
 }
 
 export function useSmartInput({
@@ -27,7 +28,8 @@ export function useSmartInput({
     setAiOpen,
     setLockedField,
     setFocusedField,
-    setHasSelection
+    setHasSelection,
+    disableAi = false
 }: UseSmartInputProps) {
 
     const handleBlur = () => {
@@ -83,7 +85,7 @@ export function useSmartInput({
         const currentText = contentRef.current?.innerText || "";
         const isVisuallyEmpty = currentText.replace(/[\u200B\u00A0\n\r]/g, "").trim() === "";
     
-        if (e.key === " " && isVisuallyEmpty) {
+        if (e.key === " " && isVisuallyEmpty && !disableAi) {
             e.preventDefault();
             if (setAiOpen && setLockedField && path) {
                 setLockedField(path);

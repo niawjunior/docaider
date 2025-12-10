@@ -24,7 +24,9 @@ import {
     CheckCircle2, 
     Minimize2, 
     Maximize2, 
-    Languages 
+    Languages,
+    ChevronLeft,
+    ChevronRight
 } from "lucide-react";
 import { useAiAssistant } from "./useAiAssistant";
 import { ResumeData } from "@/lib/schemas/resume";
@@ -55,8 +57,12 @@ export function AiAssistant({
         setAiInstruction,
         isAiLoading,
         setIsAiLoading,
-        aiResult,
-        setAiResult,
+        aiResults,
+        resultIndex,
+        currentResult,
+        handleNextResult,
+        handlePrevResult,
+        setAiResults,
         showDiscardDialog,
         setShowDiscardDialog,
         handleAskAi,
@@ -79,7 +85,7 @@ export function AiAssistant({
                 onOpenChange={(open) => {
                     // Standard close attempt
                     if (!open) {
-                        if (isAiLoading || aiResult) {
+                        if (isAiLoading || aiResults.length > 0) {
                             setShowDiscardDialog(true);
                             return;
                         }
@@ -88,7 +94,7 @@ export function AiAssistant({
                         setAiOpen(true);
                         setLockedField(focusedField);
                         // Reset state on open
-                        setAiResult(null);
+                        setAiResults([]);
                         setAiInstruction("");
                         setIsAiLoading(false);
                     }
@@ -116,13 +122,13 @@ export function AiAssistant({
                     className="w-[500px] p-0 bg-white border-slate-200 rounded-xl shadow-2xl overflow-hidden flex flex-col text-slate-800 z-[8]"
                     onCloseAutoFocus={(e) => e.preventDefault()}
                     onInteractOutside={(e) => {
-                        if (aiOpen && (isAiLoading || aiResult)) {
+                        if (aiOpen && (isAiLoading || aiResults.length > 0)) {
                             e.preventDefault();
                             setShowDiscardDialog(true);
                         }
                     }}
                 >
-                    {!aiResult ? (
+                    {aiResults.length === 0 ? (
                         <>
                             <div className="p-3 border-b border-slate-100 flex items-center gap-2">
                                 <Sparkles className="w-4 h-4 text-purple-600" />
@@ -216,33 +222,80 @@ export function AiAssistant({
                         </>
                     ) : (
                         <div className="p-4 bg-slate-50">
-                            <div className="mb-3 text-sm text-slate-600">
+                            <div className="mb-3 text-sm text-slate-600 min-h-[60px]">
                                 {isAiLoading ? (
                                     <div className="flex items-center gap-2 text-slate-400">
                                         <Loader2 className="w-4 h-4 animate-spin" />
                                         Thinking...
                                     </div>
-                                ) : aiResult}
+                                ) : (
+                                    <div className="relative px-8">
+                                         {aiResults.length > 1 && (
+                                            <div className="absolute left-0 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                                                <button 
+                                                    onClick={handlePrevResult}
+                                                    className="p-1 hover:bg-slate-200 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                                                >
+                                                    <ChevronLeft className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        )}
+                                        
+                                        <div className="px-1 text-center">
+                                            {currentResult}
+                                        </div>
+
+                                        {aiResults.length > 1 && (
+                                            <div className="absolute right-0 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                                                <button 
+                                                    onClick={handleNextResult}
+                                                    className="p-1 hover:bg-slate-200 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                                                >
+                                                    <ChevronRight className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
-                            <div className="flex gap-2 justify-end">
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => {
-                                        setAiResult(null);
-                                        setAiInstruction("");
-                                    }}
-                                    className="text-slate-500 hover:text-slate-700"
-                                >
-                                    Discard
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    onClick={handleAcceptAi}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white"
-                                >
-                                    Replace Selection
-                                </Button>
+                            
+                            {aiResults.length > 1 && (
+                                <div className="flex justify-center mb-2">
+                                    <div className="flex gap-1">
+                                        {aiResults.map((_, i) => (
+                                            <div key={i} className={cn(
+                                                "w-1.5 h-1.5 rounded-full transition-colors",
+                                                i === resultIndex ? "bg-purple-500" : "bg-slate-300"
+                                            )} />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex gap-2 justify-between items-center">
+                                <div className="text-xs text-slate-400 font-medium">
+                                    Option {resultIndex + 1} of {aiResults.length}
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => {
+                                            setAiResults([]);
+                                            setAiInstruction("");
+                                        }}
+                                        className="text-slate-500 hover:text-slate-700"
+                                    >
+                                        Discard
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        onClick={handleAcceptAi}
+                                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                                    >
+                                        Replace Selection
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     )}

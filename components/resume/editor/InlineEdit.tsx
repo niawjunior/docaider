@@ -15,6 +15,7 @@ interface InlineEditProps extends React.HTMLAttributes<HTMLElement> {
   readOnly?: boolean;
   path?: string;
   alignment?: "left" | "center" | "right" | "justify";
+  disableAi?: boolean;
 }
 
 export function InlineEdit({ 
@@ -26,6 +27,7 @@ export function InlineEdit({
   readOnly = false,
   path,
   alignment,
+  disableAi = false,
   ...props 
 }: InlineEditProps) {
   const contentRef = React.useRef<HTMLElement>(null);
@@ -67,7 +69,8 @@ export function InlineEdit({
       setAiOpen,
       setLockedField,
       setFocusedField,
-      setHasSelection
+      setHasSelection,
+      disableAi
   });
 
   // Sync value to DOM when not editing
