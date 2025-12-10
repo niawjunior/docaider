@@ -127,7 +127,7 @@ export function ResumeEditor() {
       <ResumeBuilderHeader 
         maxWidth="max-w-full" 
         showBackToApp={false}
-        className="bg-transparent border-b border-white/10 relative z-50 backdrop-blur-md"
+        className="bg-transparent border-b border-white/10 relative z-[999] backdrop-blur-md"
         theme="dark"
       >
         <div className="flex items-center justify-between w-full">
