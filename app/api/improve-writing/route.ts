@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, instruction, resumeData } = await req.json();
+    const { text, instruction, resumeData, fieldContext } = await req.json();
 
     if (!text && !instruction) {
       return NextResponse.json({ error: "No text or instruction provided" }, { status: 400 });
@@ -63,13 +63,39 @@ export async function POST(req: NextRequest) {
 
     const contextStr = getContext();
 
+    // Dynamically define Zod schema based on field type
+    const getFieldSchema = (field: string | null) => {
+        const lower = (field || "").toLowerCase();
+        
+        if (lower.includes("phone")) return z.string().describe("Phone number only (e.g. +1-234-567-8900).");
+        if (lower.includes("email")) return z.string().describe("Email address only.");
+        if (lower.includes("website") || lower.includes("linkedin") || lower.includes("url")) return z.string().describe("URL only.");
+        
+        if (lower.includes("location")) return z.string().describe("City, Country (e.g. New York, NY). No sentences.");
+        
+        if (lower.includes("company")) return z.string().describe("Company Name only. No sentences.");
+        if (lower.includes("institution") || lower.includes("university")) return z.string().describe("Institution Name only. No sentences.");
+        
+        if (lower.includes("position") || lower.includes("jobtitle")) return z.string().describe("Job Title only. No sentences.");
+        
+        if (lower.includes("degree")) return z.string().describe("Degree Name only (e.g. Bachelor of Science). No sentences.");
+        if (lower.includes("fieldofstudy")) return z.string().describe("Major/Field of Study only (e.g. Computer Science). No sentences.");
+        
+        if (lower.includes("date")) return z.string().describe("Date in YYYY-MM format or 'Present'.");
+        
+        if (lower.includes("summary") || lower.includes("description")) return z.string().describe("Professional resume content. Clear, action-oriented, and concise.");
+        
+        return z.string().describe("Professional resume content.");
+    };
+
     const { object } = await generateObject({
       model: openai("gpt-4o-mini"),
       schema: z.object({
-        improvedText: z.string().describe("The improved or generated text"),
+        improvedText: getFieldSchema(fieldContext),
       }),
       prompt: `
         You are an expert professional resume editor.
+        ${fieldContext ? `You are currently writing for the field: "${fieldContext}".` : ""}
         ${text ? "Your task is to improve the following text based on the user's instruction." : "Your task is to write new professional content based on the user's instruction."}
         
         ${contextStr}
@@ -78,12 +104,12 @@ export async function POST(req: NextRequest) {
         "${text}"` : ""}
 
         User Instruction:
-        "${instruction || (text ? "Improve grammar, clarity, and professionalism." : "Write professional content for a resume.")}"
+        "${instruction || (text ? "Improve grammar, clarity, and professionalism." : `Write professional content for ${fieldContext || "a resume"}.`)}"
 
         Requirements:
         1. Use professional, action-oriented language suitable for a resume.
         2. Do not add conversational filler (e.g., "Here is the text"). Just return the text.
-        3. ${text ? "Maintain the original meaning usually, unless told otherwise." : "Create high-quality content that fits the instruction and the provided Resume Context."}
+        3. ${text ? "Maintain the original meaning usually, unless told otherwise." : `Create high-quality content that fits the instruction and the provided Resume Context given that it is for ${fieldContext || "resumes"}.`}
         4. If writing a summary, use the Experience and Skills from the context to make it accurate.
       `,
     });

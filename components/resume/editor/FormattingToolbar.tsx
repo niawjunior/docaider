@@ -3,7 +3,7 @@
 import { useEditorContext } from "./EditorContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Sparkles, Loader2, ArrowUp, CheckCircle2, Minimize2, Maximize2, CornerDownLeft, Languages } from "lucide-react";
+import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Sparkles, Loader2, ArrowUp, CheckCircle2, Minimize2, Maximize2, CornerDownLeft, Languages, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
 import { ResumeData } from "@/lib/schemas/resume";
@@ -55,6 +55,9 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
       // If we have no text AND no instruction, we can't do anything
       if (!currentText && !instructionToUse) return;
       const targetField = lockedField || focusedField;
+      
+      // Use raw path as context - AI can understand "experience[0].company.content"
+      const fieldContext = targetField;
 
       setIsAiLoading(true);
       setAiProcessingField(targetField);
@@ -66,7 +69,8 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
               body: JSON.stringify({ 
                   text: currentText, 
                   instruction: instructionToUse,
-                  resumeData // Pass full context
+                  resumeData, // Pass full context
+                  fieldContext 
               })
           });
           const data = await res.json();
@@ -300,6 +304,18 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
                         <button 
                             className="w-full flex items-center justify-between px-2 py-1.5 text-sm text-slate-600 hover:bg-purple-50 hover:text-purple-700 rounded-md transition-colors group text-left"
                             onClick={() => {
+                                setAiInstruction("Help me fill out this field");
+                                handleAskAi("Help me fill out this field");
+                            }}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Wand2 className="w-4 h-4 text-purple-500 group-hover:text-purple-600" />
+                                <span>Help me fill out</span>
+                            </div>
+                        </button>
+                        <button 
+                            className="w-full flex items-center justify-between px-2 py-1.5 text-sm text-slate-600 hover:bg-purple-50 hover:text-purple-700 rounded-md transition-colors group text-left"
+                            onClick={() => {
                                 setAiInstruction("Improve writing");
                                 handleAskAi("Improve writing");
                             }}
@@ -379,7 +395,7 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
              </>
            ) : (
              <div className="p-4 bg-slate-50">
-                 <div className="mb-3 text-sm text-slate-600 bg-white p-3 rounded-md border border-slate-200">
+                 <div className="mb-3 text-sm text-slate-600">
                      {isAiLoading ? (
                         <div className="flex items-center gap-2 text-slate-400">
                             <Loader2 className="w-4 h-4 animate-spin" />

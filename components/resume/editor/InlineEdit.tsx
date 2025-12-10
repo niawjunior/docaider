@@ -48,6 +48,7 @@ export function InlineEdit({
   const scrambleLoop = contextSafe?.scrambleLoop || false;
   const setAiOpen = contextSafe?.setAiOpen;
   const setLockedField = contextSafe?.setLockedField;
+  const lockedField = contextSafe?.lockedField;
 
   // Monitor selection changes when editing
   React.useEffect(() => {
@@ -193,6 +194,8 @@ export function InlineEdit({
       selection.removeAllRanges();
       selection.addRange(range);
   };
+  
+  const isLocked = !readOnly && path && lockedField === path;
 
   const commonClasses = cn(
     "outline-none min-w-[20px] inline-block transition-all duration-200 border border-transparent",
@@ -200,6 +203,9 @@ export function InlineEdit({
     !readOnly && "px-1 -mx-1 rounded cursor-text", 
     !readOnly && "hover:border-blue-500/50 hover:bg-blue-500/5",
     !readOnly && "focus:ring-1 focus:ring-blue-500/30",
+    
+    // Locked/Active state (AI Popup open)
+    isLocked && "ring-1 ring-blue-500/30 bg-blue-500/5 border-blue-500/50",
     
     // Placeholder state
     !readOnly && "empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 empty:before:italic",
@@ -249,6 +255,7 @@ export function InlineEdit({
       onPaste={handlePaste}
       className={commonClasses}
       data-placeholder={placeholder}
+      data-path={path}
       {...props}
     />
   );

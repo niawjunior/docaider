@@ -15,7 +15,7 @@ export const ResumeSchema = z.object({
     phone: z.string().nullish().describe("Phone number"),
     website: z.string().nullish().describe("Personal website or portfolio URL"),
     linkedin: z.string().nullish().describe("LinkedIn profile URL"),
-    location: z.string().nullish().describe("City, Country"),
+    location: z.string().nullish().describe("City, Country. Format: 'City, Country' (e.g. 'New York, NY'). No sentences."),
     summary: RichTextFieldSchema.describe("A brief professional summary or bio"),
     headerSummary: RichTextFieldSchema.describe("Summary displayed in the header"),
   }).nullish().transform(v => v ?? {}).describe("Personal contact information"),
@@ -25,8 +25,8 @@ export const ResumeSchema = z.object({
   experience: z.array(
     z.object({
       id: z.string().nullish().describe("Unique identifier for the experience entry"),
-      company: RichTextFieldSchema.describe("Name of the company or organization"),
-      position: RichTextFieldSchema.describe("Job title or role held"),
+      company: RichTextFieldSchema.describe("Name of the company or organization. Format: Name only."),
+      position: RichTextFieldSchema.describe("Job title or role held. Format: Title only."),
       startDate: RichTextFieldSchema.describe("Start date (YYYY-MM or Present)"),
       endDate: RichTextFieldSchema.describe("End date (YYYY-MM or Present)"),
       description: RichTextFieldSchema.describe("Bullet points or detailed description of responsibilities and achievements"),
@@ -36,9 +36,9 @@ export const ResumeSchema = z.object({
   education: z.array(
     z.object({
       id: z.string().nullish().describe("Unique identifier for the education entry"),
-      institution: RichTextFieldSchema.describe("Name of the university, college, or school"),
-      degree: RichTextFieldSchema.describe("Degree or certificate obtained"),
-      fieldOfStudy: RichTextFieldSchema.describe("Major or field of study"),
+      institution: RichTextFieldSchema.describe("Name of the university, college, or school. Format: Name only."),
+      degree: RichTextFieldSchema.describe("Degree or certificate obtained. Format: Degree name only."),
+      fieldOfStudy: RichTextFieldSchema.describe("Major or field of study. Format: Major name only (e.g. Computer Science)."),
       startDate: RichTextFieldSchema.describe("Start date (YYYY-MM)"),
       endDate: RichTextFieldSchema.describe("End date or Graduation date (YYYY-MM)"),
     })
@@ -49,7 +49,7 @@ export const ResumeSchema = z.object({
   projects: z.array(
     z.object({
       id: z.string().nullish().describe("Unique identifier for the project"),
-      name: RichTextFieldSchema.describe("Name of the project"),
+      name: RichTextFieldSchema.describe("Name of the project. Format: Name only."),
       description: RichTextFieldSchema.describe("Brief description of the project and your role"),
       url: z.string().nullish().describe("URL to the project"),
       technologies: z.array(z.string()).nullish().describe("List of technologies used in the project"),
