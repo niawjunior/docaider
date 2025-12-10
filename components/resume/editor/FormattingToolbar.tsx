@@ -4,6 +4,7 @@ import { useEditorContext } from "./EditorContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Sparkles, Loader2, ArrowUp, CheckCircle2, Minimize2, Maximize2, CornerDownLeft, Languages, Wand2 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
 import { ResumeData } from "@/lib/schemas/resume";
@@ -96,64 +97,65 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
       }
   };
 
-  // Click outside to dismiss
-  useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-          if (toolbarRef.current && !toolbarRef.current.contains(event.target as Node)) {
-              if (aiOpen) {
-                  setAiOpen(false);
-                  setLockedField(null);
-                  setAiResult(null);
-                  setAiInstruction("");
-              }
-          }
-      };
 
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-          document.removeEventListener("mousedown", handleClickOutside);
-      };
-  }, [aiOpen]);
 
   useLayoutEffect(() => {
     const updatePosition = () => {
-        // If AI is open, keep the toolbar static so it doesn't jump around or follow focus to the input
-        if (aiOpen) return;
-        
-        if (!focusedField || !hasSelection) return;
+        // If AI is open, we position relative to the locked field element
+        let targetRect: DOMRect | null = null;
+        let isAiMode = false;
 
-        const selection = window.getSelection();
-        if (!selection || selection.rangeCount === 0) return;
-
-        const range = selection.getRangeAt(0);
-        const selectionRect = range.getBoundingClientRect();
-        
-        let containerRect = selectionRect;
-        const anchorNode = selection.anchorNode;
-        if (anchorNode) {
-             const element = anchorNode.nodeType === Node.TEXT_NODE 
-                 ? anchorNode.parentElement 
-                 : anchorNode as Element;
-             
+        if (aiOpen && lockedField) {
+             const element = document.querySelector(`[data-path="${lockedField}"]`);
              if (element) {
-                  containerRect = element.getBoundingClientRect();
+                 targetRect = element.getBoundingClientRect();
+                 isAiMode = true;
              }
+        } 
+        
+        // If we didn't find a target from locking (or AI is closed), try selection
+        if (!targetRect && focusedField && hasSelection && !aiOpen) {
+            const selection = window.getSelection();
+            if (selection && selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const selectionRect = range.getBoundingClientRect();
+                
+                let containerRect = selectionRect;
+                
+                // If finding rect from range fails (generic) or is collapsed
+                if (selectionRect.width === 0 && selectionRect.height === 0) {
+                     const anchorNode = selection.anchorNode;
+                     if (anchorNode) {
+                          const element = anchorNode.nodeType === Node.TEXT_NODE 
+                              ? anchorNode.parentElement 
+                              : anchorNode as Element;
+                          
+                          if (element) {
+                               containerRect = element.getBoundingClientRect();
+                          }
+                     }
+                }
+                
+                if (containerRect.width > 0 || containerRect.height > 0) {
+                    targetRect = containerRect;
+                }
+            }
         }
 
-        if (selectionRect.width === 0 && selectionRect.height === 0) return;
-        
+        if (!targetRect) return;
+
         const toolbarHeight = 45;
         const stickyTop = 80;
-        const naturalTop = containerRect.top - toolbarHeight;
+        const naturalTop = targetRect.top - toolbarHeight;
         
         const calculatedTop = Math.min(
             Math.max(naturalTop, stickyTop),
-            containerRect.bottom - toolbarHeight
+            targetRect.bottom - toolbarHeight
         );
 
         setPosition({
             top: calculatedTop,
-            left: containerRect.left + containerRect.width / 2
+            left: targetRect.left + targetRect.width / 2
         });
     };
 
@@ -212,10 +214,16 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
   }
 
   // If we couldn't resolve a valid alignment target, AND we're not just in AI mode...
-  // Actually if AI is open we still want to show the toolbar even if alignmentPath isn't resolved? 
-  // No, AI needs a field context. But we have activeTarget. IF activeTarget is valid but alignmentPath is empty (unsupported field), we usually return null.
-  // But if AI is open, we stick around to show the AI popup.
-  if (!alignmentPath && !aiOpen) return null;
+  // BUT we want to show the toolbar for ALL fields to allow AI usage (e.g. skills, job title)
+  // even if they don't support alignment.
+  // So we only return null if there is NO target field at all.
+  if (!targetField && !aiOpen) return null;
+
+
+  // Helper helper to check if alignment should be disabled
+  // Schema allows alignment on all RichTextFields, including dates
+  // If alignmentPath is null (not in schema allowlist), alignment is disabled.
+  const alignmentDisabled = !alignmentPath;
 
   return (
     <div 
@@ -250,23 +258,40 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
       
       <div className="w-[1px] h-4 bg-slate-700 mx-1" />
       
-      <ToolbarButton
-        icon={Sparkles}
-        isActive={aiOpen}
-        onClick={() => {
-            if (!aiOpen) {
+      <DropdownMenu 
+        open={aiOpen} 
+        onOpenChange={(open) => {
+            setAiOpen(open);
+            if(open) {
                 setLockedField(focusedField);
-                setAiOpen(true);
             } else {
-                setAiOpen(false);
                 setLockedField(null);
+                setAiResult(null);
+                setAiInstruction("");
             }
         }}
-        className="text-purple-400 hover:text-purple-300 hover:bg-purple-900/30"
-      />
-
-      {aiOpen && (
-        <div className="absolute top-full left-0 mt-2 w-[500px] bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden z-[501] animate-in fade-in zoom-in-95 duration-200 flex flex-col text-slate-800">
+        modal={false} // Allow interacting with the editor behind
+      >
+        <DropdownMenuTrigger asChild>
+            <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                    "w-7 h-7 rounded-sm transition-all",
+                    aiOpen ? "bg-purple-900/50 text-purple-400" : "hover:bg-slate-700 text-slate-400 hover:text-slate-200",
+                    "text-purple-400 hover:text-purple-300"
+                )}
+            >
+                <Sparkles className="w-4 h-4" />
+            </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent 
+            align="start" 
+            side="bottom"
+            sideOffset={10}
+            className="w-[500px] p-0 bg-white border-slate-200 rounded-xl shadow-2xl overflow-hidden flex flex-col text-slate-800 z-[501]"
+            onCloseAutoFocus={(e) => e.preventDefault()}
+        >
            {!aiResult ? (
              <>
                 <div className="p-3 border-b border-slate-100 flex items-center gap-2">
@@ -275,7 +300,7 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
                         value={aiInstruction}
                         onChange={(e) => setAiInstruction(e.target.value)}
                         placeholder="Ask AI anything..."
-                        className="border-none shadow-none focus-visible:ring-0 px-0 h-9 text-base bg-transparent placeholder:text-slate-400 flex-1"
+                        className="border-none shadow-none focus-visible:ring-0 px-0 h-9 text-base bg-transparent placeholder:text-slate-400 flex-1 text-slate-900"
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') handleAskAi();
                         }}
@@ -425,8 +450,8 @@ export function FormattingToolbar({ resumeData, onUpdate, theme }: FormattingToo
                  </div>
              </div>
            )}
-        </div>
-      )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

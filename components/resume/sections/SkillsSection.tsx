@@ -45,6 +45,7 @@ export function SkillsSection({ data, theme, onUpdate, readOnly }: SkillsSection
                             <span className="px-2 py-1 bg-slate-800 rounded text-xs flex items-center gap-2 hover:bg-slate-700 transition-colors">
                                 <InlineEdit readOnly={readOnly || !onUpdate} 
                                     value={skill}
+                                    path={`skills[${index}]`}
                                     onSave={(val) => {
                                         const newSkills = [...data.skills];
                                         newSkills[index] = val;
@@ -112,10 +113,11 @@ export function SkillsSection({ data, theme, onUpdate, readOnly }: SkillsSection
                             theme === "minimal" && "px-2 border-b border-slate-200 hover:border-slate-400 pb-1 text-slate-900"
                         )}
                     >
-                        <InlineEdit readOnly={readOnly || !onUpdate} 
-                            value={skill}
-                            onSave={(val) => {
-                                const newSkills = [...data.skills];
+                                <InlineEdit readOnly={readOnly || !onUpdate} 
+                                    value={skill}
+                                    path={`skills[${index}]`}
+                                    onSave={(val) => {
+                                        const newSkills = [...data.skills];
                                 newSkills[index] = val;
                                 handleUpdate(newSkills);
                             }}
