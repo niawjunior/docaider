@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { ResumePreview } from "@/components/resume/ResumePreview";
 import { ResumeData } from "@/lib/schemas/resume";
 import { RefObject } from "react";
+import { isDocumentTheme } from "@/lib/themes/registry";
 
 interface ResumeEditorPreviewAreaProps {
   isViewMode: boolean;
@@ -34,7 +35,7 @@ export function ResumeEditorPreviewArea({
             "w-full bg-slate-950 overflow-y-auto flex items-start justify-center bg-dot-white/[0.2]",
             isViewMode ? "h-screen p-0" : "h-[calc(100vh-100px)]",
             // Add padding only for document-style themes
-            !isViewMode && ["modern", "minimal", "creative"].includes(theme) ? "p-8" : "p-0"
+            !isViewMode && isDocumentTheme(theme) ? "p-8" : "p-0"
     )}>
         {isLoading ? (
             <div className="h-full flex items-center justify-center">
@@ -52,7 +53,7 @@ export function ResumeEditorPreviewArea({
                 
                 viewport === "desktop" && [
                     // Document Themes: Constrained to A4-ish width
-                    ["modern", "minimal", "creative"].includes(theme) ? "w-full max-w-5xl" : 
+                    isDocumentTheme(theme) ? "w-full max-w-5xl" : 
                     // Web Themes: Full width
                     "w-full bg-white dark:bg-slate-950"
                 ]

@@ -34,6 +34,7 @@ import { Switch } from "@/components/ui/switch";
 import Link from "next/link";
 import { publishResume, saveDraft } from "@/app/actions/resume";
 import { SectionManager } from "@/components/resume/shared/SectionManager";
+import { AVAILABLE_THEMES } from "@/lib/themes/registry";
 
 interface ResumeEditorControlsProps {
     resumeData: ResumeData | null;
@@ -151,12 +152,11 @@ export function ResumeEditorControls({
                             <SelectValue placeholder="Theme" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="modern">Modern</SelectItem>
-                            <SelectItem value="minimal">Minimal</SelectItem>
-                            <SelectItem value="creative">Creative</SelectItem>
-                            <SelectItem value="portfolio">Portfolio</SelectItem>
-                            <SelectItem value="studio">Studio</SelectItem>
-                            <SelectItem value="visual">Visual</SelectItem>
+                            {AVAILABLE_THEMES.map((t) => (
+                                <SelectItem key={t.id} value={t.id}>
+                                    {t.label}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                         </Select>
                     </div>
