@@ -40,7 +40,7 @@ export const SummarySection = ({ data, theme = "modern", onUpdate, className, re
           onSave={(val) => handleUpdate('personalInfo.summary.content', val)}
           path="personalInfo.summary.content"
           alignment={data.personalInfo?.summary?.alignment || (strategy.alignment === "center" ? "center" : undefined)}
-          className={cn("w-full bg-transparent border-none p-0 focus:ring-0")}
+          className={cn("w-full bg-transparent")}
         />
       </div>
     </ResumeSection>
