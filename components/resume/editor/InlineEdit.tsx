@@ -83,7 +83,7 @@ export function InlineEdit({
   const isLocked = !readOnly && path && lockedField === path;
 
   const commonClasses = cn(
-    "outline-none min-w-[20px] inline-block transition-all duration-200 border border-transparent",
+    "outline-none min-w-[20px] inline-block transition-all duration-200 border border-transparent max-w-full break-words whitespace-pre-wrap",
     // Base state
     !readOnly && "px-1 -mx-1 rounded cursor-text", 
     !readOnly && "hover:border-blue-500/50 hover:bg-blue-500/5",

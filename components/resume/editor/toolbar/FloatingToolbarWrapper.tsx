@@ -100,7 +100,7 @@ export function FloatingToolbarWrapper({ children }: FloatingToolbarWrapperProps
     return (
         <div 
             ref={toolbarRef}
-            className="fixed z-[500] flex items-center space-x-1 bg-slate-900 text-white rounded-lg p-1 border border-slate-700 shadow-2xl backdrop-blur-md"
+            className="fixed z-[7] flex items-center space-x-1 bg-slate-900 text-white rounded-lg p-1 border border-slate-700 shadow-2xl backdrop-blur-md"
             style={{ 
                 top: position.top, 
                 left: position.left,

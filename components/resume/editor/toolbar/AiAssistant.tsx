@@ -74,8 +74,6 @@ export function AiAssistant({
 
     return (
         <>
-            <div className="w-[1px] h-4 bg-slate-700 mx-1" />
-
             <DropdownMenu
                 open={aiOpen}
                 onOpenChange={(open) => {
@@ -115,7 +113,7 @@ export function AiAssistant({
                     side="bottom"
                     sideOffset={10}
                     data-ai-menu="true"
-                    className="w-[500px] p-0 bg-white border-slate-200 rounded-xl shadow-2xl overflow-hidden flex flex-col text-slate-800 z-[501]"
+                    className="w-[500px] p-0 bg-white border-slate-200 rounded-xl shadow-2xl overflow-hidden flex flex-col text-slate-800 z-[8]"
                     onCloseAutoFocus={(e) => e.preventDefault()}
                     onInteractOutside={(e) => {
                         if (aiOpen && (isAiLoading || aiResult)) {

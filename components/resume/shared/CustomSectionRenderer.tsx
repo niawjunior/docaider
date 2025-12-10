@@ -62,6 +62,7 @@ export function CustomSectionRenderer({
                         value={section.title}
                         onSave={(val) => handleUpdateSection({ ...section, title: val })}
                         className="bg-transparent"
+                        path={`customSections[${index}].title`}
                     />
                 </h2>
                  {onUpdate && !readOnly && (

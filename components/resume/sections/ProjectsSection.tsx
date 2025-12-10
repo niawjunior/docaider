@@ -70,7 +70,7 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                     strategy={theme === "portfolio" ? "rect" : "vertical"}
                     renderItem={(project, i, updateItem, deleteItem) => (
                         <div className={cn(
-                            "break-inside-avoid space-y-2 group/item relative",
+                            "break-inside-avoid space-y-2 group/item relative min-w-0",
                             theme === "modern" && "p-4 bg-slate-50 rounded-lg border border-slate-100 hover:border-slate-200 transition-all",
                             theme === "portfolio" && "p-0",
                             theme === "minimal" && "text-center mb-6"
@@ -138,12 +138,13 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                                 theme === "studio" && "text-neutral-400"
                             )}>
                                  <InlineEdit readOnly={readOnly || !onUpdate} 
-                                    value={project.description?.content} 
+                                    value={project.description?.content}
                                     placeholder="Project description" 
                                     multiline
                                     onSave={(val) => updateItem({ description: { ...project.description, content: val } })}
                                     path={`projects[${i}].description.content`}
                                     alignment={project.description?.alignment || (theme === "minimal" ? "center" : undefined)}
+                                    className={cn(theme === "minimal" && "w-full block")}
                                 />
                             </div>
                             
