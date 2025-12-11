@@ -38,3 +38,23 @@ export function pickMimeType(): string {
   }
   return "audio/webm";
 }
+
+/**
+ * Sets a value at a nested path in an object, supporting dot and bracket notation.
+ * Returns the modified object (clone).
+ */
+export function setNestedValue(obj: any, path: string, value: any): any {
+    const newObj = structuredClone(obj);
+    const keys = path.replace(/\[(\d+)\]/g, '.$1').split('.');
+    let current = newObj;
+    for (let i = 0; i < keys.length - 1; i++) {
+        const key = keys[i];
+        if (!(key in current)) {
+            // Check if next key is a number to create array
+            current[key] = isNaN(Number(keys[i + 1])) ? {} : [];
+        }
+        current = current[key];
+    }
+    current[keys[keys.length - 1]] = value;
+    return newObj;
+}

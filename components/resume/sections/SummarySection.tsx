@@ -2,27 +2,24 @@
 
 import { ResumeData } from "@/lib/schemas/resume";
 import { InlineEdit } from "@/components/resume/editor/InlineEdit";
-import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
 import { cn } from "@/lib/utils";
 import { ResumeSection } from "@/components/resume/shared/ResumeSection";
 import { getSectionTheme } from "@/lib/themes/styles";
+import { useResume } from "@/components/resume/state/ResumeContext";
 
 interface SummarySectionProps {
-  data: ResumeData;
   theme?: string;
-  onUpdate?: (data: ResumeData) => void;
   className?: string;
-  readOnly?: boolean;
 }
 
-export const SummarySection = ({ data, theme = "modern", onUpdate, className, readOnly }: SummarySectionProps) => {
-  const { updateField: handleUpdate } = useResumeUpdate(data, onUpdate);
-  
+export const SummarySection = ({ theme = "modern", className }: SummarySectionProps) => {
+  const { data, updateField, readOnly } = useResume();
+
   // Get Theme Config
   const config = getSectionTheme(theme, 'summary');
   const { styles, strategy } = config;
 
-  if (!onUpdate && !data.personalInfo?.summary?.content) return null;
+  if (!updateField && !data.personalInfo?.summary?.content) return null;
 
   return (
     <ResumeSection
@@ -33,11 +30,11 @@ export const SummarySection = ({ data, theme = "modern", onUpdate, className, re
     >
       <div className={styles.container}>
         <InlineEdit
-          readOnly={readOnly || !onUpdate}
+          readOnly={readOnly}
           value={data.personalInfo?.summary?.content}
           placeholder="Write a professional summary..."
           multiline
-          onSave={(val) => handleUpdate('personalInfo.summary.content', val)}
+          onSave={(val) => updateField('personalInfo.summary.content', val)}
           path="personalInfo.summary.content"
           alignment={data.personalInfo?.summary?.alignment || (strategy.alignment === "center" ? "center" : undefined)}
           className={cn("w-full bg-transparent")}

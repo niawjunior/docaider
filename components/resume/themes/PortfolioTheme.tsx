@@ -1,4 +1,5 @@
-import { ResumeData } from "@/lib/schemas/resume";
+"use client";
+
 import { motion } from "framer-motion";
 import { 
   Mail, 
@@ -8,56 +9,23 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InlineEdit } from "@/components/resume/editor/InlineEdit";
-import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
-import { ExperienceSection } from "@/components/resume/sections/ExperienceSection";
-import { EducationSection } from "@/components/resume/sections/EducationSection";
-import { ProjectsSection } from "@/components/resume/sections/ProjectsSection";
-import { SkillsSection } from "@/components/resume/sections/SkillsSection";
-import { SummarySection } from "@/components/resume/sections/SummarySection";
-import { CustomSectionRenderer } from "@/components/resume/shared/CustomSectionRenderer";
+import { useResume } from "@/components/resume/state/ResumeContext";
+import { SectionRenderer } from "@/components/resume/shared/SectionRenderer";
+import { ThemeComponentProps } from "./component-map";
 
-interface PortfolioThemeProps {
-  data: ResumeData;
-  onUpdate?: (data: ResumeData) => void;
-  readOnly?: boolean;
-}
-
-export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps) => {
-  const { updateField: handleUpdate } = useResumeUpdate(data, onUpdate);
+export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
+  const { data, updateField: handleUpdate, readOnly } = useResume();
 
   // Determine order (fallback if empty)
   const order = (data.sectionOrder && data.sectionOrder.length > 0) 
       ? data.sectionOrder 
       : ["experience", "projects", "education", "skills"];
 
-  const renderSection = (id: string) => {
-    switch (id) {
-        case 'summary': return <SummarySection key={id} data={data} theme="portfolio" onUpdate={onUpdate} readOnly={readOnly} />;
-        case 'experience': return <ExperienceSection key={id} data={data} theme="portfolio" onUpdate={onUpdate} readOnly={readOnly} />;
-        case 'education': return <EducationSection key={id} data={data} theme="portfolio" onUpdate={onUpdate} readOnly={readOnly} />;
-        case 'projects': return <ProjectsSection key={id} data={data} theme="portfolio" onUpdate={onUpdate} readOnly={readOnly} />;
-        case 'skills': return <SkillsSection key={id} data={data} theme="portfolio" onUpdate={onUpdate} readOnly={readOnly} />;
-        default:
-            const custom = data.customSections?.find(c => c.id === id);
-            if (custom) {
-                return (
-                    <CustomSectionRenderer 
-                        key={id} 
-                        section={custom} 
-                        index={data.customSections?.indexOf(custom) || 0}
-                        data={data} 
-                        onUpdate={onUpdate} 
-                        theme="portfolio"
-                        readOnly={readOnly}
-                    />
-                );
-            }
-            return null;
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100">
+    <div 
+        ref={containerRef}
+        className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100"
+    >
       {/* Hero Section */}
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
@@ -67,11 +35,12 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
       >
         <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="font-bold text-xl tracking-tight flex items-center gap-1">
-             <InlineEdit readOnly={readOnly || !onUpdate} 
+             <InlineEdit readOnly={readOnly} 
                 value={(data.personalInfo.fullName ?? '').split(' ')[0]}
                 onSave={(val) => {
                      // Read-only for nav logo derived from main name
                 }}
+                path="personalInfo.fullName" // Added dummy path to satisfy TS if needed, logic is readOnly
                 className="pointer-events-none" 
              />
             <span className="text-blue-600">.</span>
@@ -111,7 +80,7 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 flex flex-wrap md:flex-nowrap gap-x-3 gap-y-1 items-baseline">
               <span className="shrink-0">Hi, I&apos;m</span>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 min-w-0 flex-1">
-                 <InlineEdit readOnly={readOnly || !onUpdate} 
+                 <InlineEdit readOnly={readOnly} 
                     value={data.personalInfo.fullName} 
                     onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
                     path="personalInfo.fullName"
@@ -121,7 +90,7 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-slate-600 leading-relaxed mb-8">
-               <InlineEdit readOnly={readOnly || !onUpdate} 
+               <InlineEdit readOnly={readOnly} 
                     value={data.personalInfo.headerSummary?.content} 
                     onSave={(val) => handleUpdate('personalInfo.headerSummary.content', val)} 
                     placeholder="Brief bio or summary..."
@@ -135,8 +104,8 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
             <div className="flex flex-wrap gap-4 scroll-mt-24">
                {/* Email */}
                <div className="flex items-center gap-2">
-                 <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={!onUpdate}>
-                    {!onUpdate ? (
+                 <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={readOnly}>
+                    {readOnly ? (
                         <a href={`mailto:${data.personalInfo.email}`} className="flex items-center gap-2">
                              <Mail className="w-4 h-4" />
                              <span>{data.personalInfo.email || "Email"}</span>
@@ -144,7 +113,7 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                     ) : (
                         <div className="flex items-center gap-2">
                             <Mail className="w-4 h-4" />
-                            <InlineEdit readOnly={readOnly || !onUpdate}
+                            <InlineEdit readOnly={readOnly}
                                 value={data.personalInfo.email}
                                 placeholder="Email"
                                 onSave={(val) => handleUpdate('personalInfo.email', val)}
@@ -158,8 +127,8 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
 
                {/* LinkedIn */}
                <div className="flex items-center gap-2">
-                 <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={!onUpdate}>
-                    {!onUpdate ? (
+                 <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={readOnly}>
+                    {readOnly ? (
                         <a href={(data.personalInfo.linkedin as string)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                              <Linkedin className="w-4 h-4" />
                              <span>{(data.personalInfo.linkedin as string)?.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '') || "LinkedIn"}</span>
@@ -167,7 +136,7 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                     ) : (
                         <div className="flex items-center gap-2">
                             <Linkedin className="w-4 h-4" />
-                            <InlineEdit readOnly={readOnly || !onUpdate} 
+                            <InlineEdit readOnly={readOnly} 
                                 value={data.personalInfo.linkedin} 
                                 placeholder="LinkedIn URL"
                                 onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
@@ -181,8 +150,8 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
 
                {/* Website */}
                 <div className="flex items-center gap-2">
-                 <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={!onUpdate}>
-                    {!onUpdate ? (
+                 <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={readOnly}>
+                    {readOnly ? (
                         <a href={(data.personalInfo.website as string)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                              <Globe className="w-4 h-4" />
                              <span>{(data.personalInfo.website as string)?.replace(/^https?:\/\/(www\.)?/, '') || "Website"}</span>
@@ -190,7 +159,7 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                     ) : (
                         <div className="flex items-center gap-2">
                             <Globe className="w-4 h-4" />
-                            <InlineEdit readOnly={readOnly || !onUpdate} 
+                            <InlineEdit readOnly={readOnly} 
                                 value={data.personalInfo.website} 
                                 placeholder="Website URL"
                                 onSave={(val) => handleUpdate('personalInfo.website', val)} 
@@ -216,12 +185,12 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                 transition={{ duration: 0.5 }}
                 className="scroll-mt-24" // Offset for sticky header
             >
-                {renderSection(id)}
+                <SectionRenderer sectionId={id} theme="portfolio" />
             </motion.div>
         ))}
 
 
-        {onUpdate && !readOnly && (
+        {!readOnly && (
            <div className="mt-8 border-t border-slate-200 pt-8 flex justify-center print:hidden">
                <Button variant="outline" className="text-slate-900 border-slate-200 hover:bg-slate-100" onClick={() => {
                    const newSection = {
@@ -252,7 +221,7 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                          {/* Email */}
                          <div className="flex items-center gap-2">
                              <Mail className="w-5 h-5 text-slate-400" />
-                              <InlineEdit readOnly={readOnly || !onUpdate} 
+                              <InlineEdit readOnly={readOnly} 
                                 value={data.personalInfo.email} 
                                 placeholder="Email"
                                 onSave={(val) => handleUpdate('personalInfo.email', val)} 
@@ -263,7 +232,7 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                          {/* LinkedIn */}
                          <div className="flex items-center gap-2">
                              <Linkedin className="w-5 h-5 text-slate-400" />
-                              <InlineEdit readOnly={readOnly || !onUpdate} 
+                              <InlineEdit readOnly={readOnly} 
                                 value={data.personalInfo.linkedin} 
                                 placeholder="LinkedIn"
                                 onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
@@ -274,7 +243,7 @@ export const PortfolioTheme = ({ data, onUpdate, readOnly }: PortfolioThemeProps
                          {/* Website */}
                          <div className="flex items-center gap-2">
                              <Globe className="w-5 h-5 text-slate-400" />
-                              <InlineEdit readOnly={readOnly || !onUpdate} 
+                              <InlineEdit readOnly={readOnly} 
                                 value={data.personalInfo.website} 
                                 placeholder="Website"
                                 onSave={(val) => handleUpdate('personalInfo.website', val)} 

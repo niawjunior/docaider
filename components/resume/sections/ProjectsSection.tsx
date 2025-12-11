@@ -3,42 +3,40 @@ import { ResumeData } from "@/lib/schemas/resume";
 import { cn } from "@/lib/utils";
 import { InlineEdit } from "@/components/resume/editor/InlineEdit";
 import { ThemeAddButton, ThemeDeleteButton } from "../themes/ThemeControls";
-import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
 import { ResumeSectionList } from "@/components/resume/shared/ResumeSectionList";
 import { ResumeSection } from "@/components/resume/shared/ResumeSection";
 import { EmptySectionPlaceholder } from "@/components/resume/shared/EmptySectionPlaceholder";
 import { getSectionTheme } from "@/lib/themes/styles";
+import { useResume } from "@/components/resume/state/ResumeContext";
 
 interface ProjectsSectionProps {
-    data: ResumeData;
     theme: string;
-    onUpdate?: (data: ResumeData) => void;
-    readOnly?: boolean;
+    className?: string; // Add className prop
 }
 
-export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSectionProps) {
-    const { updateSection } = useResumeUpdate(data, onUpdate);
+export function ProjectsSection({ theme, className }: ProjectsSectionProps) {
+    const { data, updateField, readOnly } = useResume();
 
     // Get Theme Config
     const config = getSectionTheme(theme, 'projects');
     const { styles, strategy } = config;
 
-    if (!onUpdate && (!data.projects || data.projects.length === 0)) {
+    const handleUpdate = (newProjs: any[]) => {
+        updateField('projects', newProjs);
+    };
+
+    if (!updateField && (!data.projects || data.projects.length === 0)) {
         return null;
     }
 
-    const items = data.projects || [];
-    const handleUpdate = (newProjs: any[]) => {
-        updateSection('projects', newProjs);
-    };
-
-    if (!data.projects || (data.projects.length === 0 && !onUpdate)) return null;
+    if (!data.projects || (data.projects.length === 0 && !updateField)) return null;
 
     return (
         <ResumeSection
-            title="Projects"
-            theme={theme} // Still passed for fallback or specialized hook usage inside ResumeSection
-            onAdd={onUpdate && !readOnly ? () => {
+            title="Selected Works"
+            theme={theme}
+            className={className} // Still passed for fallback or specialized hook usage inside ResumeSection
+            onAdd={!readOnly ? () => {
                 const newProj = [{
                     id: crypto.randomUUID(),
                     name: { content: "Project Name" },
@@ -48,7 +46,7 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                 handleUpdate(newProj);
             } : undefined}
         >
-            {(!data.projects || data.projects.length === 0) && onUpdate && !readOnly ? (
+            {(!data.projects || data.projects.length === 0) && !readOnly ? (
                 <EmptySectionPlaceholder 
                     className="mt-4"
                     message="Add your first project"
@@ -78,7 +76,7 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
     
                             <div className={styles.header}>
                                  <h3 className={styles.title}>
-                                        <InlineEdit readOnly={readOnly || !onUpdate} 
+                                        <InlineEdit readOnly={readOnly} 
                                         value={project.name?.content} 
                                         placeholder="Project Name"
                                         className="bg-transparent"
@@ -91,7 +89,7 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                                  <div className={cn("flex items-center gap-2", theme === "minimal" && "w-full justify-center")}>
                                     {project.url && (
                                        <a href={project.url} target="_blank" rel="noopener noreferrer" className={styles.metadata}>
-                                             <InlineEdit readOnly={readOnly || !onUpdate} 
+                                             <InlineEdit readOnly={readOnly} 
                                             value={project.url} 
                                             placeholder="URL"
                                             onSave={(val) => updateItem({ url: val })}
@@ -99,7 +97,7 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                                        </a>
                                     )}
                                     
-                                     {onUpdate && !readOnly && (
+                                     {!readOnly && (
                                          <ThemeDeleteButton
                                             className={styles.deleteButton || "bg-transparent hover:bg-red-50 text-slate-400 hover:text-red-500 p-1 w-6 h-6 border-none transition-opacity"}
                                             onClick={deleteItem}
@@ -109,7 +107,7 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                             </div>
     
                             <div className={styles.description}>
-                                 <InlineEdit readOnly={readOnly || !onUpdate} 
+                                 <InlineEdit readOnly={readOnly} 
                                     value={project.description?.content} 
                                     placeholder="Project description" 
                                     multiline
@@ -125,7 +123,7 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                              )}>
                                 {(project.technologies || []).map((tech, tIndex) => (
                                     <span key={tIndex} className="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                            <InlineEdit readOnly={readOnly || !onUpdate}
+                                            <InlineEdit readOnly={readOnly}
                                            value={tech}
                                            onSave={(val) => {
                                                const newTech = [...(project.technologies || [])];
@@ -134,7 +132,7 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                                            }}
                                            className="bg-transparent"
                                         />
-                                          {onUpdate && !readOnly && (
+                                          {!readOnly && (
                                             <button 
                                                 onClick={() => {
                                                     const newTech = [...(project.technologies || [])];
@@ -146,7 +144,7 @@ export function ProjectsSection({ data, theme, onUpdate, readOnly }: ProjectsSec
                                          )}
                                     </span>
                                 ))}
-                                   {onUpdate && !readOnly && (
+                                   {!readOnly && (
                                      <button 
                                          onClick={() => {
                                             const newTech = [...(project.technologies || []), "New Tech"];

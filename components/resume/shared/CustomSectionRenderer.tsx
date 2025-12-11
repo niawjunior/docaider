@@ -1,6 +1,5 @@
 
 import { ResumeData } from "@/lib/schemas/resume";
-import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
 import { ThemeAddButton, ThemeDeleteButton } from "@/components/resume/themes/ThemeControls";
 import { InlineEdit } from "@/components/resume/editor/InlineEdit";
 import { ResumeSectionList } from "./ResumeSectionList";
@@ -8,27 +7,22 @@ import { cn } from "@/lib/utils";
 import { EmptySectionPlaceholder } from "./EmptySectionPlaceholder";
 import { ResumeSection } from "./ResumeSection";
 import { getSectionTheme } from "@/lib/themes/styles";
+import { useResume } from "@/components/resume/state/ResumeContext";
 
 interface CustomSectionRendererProps {
     section: NonNullable<ResumeData['customSections']>[number];
     index: number;
-    data: ResumeData;
-    onUpdate?: (data: ResumeData) => void;
     className?: string;
     theme?: string;
-    readOnly?: boolean;
 }
 
 export function CustomSectionRenderer({ 
     section, 
     index, 
-    data, 
-    onUpdate, 
     className,
     theme = "modern",
-    readOnly
 }: CustomSectionRendererProps) {
-    const { updateField } = useResumeUpdate(data, onUpdate);
+    const { data, updateField, readOnly } = useResume();
     
     // Get Theme Config
     const config = getSectionTheme(theme, 'custom');
@@ -46,8 +40,8 @@ export function CustomSectionRenderer({
         updateField('customSections', newSections);
     };
 
-    // If empty and read-only, don't render
-    if (!onUpdate && (!section.items || section.items.length === 0)) {
+    // If empty and read-only, don't render (unless we have update capabilities)
+    if (!updateField && (!section.items || section.items.length === 0)) {
         return null;
     }
 
@@ -57,7 +51,7 @@ export function CustomSectionRenderer({
             className={cn("group/section", className)}
             title={
                 <div className="flex-1">
-                    <InlineEdit readOnly={readOnly || !onUpdate}
+                    <InlineEdit readOnly={readOnly}
                         value={section.title}
                         onSave={(val) => handleUpdateSection({ ...section, title: val })}
                         className="bg-transparent w-full break-normal" // Allow full width, standard break
@@ -65,7 +59,7 @@ export function CustomSectionRenderer({
                     />
                 </div>
             }
-            actions={onUpdate && !readOnly && (
+            actions={!readOnly && (
                  <ThemeDeleteButton 
                     onClick={handleDeleteSection}
                     className={cn(
@@ -73,7 +67,7 @@ export function CustomSectionRenderer({
                     )}
                 />
             )}
-            onAdd={onUpdate && !readOnly ? () => {
+            onAdd={!readOnly ? () => {
                  const createItem = () => ({
                     id: crypto.randomUUID(),
                     title: { content: "New Item" },
@@ -87,7 +81,7 @@ export function CustomSectionRenderer({
             } : undefined}
         >
             
-            {(!section.items || section.items.length === 0) && onUpdate && !readOnly ? (
+            {(!section.items || section.items.length === 0) && !readOnly ? (
                  <EmptySectionPlaceholder 
                     message={`Add items to ${section.title}`}
                     onClick={() => {
@@ -115,7 +109,7 @@ export function CustomSectionRenderer({
 
                         <div className={styles.header}>
                              <div className={styles.title}> {/* Flex box sometimes */}
-                                 <InlineEdit readOnly={readOnly || !onUpdate}
+                                 <InlineEdit readOnly={readOnly}
                                     value={item.title?.content}
                                     placeholder="Title"
                                     className="bg-transparent"
@@ -127,7 +121,7 @@ export function CustomSectionRenderer({
                              
                              {section.type === "list" && (
                                  <div className={styles.subtitle}>
-                                     <InlineEdit readOnly={readOnly || !onUpdate}
+                                     <InlineEdit readOnly={readOnly}
                                         value={item.subtitle?.content}
                                         placeholder="Subtitle"
                                         className="bg-transparent"
@@ -138,7 +132,7 @@ export function CustomSectionRenderer({
                                  </div>
                              )}
 
-                             {onUpdate && !readOnly && (
+                             {!readOnly && (
                                  <ThemeDeleteButton 
                                     className={styles.deleteButton || "opacity-0 group-hover/item:opacity-100 transition-opacity absolute right-0 top-0"}
                                     onClick={deleteItem}
@@ -148,7 +142,7 @@ export function CustomSectionRenderer({
 
                         {/* Content */}
                         <div className={styles.description}>
-                            <InlineEdit readOnly={readOnly || !onUpdate}
+                            <InlineEdit readOnly={readOnly}
                                 value={item.content?.content}
                                 placeholder="Content..."
                                 multiline

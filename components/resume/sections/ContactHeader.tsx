@@ -4,43 +4,33 @@ import { cn } from "@/lib/utils";
 import { InlineEdit } from "@/components/resume/editor/InlineEdit";
 import { MapPin, Mail, Phone, Globe } from "lucide-react";
 import { getSectionTheme } from "@/lib/themes/styles";
+import { useResume } from "@/components/resume/state/ResumeContext";
 
 interface ContactHeaderProps {
-    data: ResumeData;
     theme: string;
-    onUpdate?: (data: ResumeData) => void;
-    readOnly?: boolean;
 }
 
-export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeaderProps) {
+export function ContactHeader({ theme }: ContactHeaderProps) {
+    const { data, updateField, readOnly } = useResume();
+    
+    // Config
     const config = getSectionTheme(theme, 'header');
     const { styles, strategy } = config;
     
-    // Generic Helper for deeply specific update since we don't have updateSection hook for root here easily without refactoring prop storage
-    const handleUpdate = (path: string, value: any) => {
-        if (!onUpdate) return;
-        const newData = JSON.parse(JSON.stringify(data));
-        
-        const parts = path.split('.');
-        let current = newData;
-        for (let i = 0; i < parts.length - 1; i++) {
-            current = current[parts[i]];
-        }
-        current[parts[parts.length - 1]] = value;
-        onUpdate(newData);
-    };
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+        <div className={styles.item}>
+            {children}
+        </div>
+    );
 
-    // Layout: 'masonry' is our flag for the "Sidebar / Vertical" layout used in Creative theme.
-    // 'list' is the standard horizontal top header.
     const isSidebarLayout = strategy.layout === 'masonry';
 
-    // Render Components
     const Title = (
         <h1 className={styles.title}>
-            <InlineEdit readOnly={readOnly || !onUpdate} 
+            <InlineEdit readOnly={readOnly} 
                 value={data.personalInfo.fullName} 
                 placeholder="Your Name"
-                onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
+                onSave={(val) => updateField('personalInfo.fullName', val)} 
                 path="personalInfo.fullName"
                 className={cn(strategy.alignment === "center" ? "text-center w-full block" : "", "bg-transparent")}
             />
@@ -49,9 +39,9 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
 
     const Summary = (
         <div className={styles.subtitle}>
-             <InlineEdit readOnly={readOnly || !onUpdate} 
+             <InlineEdit readOnly={readOnly} 
                 value={data.personalInfo.headerSummary?.content} 
-                onSave={(val) => handleUpdate('personalInfo.headerSummary.content', val)} 
+                onSave={(val) => updateField('personalInfo.headerSummary.content', val)} 
                 multiline
                 placeholder="Professional Summary"
                 path="personalInfo.headerSummary.content"
@@ -63,49 +53,49 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
 
     const ContactInfo = (
         <div className={styles.metadata}>
-             {(onUpdate || data.personalInfo.email) && (
+             {(!readOnly || data.personalInfo.email) && (
                 <div className={styles.item}>
                     <Mail className="w-4 h-4 shrink-0" />
-                    <InlineEdit readOnly={readOnly || !onUpdate} 
+                    <InlineEdit readOnly={readOnly} 
                         value={data.personalInfo.email} 
                         placeholder="Email"
-                        onSave={(val) => handleUpdate('personalInfo.email', val)} 
+                        onSave={(val) => updateField('personalInfo.email', val)} 
                         path="personalInfo.email"
                         className="bg-transparent"
                     />
                 </div>
             )}
-            {(onUpdate || data.personalInfo.phone) && (
+            {(!readOnly || data.personalInfo.phone) && (
                 <div className={styles.item}>
                     <Phone className="w-4 h-4 shrink-0" />
-                    <InlineEdit readOnly={readOnly || !onUpdate} 
+                    <InlineEdit readOnly={readOnly} 
                         value={data.personalInfo.phone} 
                         placeholder="Phone"
-                        onSave={(val) => handleUpdate('personalInfo.phone', val)} 
+                        onSave={(val) => updateField('personalInfo.phone', val)} 
                         path="personalInfo.phone"
                         className="bg-transparent"
                     />
                 </div>
             )}
-            {(onUpdate || data.personalInfo.location) && (
+            {(!readOnly || data.personalInfo.location) && (
                 <div className={styles.item}>
                     <MapPin className="w-4 h-4 shrink-0" />
-                    <InlineEdit readOnly={readOnly || !onUpdate} 
+                    <InlineEdit readOnly={readOnly} 
                         value={data.personalInfo.location} 
                         placeholder="Location"
-                        onSave={(val) => handleUpdate('personalInfo.location', val)} 
+                        onSave={(val) => updateField('personalInfo.location', val)} 
                         path="personalInfo.location"
                         className="bg-transparent"
                     />
                 </div>
             )}
-            {(onUpdate || data.personalInfo.website) && (
+            {(!readOnly || data.personalInfo.website) && (
                 <div className={styles.item}>
                     <Globe className="w-4 h-4 shrink-0" />
-                    <InlineEdit readOnly={readOnly || !onUpdate} 
+                    <InlineEdit readOnly={readOnly} 
                         value={data.personalInfo.website} 
                         placeholder="Website"
-                        onSave={(val) => handleUpdate('personalInfo.website', val)} 
+                        onSave={(val) => updateField('personalInfo.website', val)} 
                         path="personalInfo.website"
                         className="bg-transparent"
                     />
@@ -126,7 +116,6 @@ export function ContactHeader({ data, theme, onUpdate, readOnly }: ContactHeader
         );
     }
 
-    // Standard Layout (Modern, Minimal, Studio, etc.)
     return (
         <header className={styles.container}>
             <div className={strategy.alignment === 'center' ? "text-center" : "text-left"}>

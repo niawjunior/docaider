@@ -316,6 +316,26 @@ export const SKILLS_STYLES: ThemeToSectionConfig = {
             item: "text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 border border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100 rounded-none hover:bg-slate-900 hover:text-white dark:hover:bg-slate-100 dark:hover:text-slate-900 transition-colors",
             header: "", title: "", subtitle: "", metadata: "", description: ""
          }
+    },
+    'modern-sidebar': {
+        styles: {
+            container: "flex flex-wrap gap-2",
+            item: "text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 rounded-full hover:bg-slate-200 transition-colors",
+            header: "hidden", 
+            title: "", subtitle: "", metadata: "", description: "",
+            deleteButton: "w-4 h-4 text-slate-500 hover:text-red-500 bg-transparent p-0 border-none transition-opacity"
+        },
+        strategy: { layout: 'list', datesPosition: 'inline', alignment: 'left' }
+    },
+    'creative-sidebar': {
+        styles: {
+            container: "flex flex-wrap gap-2",
+            item: "px-2 py-1 bg-slate-700 rounded text-xs flex items-center gap-2 hover:bg-slate-600 transition-colors text-white",
+            header: "hidden", 
+            title: "", subtitle: "", metadata: "", description: "",
+            deleteButton: "w-4 h-4 text-slate-400 hover:text-red-400 bg-transparent p-0 border-none transition-opacity"
+        },
+        strategy: { layout: 'list', datesPosition: 'inline', alignment: 'left' }
     }
 };
 
@@ -351,10 +371,10 @@ export const SUMMARY_STYLES: ThemeToSectionConfig = {
     },
      visual: {
         styles: {
-            container: "text-lg leading-relaxed text-slate-700 font-light",
-             item: "", header: "", title: "", subtitle: "", metadata: "", description: ""
+            container: "text-lg leading-relaxed text-slate-700 font-light text-center",
+             item: "", header: "", title: "hidden", subtitle: "", metadata: "", description: ""
         },
-        strategy: { layout: 'list', datesPosition: 'inline', alignment: 'left' }
+        strategy: { layout: 'list', datesPosition: 'inline', alignment: 'center' }
     },
     portfolio: {
         ...DEFAULT_THEME_STYLE

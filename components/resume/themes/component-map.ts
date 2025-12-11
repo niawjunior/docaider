@@ -7,12 +7,8 @@ import { CreativeTheme } from "./CreativeTheme";
 import { ResumeData } from "@/lib/schemas/resume";
 
 export interface ThemeComponentProps {
-  data: ResumeData;
-  onUpdate?: (data: ResumeData) => void;
-  readOnly?: boolean;
   containerRef?: React.RefObject<any>;
   isThumbnail?: boolean;
-  theme?: string;
 }
 
 export const THEME_COMPONENTS: Record<string, React.ComponentType<ThemeComponentProps>> = {

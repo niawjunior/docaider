@@ -1,77 +1,41 @@
 "use client";
 
-import { ResumeData } from "@/lib/schemas/resume";
+import { useResume } from "@/components/resume/state/ResumeContext";
 import { ContactHeader } from "@/components/resume/sections/ContactHeader";
-import { ExperienceSection } from "@/components/resume/sections/ExperienceSection";
-import { EducationSection } from "@/components/resume/sections/EducationSection";
 import { SkillsSection } from "@/components/resume/sections/SkillsSection";
-import { ProjectsSection } from "@/components/resume/sections/ProjectsSection";
-import { SummarySection } from "@/components/resume/sections/SummarySection";
-import { CustomSectionRenderer } from "@/components/resume/shared/CustomSectionRenderer";
+import { SectionRenderer } from "@/components/resume/shared/SectionRenderer";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-interface ModernThemeProps {
-  data: ResumeData;
-  onUpdate?: (data: ResumeData) => void;
-  readOnly?: boolean; // Added readOnly prop
-}
+import { ThemeComponentProps } from "./component-map";
 
-export const ModernTheme = ({ data, onUpdate, readOnly }: ModernThemeProps) => { // Destructure readOnly
+export const ModernTheme = ({ containerRef }: ThemeComponentProps) => {
+  const { data, updateField, readOnly } = useResume();
+
   // Determine order (fallback if empty)
   const order = (data.sectionOrder && data.sectionOrder.length > 0) 
       ? data.sectionOrder 
       : ["experience", "education", "projects", "skills"];
 
-  // Helper to render a section by ID
-  const renderSection = (id: string) => {
-    switch (id) {
-        case 'summary': return <SummarySection key={id} data={data} theme="modern" onUpdate={onUpdate} readOnly={readOnly} />;
-        case 'experience': return <ExperienceSection key={id} data={data} theme="modern" onUpdate={onUpdate} readOnly={readOnly} />;
-        case 'education': return <EducationSection key={id} data={data} theme="modern" onUpdate={onUpdate} readOnly={readOnly} />;
-        case 'projects': return <ProjectsSection key={id} data={data} theme="modern" onUpdate={onUpdate} readOnly={readOnly} />;
-        case 'skills':
-            // In Modern theme, Skills are typically in the sidebar.
-            // If the user drags 'skills' into the main list, we technically "skip" it here
-            // because it is hardcoded in the sidebar.
-            // Alternatively, we could ONLY render it here if we want to allow moving it out of sidebar.
-            // For now, consistent with previous logic: Render explicit sidebar, skip here.
-            return null;
-            
-        default:
-            // Custom Section
-            const custom = data.customSections?.find(c => c.id === id);
-            if (custom) {
-                return (
-                    <CustomSectionRenderer 
-                        key={id} 
-                        section={custom} 
-                        index={data.customSections?.indexOf(custom) || 0}
-                        data={data} 
-                        onUpdate={onUpdate} 
-                        theme="modern"
-                        readOnly={readOnly} // Pass readOnly to CustomSectionRenderer
-                    />
-                );
-            }
-            return null;
-    }
-  };
-
   return (
-    <div id="resume-preview" className="w-[250mm] min-h-[297mm] bg-white shadow-xl flex mx-auto">
+    <div 
+        ref={containerRef}
+        id="resume-preview" 
+        className="w-[210mm] min-h-[297mm] bg-white text-slate-900 shadow-xl mx-auto flex"
+    >
       {/* Sidebar */}
       <div className="w-1/3 bg-slate-900 text-white p-8 space-y-8 flex-shrink-0">
         <div className="space-y-4">
              <div className="text-center">
-                  {/* Avatar & Name area if needed in sidebar, but currently using ContactHeader which handles name */}
+                  {/* Avatar & Name area handled by ContactHeader */}
              </div>
         </div>
         
-        <ContactHeader data={data} theme="modern" onUpdate={onUpdate} readOnly={readOnly} /> {/* Pass readOnly */}
+        <ContactHeader theme="modern" />
         
         {/* Fixed Sidebar Sections */}
-        <SkillsSection data={data} theme="modern" onUpdate={onUpdate} readOnly={readOnly} /> {/* Pass readOnly */}
+        {/* Note: In Modern theme, Skills are typically in the sidebar. */}
+        <SkillsSection theme="modern-sidebar" />
       </div>
 
       {/* Main Content */}
@@ -79,10 +43,10 @@ export const ModernTheme = ({ data, onUpdate, readOnly }: ModernThemeProps) => {
          {/* Render ordered sections (filtering out Skills which is sidebar) */}
          {order.map(id => {
              if (id === 'skills') return null; // In sidebar
-             return renderSection(id);
+             return <SectionRenderer key={id} sectionId={id} theme="modern" />;
          })}
 
-         {onUpdate && !readOnly && (
+         {!readOnly && (
             <div className="mt-8 border-t border-slate-200 pt-8 flex justify-center">
                 <Button variant="outline" className="text-slate-900 border-slate-200 hover:bg-slate-100" onClick={() => {
                     const newSection = {
@@ -92,7 +56,7 @@ export const ModernTheme = ({ data, onUpdate, readOnly }: ModernThemeProps) => {
                         items: []
                     };
                     const newSections = [...(data.customSections || []), newSection];
-                    onUpdate({ ...data, customSections: newSections });
+                    updateField('customSections', newSections);
                 }}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Custom Section
@@ -103,3 +67,4 @@ export const ModernTheme = ({ data, onUpdate, readOnly }: ModernThemeProps) => {
     </div>
   );
 };
+
