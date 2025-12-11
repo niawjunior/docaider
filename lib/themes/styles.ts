@@ -214,10 +214,10 @@ export const PROJECT_STYLES: ThemeToSectionConfig = {
             container: "grid gap-6 grid-cols-1",
             item: "p-6 border border-slate-200 rounded-xl",
             header: "flex justify-between items-start gap-3",
-            title: "font-bold text-2xl text-slate-900",
+            title: "font-bold text-2xl text-white",
             subtitle: "hidden",
-            metadata: "text-slate-500 text-sm",
-            description: "text-slate-600 text-sm leading-relaxed"
+            metadata: "text-neutral-400 text-sm",
+            description: "text-neutral-300 text-sm leading-relaxed"
         },
         strategy: {
              layout: 'list',
@@ -313,7 +313,7 @@ export const SKILLS_STYLES: ThemeToSectionConfig = {
          ...DEFAULT_THEME_STYLE,
           styles: {
             container: "flex flex-wrap gap-2",
-            item: "text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 border border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100 rounded-none hover:bg-slate-900 hover:text-white dark:hover:bg-slate-100 dark:hover:text-slate-900 transition-colors",
+            item: "text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 border border-neutral-800 text-white rounded-none hover:bg-white hover:text-black transition-colors",
             header: "", title: "", subtitle: "", metadata: "", description: ""
          }
     },
@@ -371,7 +371,7 @@ export const SUMMARY_STYLES: ThemeToSectionConfig = {
     },
      visual: {
         styles: {
-            container: "text-lg leading-relaxed text-slate-700 font-light text-center",
+            container: "text-lg leading-relaxed text-neutral-300 font-light text-center",
              item: "", header: "", title: "hidden", subtitle: "", metadata: "", description: ""
         },
         strategy: { layout: 'list', datesPosition: 'inline', alignment: 'center' }
@@ -438,10 +438,10 @@ export const HEADER_STYLES: ThemeToSectionConfig = {
     visual: {
         styles: {
             container: "mb-12 border-none pb-0 text-left",
-            title: "font-bold tracking-tighter mb-4 w-full text-7xl text-slate-900",
-            subtitle: "text-2xl text-slate-600 mb-8 w-full font-light",
-            metadata: "flex flex-wrap gap-6 text-base text-slate-500",
-             item: "flex items-center gap-2 px-3 py-1 border border-slate-200 rounded-full",
+            title: "font-bold tracking-tighter mb-4 w-full text-7xl text-white",
+            subtitle: "text-2xl text-neutral-400 mb-8 w-full font-light",
+            metadata: "flex flex-wrap gap-6 text-base text-neutral-400",
+             item: "flex items-center gap-2 px-3 py-1 border border-neutral-800 rounded-full",
              header: "", description: ""
         },
         strategy: { layout: 'list', datesPosition: 'inline', alignment: 'left' }

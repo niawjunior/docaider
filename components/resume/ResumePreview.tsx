@@ -27,10 +27,20 @@ export const ResumePreview = ({ data, onUpdate, readOnly, isThumbnail, theme = "
     onUpdate(newData);
   };
 
+  const handleUpdateMultipleFields = (updates: Record<string, any>) => {
+    if (!onUpdate) return;
+    let newData = data;
+    Object.entries(updates).forEach(([path, value]) => {
+       newData = setNestedValue(newData, path, value);
+    });
+    onUpdate(newData);
+  };
+
   const content = (
       <ResumeProvider 
           data={data} 
           updateField={handleUpdateField} 
+          updateMultipleFields={handleUpdateMultipleFields}
           readOnly={readOnly} 
           isThumbnail={isThumbnail}
           theme={theme}

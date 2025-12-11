@@ -17,7 +17,7 @@ import { useResume } from "@/components/resume/state/ResumeContext";
 import { ThemeComponentProps } from "./component-map";
 
 export const StudioTheme = ({ containerRef }: ThemeComponentProps) => {
-  const { data, updateField: handleUpdate, readOnly } = useResume();
+  const { data, updateField: handleUpdate, updateMultipleFields, readOnly } = useResume();
 
   const marqueeVariants = {
     animate: {
@@ -543,18 +543,17 @@ export const StudioTheme = ({ containerRef }: ThemeComponentProps) => {
                    const newSections = [...(data.customSections || []), newSection];
                    const newOrder = [...(data.sectionOrder || []), newSection.id];
                    
-                   // Update both. 
-                   // NOTE: updateField is for paths. For multiple updates, we either call it twice or context supports bulk?
-                   // Context updateField is (path, value).
-                   // I should chain them or update a parent object if possible.
-                   // The root data update is implicit? No.
-                   // I can only update one path.
-                   // But here we need to update 'customSections' AND 'sectionOrder'.
-                   // Current Context API is one field at a time.
-                   // But they are separate keys.
-                   // I'll call it twice. React batching should handle it.
-                   handleUpdate('customSections', newSections);
-                   handleUpdate('sectionOrder', newOrder);
+                   // Atomically update both fields
+                   if (updateMultipleFields) {
+                       updateMultipleFields({
+                           'customSections': newSections,
+                           'sectionOrder': newOrder
+                       });
+                   } else {
+                       // Fallback (though provider should have it)
+                       handleUpdate('customSections', newSections);
+                       setTimeout(() => handleUpdate('sectionOrder', newOrder), 0);
+                   }
                }} className="bg-transparent border-neutral-800 text-white hover:bg-neutral-800 hover:text-white">
                    <Plus className="w-4 h-4 mr-2" />
                    Add Section

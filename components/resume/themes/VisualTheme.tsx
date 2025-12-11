@@ -81,19 +81,13 @@ export const VisualTheme = ({ containerRef, isThumbnail }: ThemeComponentProps) 
       )}>
         <div className="absolute inset-0 z-0">
           {data.coverImage ? (
-            <motion.div 
-                style={isThumbnail ? undefined : { y }} 
-                className={cn(
-                    "w-full h-[120%] -translate-y-[10%]",
-                    isThumbnail && "h-full translate-y-0" // Reset for thumbnail
-                )}
-            >
-              <img 
-                src={data.coverImage} 
-                alt="Cover" 
-                className="w-full h-full object-cover opacity-60"
-              />
-            </motion.div>
+            <div className="absolute inset-0">
+                <img 
+                    src={data.coverImage} 
+                    alt="Cover" 
+                    className="w-full h-full object-cover opacity-60"
+                />
+            </div>
           ) : (
             <div className="w-full h-full bg-neutral-900" />
           )}

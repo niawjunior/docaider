@@ -88,13 +88,23 @@ export function ProjectsSection({ theme, className }: ProjectsSectionProps) {
                                  
                                  <div className={cn("flex items-center gap-2", theme === "minimal" && "w-full justify-center")}>
                                     {project.url && (
-                                       <a href={project.url} target="_blank" rel="noopener noreferrer" className={styles.metadata}>
-                                             <InlineEdit readOnly={readOnly} 
-                                            value={project.url} 
-                                            placeholder="URL"
-                                            onSave={(val) => updateItem({ url: val })}
-                                         />
-                                       </a>
+                                       readOnly ? (
+                                           <a href={project.url} target="_blank" rel="noopener noreferrer" className={styles.metadata}>
+                                                <InlineEdit readOnly={readOnly} 
+                                                    value={project.url} 
+                                                    placeholder="URL"
+                                                    onSave={(val) => updateItem({ url: val })}
+                                                />
+                                           </a>
+                                       ) : (
+                                            <span className={styles.metadata}>
+                                                 <InlineEdit readOnly={readOnly} 
+                                                    value={project.url} 
+                                                    placeholder="URL"
+                                                    onSave={(val) => updateItem({ url: val })}
+                                                 />
+                                            </span>
+                                       )
                                     )}
                                     
                                      {!readOnly && (
@@ -131,6 +141,7 @@ export function ProjectsSection({ theme, className }: ProjectsSectionProps) {
                                                updateItem({ technologies: newTech });
                                            }}
                                            className="bg-transparent"
+                                           path={`projects[${i}].technologies[${tIndex}]`}
                                         />
                                           {!readOnly && (
                                             <button 

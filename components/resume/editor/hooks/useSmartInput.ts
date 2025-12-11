@@ -36,6 +36,7 @@ export function useSmartInput({
         if (readOnly) return;
         setIsEditing(false);
         if (setHasSelection) setHasSelection(false);
+        if (setFocusedField) setFocusedField(null);
         if (contentRef.current) {
             // Use textContent for single-line to avoid CSS artifacts (like text-transform), 
             // but fallback to innerText for multiline to preserve line breaks correctly.

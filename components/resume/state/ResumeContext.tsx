@@ -6,6 +6,7 @@ import { ResumeData } from "@/lib/schemas/resume";
 interface ResumeContextType {
     data: ResumeData;
     updateField: (path: string, value: any) => void;
+    updateMultipleFields: (updates: Record<string, any>) => void;
     readOnly: boolean;
     isThumbnail: boolean;
     theme?: string;
@@ -17,6 +18,7 @@ interface ResumeProviderProps {
     children: ReactNode;
     data: ResumeData;
     updateField?: (path: string, value: any) => void;
+    updateMultipleFields?: (updates: Record<string, any>) => void;
     readOnly?: boolean;
     isThumbnail?: boolean;
     theme?: string;
@@ -26,6 +28,7 @@ export function ResumeProvider({
     children, 
     data, 
     updateField = () => {}, 
+    updateMultipleFields = () => {},
     readOnly = false,
     isThumbnail = false,
     theme
@@ -34,6 +37,7 @@ export function ResumeProvider({
         <ResumeContext.Provider value={{
             data,
             updateField,
+            updateMultipleFields,
             readOnly,
             isThumbnail,
             theme

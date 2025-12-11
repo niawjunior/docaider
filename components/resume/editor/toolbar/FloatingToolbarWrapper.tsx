@@ -15,8 +15,8 @@ export function FloatingToolbarWrapper({ children }: FloatingToolbarWrapperProps
     const toolbarRef = useRef<HTMLDivElement>(null);
 
     // Visibility Check
-    // If AI IS open, we render even if selection is lost, using lockedField if available
-    const shouldRender = aiOpen || (focusedField && hasSelection);
+    // Render if AI is open OR if we have a focused field (don't strictly require selection range)
+    const shouldRender = aiOpen || !!focusedField;
 
     useLayoutEffect(() => {
         if (!shouldRender) return;
@@ -32,39 +32,14 @@ export function FloatingToolbarWrapper({ children }: FloatingToolbarWrapperProps
                  }
             } 
             
-            // Priority 2: Current Focus (Selection or Element) - Only if NOT in AI mode or AI didn't find target
+            // Priority 2: Current Focus (Element only, no cursor tracking as requested)
             if (!targetRect && focusedField) {
-                 // Try Text Selection first
-                 if (hasSelection) {
-                    const selection = window.getSelection();
-                    if (selection && selection.rangeCount > 0) {
-                        const range = selection.getRangeAt(0);
-                        const selectionRect = range.getBoundingClientRect();
-                        
-                        let containerRect = selectionRect;
-                        if (selectionRect.width === 0 && selectionRect.height === 0) {
-                            const anchorNode = selection.anchorNode;
-                            if (anchorNode) {
-                                const element = anchorNode.nodeType === Node.TEXT_NODE 
-                                    ? anchorNode.parentElement 
-                                    : anchorNode as Element;
-                                if (element) {
-                                    containerRect = element.getBoundingClientRect();
-                                }
-                            }
-                        }
-                        if (containerRect.width > 0 || containerRect.height > 0) {
-                            targetRect = containerRect;
-                        }
-                    }
-                 }
-                 
-                 // Fallback to Element (e.g. Skills)
-                 if (!targetRect) {
-                     const element = document.querySelector(`[data-path="${focusedField}"]`);
-                     if (element) {
-                         targetRect = element.getBoundingClientRect();
-                     }
+                 const element = document.querySelector(`[data-path="${focusedField}"]`);
+                 const elementRect = element?.getBoundingClientRect();
+
+                 // Simplified: Just center on the element at the top
+                 if (elementRect) {
+                     targetRect = elementRect;
                  }
             }
             
@@ -88,10 +63,12 @@ export function FloatingToolbarWrapper({ children }: FloatingToolbarWrapperProps
         updatePosition();
         window.addEventListener("scroll", updatePosition, { capture: true });
         window.addEventListener("resize", updatePosition);
+        document.addEventListener("selectionchange", updatePosition);
 
         return () => {
             window.removeEventListener("scroll", updatePosition, { capture: true });
             window.removeEventListener("resize", updatePosition);
+            document.removeEventListener("selectionchange", updatePosition);
         };
     }, [focusedField, hasSelection, aiOpen, lockedField, shouldRender]);
 
