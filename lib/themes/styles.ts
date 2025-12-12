@@ -137,7 +137,7 @@ export const PROJECT_STYLES: ThemeToSectionConfig = {
             subtitle: "hidden", 
             metadata: "text-blue-500 hover:underline text-sm block w-full", // Removed span override, rely on component prop
             description: "text-slate-600 text-sm leading-relaxed",
-            deleteButton: "absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors" // Absolute positioning
+            deleteButton: "absolute top-0 right-0 text-slate-400 hover:text-red-500 transition-colors" // Absolute positioning
         },
         strategy: {
             layout: 'list',
