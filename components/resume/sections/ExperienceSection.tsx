@@ -70,7 +70,7 @@ export function ExperienceSection({ theme, className }: ExperienceSectionProps) 
                       <div className={styles.item}>
                         {/* Decorative Element e.g. Dot for Creative Theme */}
                         {strategy.showDecorations && (
-                            <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-slate-900 border-4 border-white" />
+                            <div className="absolute -left-[33px] top-1 w-4 h-4 rounded-full bg-slate-900 border-4 border-white" />
                         )}
 
                         <div className={styles.header}>

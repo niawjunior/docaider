@@ -69,7 +69,7 @@ export function EducationSection({ theme, className }: EducationSectionProps) {
                         <div className={styles.item}>
                             {/* Decoration (Creative Dot) */}
                             {strategy.showDecorations && (
-                                <div className="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-slate-900 border-4 border-white" />
+                                <div className="absolute -left-[33px] top-1 w-4 h-4 rounded-full bg-slate-900 border-4 border-white" />
                             )}
 
                             <div className={styles.header}>
