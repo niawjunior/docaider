@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ScanAnimation, CircuitAnimation, SparkleAnimation, RocketAnimation } from "@/components/resume/shared/AnimatedIcons";
 import { useDropzone } from "react-dropzone";
+import WizardSVG from "@/components/resume/WizardSVG";
 
 interface ResumeUploaderProps {
   onUploadSuccess: (data: ResumeData) => void;
@@ -180,14 +181,8 @@ export function ResumeUploader(props: ResumeUploaderProps) {
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0.8, opacity: 0 }}
-                      className="bg-slate-800/50 p-6 rounded-3xl ring-1 ring-white/10 shadow-2xl backdrop-blur-sm"
                   >
-                      <motion.div
-                        animate={{ y: [0, -5, 0] }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                      >
-                         <Upload className="w-12 h-12 text-blue-400" />
-                      </motion.div>
+                      <WizardSVG className="w-32 h-32" />
                   </motion.div>
               )}
           </AnimatePresence>

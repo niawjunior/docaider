@@ -400,8 +400,8 @@ export const HEADER_STYLES: ThemeToSectionConfig = {
             container: "mb-8 text-center pb-8 border-b border-slate-200",
             title: "font-bold uppercase mb-2 w-full text-3xl tracking-widest font-normal text-slate-900",
             subtitle: "text-lg text-slate-500 mb-4 w-full italic text-center",
-            metadata: "flex flex-wrap gap-4 text-sm text-slate-500 justify-center [&>div]:w-[30%]", // Max 3 per row
-            item: "flex items-center gap-1 [&_span]:whitespace-nowrap",
+            metadata: "flex flex-wrap gap-4 text-sm text-slate-500 justify-center", // Removed fixed width constraint
+            item: "flex items-center gap-1", // Removed whitespace-nowrap
             header: "", description: ""
         },
         strategy: { layout: 'list', datesPosition: 'inline', alignment: 'center' }

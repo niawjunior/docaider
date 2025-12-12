@@ -85,6 +85,8 @@ export function ResumeEditorControls({
     const activeThemeConfig = AVAILABLE_THEMES.find(t => t.id === theme);
     const isWebTheme = activeThemeConfig?.type === 'web';
 
+    const [showPublishDialog, setShowPublishDialog] = useState(false);
+
     return (
         <div className="flex items-center gap-3">
              {resumeData && (
@@ -159,7 +161,7 @@ export function ResumeEditorControls({
                     )}
 
                     {/* Main Actions Dropdown */}
-                    <Dialog>
+                    <Dialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button size="sm" className="bg-blue-600 hover:bg-blue-500 text-white border-none shadow-lg shadow-blue-900/20 ml-2 gap-2 w-[120px] flex">
@@ -168,12 +170,39 @@ export function ResumeEditorControls({
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56 bg-slate-900 border-slate-800 text-slate-200">
-                                <DialogTrigger asChild>
-                                    <DropdownMenuItem onClick={() => setPublishedUrl(null)} className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 focus:text-white gap-2">
-                                        <Share2 className="w-4 h-4" />
-                                        Publish to Web
-                                    </DropdownMenuItem>
-                                </DialogTrigger>
+                                <DropdownMenuItem 
+                                    onClick={async (e) => {
+                                        e.preventDefault();
+                                        setPublishedUrl(null);
+
+                                        // Auto-save logic before opening dialog
+                                        if (isDirty) {
+                                            const savePromise = async () => {
+                                                await onSave({ silent: true });
+                                            };
+
+                                            toast.promise(savePromise(), {
+                                                loading: 'Saving latest changes...',
+                                                success: 'Saved! Opening publish settings...',
+                                                error: 'Failed to save.',
+                                            });
+                                            
+                                            try {
+                                                await savePromise();
+                                                setShowPublishDialog(true);
+                                            } catch (error) {
+                                                console.error("Auto-save failed:", error);
+                                            }
+                                        } else {
+                                            setShowPublishDialog(true);
+                                        }
+                                    }} 
+                                    className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 focus:text-white gap-2"
+                                >
+                                    <Share2 className="w-4 h-4" />
+                                    Publish to Web
+                                </DropdownMenuItem>
+
                                   {idParam && (
                                     <>
                                         <DropdownMenuSeparator className="bg-slate-800" />
@@ -317,13 +346,10 @@ export function ResumeEditorControls({
                                 if (!resumeData || !slug) return;
                                 setIsPublishing(true);
                                 try {
-                                    // Save first to ensure latest content is on backend
-                                    await saveDraft({
-                                        content: resumeData,
-                                        theme,
-                                        slug,
-                                        id: idParam || undefined,
-                                    });
+                                    // Trigger generic save to ensure consistency and clear dirty state
+                                    if (isDirty) {
+                                        await onSave({ silent: true });
+                                    }
                                     const pubResult = await publishResume({
                                         content: resumeData,
                                         theme,

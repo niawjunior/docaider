@@ -10,6 +10,7 @@ import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePres
 import { useRef, useState, useEffect } from "react";
 import { saveDraft } from "@/app/actions/resume";
 import { THEME_DEMOS } from "@/lib/themes";
+import WizardSVG from "./WizardSVG";
 
 interface LandingPageProps {
   initialData: { count: number; showcase: any[] };
@@ -223,11 +224,20 @@ export function LandingPage({ initialData }: LandingPageProps) {
       <ResumeBuilderHeader theme="dark" className="bg-transparent border-b border-white/10 relative z-50 backdrop-blur-md" />
 
       <main className="relative z-10" ref={targetRef}>
+
         {/* Animated Hero */}
         <motion.section 
           style={{ opacity: fadeOpacity, scale: scaleHero }}
           className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 text-center pt-20"
         >
+        <motion.div
+                              key="idle"
+                              initial={{ scale: 0.8, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              exit={{ scale: 0.8, opacity: 0 }}
+                          >
+                              <WizardSVG className="w-32 h-32" />
+                          </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -237,7 +247,6 @@ export function LandingPage({ initialData }: LandingPageProps) {
             <Sparkles className="w-4 h-4 text-yellow-400 group-hover:rotate-12 transition-transform" />
             <span className="bg-gradient-to-r from-yellow-200 to-amber-200 text-transparent bg-clip-text font-bold">New:</span> 
             <span className="text-slate-300">Portfolio AI is live</span>
-            <ArrowRight className="w-4 h-4 text-slate-500 group-hover:translate-x-1 transition-transform" />
           </motion.div>
 
           <motion.h1 
