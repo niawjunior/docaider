@@ -57,8 +57,8 @@ export async function publishResume(data: {
         content: data.content,
         theme: data.theme,
         slug: data.slug, // Allow updating slug
-        job_title: data.content.personalInfo.jobTitle,
-        summary: data.content.personalInfo.summary,
+        job_title: (data.content.personalInfo as any).jobTitle,
+        summary: (data.content.personalInfo as any).summary,
         is_public: isPublic,
         updated_at: new Date().toISOString(),
       })
@@ -80,8 +80,8 @@ export async function publishResume(data: {
       .update({
         content: data.content,
         theme: data.theme,
-        job_title: data.content.personalInfo.jobTitle,
-        summary: data.content.personalInfo.summary,
+        job_title: (data.content.personalInfo as any).jobTitle,
+        summary: (data.content.personalInfo as any).summary,
         is_public: isPublic,
         updated_at: new Date().toISOString(),
       })
@@ -98,8 +98,8 @@ export async function publishResume(data: {
       user_id: user.id,
       content: data.content,
       theme: data.theme,
-      job_title: data.content.personalInfo.jobTitle,
-      summary: data.content.personalInfo.summary,
+      job_title: (data.content.personalInfo as any).jobTitle,
+      summary: (data.content.personalInfo as any).summary,
       is_public: isPublic,
     });
 
@@ -145,8 +145,8 @@ export async function saveDraft(data: {
       .update({
         content: data.content,
         theme: data.theme,
-        job_title: data.content.personalInfo.jobTitle,
-        summary: data.content.personalInfo.summary,
+        job_title: (data.content.personalInfo as any).jobTitle,
+        summary: (data.content.personalInfo as any).summary,
         updated_at: new Date().toISOString(),
         // We don't change public status here, just save content
       })
@@ -165,8 +165,8 @@ export async function saveDraft(data: {
         user_id: user.id,
         content: data.content,
         theme: data.theme,
-        job_title: data.content.personalInfo.jobTitle,
-        summary: data.content.personalInfo.summary,
+        job_title: (data.content.personalInfo as any).jobTitle,
+        summary: (data.content.personalInfo as any).summary,
         slug: slug,
         is_public: false, // Default to draft/private
       })
