@@ -41,7 +41,7 @@ interface ResumeEditorControlsProps {
     setResumeData: (data: ResumeData) => void;
     isDirty: boolean;
     isSaving: boolean;
-    onSave: () => void;
+    onSave: (options?: { silent?: boolean }) => Promise<void> | void;
     viewport: "desktop" | "tablet" | "mobile";
     setViewport: (v: "desktop" | "tablet" | "mobile") => void;
     theme: string;
@@ -101,7 +101,7 @@ export function ResumeEditorControls({
                         variant={isDirty ? "default" : "secondary"}
                         size="sm"
                         className={isDirty ? "bg-amber-500 hover:bg-amber-600 text-black border-none" : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10"}
-                        onClick={onSave}
+                        onClick={() => onSave()}
                         disabled={isSaving || !idParam}
                     >
                         {isSaving ? (
@@ -198,7 +198,35 @@ export function ResumeEditorControls({
                                                 </Tooltip>
                                             </TooltipProvider>
                                         ) : (
-                                            <DropdownMenuItem onSelect={() => setShowPdfExport(true)} className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 focus:text-white gap-2">
+                                            <DropdownMenuItem 
+                                                onSelect={async (e) => {
+                                                    e.preventDefault(); 
+                                                    
+                                                    // Auto-save before exporting
+                                                    if (isDirty) {
+                                                        const savePromise = async () => {
+                                                            await onSave({ silent: true });
+                                                        };
+
+                                                        toast.promise(savePromise(), {
+                                                            loading: 'Saving latest changes...',
+                                                            success: 'Saved! Preparing PDF...',
+                                                            error: 'Failed to save.',
+                                                        });
+                                                        
+                                                        try {
+                                                            await savePromise();
+                                                            setShowPdfExport(true);
+                                                        } catch (error) {
+                                                            console.error("Auto-save failed:", error);
+                                                            // Optional: Show error dialog or prevent export
+                                                        }
+                                                    } else {
+                                                         setShowPdfExport(true);
+                                                    }
+                                                }} 
+                                                className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 focus:text-white gap-2"
+                                            >
                                                 <Download className="w-4 h-4" />
                                                 Download PDF
                                             </DropdownMenuItem>

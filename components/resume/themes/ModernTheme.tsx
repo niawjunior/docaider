@@ -21,10 +21,13 @@ export const ModernTheme = ({ containerRef }: ThemeComponentProps) => {
     <div 
         ref={containerRef}
         id="resume-preview" 
-        className="w-[230mm] min-h-[297mm] bg-white text-slate-900 shadow-xl mx-auto flex"
+        className="w-[210mm] min-h-[297mm] shadow-xl mx-auto flex relative"
+        style={{ backgroundColor: '#0f172a' }}
     >
+      {/* Edge Bleed Fix */}
+      <div className="absolute top-0 bottom-0 -left-[1px] w-[2px] bg-[#0f172a] z-0 pointer-events-none" />
       {/* Sidebar */}
-      <div className="w-1/3 bg-slate-900 text-white p-6 flex-shrink-0">
+      <div className="w-1/3 bg-slate-900 text-white p-6 flex-shrink-0 min-h-full">
         <div className="space-y-4">
              <div className="text-center">
                   {/* Avatar & Name area handled by ContactHeader */}

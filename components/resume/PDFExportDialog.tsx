@@ -126,7 +126,7 @@ export function PDFExportDialog({ resumeId, trigger, open, onOpenChange, classNa
           </DialogDescription>
         </DialogHeader>
 
-        <div className="relative w-full h-[320px] flex items-center justify-center overflow-hidden">
+        <div className="relative w-full h-[250px] flex items-center justify-center overflow-hidden">
             <AnimatePresence initial={false} mode="popLayout">
                 {status === "idle" && (
                      <motion.div 

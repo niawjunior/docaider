@@ -84,7 +84,7 @@ export function ResumeEditor() {
   // Track unsaved changes (content OR theme)
   const isDirty = JSON.stringify({ content: resumeData, theme }) !== lastSavedData.current;
 
-  const handleSave = async () => {
+  const handleSave = async (options?: { silent?: boolean }) => {
       if (!resumeData || !idParam) return;
       setIsSaving(true);
       try {
@@ -95,10 +95,14 @@ export function ResumeEditor() {
               slug 
           });
           lastSavedData.current = JSON.stringify({ content: resumeData, theme });
-          toast.success("Saved successfully");
+          if (!options?.silent) {
+              toast.success("Saved successfully");
+          }
       } catch (e) {
           console.error("Save Failed", e);
-          toast.error("Failed to save");
+          if (!options?.silent) {
+            toast.error("Failed to save");
+          }
       } finally {
           setIsSaving(false);
       }

@@ -15,10 +15,13 @@ export const CreativeTheme = ({ containerRef }: ThemeComponentProps) => {
   return (
       <div 
         ref={containerRef}
-        className="w-full max-w-5xl min-h-[1100px] bg-white text-slate-900 shadow-xl mx-auto print:shadow-none group/resume text-left p-0 flex"
+        className="w-[210mm] min-h-[297mm] text-slate-900 shadow-xl mx-auto print:shadow-none group/resume text-left p-0 flex relative"
+        style={{ backgroundColor: '#0f172a' }}
       >
+        {/* Edge Bleed Fix */}
+        <div className="absolute top-0 bottom-0 -left-[1px] w-[2px] bg-[#0f172a] z-0 pointer-events-none" />
         {/* Sidebar */}
-        <div className="w-1/3 bg-slate-900 text-white p-8 space-y-8 text-left">
+        <div className="w-1/3 bg-slate-900 text-white p-8 space-y-8 text-left min-h-full">
            <SectionRenderer sectionId="contact" theme="creative" />
            <SectionRenderer sectionId="skills" theme="creative-sidebar" />
         </div>
