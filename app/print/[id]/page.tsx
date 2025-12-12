@@ -1,9 +1,40 @@
-
 import { createClient, createServiceClient } from "@/app/utils/supabase/server";
 import { ResumeData } from "@/lib/schemas/resume";
 import { normalizeResumeData } from "@/lib/utils/resume-normalization";
 import { ResumePreview } from "@/components/resume/ResumePreview";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
+
+export async function generateMetadata({ 
+  params, 
+  searchParams 
+}: { 
+  params: Promise<{ id: string }>,
+  searchParams: Promise<{ secret?: string }> 
+}): Promise<Metadata> {
+  const { id } = await params;
+  const { secret } = await searchParams;
+  
+  const isServiceBypass = secret === process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabase = isServiceBypass ? createServiceClient() : await createClient();
+
+  const { data: resume } = await supabase
+    .from("resumes")
+    .select("content")
+    .eq("id", id)
+    .single();
+
+  if (!resume) {
+    return {
+      title: "Resume Not Found"
+    };
+  }
+
+  const fullName = (resume.content as ResumeData).personalInfo?.fullName || "Resume";
+  return {
+    title: `${fullName} - Resume`
+  };
+}
 
 export default async function PrintResumePage({ 
   params, 

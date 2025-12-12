@@ -476,7 +476,6 @@ export function LandingPage({ initialData }: LandingPageProps) {
                   Launch Your Resume
               </Button>
               <div className="pt-8 flex items-center justify-center gap-8 text-sm text-slate-500">
-                 <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Free Forever</span>
                  <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> No Credit Card</span>
                  <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Instant Setup</span>
               </div>
