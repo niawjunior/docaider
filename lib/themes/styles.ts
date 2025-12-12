@@ -30,9 +30,9 @@ export type ThemeToSectionConfig = Record<string, SectionThemeConfig>;
 const DEFAULT_THEME_STYLE: SectionThemeConfig = {
   styles: {
     container: "space-y-6",
-    item: "group/item relative",
-    header: "flex justify-between items-start mb-1 gap-4",
-    title: "font-bold text-lg text-slate-900 flex-1 min-w-0", // Added flex-1
+    item: "break-inside-avoid group/item relative", // break-inside-avoid verified
+    header: "flex justify-between items-start mb-1 gap-4 break-after-avoid", // added break-after-avoid
+    title: "font-bold text-lg text-slate-900 flex-1 min-w-0", 
     subtitle: "font-medium text-slate-700",
     metadata: "text-sm text-slate-500 whitespace-nowrap flex gap-1",
     description: "text-slate-600 text-sm leading-relaxed",
@@ -51,14 +51,14 @@ export const EXPERIENCE_STYLES: ThemeToSectionConfig = {
     ...DEFAULT_THEME_STYLE,
     styles: {
       ...DEFAULT_THEME_STYLE.styles,
-      item: "group/item relative hover:bg-slate-50 p-2 -mx-2 rounded transition-colors",
+      item: "break-inside-avoid group/item relative hover:bg-slate-50 p-2 -mx-2 rounded transition-colors",
     }
   },
   minimal: {
     styles: {
       container: "space-y-6",
-      item: "group/item relative mb-6 text-center",
-      header: "flex flex-col items-center text-center relative gap-1",
+      item: "break-inside-avoid group/item relative mb-6 text-center",
+      header: "flex flex-col items-center text-center relative gap-1 break-after-avoid",
       title: "font-bold text-lg text-slate-900 w-full block", // Already full width
       subtitle: "font-medium text-slate-700 w-full block",
       metadata: "text-sm text-slate-500 justify-center w-full flex gap-1 mt-1",
@@ -74,8 +74,8 @@ export const EXPERIENCE_STYLES: ThemeToSectionConfig = {
   creative: {
     styles: {
       container: "space-y-8 border-l-2 border-slate-100 pl-6 ml-1",
-      item: "group/item relative", // No hover bg
-      header: "flex justify-between items-start mb-1 gap-4",
+      item: "break-inside-avoid group/item relative", // No hover bg
+      header: "flex justify-between items-start mb-1 gap-4 break-after-avoid",
       title: "font-bold text-lg text-slate-900 flex-1 min-w-0", // Added flex-1
       subtitle: "font-medium text-slate-500", // Company color
       metadata: "text-xs text-slate-400 font-mono mb-2 flex gap-1",
@@ -91,8 +91,8 @@ export const EXPERIENCE_STYLES: ThemeToSectionConfig = {
   studio: {
     styles: {
       container: "space-y-8",
-      item: "group/item relative hover:bg-white/5 p-2 -mx-2 rounded transition-colors",
-      header: "flex justify-between items-start mb-1 gap-4",
+      item: "break-inside-avoid group/item relative hover:bg-white/5 p-2 -mx-2 rounded transition-colors",
+      header: "flex justify-between items-start mb-1 gap-4 break-after-avoid",
       title: "font-bold text-xl tracking-tight text-white flex-1 min-w-0", // Added flex-1
       subtitle: "font-medium text-neutral-500",
       metadata: "text-sm text-neutral-400 whitespace-nowrap flex gap-1",
@@ -109,7 +109,7 @@ export const EXPERIENCE_STYLES: ThemeToSectionConfig = {
     ...DEFAULT_THEME_STYLE, // Similar to Modern for Experience usually
      styles: {
       ...DEFAULT_THEME_STYLE.styles,
-      item: "group/item relative hover:bg-slate-50 p-2 -mx-2 rounded transition-colors",
+      item: "break-inside-avoid group/item relative hover:bg-slate-50 p-2 -mx-2 rounded transition-colors",
     }
   },
   visual: {
@@ -118,7 +118,7 @@ export const EXPERIENCE_STYLES: ThemeToSectionConfig = {
       ...DEFAULT_THEME_STYLE.styles,
       container: "space-y-12",
       title: "font-bold text-2xl tracking-tighter text-white flex-1 min-w-0",
-      item: "group/item relative border-l-4 border-white/20 pl-6 py-2",
+      item: "break-inside-avoid group/item relative border-l-4 border-white/20 pl-6 py-2",
       description: "text-neutral-300 text-sm leading-relaxed",
       metadata: "text-sm text-neutral-400 whitespace-nowrap flex gap-1",
       subtitle: "font-medium text-neutral-400",
@@ -131,8 +131,8 @@ export const PROJECT_STYLES: ThemeToSectionConfig = {
     modern: {
         styles: {
             container: "grid gap-4 grid-cols-1",
-            item: "p-4 bg-slate-50 rounded-lg border border-slate-100 hover:border-slate-200 transition-all",
-            header: "flex flex-col gap-1 items-start relative", // Stack vertical, relative for delete button
+            item: "break-inside-avoid p-4 bg-slate-50 rounded-lg border border-slate-100 hover:border-slate-200 transition-all",
+            header: "flex flex-col gap-1 items-start relative break-after-avoid", // Stack vertical, relative for delete button
             title: "font-bold text-base text-slate-900 w-full pr-8", // pr-8 to avoid overlap with absolute delete btn
             subtitle: "hidden", 
             metadata: "text-blue-500 hover:underline text-sm block w-full", // Removed span override, rely on component prop
@@ -148,8 +148,8 @@ export const PROJECT_STYLES: ThemeToSectionConfig = {
     minimal: {
         styles: {
             container: "grid gap-4 grid-cols-1",
-            item: "text-center mb-6",
-            header: "flex flex-col items-center relative gap-1",
+            item: "break-inside-avoid text-center mb-6",
+            header: "flex flex-col items-center relative gap-1 break-after-avoid",
             title: "font-bold text-slate-900 w-full block",
             subtitle: "hidden",
             metadata: "text-blue-500 hover:underline text-sm w-full justify-center flex mt-1",
@@ -165,7 +165,7 @@ export const PROJECT_STYLES: ThemeToSectionConfig = {
          styles: {
             container: "grid gap-4 grid-cols-1 md:grid-cols-2",
             item: "p-0", // Clean
-            header: "flex justify-between items-start gap-3",
+            header: "flex justify-between items-start gap-3 break-after-avoid",
             title: "font-bold text-lg text-slate-900",
             subtitle: "hidden",
             metadata: "text-blue-500 hover:underline text-sm",
@@ -181,7 +181,7 @@ export const PROJECT_STYLES: ThemeToSectionConfig = {
         styles: {
             container: "space-y-8 border-l-2 border-slate-100 pl-6 ml-1 block",
             item: "break-inside-avoid space-y-2 group/item relative",
-            header: "flex justify-between items-start gap-3",
+            header: "flex justify-between items-start gap-3 break-after-avoid",
             title: "font-bold text-lg text-slate-900",
             subtitle: "hidden",
             metadata: "text-blue-500 hover:underline text-sm",
@@ -198,7 +198,7 @@ export const PROJECT_STYLES: ThemeToSectionConfig = {
         styles: {
             container: "grid gap-4 grid-cols-1",
             item: "p-0",
-            header: "flex justify-between items-start gap-3",
+            header: "flex justify-between items-start gap-3 break-after-avoid",
             title: "font-bold text-xl tracking-tight text-white",
             subtitle: "hidden",
             metadata: "text-slate-400 hover:text-white transition-colors text-sm",
@@ -214,7 +214,7 @@ export const PROJECT_STYLES: ThemeToSectionConfig = {
         styles: {
             container: "grid gap-6 grid-cols-1",
             item: "p-6 border border-slate-200 rounded-xl",
-            header: "flex justify-between items-start gap-3",
+            header: "flex justify-between items-start gap-3 break-after-avoid",
             title: "font-bold text-2xl text-white",
             subtitle: "hidden",
             metadata: "text-neutral-400 text-sm",
@@ -233,7 +233,7 @@ export const SKILLS_STYLES: ThemeToSectionConfig = {
     modern: {
         styles: {
             container: "flex flex-wrap gap-2",
-            item: "text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 rounded-full hover:bg-slate-200 transition-colors",
+            item: "break-inside-avoid text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 rounded-full hover:bg-slate-200 transition-colors",
             header: "hidden", // Use ResumeSection header
             title: "",
             subtitle: "",
@@ -250,7 +250,7 @@ export const SKILLS_STYLES: ThemeToSectionConfig = {
     minimal: {
         styles: {
             container: "flex flex-wrap gap-2 justify-center",
-            item: "text-sm font-medium group/skill relative flex items-center gap-1 px-2 border-b border-slate-200 hover:border-slate-400 pb-1 text-slate-900",
+            item: "break-inside-avoid text-sm font-medium group/skill relative flex items-center gap-1 px-2 border-b border-slate-200 hover:border-slate-400 pb-1 text-slate-900",
             header: "hidden",
             title: "",
             subtitle: "",
@@ -267,7 +267,7 @@ export const SKILLS_STYLES: ThemeToSectionConfig = {
      creative: {
         styles: {
             container: "flex flex-wrap gap-2",
-            item: "px-2 py-1 bg-slate-700 rounded text-xs flex items-center gap-2 hover:bg-slate-600 transition-colors text-white",
+            item: "break-inside-avoid px-2 py-1 bg-slate-700 rounded text-xs flex items-center gap-2 hover:bg-slate-600 transition-colors text-white",
             header: "hidden", // We might use custom header style or ResumeSection? Creative in Skills had different header look (small upper). 
             // ResumeSection 'creative' header is bold 2xl. Skills was "uppercase tracking-widest text-xs".
             // This implies Skills section in Creative theme MIGHT need its own header style override passed to ResumeSection?
@@ -287,7 +287,7 @@ export const SKILLS_STYLES: ThemeToSectionConfig = {
     studio: { // Fallback/Similar
         styles: {
             container: "flex flex-wrap gap-2",
-            item: "text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 bg-slate-900/5 text-slate-900 dark:bg-white/10 dark:text-white rounded-full hover:bg-slate-900/10 dark:hover:bg-white/20 transition-colors",
+            item: "break-inside-avoid text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 bg-slate-900/5 text-slate-900 dark:bg-white/10 dark:text-white rounded-full hover:bg-slate-900/10 dark:hover:bg-white/20 transition-colors",
              header: "",
              title: "", 
              subtitle: "",
@@ -306,7 +306,7 @@ export const SKILLS_STYLES: ThemeToSectionConfig = {
         ...DEFAULT_THEME_STYLE,
          styles: {
             container: "flex flex-wrap gap-2",
-            item: "text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 rounded-full hover:bg-slate-200 transition-colors",
+            item: "break-inside-avoid text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 rounded-full hover:bg-slate-200 transition-colors",
             header: "", title: "", subtitle: "", metadata: "", description: ""
          }
     },
@@ -314,14 +314,14 @@ export const SKILLS_STYLES: ThemeToSectionConfig = {
          ...DEFAULT_THEME_STYLE,
           styles: {
             container: "flex flex-wrap gap-2",
-            item: "text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 border border-neutral-800 text-white rounded-none hover:bg-white hover:text-black transition-colors",
+            item: "break-inside-avoid text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 border border-neutral-800 text-white rounded-none hover:bg-white hover:text-black transition-colors",
             header: "", title: "", subtitle: "", metadata: "", description: ""
          }
     },
     'modern-sidebar': {
         styles: {
             container: "flex flex-wrap gap-2",
-            item: "text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 rounded-full hover:bg-slate-200 transition-colors",
+            item: "break-inside-avoid text-sm font-medium group/skill relative flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 rounded-full hover:bg-slate-200 transition-colors",
             header: "hidden", 
             title: "", subtitle: "", metadata: "", description: "",
             deleteButton: "w-4 h-4 text-slate-500 hover:text-red-500 bg-transparent p-0 border-none transition-opacity"
@@ -331,7 +331,7 @@ export const SKILLS_STYLES: ThemeToSectionConfig = {
     'creative-sidebar': {
         styles: {
             container: "flex flex-wrap gap-2",
-            item: "px-2 py-1 bg-slate-700 rounded text-xs flex items-center gap-2 hover:bg-slate-600 transition-colors text-white",
+            item: "break-inside-avoid px-2 py-1 bg-slate-700 rounded text-xs flex items-center gap-2 hover:bg-slate-600 transition-colors text-white",
             header: "hidden", 
             title: "", subtitle: "", metadata: "", description: "",
             deleteButton: "w-4 h-4 text-slate-400 hover:text-red-400 bg-transparent p-0 border-none transition-opacity"
@@ -484,19 +484,19 @@ export interface SectionHeaderStyles {
 export const SECTION_STYLES: Record<string, SectionHeaderStyles> = {
     modern: {
         wrapper: "mb-8 text-left text-slate-900",
-        header: "flex justify-between items-center mb-6 border-b pb-2 border-slate-200",
+        header: "flex justify-between items-center mb-6 border-b pb-2 border-slate-200 break-after-avoid",
         title: "font-bold uppercase flex items-center gap-2 text-xl",
         addButton: "w-8 h-8 p-0 border-none bg-transparent hover:bg-slate-100 text-slate-500"
     },
     'modern-sidebar': {
         wrapper: "mb-8 text-left text-white", // White wrapper text default for sidebar
-        header: "flex justify-between items-center mb-4 border-b pb-2 border-slate-700/50",
+        header: "flex justify-between items-center mb-4 border-b pb-2 border-slate-700/50 break-after-avoid",
         title: "font-bold uppercase flex items-center gap-2 text-sm tracking-widest text-white/90", // Elegant Sidebar Header
         addButton: "w-6 h-6 p-0 border-none bg-transparent hover:bg-white/10 text-slate-400"
     },
     minimal: {
         wrapper: "mb-8 text-left text-slate-900",
-        header: "flex justify-center items-center mb-6 border-b pb-2 border-slate-200 relative", // Center align header
+        header: "flex justify-center items-center mb-6 border-b pb-2 border-slate-200 relative break-after-avoid", // Center align header
         title: "font-bold uppercase flex items-center gap-2 text-sm tracking-widest text-center w-full border-none justify-center", // Centered title
         addButton: "absolute right-8 top-0 w-8 h-8 p-0 border-none bg-transparent hover:bg-slate-100 text-slate-500" // Maybe absolute? Minimal usually hides add button from header or puts it below?
         // Original code didn't strictly handle Add Button position for minimal in header well, let's keep it simple or hide it.
@@ -505,33 +505,33 @@ export const SECTION_STYLES: Record<string, SectionHeaderStyles> = {
     },
     creative: {
         wrapper: "mb-8", // text-left removed? Creative aligns differently? Original had `theme === "creative" ? "" : "mb-8 text-left"` 
-        header: "flex justify-between items-center mb-6 border-b pb-2 border-slate-100",
+        header: "flex justify-between items-center mb-6 border-b pb-2 border-slate-100 break-after-avoid",
         title: "font-bold uppercase flex items-center gap-2 text-2xl text-slate-900",
         addButton: "border-slate-200",
         decoration: true // Uses the darker dot/dash
     },
     'creative-sidebar': {
          wrapper: "mb-8 text-left text-white",
-         header: "flex justify-between items-center mb-6 border-b pb-2 border-slate-700/50",
+         header: "flex justify-between items-center mb-6 border-b pb-2 border-slate-700/50 break-after-avoid",
          title: "font-bold uppercase flex items-center gap-2 text-sm tracking-[0.2em] text-white", // Premium tracking
          addButton: "border-slate-700 hover:bg-slate-700 text-slate-300 w-6 h-6",
          // decoration removed for sidebar alignment
     },
     studio: {
         wrapper: "mb-8 text-left",
-        header: "flex justify-between items-center mb-6 border-none pb-0", // No border
+        header: "flex justify-between items-center mb-6 border-none pb-0 break-after-avoid", // No border
         title: "font-bold uppercase flex items-center gap-2 text-4xl tracking-tight text-white",
         addButton: "bg-transparent text-white border-white/20 hover:bg-white/10"
     },
     visual: {
         wrapper: "mb-12 text-left",
-        header: "flex justify-between items-center mb-8 border-none pb-0",
+        header: "flex justify-between items-center mb-8 border-none pb-0 break-after-avoid",
         title: "font-bold uppercase flex items-center gap-2 text-4xl md:text-6xl tracking-tighter text-white", // Solid White
         addButton: "bg-transparent text-neutral-400 border-neutral-700 hover:bg-neutral-800"
     },
     portfolio: {
         wrapper: "mb-8 text-left text-slate-900",
-        header: "flex justify-between items-center mb-6 border-b pb-2 border-slate-200",
+        header: "flex justify-between items-center mb-6 border-b pb-2 border-slate-200 break-after-avoid",
         title: "font-bold uppercase flex items-center gap-2 text-lg md:text-xl",
         addButton: "w-8 h-8 p-0 border-none bg-transparent hover:bg-slate-100 text-slate-500"
     }

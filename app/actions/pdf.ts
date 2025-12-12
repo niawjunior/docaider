@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { getBrowser } from "@/lib/pdf-helper";
 
-export async function generateResumePDF(resumeId: string) {
+export async function generateResumePDF(resumeId: string, theme?: string) {
   try {
     const headersList = await headers();
     
@@ -17,7 +17,11 @@ export async function generateResumePDF(resumeId: string) {
 
     // Secret for Bypass
     const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const printUrl = `${baseUrl}/print/${resumeId}?secret=${secret}`;
+    let printUrl = `${baseUrl}/print/${resumeId}?secret=${secret}`;
+    
+    if (theme) {
+        printUrl += `&theme=${theme}`;
+    }
 
     // Get Browser Instance (Local or Sparticuz)
     const browser = await getBrowser();

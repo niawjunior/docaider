@@ -10,10 +10,10 @@ export default async function PrintResumePage({
   searchParams 
 }: { 
   params: Promise<{ id: string }>,
-  searchParams: Promise<{ secret?: string }> 
+  searchParams: Promise<{ secret?: string; theme?: string }> 
 }) {
   const { id } = await params;
-  const { secret } = await searchParams;
+  const { secret, theme: themeParam } = await searchParams;
   
   // BYPASS LOGIC:
   // If the secret matches the Service Role Key, use the Admin Client (bypass RLS)
@@ -36,17 +36,33 @@ export default async function PrintResumePage({
 
   const content = normalizeResumeData(resume.content as ResumeData);
 
+  const activeTheme = (themeParam as any) || resume.theme || 'modern';
+
+  // Theme-specific Print Configuration
+  // 1. Full Bleed Themes (Sidebar, Creative, Dark Backgrounds) -> margin: 0
+  // 2. Document Themes (Standard White, Text-heavy) -> margin: 20mm
+  const FULL_BLEED_THEMES = ['creative', 'creative-sidebar', 'studio', 'visual', 'modern-sidebar', 'modern'];
+  const isFullBleed = FULL_BLEED_THEMES.includes(activeTheme);
+
+  const pageMargin = isFullBleed 
+    ? 'margin: 0;' 
+    : 'margin-top: 20mm; margin-bottom: 20mm; margin-left: 0; margin-right: 0;';
+
   return (
     <div className="print-container bg-white min-h-screen w-full">
       <style>{`
         @page {
-          margin: 0;
+          ${pageMargin}
           size: auto;
         }
         @media print {
           body {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+          }
+          * {
+            box-shadow: none !important;
+            text-shadow: none !important;
           }
         }
         /* Ensure background colors are printed */
@@ -57,7 +73,7 @@ export default async function PrintResumePage({
       `}</style>
       <ResumePreview 
         data={content} 
-        theme={resume.theme} 
+        theme={activeTheme} 
         isThumbnail={false} 
         readOnly={true} // Forcing read-only for print/pdf
       />

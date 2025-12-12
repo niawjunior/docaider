@@ -15,13 +15,14 @@ interface PDFExportDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   className?: string;
+  currentTheme?: string;
 }
 
 type ExportState = "idle" | "generating" | "success" | "error";
 
 
 
-export function PDFExportDialog({ resumeId, trigger, open, onOpenChange, className }: PDFExportDialogProps) {
+export function PDFExportDialog({ resumeId, trigger, open, onOpenChange, className, currentTheme }: PDFExportDialogProps) {
   const [status, setStatus] = useState<ExportState>("idle");
   const [currentStep, setCurrentStep] = useState(0);
   const [internalOpen, setInternalOpen] = useState(false);
@@ -31,9 +32,13 @@ export function PDFExportDialog({ resumeId, trigger, open, onOpenChange, classNa
   const show = isControlled ? open : internalOpen;
   const setShow = (val: boolean) => {
     if (status === "generating" && !val) return; // Prevent closing while generating
-    if (!val) resetState();
     if (isControlled && onOpenChange) onOpenChange(val);
     else setInternalOpen(val);
+    
+    // Delay reset to avoid flashing "idle" state during close animation
+    if (!val) {
+        setTimeout(() => resetState(), 300);
+    }
   };
 
   const STEPS = [
@@ -55,7 +60,7 @@ export function PDFExportDialog({ resumeId, trigger, open, onOpenChange, classNa
     timers.push(setTimeout(() => setCurrentStep(2), 3500)); // To Rendering
 
     try {
-      const result = await generateResumePDF(resumeId);
+      const result = await generateResumePDF(resumeId, currentTheme);
 
       // Clear any pending timers if it finished super fast (unlikely but safe)
       timers.forEach(clearTimeout);
@@ -121,15 +126,16 @@ export function PDFExportDialog({ resumeId, trigger, open, onOpenChange, classNa
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-8 flex flex-col items-center justify-center min-h-[200px] space-y-6">
-            <AnimatePresence mode="wait">
+        <div className="relative w-full h-[320px] flex items-center justify-center overflow-hidden">
+            <AnimatePresence initial={false} mode="popLayout">
                 {status === "idle" && (
                      <motion.div 
                         key="idle"
-                        initial={{ opacity: 0, scale: 0.9 }} 
+                        layout // Smooth layout reflow
+                        initial={{ opacity: 0, scale: 0.95 }} 
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        className="text-center space-y-4"
+                        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                        className="text-center space-y-4 absolute inset-0 flex flex-col items-center justify-center" // Absolute center
                      >
                         <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto text-blue-600 dark:text-blue-400">
                              <FileDown className="w-10 h-10" />
@@ -143,10 +149,11 @@ export function PDFExportDialog({ resumeId, trigger, open, onOpenChange, classNa
                 {status === "generating" && (
                     <motion.div 
                         key="generating"
-                        initial={{ opacity: 0, scale: 0.9 }} 
+                        layout // Smooth layout reflow
+                        initial={{ opacity: 0, scale: 0.95 }} 
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        className="text-center w-full"
+                        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                        className="text-center w-full absolute inset-0 flex flex-col items-center justify-center" // Absolute center
                     >
                          <div className="relative w-32 h-32 mx-auto mb-6">
                             <AnimatePresence mode="wait">
@@ -297,10 +304,11 @@ export function PDFExportDialog({ resumeId, trigger, open, onOpenChange, classNa
                 {status === "success" && (
                     <motion.div 
                         key="success"
-                        initial={{ opacity: 0, scale: 0.9 }} 
+                        layout
+                        initial={{ opacity: 0, scale: 0.95 }} 
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        className="text-center space-y-4"
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="text-center space-y-4 absolute inset-0 flex flex-col items-center justify-center"
                     >
                         <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto text-green-600 dark:text-green-400">
                              <CheckCircle className="w-10 h-10" />
@@ -315,10 +323,11 @@ export function PDFExportDialog({ resumeId, trigger, open, onOpenChange, classNa
                  {status === "error" && (
                     <motion.div 
                         key="error"
-                        initial={{ opacity: 0, scale: 0.9 }} 
+                        layout
+                        initial={{ opacity: 0, scale: 0.95 }} 
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        className="text-center space-y-4"
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="text-center space-y-4 absolute inset-0 flex flex-col items-center justify-center"
                     >
                         <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto text-red-600 dark:text-red-400">
                              <AlertCircle className="w-10 h-10" />

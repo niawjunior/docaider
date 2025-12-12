@@ -1,5 +1,5 @@
 import { PDFExportDialog } from "@/components/resume/PDFExportDialog";
-import { Loader2, Share2, Layout, Monitor, Tablet, Smartphone, Eye, ChevronDown, Calendar, Lock, Globe, Download } from "lucide-react";
+import { Loader2, Share2, Layout, Monitor, Tablet, Smartphone, Eye, ChevronDown, Calendar, Lock, Globe, Download, AlertCircle } from "lucide-react";
 import { ResumeData } from "@/lib/schemas/resume";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -12,13 +12,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +28,13 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { ThemeSelector } from "./ThemeSelector";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ResumeEditorControlsProps {
     resumeData: ResumeData | null;
@@ -80,6 +80,10 @@ export function ResumeEditorControls({
     setIsViewMode
 }: ResumeEditorControlsProps) {
     const [showPdfExport, setShowPdfExport] = useState(false);
+    
+    // Check if current theme is a web theme
+    const activeThemeConfig = AVAILABLE_THEMES.find(t => t.id === theme);
+    const isWebTheme = activeThemeConfig?.type === 'web';
 
     return (
         <div className="flex items-center gap-3">
@@ -143,23 +147,11 @@ export function ResumeEditorControls({
                     <div className="h-6 w-px bg-white/10 mx-2 hidden sm:block" />
 
                     {/* Theme Selector */}
-                    <div className="flex items-center space-x-2 hidden sm:flex">
-                        <span className="text-slate-300 hover:text-white hover:bg-white/10 text-xs font-bold uppercase tracking-wider">Theme</span>
-                        <Select
-                        value={theme}
-                        onValueChange={(val: any) => setTheme(val)}
-                        >
-                        <SelectTrigger className="w-[130px] h-8 text-slate-300 hover:text-white hover:bg-white/10 bg-white/5 border-white/10 text-xs">
-                            <SelectValue placeholder="Theme" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {AVAILABLE_THEMES.map((t) => (
-                                <SelectItem key={t.id} value={t.id}>
-                                    {t.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                        </Select>
+                    <div className="hidden sm:block">
+                        <ThemeSelector 
+                            currentTheme={theme} 
+                            onThemeChange={setTheme} 
+                        />
                     </div>
 
                     {resumeData && (
@@ -175,26 +167,48 @@ export function ResumeEditorControls({
                                     <ChevronDown className="w-3 h-3 opacity-50" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 bg-slate-900 border-slate-800 text-slate-200">
+                            <DropdownMenuContent align="end" className="w-56 bg-slate-900 border-slate-800 text-slate-200">
                                 <DialogTrigger asChild>
                                     <DropdownMenuItem onClick={() => setPublishedUrl(null)} className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 focus:text-white gap-2">
                                         <Share2 className="w-4 h-4" />
-                                        Publish
+                                        Publish to Web
                                     </DropdownMenuItem>
                                 </DialogTrigger>
                                   {idParam && (
                                     <>
                                         <DropdownMenuSeparator className="bg-slate-800" />
-                                        <DropdownMenuItem onSelect={() => setShowPdfExport(true)} className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 focus:text-white gap-2">
-                                            <Download className="w-4 h-4" />
-                                            Download PDF
-                                        </DropdownMenuItem>
+                                        
+                                        {isWebTheme ? (
+                                            <TooltipProvider>
+                                                <Tooltip delayDuration={0}>
+                                                    <TooltipTrigger asChild>
+                                                        <div className="outline-none">
+                                                            <DropdownMenuItem disabled className="cursor-not-allowed opacity-50 gap-2">
+                                                                <Download className="w-4 h-4" />
+                                                                Download PDF
+                                                            </DropdownMenuItem>
+                                                        </div>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent side="left" className="bg-slate-800 text-slate-200 border-slate-700 max-w-[200px]">
+                                                        <p className="flex items-start gap-2">
+                                                            <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                                                            <span>PDF export is not available for purely digital web themes. Switch to a Document theme to export.</span>
+                                                        </p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        ) : (
+                                            <DropdownMenuItem onSelect={() => setShowPdfExport(true)} className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 focus:text-white gap-2">
+                                                <Download className="w-4 h-4" />
+                                                Download PDF
+                                            </DropdownMenuItem>
+                                        )}
                                     </>
                                 )}
                                 <DropdownMenuSeparator className="bg-slate-800" />
                                 <DropdownMenuItem onClick={() => setIsViewMode(true)} className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 focus:text-white gap-2">
                                     <Eye className="w-4 h-4" />
-                                    View Mode
+                                    View Live Mode
                                 </DropdownMenuItem>
                               
                             </DropdownMenuContent>
@@ -319,6 +333,7 @@ export function ResumeEditorControls({
                 open={showPdfExport} 
                 onOpenChange={setShowPdfExport} 
                 resumeId={idParam || ""} 
+                currentTheme={theme}
             />
         </div>
     );
