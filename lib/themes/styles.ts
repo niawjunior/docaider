@@ -213,7 +213,7 @@ export const PROJECT_STYLES: ThemeToSectionConfig = {
      visual: {
         styles: {
             container: "grid gap-6 grid-cols-1",
-            item: "p-6 border border-slate-200 rounded-xl",
+            item: "",
             header: "flex justify-between items-start gap-3 break-after-avoid",
             title: "font-bold text-2xl text-white",
             subtitle: "hidden",
@@ -452,9 +452,30 @@ export const HEADER_STYLES: ThemeToSectionConfig = {
     }
 }
 
+// --- Education Section Configurations ---
+export const EDUCATION_STYLES: ThemeToSectionConfig = {
+    modern: {
+        ...DEFAULT_THEME_STYLE,
+        styles: {
+            ...DEFAULT_THEME_STYLE.styles,
+            item: "break-inside-avoid group/item relative", // Clean item style, let component handle card padding
+        }
+    },
+    minimal: EXPERIENCE_STYLES.minimal,
+    creative: EXPERIENCE_STYLES.creative,
+    studio: EXPERIENCE_STYLES.studio,
+    portfolio: EXPERIENCE_STYLES.portfolio,
+    visual: EXPERIENCE_STYLES.visual,
+    'modern-sidebar': EXPERIENCE_STYLES['modern-sidebar'],
+    'creative-sidebar': EXPERIENCE_STYLES['creative-sidebar']
+};
+
 export function getSectionTheme(theme: string, section: 'experience' | 'projects' | 'education' | 'custom' | 'skills' | 'summary' | 'header'): SectionThemeConfig {
-  if (section === 'experience' || section === 'custom' || section === 'education') {
+  if (section === 'experience' || section === 'custom') { // Removed 'education'
     return EXPERIENCE_STYLES[theme] || EXPERIENCE_STYLES['modern'];
+  }
+  if (section === 'education') {
+      return EDUCATION_STYLES[theme] || EDUCATION_STYLES['modern'];
   }
   if (section === 'projects') {
       return PROJECT_STYLES[theme] || PROJECT_STYLES['modern'];

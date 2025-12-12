@@ -5,21 +5,23 @@ import { SectionRenderer } from "@/components/resume/shared/SectionRenderer";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { ThemeComponentProps } from "./component-map";
+import { useResumeSections } from "../hooks/useResumeSections";
+import { PaperLayout } from "../shared/PaperLayout";
 
 export const CreativeTheme = ({ containerRef }: ThemeComponentProps) => {
-  const { data, updateField, readOnly } = useResume();
-  const order = (data.sectionOrder && data.sectionOrder.length > 0) 
-      ? data.sectionOrder 
-      : ["experience", "education", "projects", "skills"];
+  const { data, updateField, updateMultipleFields, readOnly } = useResume();
+  
+  const { mainSections } = useResumeSections({
+      data,
+      sidebarIds: ['skills', 'contact']
+  });
 
   return (
-      <div 
+      <PaperLayout 
         ref={containerRef}
-        className="w-[210mm] min-h-[297mm] text-slate-900 shadow-xl mx-auto print:shadow-none group/resume text-left p-0 flex relative"
-        style={{ backgroundColor: '#0f172a' }}
+        className="text-slate-900 group/resume text-left p-0 flex"
+        sidebarMatchColor="#0f172a"
       >
-        {/* Edge Bleed Fix */}
-        <div className="absolute top-0 bottom-0 -left-[1px] w-[2px] bg-[#0f172a] z-0 pointer-events-none" />
         {/* Sidebar */}
         <div className="w-1/3 bg-slate-900 text-white p-8 space-y-8 text-left min-h-full">
            <SectionRenderer sectionId="contact" theme="creative" />
@@ -28,21 +30,14 @@ export const CreativeTheme = ({ containerRef }: ThemeComponentProps) => {
 
         {/* Main Content */}
         <div className="w-2/3 p-8 space-y-8 bg-white text-left">
-           {order.map(id => {
-               // Skills is in sidebar
-               if (id === 'skills') return null; 
-               // Contact is in sidebar (usually contact isn't in sectionOrder, but just in case)
-               if (id === 'contact') return null;
-
-               return (
-                 <div key={id}>
-                   <SectionRenderer 
-                     sectionId={id} 
-                     theme="creative" 
-                   />
-                 </div>
-               );
-           })}
+           {mainSections.map(id => (
+              <div key={id}>
+                <SectionRenderer 
+                  sectionId={id} 
+                  theme="creative" 
+                />
+              </div>
+           ))}
            
            {!readOnly && (
                <div className="mt-8 border-t border-slate-200 pt-8 flex justify-center">
@@ -62,6 +57,6 @@ export const CreativeTheme = ({ containerRef }: ThemeComponentProps) => {
                </div>
            )}
         </div>
-      </div>
+      </PaperLayout>
   );
 };

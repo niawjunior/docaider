@@ -14,10 +14,16 @@ import { SectionRenderer } from "@/components/resume/shared/SectionRenderer";
 import { ContactManager } from "@/components/resume/shared/ContactManager";
 import { ThemeComponentProps } from "./component-map";
 
+import { useResumeSections } from "../hooks/useResumeSections";
+
 export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
-  const { data, updateField: handleUpdate, readOnly } = useResume();
+  const { data, updateField: handleUpdate, updateMultipleFields, readOnly } = useResume();
   const personalInfo = (data.personalInfo || {}) as any; // Fix TS access
 
+  const { mainSections } = useResumeSections({
+      data,
+      sidebarIds: []
+  });
   // Determine order (fallback if empty)
   const order = (data.sectionOrder && data.sectionOrder.length > 0) 
       ? data.sectionOrder 
@@ -105,8 +111,9 @@ export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
         </motion.section>
 
         {/* Dynamic Sections */}
-        {order.map(id => (
-            <motion.div
+        <div className="space-y-24">
+           {mainSections.map(id => (
+               <motion.div
                 key={id}
                 id={id} // Add ID for anchor scrolling
                 initial={{ opacity: 0, y: 20 }}
@@ -117,7 +124,8 @@ export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
             >
                 <SectionRenderer sectionId={id} theme="portfolio" />
             </motion.div>
-        ))}
+           ))}
+        </div>
 
 
         {!readOnly && (

@@ -17,10 +17,17 @@ import { ContactManager } from "@/components/resume/shared/ContactManager";
 import { ThemeComponentProps } from "./component-map";
 import { useResume } from "@/components/resume/state/ResumeContext";
 
+import { useResumeSections } from "../hooks/useResumeSections";
+
 export const VisualTheme = ({ containerRef, isThumbnail }: ThemeComponentProps) => {
   const { data, updateField: handleUpdate, readOnly } = useResume();
   const personalInfo = data.personalInfo;
   const [isMounted, setIsMounted] = useState(false);
+
+  const { mainSections } = useResumeSections({
+      data,
+      sidebarIds: []
+  });
 
   useEffect(() => {
     setIsMounted(true);

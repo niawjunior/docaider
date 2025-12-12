@@ -6,22 +6,27 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { ThemeComponentProps } from "./component-map";
 
+import { PaperLayout } from "../shared/PaperLayout";
+import { useResumeSections } from "../hooks/useResumeSections";
+
 export const MinimalTheme = ({ containerRef }: ThemeComponentProps) => {
-  const { data, updateField, readOnly } = useResume();
-  const order = (data.sectionOrder && data.sectionOrder.length > 0) 
-      ? data.sectionOrder 
-      : ["experience", "education", "projects", "skills"];
+  const { data, updateField, updateMultipleFields, readOnly } = useResume();
+
+  const { mainSections } = useResumeSections({
+      data,
+      sidebarIds: [] // Minimal theme is single column
+  });
 
   return (
-    <div 
-      ref={containerRef}
-      id="resume-preview" 
-      className="w-[250mm] min-h-[297mm] bg-white shadow-xl mx-auto p-12 md:p-16 space-y-8 text-left"
+    <PaperLayout 
+        ref={containerRef}
+        className="bg-white text-slate-900 p-12 space-y-8"
+        // No sidebar color needed
     >
       <SectionRenderer sectionId="contact" theme="minimal" />
       
       {/* Dynamic Order */}
-      {order.map(id => {
+      {mainSections.map(id => {
          // contact is already rendered
          if (id === 'contact') return null;
          return (
@@ -48,6 +53,6 @@ export const MinimalTheme = ({ containerRef }: ThemeComponentProps) => {
                </Button>
            </div>
        )}
-    </div>
+    </PaperLayout>
   );
 };

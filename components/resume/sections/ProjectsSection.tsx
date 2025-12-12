@@ -8,6 +8,7 @@ import { ResumeSection } from "@/components/resume/shared/ResumeSection";
 import { EmptySectionPlaceholder } from "@/components/resume/shared/EmptySectionPlaceholder";
 import { getSectionTheme } from "@/lib/themes/styles";
 import { useResume } from "@/components/resume/state/ResumeContext";
+import { motion } from "framer-motion";
 
 interface ProjectsSectionProps {
     theme: string;
@@ -68,7 +69,20 @@ export function ProjectsSection({ theme, className }: ProjectsSectionProps) {
                     className={styles.container}
                     strategy={strategy.layout === 'grid' ? 'rect' : 'vertical'}
                     renderItem={(project, i, updateItem, deleteItem) => (
-                        <div className={cn("min-w-0", styles.item)} key={project.id || i}>
+                        <motion.div
+                            key={project.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            className={cn(
+                                "relative group/item min-w-0",
+                                styles.item, // Keep existing styles.item for theme-specific styling
+                                theme === 'modern' ? 'bg-white p-6 rounded-xl shadow-sm border border-slate-200/60 print:shadow-none print:border-none print:bg-transparent print:p-0 print:mb-6' : '',
+                                theme === 'creative' ? 'print:pl-0' : '', // Removed redundant border-l-2 and pl-8 which duplicated the container timeline
+                                theme === 'creative-sidebar' ? 'text-white' : '',
+                                theme === 'minimal' ? 'mb-8' : ''
+                            )}
+                        >
                            {/* Creative Theme Dot */}
                            {strategy.showDecorations && (
                                 <div className="absolute -left-[33px] top-1 w-4 h-4 rounded-full bg-slate-900 border-4 border-white" />
@@ -167,7 +181,7 @@ export function ProjectsSection({ theme, className }: ProjectsSectionProps) {
                                      >+ Add</button>
                                    )}
                              </div>
-                        </div>
+                        </motion.div>
                     )}
                 />
             )}

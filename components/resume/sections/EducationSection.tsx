@@ -66,7 +66,12 @@ export function EducationSection({ theme, className }: EducationSectionProps) {
                     readOnly={readOnly}
                     className={styles.container}
                     renderItem={(edu, index, updateItem, deleteItem) => (
-                        <div className={styles.item}>
+                        <div className={cn(
+                            "relative group/item break-inside-avoid min-w-0",
+                            styles.item,
+                            theme === "modern" && "bg-slate-50 p-6 rounded-xl border border-slate-100 print:bg-transparent print:border-none print:p-0 print:mb-2",
+                            theme === "minimal" && "mb-8 text-left"
+                        )}>
                             {/* Decoration (Creative Dot) */}
                             {strategy.showDecorations && (
                                 <div className="absolute -left-[33px] top-1 w-4 h-4 rounded-full bg-slate-900 border-4 border-white" />
