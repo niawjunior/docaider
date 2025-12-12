@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CoverImagePicker } from "@/components/resume/shared/CoverImagePicker";
+import { ContactManager } from "@/components/resume/shared/ContactManager";
 
 import { ThemeComponentProps } from "./component-map";
 import { useResume } from "@/components/resume/state/ResumeContext";
@@ -214,48 +215,14 @@ export const VisualTheme = ({ containerRef, isThumbnail }: ThemeComponentProps) 
           <h2 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter mb-8">
             Get in Touch
           </h2>
-          <div className="flex flex-col gap-4 text-xl md:text-2xl text-neutral-400 items-center">
-             <div className="flex items-center gap-2">
-                 <Mail className="w-6 h-6" />
-                 <InlineEdit readOnly={readOnly} 
-                    value={personalInfo.email} 
-                    placeholder="Email Address"
-                    onSave={(val) => handleUpdate('personalInfo.email', val)} 
-                    path="personalInfo.email"
-                    className="bg-transparent border-none text-center"
-                 />
-             </div>
-             <div className="flex items-center gap-2">
-                  <Linkedin className="w-6 h-6" />
-                  <InlineEdit readOnly={readOnly} 
-                    value={personalInfo.linkedin} 
-                    placeholder="LinkedIn"
-                    onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
-                    path="personalInfo.linkedin"
-                    className="bg-transparent border-none text-center text-lg"
-                 />
-             </div>
-             <div className="flex items-center gap-2">
-                 <Globe className="w-6 h-6" />
-                   <InlineEdit readOnly={readOnly} 
-                    value={personalInfo.website} 
-                    placeholder="Website"
-                    onSave={(val) => handleUpdate('personalInfo.website', val)} 
-                    path="personalInfo.website"
-                    className="bg-transparent border-none text-center text-lg"
-                 />
-             </div>
-             <div className="flex items-center gap-2 mt-4 text-lg">
-                 <MapPin className="w-5 h-5" />
-                   <InlineEdit readOnly={readOnly} 
-                    value={personalInfo.location} 
-                    placeholder="Location"
-                    onSave={(val) => handleUpdate('personalInfo.location', val)} 
-                    path="personalInfo.location"
-                    className="bg-transparent border-none text-center"
-                 />
-             </div>
-          </div>
+           <div className="flex flex-col gap-4 text-xl md:text-2xl text-neutral-400 items-center">
+              <ContactManager 
+                layout="column" 
+                align="center" 
+                className="items-center" 
+                itemClassName="[&_span]:whitespace-nowrap"
+              />
+           </div>
         </section>
 
 

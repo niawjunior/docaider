@@ -12,12 +12,14 @@ import { ThemeAddButton, ThemeDeleteButton } from "./ThemeControls";
 import { ResumeSectionList } from "../shared/ResumeSectionList";
 import { EmptySectionPlaceholder } from "../shared/EmptySectionPlaceholder";
 import { CustomSectionRenderer } from "../shared/CustomSectionRenderer";
+import { ContactManager } from "../shared/ContactManager";
 import { Plus } from "lucide-react";
 import { useResume } from "@/components/resume/state/ResumeContext";
 import { ThemeComponentProps } from "./component-map";
 
 export const StudioTheme = ({ containerRef }: ThemeComponentProps) => {
   const { data, updateField: handleUpdate, updateMultipleFields, readOnly } = useResume();
+  const personalInfo = (data.personalInfo || {}) as any;
 
   const marqueeVariants = {
     animate: {
@@ -42,7 +44,7 @@ export const StudioTheme = ({ containerRef }: ThemeComponentProps) => {
       <nav className="sticky top-0 w-full z-50 mix-blend-difference px-6 py-6 flex justify-between items-center bg-black/0 backdrop-blur-sm">
         <div className="text-xl font-bold tracking-tighter uppercase">
            {/* Static Logo from Name */}
-          {(data.personalInfo.fullName ?? '').split(' ')[0]}
+          {(personalInfo.fullName ?? '').split(' ')[0]}
         </div>
           <div className="flex gap-6 text-sm font-medium uppercase tracking-widest hidden sm:flex">
              {/* Map dynamic sections */}
@@ -88,7 +90,7 @@ export const StudioTheme = ({ containerRef }: ThemeComponentProps) => {
             <div key={i} className="flex items-center gap-8">
               <span className="text-[10cqw] font-black leading-none uppercase tracking-tighter text-white">
                  {/* Marquee text is usually job title */}
-                 {data.personalInfo.jobTitle || "Creative Developer"}
+                 {personalInfo.jobTitle || "Creative Developer"}
               </span>
               <span className="text-[10cqw] font-black leading-none text-transparent stroke-text">
                 —
@@ -102,7 +104,7 @@ export const StudioTheme = ({ containerRef }: ThemeComponentProps) => {
           <div className="px-6 mt-4 text-center">
               <div className="text-sm text-neutral-500 mb-1">MARQUEE TEXT (Edit here):</div>
               <InlineEdit readOnly={readOnly}
-                  value={data.personalInfo.jobTitle}
+                  value={personalInfo.jobTitle}
                   placeholder="CREATIVE DEVELOPER"
                   onSave={(val) => handleUpdate('personalInfo.jobTitle', val?.toUpperCase())}
                   path="personalInfo.jobTitle"
@@ -128,12 +130,12 @@ export const StudioTheme = ({ containerRef }: ThemeComponentProps) => {
                         >
                            <div className="text-4xl md:text-6xl font-bold leading-tight mb-8">
                              <InlineEdit readOnly={readOnly}
-                                value={data.personalInfo.summary?.content}
+                                value={personalInfo.summary?.content}
                                 placeholder="Your professional summary goes here..."
                                 multiline
                                 onSave={(val) => handleUpdate('personalInfo.summary.content', val)}
                                 path="personalInfo.summary.content"
-                                alignment={data.personalInfo.summary?.alignment || undefined}
+                                alignment={personalInfo.summary?.alignment || undefined}
                                 className="bg-transparent border-neutral-800"
                              />
                            </div>
@@ -566,43 +568,14 @@ export const StudioTheme = ({ containerRef }: ThemeComponentProps) => {
             <h2 className="text-6xl md:text-8xl font-bold uppercase tracking-tighter mb-12">
               Let's Talk
             </h2>
-            <div className="flex flex-col gap-8 text-xl">
-               <div className="flex items-center gap-4 group">
-                    <Mail className="w-6 h-6 text-neutral-500 group-hover:text-white transition-colors" />
-                    <InlineEdit readOnly={readOnly} 
-                        value={data.personalInfo.email} 
-                        placeholder="Email Address"
-                        onSave={(val) => handleUpdate('personalInfo.email', val)} 
-                        path="personalInfo.email"
-                        className="bg-transparent border-neutral-800"
-                     />
-               </div>
-               <div className="flex items-center gap-4 group">
-                    <Linkedin className="w-6 h-6 text-neutral-500 group-hover:text-white transition-colors" />
-                     <InlineEdit readOnly={readOnly} 
-                        value={data.personalInfo.linkedin} 
-                        placeholder="LinkedIn URL"
-                        onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
-                        path="personalInfo.linkedin"
-                        className="bg-transparent border-neutral-800"
-                     />
-               </div>
-               <div className="flex items-center gap-4 group">
-                    <Globe className="w-6 h-6 text-neutral-500 group-hover:text-white transition-colors" />
-                     <InlineEdit readOnly={readOnly} 
-                        value={data.personalInfo.website} 
-                        placeholder="Website URL"
-                        onSave={(val) => handleUpdate('personalInfo.website', val)} 
-                        path="personalInfo.website"
-                        className="bg-transparent border-neutral-800"
-                     />
-               </div>
+            <div className="text-xl">
+               <ContactManager />
             </div>
-            
+
             <div className="mt-20 pt-8 border-t border-neutral-900 text-neutral-600 text-sm flex justify-between items-center">
                  <div>
                     <InlineEdit readOnly={readOnly} 
-                        value={data.personalInfo.fullName} 
+                        value={personalInfo.fullName} 
                         placeholder="Your Name"
                         onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
                         path="personalInfo.fullName"
@@ -612,7 +585,7 @@ export const StudioTheme = ({ containerRef }: ThemeComponentProps) => {
                  </div>
                  <div>
                      <InlineEdit readOnly={readOnly} 
-                        value={data.personalInfo.location} 
+                        value={personalInfo.location} 
                         placeholder="Location"
                         onSave={(val) => handleUpdate('personalInfo.location', val)} 
                         path="personalInfo.location"

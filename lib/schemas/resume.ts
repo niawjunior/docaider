@@ -18,6 +18,11 @@ export const ResumeSchema = z.object({
     location: z.string().nullish().describe("City, Country. Format: 'City, Country' (e.g. 'New York, NY'). No sentences."),
     summary: RichTextFieldSchema.describe("A brief professional summary or bio"),
     headerSummary: RichTextFieldSchema.describe("Summary displayed in the header"),
+    additionalLinks: z.array(z.object({
+        id: z.string().nullish(),
+        label: z.string().nullish(),
+        url: z.string().nullish(),
+    })).nullish().transform(v => v ?? []),
   }).nullish().transform(v => v ?? {}).describe("Personal contact information"),
   
   coverImage: z.string().nullish(),

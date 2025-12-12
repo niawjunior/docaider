@@ -21,10 +21,10 @@ export const ModernTheme = ({ containerRef }: ThemeComponentProps) => {
     <div 
         ref={containerRef}
         id="resume-preview" 
-        className="w-[210mm] min-h-[297mm] bg-white text-slate-900 shadow-xl mx-auto flex"
+        className="w-[230mm] min-h-[297mm] bg-white text-slate-900 shadow-xl mx-auto flex"
     >
       {/* Sidebar */}
-      <div className="w-1/3 bg-slate-900 text-white p-8 space-y-8 flex-shrink-0">
+      <div className="w-1/3 bg-slate-900 text-white p-6 space-y-8 flex-shrink-0">
         <div className="space-y-4">
              <div className="text-center">
                   {/* Avatar & Name area handled by ContactHeader */}

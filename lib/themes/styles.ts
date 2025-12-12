@@ -132,11 +132,12 @@ export const PROJECT_STYLES: ThemeToSectionConfig = {
         styles: {
             container: "grid gap-4 grid-cols-1",
             item: "p-4 bg-slate-50 rounded-lg border border-slate-100 hover:border-slate-200 transition-all",
-            header: "flex justify-between items-start gap-3",
-            title: "font-bold text-base text-slate-900 flex-1 min-w-0", // Added flex-1
-            subtitle: "hidden", // No subtitle usually
-            metadata: "text-blue-500 hover:underline text-sm truncate max-w-[150px]", // URL
-            description: "text-slate-600 text-sm leading-relaxed"
+            header: "flex flex-col gap-1 items-start relative", // Stack vertical, relative for delete button
+            title: "font-bold text-base text-slate-900 w-full pr-8", // pr-8 to avoid overlap with absolute delete btn
+            subtitle: "hidden", 
+            metadata: "text-blue-500 hover:underline text-sm block w-full", // Removed span override, rely on component prop
+            description: "text-slate-600 text-sm leading-relaxed",
+            deleteButton: "absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors" // Absolute positioning
         },
         strategy: {
             layout: 'list',
@@ -388,19 +389,19 @@ export const HEADER_STYLES: ThemeToSectionConfig = {
             container: "mb-8 pb-6 text-left border-b border-slate-700/50", // Subtle separator
             title: "font-bold uppercase tracking-tight mb-2 w-full text-4xl text-white", // White Title
             subtitle: "text-lg text-slate-300 mb-4 w-full", // Light Subtitle
-            metadata: "flex flex-wrap gap-4 text-sm text-slate-400", // Light Meta
+            metadata: "text-xs text-slate-400", // Light Meta (ContactManager handles flex/gap)
             item: "flex items-center gap-1",
             header: "", description: "" // Unused
         },
-        strategy: { layout: 'list', datesPosition: 'inline', alignment: 'left' } 
+        strategy: { layout: 'masonry', datesPosition: 'inline', alignment: 'left' } 
     },
     minimal: {
         styles: {
             container: "mb-8 text-center pb-8 border-b border-slate-200",
             title: "font-bold uppercase mb-2 w-full text-3xl tracking-widest font-normal text-slate-900",
             subtitle: "text-lg text-slate-500 mb-4 w-full italic text-center",
-            metadata: "flex flex-wrap gap-4 text-sm text-slate-500 justify-center",
-            item: "flex items-center gap-1",
+            metadata: "flex flex-wrap gap-4 text-sm text-slate-500 justify-center [&>div]:w-[30%]", // Max 3 per row
+            item: "flex items-center gap-1 [&_span]:whitespace-nowrap",
             header: "", description: ""
         },
         strategy: { layout: 'list', datesPosition: 'inline', alignment: 'center' }

@@ -85,19 +85,43 @@ export function InlineEdit({
 
   const isLocked = !readOnly && path && lockedField === path;
 
+  // Real-time visual empty state tracking for native placeholder behavior
+  const [isVisualEmpty, setIsVisualEmpty] = React.useState(!value);
+
+  React.useEffect(() => {
+      // Sync on external value change, but respect local typing if needed.
+      // Here we just re-sync if not editing, or if value changes significantly?
+      // Actually, if value prop updates, we should update visual empty.
+      // But during editing, value prop lags. So we rely on handleInput for real-time.
+      if (!isEditing) {
+        setIsVisualEmpty(!value);
+      }
+  }, [value, isEditing]);
+
+  const handleInput = (e: React.FormEvent<HTMLElement>) => {
+      const text = e.currentTarget.innerText;
+      // Check for effectively empty content (including br or whitespace)
+      const empty = !text || text === '\n' || text.trim() === '';
+      setIsVisualEmpty(empty);
+      props.onInput?.(e as any);
+  };
+
   const commonClasses = cn(
-    "outline-none min-w-[20px] inline-block transition-all duration-200 border border-transparent max-w-full break-words whitespace-pre-wrap",
+    // break-words (overflow-wrap: break-word) prevents aggressive breaking of normal words (fixing placeholder wrapping)
+    // while still breaking long unbreakable strings (URLs) to prevent overflow.
+    "outline-none min-w-[20px] min-h-[1.5em] leading-normal inline-block transition-all duration-200 border border-transparent max-w-full break-words whitespace-pre-wrap",
     // Base state
-    !readOnly && "px-1 -mx-1 rounded cursor-text", 
+    !readOnly && "px-1 rounded cursor-text", 
     !readOnly && "hover:border-blue-500/50 hover:bg-blue-500/5",
     !readOnly && "focus:ring-1 focus:ring-blue-500/30",
     
     // Locked/Active state
-    isLocked && "ring-1 ring-blue-500/30 bg-blue-500/5 border-blue-500/50",
+    isLocked && "ring-4 ring-blue-500/30 bg-blue-500/5 border-blue-500/50",
     
-    // Placeholder state
-    !readOnly && "empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400 empty:before:italic",
-    !readOnly && !value && !isEditing && "text-slate-400 italic bg-blue-500/10 border-dashed border-blue-300",
+    // Placeholder rendering driven by real-time visual empty state
+    // We remove !isEditing check so styles persist on focus (Native feel).
+    !readOnly && isVisualEmpty && "before:content-[attr(data-placeholder)] before:text-neutral-400 before:italic",
+    !readOnly && isVisualEmpty && "text-neutral-400 italic bg-blue-500/10 border-dashed border-blue-300",
     
     // Read-only state
     readOnly && "cursor-default min-w-0 px-0 mx-0 border-none",
@@ -141,6 +165,7 @@ export function InlineEdit({
       onFocus={handleFocus}
       onKeyDown={handleKeyDown}
       onPaste={handlePaste}
+      onInput={handleInput}
       className={commonClasses}
       data-placeholder={placeholder}
       data-path={path}

@@ -93,6 +93,7 @@ export function ProjectsSection({ theme, className }: ProjectsSectionProps) {
                                                 <InlineEdit readOnly={readOnly} 
                                                     value={project.url} 
                                                     placeholder="URL"
+                                                    className="w-full whitespace-nowrap block"
                                                     onSave={(val) => updateItem({ url: val })}
                                                 />
                                            </a>
@@ -101,6 +102,7 @@ export function ProjectsSection({ theme, className }: ProjectsSectionProps) {
                                                  <InlineEdit readOnly={readOnly} 
                                                     value={project.url} 
                                                     placeholder="URL"
+                                                    className="w-full whitespace-nowrap block"
                                                     onSave={(val) => updateItem({ url: val })}
                                                  />
                                             </span>

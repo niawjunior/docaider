@@ -1,10 +1,9 @@
 
-import { ResumeData } from "@/lib/schemas/resume";
 import { cn } from "@/lib/utils";
 import { InlineEdit } from "@/components/resume/editor/InlineEdit";
-import { MapPin, Mail, Phone, Globe } from "lucide-react";
 import { getSectionTheme } from "@/lib/themes/styles";
 import { useResume } from "@/components/resume/state/ResumeContext";
+import { ContactManager } from "../shared/ContactManager";
 
 interface ContactHeaderProps {
     theme: string;
@@ -17,18 +16,13 @@ export function ContactHeader({ theme }: ContactHeaderProps) {
     const config = getSectionTheme(theme, 'header');
     const { styles, strategy } = config;
     
-    const Wrapper = ({ children }: { children: React.ReactNode }) => (
-        <div className={styles.item}>
-            {children}
-        </div>
-    );
-
     const isSidebarLayout = strategy.layout === 'masonry';
+    const personalInfo = (data.personalInfo || {}) as any;
 
     const Title = (
         <h1 className={styles.title}>
             <InlineEdit readOnly={readOnly} 
-                value={data.personalInfo.fullName} 
+                value={personalInfo.fullName} 
                 placeholder="Your Name"
                 onSave={(val) => updateField('personalInfo.fullName', val)} 
                 path="personalInfo.fullName"
@@ -40,68 +34,27 @@ export function ContactHeader({ theme }: ContactHeaderProps) {
     const Summary = (
         <div className={styles.subtitle}>
              <InlineEdit readOnly={readOnly} 
-                value={data.personalInfo.headerSummary?.content} 
+                value={personalInfo.headerSummary?.content} 
                 onSave={(val) => updateField('personalInfo.headerSummary.content', val)} 
                 multiline
                 placeholder="Professional Summary"
                 path="personalInfo.headerSummary.content"
-                alignment={data.personalInfo.headerSummary?.alignment || (strategy.alignment === "center" ? "center" : undefined)}
+                alignment={personalInfo.headerSummary?.alignment || (strategy.alignment === "center" ? "center" : undefined)}
                 className={cn(strategy.alignment === "center" ? "w-full block" : "", "bg-transparent")}
             />
         </div>
     );
 
+
+
     const ContactInfo = (
-        <div className={styles.metadata}>
-             {(!readOnly || data.personalInfo.email) && (
-                <div className={styles.item}>
-                    <Mail className="w-4 h-4 shrink-0" />
-                    <InlineEdit readOnly={readOnly} 
-                        value={data.personalInfo.email} 
-                        placeholder="Email"
-                        onSave={(val) => updateField('personalInfo.email', val)} 
-                        path="personalInfo.email"
-                        className="bg-transparent"
-                    />
-                </div>
-            )}
-            {(!readOnly || data.personalInfo.phone) && (
-                <div className={styles.item}>
-                    <Phone className="w-4 h-4 shrink-0" />
-                    <InlineEdit readOnly={readOnly} 
-                        value={data.personalInfo.phone} 
-                        placeholder="Phone"
-                        onSave={(val) => updateField('personalInfo.phone', val)} 
-                        path="personalInfo.phone"
-                        className="bg-transparent"
-                    />
-                </div>
-            )}
-            {(!readOnly || data.personalInfo.location) && (
-                <div className={styles.item}>
-                    <MapPin className="w-4 h-4 shrink-0" />
-                    <InlineEdit readOnly={readOnly} 
-                        value={data.personalInfo.location} 
-                        placeholder="Location"
-                        onSave={(val) => updateField('personalInfo.location', val)} 
-                        path="personalInfo.location"
-                        className="bg-transparent"
-                    />
-                </div>
-            )}
-            {(!readOnly || data.personalInfo.website) && (
-                <div className={styles.item}>
-                    <Globe className="w-4 h-4 shrink-0" />
-                    <InlineEdit readOnly={readOnly} 
-                        value={data.personalInfo.website} 
-                        placeholder="Website"
-                        onSave={(val) => updateField('personalInfo.website', val)} 
-                        path="personalInfo.website"
-                        className="bg-transparent"
-                    />
-                </div>
-            )}
-        </div>
+        <ContactManager 
+            readOnly={readOnly}
+            layout={isSidebarLayout ? 'column' : 'row'} 
+            className={styles.metadata}
+            itemClassName={styles.item}
+            align={strategy.alignment as "left" | "center" | "right"}
+        />
     );
 
     if (isSidebarLayout) {

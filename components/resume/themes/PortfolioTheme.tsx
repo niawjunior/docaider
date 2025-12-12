@@ -11,10 +11,12 @@ import { Button } from "@/components/ui/button";
 import { InlineEdit } from "@/components/resume/editor/InlineEdit";
 import { useResume } from "@/components/resume/state/ResumeContext";
 import { SectionRenderer } from "@/components/resume/shared/SectionRenderer";
+import { ContactManager } from "@/components/resume/shared/ContactManager";
 import { ThemeComponentProps } from "./component-map";
 
 export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
   const { data, updateField: handleUpdate, readOnly } = useResume();
+  const personalInfo = (data.personalInfo || {}) as any; // Fix TS access
 
   // Determine order (fallback if empty)
   const order = (data.sectionOrder && data.sectionOrder.length > 0) 
@@ -36,7 +38,7 @@ export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
         <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="font-bold text-xl tracking-tight flex items-center gap-1">
              <InlineEdit readOnly={readOnly} 
-                value={(data.personalInfo.fullName ?? '').split(' ')[0]}
+                value={(personalInfo.fullName ?? '').split(' ')[0]}
                 onSave={(val) => {
                      // Read-only for nav logo derived from main name
                 }}
@@ -68,7 +70,7 @@ export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
         </div>
       </motion.header>
 
-      <main className="max-w-5xl mx-auto px-8 py-12 space-y-24">
+      <main className="max-w-5xl mx-auto px-8 py-12 space-y-12">
         {/* About / Hero */}
         <motion.section 
           id="about"
@@ -81,7 +83,7 @@ export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
               <span className="shrink-0">Hi, I&apos;m</span>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 min-w-0 flex-1">
                  <InlineEdit readOnly={readOnly} 
-                    value={data.personalInfo.fullName} 
+                    value={personalInfo.fullName} 
                     onSave={(val) => handleUpdate('personalInfo.fullName', val)} 
                     path="personalInfo.fullName"
                     placeholder="Your Name"
@@ -91,86 +93,14 @@ export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
             </h1>
             <p className="text-xl md:text-2xl text-slate-600 leading-relaxed mb-8">
                <InlineEdit readOnly={readOnly} 
-                    value={data.personalInfo.headerSummary?.content} 
+                    value={personalInfo.headerSummary?.content} 
                     onSave={(val) => handleUpdate('personalInfo.headerSummary.content', val)} 
                     placeholder="Brief bio or summary..."
                     multiline
                     path="personalInfo.headerSummary.content"
-                    alignment={data.personalInfo.headerSummary?.alignment || undefined}
+                    alignment={personalInfo.headerSummary?.alignment || undefined}
                  />
             </p>
-            
-
-            <div className="flex flex-wrap gap-4 scroll-mt-24">
-               {/* Email */}
-               <div className="flex items-center gap-2">
-                 <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={readOnly}>
-                    {readOnly ? (
-                        <a href={`mailto:${data.personalInfo.email}`} className="flex items-center gap-2">
-                             <Mail className="w-4 h-4" />
-                             <span>{data.personalInfo.email || "Email"}</span>
-                        </a>
-                    ) : (
-                        <div className="flex items-center gap-2">
-                            <Mail className="w-4 h-4" />
-                            <InlineEdit readOnly={readOnly}
-                                value={data.personalInfo.email}
-                                placeholder="Email"
-                                onSave={(val) => handleUpdate('personalInfo.email', val)}
-                                path="personalInfo.email"
-                                className="bg-transparent border-none p-0 h-auto w-auto min-w-[100px]"
-                            />
-                        </div>
-                    )}
-                 </Button>
-               </div>
-
-               {/* LinkedIn */}
-               <div className="flex items-center gap-2">
-                 <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={readOnly}>
-                    {readOnly ? (
-                        <a href={(data.personalInfo.linkedin as string)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                             <Linkedin className="w-4 h-4" />
-                             <span>{(data.personalInfo.linkedin as string)?.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '') || "LinkedIn"}</span>
-                        </a>
-                    ) : (
-                        <div className="flex items-center gap-2">
-                            <Linkedin className="w-4 h-4" />
-                            <InlineEdit readOnly={readOnly} 
-                                value={data.personalInfo.linkedin} 
-                                placeholder="LinkedIn URL"
-                                onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
-                                path="personalInfo.linkedin"
-                                className="bg-transparent border-none p-0 h-auto w-auto min-w-[100px]"
-                            />
-                        </div>
-                    )}
-                 </Button>
-               </div>
-
-               {/* Website */}
-                <div className="flex items-center gap-2">
-                 <Button variant="outline" className="rounded-full px-4 hover:bg-slate-100 hover:text-slate-900 border-slate-200" asChild={readOnly}>
-                    {readOnly ? (
-                        <a href={(data.personalInfo.website as string)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                             <Globe className="w-4 h-4" />
-                             <span>{(data.personalInfo.website as string)?.replace(/^https?:\/\/(www\.)?/, '') || "Website"}</span>
-                        </a>
-                    ) : (
-                        <div className="flex items-center gap-2">
-                            <Globe className="w-4 h-4" />
-                            <InlineEdit readOnly={readOnly} 
-                                value={data.personalInfo.website} 
-                                placeholder="Website URL"
-                                onSave={(val) => handleUpdate('personalInfo.website', val)} 
-                                path="personalInfo.website"
-                                className="bg-transparent border-none p-0 h-auto w-auto min-w-[100px]"
-                            />
-                        </div>
-                    )}
-                 </Button>
-               </div>
-            </div>
           </div>
         </motion.section>
 
@@ -218,39 +148,11 @@ export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
                      </p>
                      
                      <div className="flex flex-wrap justify-center gap-4 scroll-mt-24">
-                         {/* Email */}
-                         <div className="flex items-center gap-2">
-                             <Mail className="w-5 h-5 text-slate-400" />
-                              <InlineEdit readOnly={readOnly} 
-                                value={data.personalInfo.email} 
-                                placeholder="Email"
-                                onSave={(val) => handleUpdate('personalInfo.email', val)} 
-                                path="personalInfo.email"
-                                className="bg-transparent border-none text-slate-900 font-medium"
-                             />
-                         </div>
-                         {/* LinkedIn */}
-                         <div className="flex items-center gap-2">
-                             <Linkedin className="w-5 h-5 text-slate-400" />
-                              <InlineEdit readOnly={readOnly} 
-                                value={data.personalInfo.linkedin} 
-                                placeholder="LinkedIn"
-                                onSave={(val) => handleUpdate('personalInfo.linkedin', val)} 
-                                path="personalInfo.linkedin"
-                                className="bg-transparent border-none text-slate-900 font-medium"
-                             />
-                         </div>
-                         {/* Website */}
-                         <div className="flex items-center gap-2">
-                             <Globe className="w-5 h-5 text-slate-400" />
-                              <InlineEdit readOnly={readOnly} 
-                                value={data.personalInfo.website} 
-                                placeholder="Website"
-                                onSave={(val) => handleUpdate('personalInfo.website', val)} 
-                                path="personalInfo.website"
-                                className="bg-transparent border-none text-slate-900 font-medium"
-                             />
-                         </div>
+                        <ContactManager 
+                           layout="row" 
+                           align="center"
+                           itemClassName="border border-slate-200 rounded-full px-4 py-2 hover:bg-slate-100 transition-colors bg-white h-auto [&_span]:whitespace-nowrap items-center"
+                        />
                      </div>
                 </div>
             </div>
