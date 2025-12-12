@@ -22,8 +22,8 @@ export const ResumeSchema = z.object({
         id: z.string().nullish(),
         label: z.string().nullish(),
         url: z.string().nullish(),
-    })).nullish().transform(v => v ?? []),
-  }).nullish().transform(v => v ?? {}).describe("Personal contact information"),
+    })).default([]),
+  }).default({}).describe("Personal contact information"),
   
   coverImage: z.string().nullish(),
   
@@ -36,7 +36,7 @@ export const ResumeSchema = z.object({
       endDate: RichTextFieldSchema.describe("End date (YYYY-MM or Present)"),
       description: RichTextFieldSchema.describe("Bullet points or detailed description of responsibilities and achievements"),
     })
-  ).nullish().transform(v => v ?? []).describe("Work experience history"),
+  ).default([]).describe("Work experience history"),
   
   education: z.array(
     z.object({
@@ -47,9 +47,9 @@ export const ResumeSchema = z.object({
       startDate: RichTextFieldSchema.describe("Start date (YYYY-MM)"),
       endDate: RichTextFieldSchema.describe("End date or Graduation date (YYYY-MM)"),
     })
-  ).nullish().transform(v => v ?? []).describe("Educational background"),
+  ).default([]).describe("Educational background"),
   
-  skills: z.array(z.string()).nullish().transform(v => v ?? []).describe("List of professional skills"),
+  skills: z.array(z.string()).default([]).describe("List of professional skills"),
   
   projects: z.array(
     z.object({
@@ -59,7 +59,7 @@ export const ResumeSchema = z.object({
       url: z.string().nullish().describe("URL to the project"),
       technologies: z.array(z.string()).nullish().describe("List of technologies used in the project"),
     })
-  ).nullish().transform(v => v ?? []).describe("Notable projects"),
+  ).default([]).describe("Notable projects"),
   
   testimonials: z.array(
     z.object({
@@ -68,7 +68,7 @@ export const ResumeSchema = z.object({
       role: z.string().nullish(),
       content: z.string().nullish(),
     })
-  ).nullish().transform(v => v ?? []).describe("Client testimonials"),
+  ).default([]).describe("Client testimonials"),
   
   customSections: z.array(
     z.object({
@@ -82,11 +82,11 @@ export const ResumeSchema = z.object({
           subtitle: RichTextFieldSchema.describe("Subtitle of the item"),
           content: RichTextFieldSchema.describe("Description or content of the item"),
         })
-      ).nullish().transform(v => v ?? [])
+      ).default([])
     })
-  ).nullish().transform(v => v ?? []).describe("Custom user-defined sections"),
+  ).default([]).describe("Custom user-defined sections"),
   
-  sectionOrder: z.array(z.string()).nullish().transform(v => v ?? [
+  sectionOrder: z.array(z.string()).default([
     "summary",
     "experience", 
     "education", 

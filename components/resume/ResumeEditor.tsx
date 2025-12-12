@@ -61,7 +61,7 @@ export function ResumeEditor() {
            const data = await getResumeById(idParam);
            if (data) {
              setResumeData(data.content);
-             setTheme(data.theme as any);
+             setTheme(data.theme);
              setSlug(data.slug);
              setVisibility(data.is_public ? "public" : "private");
 

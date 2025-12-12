@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["pdf-parse"],
+  serverExternalPackages: ["pdf-parse", "puppeteer-core", "@sparticuz/chromium", "@sparticuz/chromium-min"],
   crossOrigin: "anonymous",
   async headers() {
     return [
@@ -40,6 +40,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  
 };
 
 const withNextIntl = createNextIntlPlugin();

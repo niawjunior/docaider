@@ -373,11 +373,11 @@ export function LandingPage({ initialData }: LandingPageProps) {
                     >
                        <div className="relative aspect-[4/3] bg-slate-900 rounded-xl overflow-hidden border border-white/10 group-hover:border-white/30 transition-all shadow-2xl">
                           <div className={`absolute inset-0 scale-[0.25] origin-top-left w-[400%] h-[400%] pointer-events-none ${['visual', 'modern'].includes(theme.id) ? 'bg-black' : 'bg-white'}`}>
-                             <ResumePreview data={theme.data as any} theme={theme.id as any} isThumbnail={true} className="h-full" />
+                             <ResumePreview data={theme.data} theme={theme.id} isThumbnail={true} className="h-full" />
                           </div>
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-4 backdrop-blur-sm">
                              <Button 
-                                onClick={() => handleUseTemplate(theme.data as any, theme.id)} 
+                                onClick={() => handleUseTemplate(theme.data, theme.id)} 
                                 disabled={isCreating}
                                 className="rounded-full bg-white text-black hover:bg-slate-200"
                              >

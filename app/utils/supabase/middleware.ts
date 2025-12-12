@@ -63,6 +63,7 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/api/transcribe") &&
     !request.nextUrl.pathname.startsWith("/api/text-to-speech") &&
     !request.nextUrl.pathname.startsWith("/p/") && // Public resumes
+    !request.nextUrl.pathname.startsWith("/print/") && // Print resume (protected by page-level secret)
     // Allow resume builder landing page and gallery, but protect create/edit routes
     !(
       request.nextUrl.pathname === "/resume-builder" || 

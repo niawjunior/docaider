@@ -19,7 +19,7 @@ import { useResume } from "@/components/resume/state/ResumeContext";
 
 export const VisualTheme = ({ containerRef, isThumbnail }: ThemeComponentProps) => {
   const { data, updateField: handleUpdate, readOnly } = useResume();
-  const personalInfo = data.personalInfo as any;
+  const personalInfo = data.personalInfo;
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {

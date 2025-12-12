@@ -36,7 +36,7 @@ export function GalleryPage({ initialData }: GalleryPageProps) {
   const filteredData = initialData.filter((item) => {
     const matchesSearch =
       (item.job_title?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
-      ((item.content.personalInfo as any)?.fullName?.toLowerCase() || "").includes(searchQuery.toLowerCase());
+      ((item.content.personalInfo)?.fullName?.toLowerCase() || "").includes(searchQuery.toLowerCase());
     const matchesTheme = filterTheme === "all" || item.theme === filterTheme;
     return matchesSearch && matchesTheme;
   });
@@ -144,10 +144,10 @@ export function GalleryPage({ initialData }: GalleryPageProps) {
                         </span>
                       </div>
                       <p className="text-sm text-slate-400 font-medium mb-1">
-                        {(item.content.personalInfo as any)?.fullName}
+                        {(item.content.personalInfo)?.fullName}
                       </p>
                       <p className="text-slate-500 text-sm line-clamp-2">
-                        {(item.content.personalInfo as any)?.summary?.content ?? item.summary}
+                        {(item.content.personalInfo)?.summary?.content ?? item.summary}
                       </p>
                     </div>
                   </motion.div>

@@ -14,13 +14,10 @@ export const DEFAULT_SECTION_ORDER = [
  */
 export function normalizeResumeData(data: Partial<ResumeData>): ResumeData {
   // 1. Ensure personalInfo exists with all sub-objects
-  const personalInfo = data.personalInfo || {};
+  const personalInfo = data.personalInfo || {} as any;
   
   // Ensure summary objects exist if missing
-  if (typeof personalInfo.summary === 'string') {
-      // Migrate legacy string summary
-      personalInfo.summary = { content: personalInfo.summary, alignment: "left" };
-  } else if (!personalInfo.summary) {
+  if (!personalInfo.summary) {
       personalInfo.summary = { content: "", alignment: "left" };
   } else {
       // Ensure properties exist on partial object
@@ -32,9 +29,7 @@ export function normalizeResumeData(data: Partial<ResumeData>): ResumeData {
   }
 
   // Header Summary
-  if (typeof personalInfo.headerSummary === 'string') {
-     personalInfo.headerSummary = { content: personalInfo.headerSummary, alignment: "left" };
-  } else if (!personalInfo.headerSummary) {
+  if (!personalInfo.headerSummary) {
      // Default to summary content if header summary is missing
      personalInfo.headerSummary = { content: personalInfo.summary.content, alignment: "left" };
   }

@@ -96,7 +96,7 @@ export function ResumeCreationWizard() {
             if (demoTheme) {
                 try {
                     const result = await saveDraft({
-                        content: demoTheme.data as any,
+                        content: demoTheme.data,
                         theme: themeParam,
                         slug: `${demoTheme.data.personalInfo.fullName?.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
                     });
@@ -188,7 +188,7 @@ export function ResumeCreationWizard() {
   const handleCreateFromTemplate = async () => {
     if (!activePreviewTheme) return;
     // Trigger the reveal animation with the template data
-    setRevealData(activePreviewTheme.data as any);
+    setRevealData(activePreviewTheme.data);
   };
 
   return (

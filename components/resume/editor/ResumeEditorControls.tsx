@@ -1,11 +1,7 @@
-"use client";
-
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2, Share2, Layout, Monitor, Tablet, Smartphone, Eye, ChevronDown, Calendar, Lock, Globe } from "lucide-react";
+import { PDFExportDialog } from "@/components/resume/PDFExportDialog";
+import { Loader2, Share2, Layout, Monitor, Tablet, Smartphone, Eye, ChevronDown, Calendar, Lock, Globe, Download } from "lucide-react";
 import { ResumeData } from "@/lib/schemas/resume";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -35,6 +31,10 @@ import Link from "next/link";
 import { publishResume, saveDraft } from "@/app/actions/resume";
 import { SectionManager } from "@/components/resume/shared/SectionManager";
 import { AVAILABLE_THEMES } from "@/lib/themes/registry";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface ResumeEditorControlsProps {
     resumeData: ResumeData | null;
@@ -79,6 +79,7 @@ export function ResumeEditorControls({
     idParam,
     setIsViewMode
 }: ResumeEditorControlsProps) {
+    const [showPdfExport, setShowPdfExport] = useState(false);
 
     return (
         <div className="flex items-center gap-3">
@@ -181,11 +182,21 @@ export function ResumeEditorControls({
                                         Publish
                                     </DropdownMenuItem>
                                 </DialogTrigger>
+                                  {idParam && (
+                                    <>
+                                        <DropdownMenuSeparator className="bg-slate-800" />
+                                        <DropdownMenuItem onSelect={() => setShowPdfExport(true)} className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 focus:text-white gap-2">
+                                            <Download className="w-4 h-4" />
+                                            Download PDF
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
                                 <DropdownMenuSeparator className="bg-slate-800" />
                                 <DropdownMenuItem onClick={() => setIsViewMode(true)} className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800 focus:text-white gap-2">
                                     <Eye className="w-4 h-4" />
                                     View Mode
                                 </DropdownMenuItem>
+                              
                             </DropdownMenuContent>
                         </DropdownMenu>
 
@@ -236,18 +247,24 @@ export function ResumeEditorControls({
                             </div>
                         ) : (
                             <div className="py-6 text-center space-y-4">
-                            <div className="w-12 h-12 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto">
-                                <Share2 className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-lg">{idParam ? "Resume Updated!" : "Resume Published!"}</h3>
-                                <p className="text-slate-500">Your resume is now live at:</p>
-                            </div>
-                            <div className="p-3 bg-slate-800 rounded-lg text-sm font-mono break-all">
-                                <Link href={publishedUrl} target="_blank" className="text-blue-400 hover:underline">
-                                {window.location.origin}{publishedUrl}
-                                </Link>
-                            </div>
+                                <div className="w-12 h-12 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto">
+                                    <Share2 className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-lg">{idParam ? "Resume Updated!" : "Resume Published!"}</h3>
+                                    <p className="text-slate-500">Your resume is now live at:</p>
+                                </div>
+                                <div className="p-3 bg-slate-800 rounded-lg text-sm font-mono break-all">
+                                    <Link href={publishedUrl} target="_blank" className="text-blue-400 hover:underline">
+                                    {window.location.origin}{publishedUrl}
+                                    </Link>
+                                </div>
+
+                                <div className="pt-4">
+                                     <Button variant="secondary" asChild className="w-full h-11 text-base font-medium">
+                                        <Link href={publishedUrl} target="_blank">View Live Resume</Link>
+                                    </Button>
+                                </div>
                             </div>
                         )}
 
@@ -287,8 +304,8 @@ export function ResumeEditorControls({
                                 {idParam ? "Update Settings" : "Publish Now"}
                             </Button>
                             ) : (
-                            <Button variant="outline" asChild>
-                                <Link href={publishedUrl} target="_blank">View Live Resume</Link>
+                            <Button variant="outline" onClick={() => setPublishedUrl(null)}>
+                                Close
                             </Button>
                             )}
                         </DialogFooter>
@@ -296,6 +313,13 @@ export function ResumeEditorControls({
                     </Dialog>
                 </>
              )}
+             
+            {/* PDF Export Dialog - Controlled */}
+            <PDFExportDialog 
+                open={showPdfExport} 
+                onOpenChange={setShowPdfExport} 
+                resumeId={idParam || ""} 
+            />
         </div>
     );
 }

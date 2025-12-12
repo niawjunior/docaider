@@ -24,10 +24,10 @@ export function AlignmentTools({ resumeData, activeTarget, theme, updateField }:
 
     if (targetField === "personalInfo.summary.content") {
         alignmentPath = "personalInfo.summary.alignment";
-        currentAlignment = getEffectiveAlignment((resumeData.personalInfo as any)?.summary?.alignment);
+        currentAlignment = getEffectiveAlignment(resumeData.personalInfo?.summary?.alignment);
     } else if (targetField === "personalInfo.headerSummary.content") {
         alignmentPath = "personalInfo.headerSummary.alignment";
-        currentAlignment = getEffectiveAlignment((resumeData.personalInfo as any)?.headerSummary?.alignment);
+        currentAlignment = getEffectiveAlignment(resumeData.personalInfo?.headerSummary?.alignment);
     } else if (targetField.endsWith(".content")) {
         // Restriction: For structured sections, only allow alignment on 'description' fields.
         // Titles, dates, company names etc. should be strictly controlled by the theme.

@@ -1,13 +1,15 @@
-
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { generateResumePDF } from "@/app/actions/pdf";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { ArrowLeft, Download, Loader2 } from "lucide-react";
+import { useRouter, useParams } from "next/navigation";
 import useSupabaseSession from "@/app/hooks/useSupabaseSession";
 import { signOut } from "@/app/login/action";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface ResumeBuilderHeaderProps {
   children?: React.ReactNode;
@@ -27,7 +29,15 @@ export function ResumeBuilderHeader({
   theme = "light"
 }: ResumeBuilderHeaderProps) {
   const router = useRouter();
+  const params = useParams();
   const { session, loading } = useSupabaseSession();
+  
+  // Safely extract resume ID from params if available (e.g., in builder route)
+  // const resumeId = typeof params?.id === 'string' ? params.id : null;
+
+
+
+  const isDark = theme === "dark";
 
   const handleSignOut = async () => {
     await signOut();
@@ -37,8 +47,6 @@ export function ResumeBuilderHeader({
   const handleCreate = () => {
      router.push("/resume-builder/create");
   };
-
-  const isDark = theme === "dark";
 
   return (
     <header className={cn(
@@ -81,11 +89,19 @@ export function ResumeBuilderHeader({
             )}>
               Resume Builder
             </span>
+            <span className={cn(
+              "text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ml-1 tracking-wider",
+              isDark ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-blue-100 text-blue-700 border border-blue-200"
+            )}>
+              Beta
+            </span>
           </Link>
         </div>
 
         <div className="flex items-center gap-4">
           {children}
+
+
 
           {showAuth && (
             <>

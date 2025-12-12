@@ -24,7 +24,8 @@ export const THEME_DEMOS: ThemeDemo[] = [
             location: "New York, NY",
             linkedin: "linkedin.com/in/emilywhite-marketing",
             website: "emilywhite.com",
-            jobTitle: "Marketing Director" 
+            jobTitle: "Marketing Director",
+            additionalLinks: []
         },
         experience: [
             { 
@@ -99,7 +100,8 @@ export const THEME_DEMOS: ThemeDemo[] = [
             location: "San Francisco, CA",
             linkedin: "linkedin.com/in/alexmorgan",
             website: "morgandesign.com",
-            jobTitle: "Senior Graphic Designer" 
+            jobTitle: "Senior Graphic Designer",
+            additionalLinks: []
         },
         experience: [
             { 
@@ -166,7 +168,8 @@ export const THEME_DEMOS: ThemeDemo[] = [
             location: "Seattle, WA",
             linkedin: "linkedin.com/in/sarahchen-dev",
             website: "sarahchen.dev",
-            jobTitle: "Senior Software Engineer" 
+            jobTitle: "Senior Software Engineer",
+            additionalLinks: []
         },
         coverImage: "/images/covers/photo-1618005182384-a83a8bd57fbe.avif",
         experience: [
@@ -234,7 +237,8 @@ export const THEME_DEMOS: ThemeDemo[] = [
             location: "Austin, TX",
             linkedin: "linkedin.com/in/marcusj-pm",
             website: "marcusj.io",
-            jobTitle: "Lead Product Manager" 
+            jobTitle: "Lead Product Manager",
+            additionalLinks: []
         },
         experience: [
             { 
@@ -309,7 +313,8 @@ export const THEME_DEMOS: ThemeDemo[] = [
             location: "Chicago, IL",
             linkedin: "linkedin.com/in/davidkim-uxr",
             website: "davidkimresearch.com",
-            jobTitle: "Senior UX Researcher" 
+            jobTitle: "Senior UX Researcher",
+            additionalLinks: []
         },
         experience: [
             { 
@@ -384,7 +389,8 @@ export const THEME_DEMOS: ThemeDemo[] = [
             location: "London, UK",
             linkedin: "linkedin.com/in/lisaray-writer",
             website: "lisarayportfolio.com",
-            jobTitle: "Senior Copywriter"
+            jobTitle: "Senior Copywriter",
+            additionalLinks: []
         },
         experience: [
             { 
