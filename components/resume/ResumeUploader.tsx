@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, FileText, X, Wand2, FileIcon } from "lucide-react";
+import { Upload, FileText, X, Wand2, FileIcon, AlertCircle } from "lucide-react";
 import { ResumeData } from "@/lib/schemas/resume";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ScanAnimation, CircuitAnimation, SparkleAnimation, RocketAnimation } from "@/components/resume/shared/AnimatedIcons";
+import { useDropzone } from "react-dropzone";
 
 interface ResumeUploaderProps {
   onUploadSuccess: (data: ResumeData) => void;
@@ -32,6 +33,24 @@ export function ResumeUploader(props: ResumeUploaderProps) {
   const [file, setFile] = useState<File | null>(null);
   const [processingStep, setProcessingStep] = useState(0);
   const [isFinalizing, setIsFinalizing] = useState(false);
+
+  // Drag & Drop Logic
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles?.length > 0) {
+      setFile(acceptedFiles[0]);
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive, isDragReject, fileRejections } = useDropzone({
+    onDrop,
+    maxSize: 2 * 1024 * 1024, // 2MB Limit
+    accept: {
+      'application/pdf': ['.pdf'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'application/msword': ['.doc']
+    },
+    multiple: false
+  });
 
   const parseResume = useMutation({
     mutationFn: async (file: File) => {
@@ -67,8 +86,6 @@ export function ResumeUploader(props: ResumeUploaderProps) {
     },
   });
 
-
-
   const isLoading = externalLoading || parseResume.isPending || isFinalizing;
   const { onLoadingStateChange } = props;
 
@@ -102,12 +119,6 @@ export function ResumeUploader(props: ResumeUploaderProps) {
       }
   }, [isLoading, processingStep]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
-  };
-
   const handleRemoveFile = (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
@@ -123,6 +134,9 @@ export function ResumeUploader(props: ResumeUploaderProps) {
 
   const CurrentStepIcon = PROCESSING_STEPS[processingStep].icon;
   const currentStepColor = PROCESSING_STEPS[processingStep].color;
+
+  // Error handling for drag & drop
+  const fileError = fileRejections.length > 0 ? fileRejections[0].errors[0] : null;
 
   return (
     <div className="h-full flex flex-col items-center justify-center text-center space-y-8 p-4">
@@ -210,10 +224,12 @@ export function ResumeUploader(props: ResumeUploaderProps) {
                 isLoading && processingStep === 0 && "bg-blue-600",
                 isLoading && processingStep === 1 && "bg-purple-600",
                 isLoading && processingStep === 2 && "bg-yellow-500",
-                isLoading && processingStep === 3 && "bg-green-500"
+                isLoading && processingStep === 3 && "bg-green-500",
+                isDragActive && !isLoading && "bg-blue-500 opacity-80 animate-pulse",
+                isDragReject && !isLoading && "bg-red-500 opacity-80"
           )}></div>
           
-          <div className="relative bg-slate-900 rounded-xl border border-slate-700/50 hover:border-slate-600 transition-all overflow-hidden shadow-2xl w-full h-[250px]">
+          <div className="relative bg-slate-900 rounded-xl border border-slate-700/50 hover:border-slate-600 transition-all overflow-hidden shadow-2xl w-full h-[250px] flex flex-col">
             
             <AnimatePresence mode="wait">
                 {file && !isLoading ? (
@@ -302,31 +318,60 @@ export function ResumeUploader(props: ResumeUploaderProps) {
                          </div>
                     </motion.div>
                 ) : (
-                    // IDLE UPLOAD STATE
+                    // IDLE UPLOAD STATE (With Dropzone)
                     <motion.div
                          key="upload-idle"
                          initial={{ opacity: 0 }}
                          animate={{ opacity: 1 }}
                          exit={{ opacity: 0 }}
-                         className="flex flex-col justify-center w-full h-full"
+                         className="w-full h-full"
                     >
-                        <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer hover:bg-slate-800/30 transition-all p-6">
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center space-y-4">
-                                <div className="p-4 bg-slate-800 rounded-full group-hover:scale-110 transition-transform duration-300 ring-1 ring-white/5">
-                                    <FileIcon className="w-8 h-8 text-slate-400 group-hover:text-blue-400 transition-colors" />
-                                </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm text-slate-300"><span className="font-semibold text-blue-400">Click to upload</span> or drag and drop</p>
-                                    <p className="text-xs text-slate-500">Support for PDF, DOCX (Max 5MB)</p>
+                        <div 
+                            {...getRootProps()} 
+                            className="flex flex-col justify-center w-full h-full outline-none"
+                        >
+                            <input {...getInputProps()} />
+                            <div className={cn(
+                                "flex flex-col items-center justify-center w-full h-full cursor-pointer transition-all p-6 rounded-xl",
+                                isDragActive ? "bg-blue-500/10" : "hover:bg-slate-800/30"
+                            )}>
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center space-y-4">
+                                    <div className={cn(
+                                        "p-4 rounded-full transition-transform duration-300 ring-1 ring-white/5",
+                                        isDragActive ? "bg-blue-500/20 scale-110" : "bg-slate-800 group-hover:scale-110",
+                                        isDragReject && "bg-red-500/20 ring-red-500/50"
+                                    )}>
+                                        {isDragReject ? (
+                                            <X className="w-8 h-8 text-red-400" />
+                                        ) : (
+                                            <FileIcon className={cn("w-8 h-8 transition-colors", isDragActive ? "text-blue-400" : "text-slate-400 group-hover:text-blue-400")} />
+                                        )}
+                                    </div>
+                                    <div className="space-y-1">
+                                        {fileError ? (
+                                            <div className="text-red-400 flex flex-col items-center gap-1 animate-in fade-in slide-in-from-bottom-2">
+                                                <div className="flex items-center gap-1 font-medium">
+                                                    <AlertCircle className="w-4 h-4" />
+                                                    <span>File too large or invalid</span>
+                                                </div>
+                                                <p className="text-xs opacity-80">Max size 2MB, PDF or DOCX only</p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <p className="text-sm text-slate-300">
+                                                    {isDragActive ? (
+                                                        <span className="font-semibold text-blue-400">Drop your file here</span>
+                                                    ) : (
+                                                        <span><span className="font-semibold text-blue-400">Click to upload</span> or drag and drop</span>
+                                                    )}
+                                                </p>
+                                                <p className="text-xs text-slate-500">Support for PDF, DOCX (Max 2MB)</p>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                            <Input
-                                type="file"
-                                accept=".pdf,.docx,.doc"
-                                onChange={handleFileChange}
-                                className="hidden"
-                            />
-                        </label>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
