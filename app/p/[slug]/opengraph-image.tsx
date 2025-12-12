@@ -39,12 +39,13 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#F8FAFC", // slate-50
+          backgroundColor: "#020617", // slate-950
+          backgroundImage: "radial-gradient(circle at 50% 0%, #1e293b 0%, #020617 75%)",
           fontFamily: "sans-serif",
           position: "relative",
         }}
       >
-        {/* Background Pattern */}
+        {/* Background Grid Pattern */}
         <div
           style={{
             position: "absolute",
@@ -52,59 +53,99 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: "radial-gradient(#CBD5E1 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-            opacity: 0.3,
+            backgroundImage: "linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(90deg, #1e293b 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+            opacity: 0.15,
+            maskImage: "linear-gradient(to bottom, black 40%, transparent 100%)", // Fade out at bottom
           }}
         />
 
-        {/* Card Container */}
+        {/* Glowing Orbs */}
+        <div 
+            style={{
+                position: "absolute",
+                top: "-20%",
+                left: "20%",
+                width: "600px",
+                height: "600px",
+                background: "radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(0,0,0,0) 70%)",
+                filter: "blur(40px)",
+                opacity: 0.8,
+            }}
+        />
+        <div 
+            style={{
+                position: "absolute",
+                bottom: "-10%",
+                right: "10%",
+                width: "500px",
+                height: "500px",
+                background: "radial-gradient(circle, rgba(168,85,247,0.1) 0%, rgba(0,0,0,0) 70%)",
+                filter: "blur(50px)",
+                opacity: 0.6,
+            }}
+        />
+
+        {/* Main Glass Card */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "white",
-            padding: "60px 80px",
-            borderRadius: "24px",
-            boxShadow: "0 20px 50px -12px rgba(0, 0, 0, 0.15)",
-            border: "1px solid #E2E8F0",
-            maxWidth: "80%",
+            backgroundColor: "rgba(15, 23, 42, 0.6)", // slate-900/60
+            padding: "80px 100px",
+            borderRadius: "32px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.1)",
+            maxWidth: "85%",
             textAlign: "center",
             position: "relative",
             zIndex: 10,
+            backdropFilter: "blur(12px)",
           }}
         >
-          {/* Avatar / Icon */}
+          {/* Avatar / Icon with Gradient Ring */}
           <div
             style={{
-              width: "100px",
-              height: "100px",
+              padding: "4px",
               borderRadius: "50%",
-              backgroundColor: "#2563EB", // blue-600
-              color: "white",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "48px",
-              fontWeight: "bold",
+              background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)", // Blue to Purple
               marginBottom: "32px",
-              boxShadow: "0 10px 30px -10px rgba(37, 99, 235, 0.5)",
+              boxShadow: "0 0 40px -10px rgba(59, 130, 246, 0.5)",
+              display: "flex",
             }}
           >
-            {initial}
+            <div
+                style={{
+                    width: "120px",
+                    height: "120px",
+                    borderRadius: "50%",
+                    backgroundColor: "#0f172a", // slate-900
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "56px",
+                    fontWeight: "bold",
+                    border: "4px solid #0f172a", // Inner border match background
+                }}
+            >
+                {initial}
+            </div>
           </div>
 
           {/* Name */}
           <div
             style={{
-              fontSize: "64px",
+              fontSize: "72px",
               fontWeight: 800,
-              color: "#0F172A", // slate-900
+              background: "linear-gradient(to bottom right, #ffffff 0%, #cbd5e1 100%)",
+              backgroundClip: "text",
+              color: "transparent",
               lineHeight: 1.1,
               marginBottom: "16px",
               letterSpacing: "-0.02em",
+              textShadow: "0 2px 10px rgba(0,0,0,0.3)",
             }}
           >
             {fullName}
@@ -113,10 +154,11 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           {/* Job Title */}
           <div
             style={{
-              fontSize: "32px",
+              fontSize: "36px",
               fontWeight: 500,
-              color: "#64748B", // slate-500
-              marginBottom: location ? "12px" : "0",
+              color: "#94a3b8", // slate-400
+              marginBottom: location ? "16px" : "0",
+              letterSpacing: "-0.01em",
             }}
           >
             {jobTitle}
@@ -127,13 +169,15 @@ export default async function Image({ params }: { params: Promise<{ slug: string
              <div
              style={{
                fontSize: "24px",
-               color: "#94A3B8", // slate-400
+               color: "#64748b", // slate-500
                display: "flex",
                alignItems: "center",
                gap: "8px",
+               marginTop: "8px",
+               fontWeight: 400,
              }}
            >
-             📍 {location}
+             <span style={{ fontSize: "20px" }}>📍</span> {location}
            </div>
           )}
         </div>
@@ -142,16 +186,18 @@ export default async function Image({ params }: { params: Promise<{ slug: string
          <div
             style={{
               position: "absolute",
-              bottom: "40px",
+              bottom: "50px",
               display: "flex",
               alignItems: "center",
-              gap: "8px",
-              color: "#94A3B8",
-              fontSize: "20px",
-              fontWeight: 600,
+              gap: "10px",
+              color: "#64748b", // slate-500
+              fontSize: "22px",
+              fontWeight: 500,
+              letterSpacing: "0.02em",
             }}
           >
-            Created with <span style={{ color: "#2563EB" }}>DocAider</span>
+            <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#3b82f6" }} /> 
+            Created with <span style={{ color: "#e2e8f0", fontWeight: 600 }}>DocAider</span>
           </div>
       </div>
     ),
