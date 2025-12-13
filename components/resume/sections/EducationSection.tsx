@@ -12,9 +12,10 @@ import { useResume } from "@/components/resume/state/ResumeContext";
 interface EducationSectionProps {
     theme: string;
     className?: string;
+    id?: string;
 }
 
-export function EducationSection({ theme, className }: EducationSectionProps) {
+export function EducationSection({ theme, className, id }: EducationSectionProps) {
     const { data, updateField, readOnly } = useResume();
     
     const config = getSectionTheme(theme, 'education');
@@ -30,6 +31,7 @@ export function EducationSection({ theme, className }: EducationSectionProps) {
 
     return (
         <ResumeSection
+            id={id}
             title="Education"
             theme={theme}
             className={className}
@@ -121,28 +123,30 @@ export function EducationSection({ theme, className }: EducationSectionProps) {
                             </div>
                             
                             {/* Subtitle / Degree Wrapper */}
-                            <div className={cn(
-                                styles.subtitle,
-                                "flex flex-wrap gap-1", // Ensure degree parts flow together
-                                strategy.alignment === 'center' ? "justify-center" : ""
-                            )}>
-                                 <InlineEdit readOnly={readOnly} 
-                                     value={edu.degree?.content} 
-                                     placeholder="Degree"
-                                     className="bg-transparent"
-                                     onSave={(val) => updateItem({ degree: { ...edu.degree, content: val } })}
-                                     path={`education[${index}].degree.content`}
-                                     alignment={edu.degree?.alignment || undefined}
-                                 />
-                                 <span>in</span>
-                                <InlineEdit readOnly={readOnly} 
-                                     value={edu.fieldOfStudy?.content} 
-                                     placeholder="Field of Study"
-                                     className="bg-transparent"
-                                     onSave={(val) => updateItem({ fieldOfStudy: { ...edu.fieldOfStudy, content: val } })}
-                                     path={`education[${index}].fieldOfStudy.content`}
-                                     alignment={edu.fieldOfStudy?.alignment || undefined}
-                                 />
+                            <div className={styles.body}>
+                                <div className={cn(
+                                    styles.subtitle,
+                                    "flex flex-wrap gap-1", // Ensure degree parts flow together
+                                    strategy.alignment === 'center' ? "justify-center" : ""
+                                )}>
+                                     <InlineEdit readOnly={readOnly} 
+                                         value={edu.degree?.content} 
+                                         placeholder="Degree"
+                                         className="bg-transparent"
+                                         onSave={(val) => updateItem({ degree: { ...edu.degree, content: val } })}
+                                         path={`education[${index}].degree.content`}
+                                         alignment={edu.degree?.alignment || undefined}
+                                     />
+                                     <span>in</span>
+                                    <InlineEdit readOnly={readOnly} 
+                                         value={edu.fieldOfStudy?.content} 
+                                         placeholder="Field of Study"
+                                         className="bg-transparent"
+                                         onSave={(val) => updateItem({ fieldOfStudy: { ...edu.fieldOfStudy, content: val } })}
+                                         path={`education[${index}].fieldOfStudy.content`}
+                                         alignment={edu.fieldOfStudy?.alignment || undefined}
+                                     />
+                                </div>
                             </div>
                             
                             {/* Creative Theme Date Location */}

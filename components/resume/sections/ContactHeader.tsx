@@ -50,6 +50,7 @@ export function ContactHeader({ theme }: ContactHeaderProps) {
     const ContactInfo = (
         <ContactManager 
             readOnly={readOnly}
+            theme={theme}
             layout={isSidebarLayout ? 'column' : 'row'} 
             className={styles.metadata}
             itemClassName={styles.item}

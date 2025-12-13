@@ -23,22 +23,24 @@ export const SectionRenderer = ({ sectionId, className, theme: propTheme }: Sect
 
     switch (sectionId) {
         case "contact":
+            // Contact usually handled separately, but let's pass id just in case header needs it
+            // Though ContactHeader doesn't have ResumeSection wrapper...
             return <ContactHeader theme={activeTheme} />;
         
         case "summary":
-            return <SummarySection theme={activeTheme} className={className} />;
+            return <SummarySection theme={activeTheme} className={className} id={sectionId} />;
             
         case "experience":
-            return <ExperienceSection theme={activeTheme} className={className} />;
+            return <ExperienceSection theme={activeTheme} className={className} id={sectionId} />;
             
         case "education":
-            return <EducationSection theme={activeTheme} className={className} />;
+            return <EducationSection theme={activeTheme} className={className} id={sectionId} />;
             
         case "skills":
-            return <SkillsSection theme={activeTheme} className={className} />;
+            return <SkillsSection theme={activeTheme} className={className} id={sectionId} />;
             
         case "projects":
-            return <ProjectsSection theme={activeTheme} className={className} />;
+            return <ProjectsSection theme={activeTheme} className={className} id={sectionId} />;
             
         default:
             // Handle Custom Sections
@@ -50,6 +52,9 @@ export const SectionRenderer = ({ sectionId, className, theme: propTheme }: Sect
                         index={data.customSections?.indexOf(customSection) || 0}
                         theme={activeTheme}
                         className={className}
+                        // CustomSectionRenderer internally uses ResumeSection? Let's check.
+                        // Ideally we pass id here too, but CustomSectionRenderer might use section.id internally.
+                        // Let's pass it anyway if it supports it, or it will just be ignored.
                     />
                 );
             }

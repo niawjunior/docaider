@@ -1,12 +1,7 @@
-import { ResumeData } from "@/lib/schemas/resume";
 import { cn } from "@/lib/utils";
 import { motion, useScroll, useTransform } from "framer-motion";
-import {  Mail, MapPin, Globe, Linkedin, ImageIcon } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 import { InlineEdit } from "@/components/resume/editor/InlineEdit";
-import { ThemeAddButton, ThemeDeleteButton } from "./ThemeControls";
-import { useResumeUpdate } from "@/lib/hooks/use-resume-update";
-import { EmptySectionPlaceholder } from "@/components/resume/shared/EmptySectionPlaceholder";
-import { CustomSectionRenderer } from "@/components/resume/shared/CustomSectionRenderer";
 import { SectionRenderer } from "@/components/resume/shared/SectionRenderer";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -20,13 +15,13 @@ import { useResume } from "@/components/resume/state/ResumeContext";
 import { useResumeSections } from "../hooks/useResumeSections";
 
 export const VisualTheme = ({ containerRef, isThumbnail }: ThemeComponentProps) => {
-  const { data, updateField: handleUpdate, readOnly } = useResume();
+  const { data, updateField: handleUpdate, updateMultipleFields, readOnly } = useResume();
   const personalInfo = data.personalInfo;
   const [isMounted, setIsMounted] = useState(false);
 
   const { mainSections } = useResumeSections({
       data,
-      sidebarIds: []
+      sidebarIds: ['contact']
   });
 
   useEffect(() => {
@@ -53,10 +48,13 @@ export const VisualTheme = ({ containerRef, isThumbnail }: ThemeComponentProps) 
               {(personalInfo.fullName ?? '').split(' ')[0]}
           </span>
           <div className="flex gap-6 text-sm font-medium uppercase tracking-widest bg-black/50 backdrop-blur rounded px-4 py-2">
-             {(data.sectionOrder && data.sectionOrder.length > 0 ? data.sectionOrder : ["summary", "projects", "experience", "skills", "education"]).map(sectionId => {
+             {mainSections.map(sectionId => {
                  const isCustom = data.customSections?.find(c => c.id === sectionId);
-                 const isStandard = ['summary', 'experience', 'projects', 'education', 'skills', 'about', 'contact'].includes(sectionId);
+                 // Contact is manual footer
+                 if (sectionId === 'contact') return null;
                  
+                 // Ghost ID check
+                 const isStandard = ['summary', 'experience', 'projects', 'education', 'skills', 'about'].includes(sectionId);
                  if (!isCustom && !isStandard) return null;
 
                  let label = isCustom ? isCustom.title : sectionId;
@@ -163,7 +161,8 @@ export const VisualTheme = ({ containerRef, isThumbnail }: ThemeComponentProps) 
 
       <main className="max-w-7xl mx-auto px-6 py-24" id="work">
         {/* Dynamic Section Rendering */}
-        {(data.sectionOrder && data.sectionOrder.length > 0 ? data.sectionOrder : ["summary", "projects", "experience", "skills", "education"]).map(id => {
+        {/* Dynamic Section Rendering */}
+        {mainSections.map(id => {
              // For Visual Theme, specific animations per section type
              if (id === 'summary') {
                  return (
@@ -201,15 +200,26 @@ export const VisualTheme = ({ containerRef, isThumbnail }: ThemeComponentProps) 
         {!readOnly && (
              <div className="flex justify-center mt-24">
                   <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 bg-transparent" onClick={() => {
-                        const newSection = {
-                            id: crypto.randomUUID(),
-                            title: "New Section",
-                            type: "list" as const,
-                            items: []
-                        };
-                        const newSections = [...(data.customSections || []), newSection];
-                        handleUpdate('customSections', newSections);
-                  }}>
+                         const newSection = {
+                             id: crypto.randomUUID(),
+                             title: "New Section",
+                             type: "list" as const,
+                             items: []
+                         };
+                         const newSections = [...(data.customSections || []), newSection];
+                         
+                         // Ensure we have a valid order to append to
+                         const currentOrder = (data.sectionOrder && data.sectionOrder.length > 0) 
+                              ? data.sectionOrder 
+                              : ["summary", "projects", "experience", "skills", "education"]; // Visual defaults
+                         
+                         const newOrder = [...currentOrder, newSection.id];
+
+                         updateMultipleFields({
+                              'customSections': newSections,
+                              'sectionOrder': newOrder
+                         });
+                   }}>
                       <Plus className="w-4 h-4 mr-2" />
                       Add Section
                   </Button>

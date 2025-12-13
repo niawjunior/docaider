@@ -10,9 +10,10 @@ import { useResume } from "@/components/resume/state/ResumeContext";
 interface SkillsSectionProps {
     theme: string;
     className?: string;
+    id?: string;
 }
 
-export function SkillsSection({ theme, className }: SkillsSectionProps) {
+export function SkillsSection({ theme, className, id }: SkillsSectionProps) {
     const { data, updateField, readOnly } = useResume();
 
     // Get Theme Config
@@ -30,6 +31,7 @@ export function SkillsSection({ theme, className }: SkillsSectionProps) {
 
     return (
         <ResumeSection
+            id={id}
             title="Skills"
             theme={theme}
             // Add Button integrated into ResumeSection header

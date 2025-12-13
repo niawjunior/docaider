@@ -8,6 +8,7 @@ export interface ComponentStyles {
   subtitle: string;
   metadata: string;
   description: string;
+  body?: string; // Optional wrapper for body content (e.g. wrapper around subtitle+desc)
   deleteButton?: string; // Optional custom style for delete button
   decoration?: React.ReactNode; 
 }
@@ -90,14 +91,15 @@ export const EXPERIENCE_STYLES: ThemeToSectionConfig = {
   },
   studio: {
     styles: {
-      container: "space-y-8",
-      item: "break-inside-avoid group/item relative hover:bg-white/5 p-2 -mx-2 rounded transition-colors",
-      header: "flex justify-between items-start mb-1 gap-4 break-after-avoid",
-      title: "font-bold text-xl tracking-tight text-white flex-1 min-w-0", // Added flex-1
-      subtitle: "font-medium text-neutral-500",
-      metadata: "text-sm text-neutral-400 whitespace-nowrap flex gap-1",
-      description: "text-neutral-400 text-sm leading-relaxed",
-      deleteButton: "text-red-400 hover:bg-white/10 rounded bg-transparent border-none shadow-none w-6 h-6 p-1 transition-opacity ml-2"
+      container: "space-y-12",
+      item: "group/item relative border-l border-neutral-800 p-0 pl-8 ml-2", // Custom indentation
+      header: "flex flex-col md:flex-row md:items-baseline justify-between mb-4 relative pr-8 break-after-avoid",
+      title: "text-2xl font-bold text-white", // Company/Position Title
+      subtitle: "text-xl text-neutral-300 mb-4", // Position/Company Subtitle
+      metadata: "text-neutral-500 font-mono text-sm", // Dates
+      description: "text-neutral-400 leading-relaxed font-light",
+      body: "bg-neutral-900/50 p-6 rounded-lg border border-neutral-800/50", // Card wrapper
+      deleteButton: "absolute right-0 top-1 text-neutral-500 hover:text-red-500 bg-transparent border-none"
     },
     strategy: {
       layout: 'list',
@@ -196,16 +198,17 @@ export const PROJECT_STYLES: ThemeToSectionConfig = {
     },
     studio: {
         styles: {
-            container: "grid gap-4 grid-cols-1",
-            item: "p-0",
-            header: "flex justify-between items-start gap-3 break-after-avoid",
-            title: "font-bold text-xl tracking-tight text-white",
+            container: "grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16",
+            item: "group/item relative",
+            header: "border-b border-neutral-800 pb-4 mb-4 flex justify-between items-end break-after-avoid",
+            title: "text-3xl font-bold flex-1",
             subtitle: "hidden",
-            metadata: "text-slate-400 hover:text-white transition-colors text-sm",
-            description: "text-neutral-400 text-sm leading-relaxed"
+            metadata: "text-neutral-500 text-sm",
+            description: "text-xl text-neutral-400 font-light leading-relaxed",
+            deleteButton: "text-red-500 hover:bg-red-900/50 border-none bg-transparent transition-opacity shrink-0"
         },
         strategy: {
-            layout: 'list',
+            layout: 'grid', // Uses rect strategy
             datesPosition: 'inline',
             alignment: 'left'
         }
@@ -389,7 +392,7 @@ export const HEADER_STYLES: ThemeToSectionConfig = {
             container: "mb-8 pb-6 text-left border-b border-slate-700/50", // Subtle separator
             title: "font-bold uppercase tracking-tight mb-2 w-full text-4xl text-white", // White Title
             subtitle: "text-lg text-slate-300 mb-4 w-full", // Light Subtitle
-            metadata: "text-xs text-slate-400", // Light Meta (ContactManager handles flex/gap)
+            metadata: "text-sm text-slate-400", // Light Meta (ContactManager handles flex/gap)
             item: "flex items-center gap-1",
             header: "", description: "" // Unused
         },
@@ -539,10 +542,10 @@ export const SECTION_STYLES: Record<string, SectionHeaderStyles> = {
          // decoration removed for sidebar alignment
     },
     studio: {
-        wrapper: "mb-8 text-left",
-        header: "flex justify-between items-center mb-6 border-none pb-0 break-after-avoid", // No border
-        title: "font-bold uppercase flex items-center gap-2 text-4xl tracking-tight text-white",
-        addButton: "bg-transparent text-white border-white/20 hover:bg-white/10"
+        wrapper: "py-24 border-t border-neutral-800 scroll-mt-24 text-left",
+        header: "flex justify-between items-end mb-16 break-after-avoid",
+        title: "text-4xl font-bold uppercase tracking-tight text-white",
+        addButton: "bg-white text-black hover:bg-neutral-200 border-none"
     },
     visual: {
         wrapper: "mb-12 text-left",

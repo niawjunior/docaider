@@ -12,9 +12,10 @@ import { useResume } from "@/components/resume/state/ResumeContext";
 interface ExperienceSectionProps {
     theme: string;
     className?: string;
+    id?: string;
 }
 
-export function ExperienceSection({ theme, className }: ExperienceSectionProps) {
+export function ExperienceSection({ theme, className, id }: ExperienceSectionProps) {
     const { data, updateField, readOnly } = useResume();
     
     // Get Theme Config
@@ -31,6 +32,7 @@ export function ExperienceSection({ theme, className }: ExperienceSectionProps) 
 
     return (
         <ResumeSection
+            id={id}
             title="Experience"
             theme={theme}
             className={className}
@@ -121,7 +123,7 @@ export function ExperienceSection({ theme, className }: ExperienceSectionProps) 
                         </div>
 
                         {/* Body content */}
-                        <div>
+                        <div className={styles.body}>
                              {/* Company Name / Subtitle */}
                             <div className={styles.subtitle}>
                                 <InlineEdit

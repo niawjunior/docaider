@@ -13,9 +13,10 @@ import { motion } from "framer-motion";
 interface ProjectsSectionProps {
     theme: string;
     className?: string; // Add className prop
+    id?: string;
 }
 
-export function ProjectsSection({ theme, className }: ProjectsSectionProps) {
+export function ProjectsSection({ theme, className, id }: ProjectsSectionProps) {
     const { data, updateField, readOnly } = useResume();
 
     // Get Theme Config
@@ -34,6 +35,7 @@ export function ProjectsSection({ theme, className }: ProjectsSectionProps) {
 
     return (
         <ResumeSection
+            id={id}
             title="Selected Works"
             theme={theme}
             className={className} // Still passed for fallback or specialized hook usage inside ResumeSection

@@ -4,7 +4,6 @@ import { VisualTheme } from "./VisualTheme";
 import { ModernTheme } from "./ModernTheme";
 import { MinimalTheme } from "./MinimalTheme";
 import { CreativeTheme } from "./CreativeTheme";
-import { ResumeData } from "@/lib/schemas/resume";
 
 export interface ThemeComponentProps {
   containerRef?: React.RefObject<any>;

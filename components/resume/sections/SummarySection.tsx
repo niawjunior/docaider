@@ -10,9 +10,10 @@ import { useResume } from "@/components/resume/state/ResumeContext";
 interface SummarySectionProps {
   theme?: string;
   className?: string;
+  id?: string;
 }
 
-export const SummarySection = ({ theme = "modern", className }: SummarySectionProps) => {
+export const SummarySection = ({ theme = "modern", className, id }: SummarySectionProps) => {
   const { data, updateField, readOnly } = useResume();
 
   // Get Theme Config
@@ -23,6 +24,7 @@ export const SummarySection = ({ theme = "modern", className }: SummarySectionPr
 
   return (
     <ResumeSection
+        id={id}
         title="Professional Summary"
         theme={theme}
         className={className}

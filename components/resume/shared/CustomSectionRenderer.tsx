@@ -22,7 +22,7 @@ export function CustomSectionRenderer({
     className,
     theme = "modern",
 }: CustomSectionRendererProps) {
-    const { data, updateField, readOnly } = useResume();
+    const { data, updateField, updateMultipleFields, readOnly } = useResume();
     
     // Get Theme Config
     const config = getSectionTheme(theme, 'custom');
@@ -37,7 +37,16 @@ export function CustomSectionRenderer({
     const handleDeleteSection = () => {
         const newSections = [...(data.customSections || [])];
         newSections.splice(index, 1);
-        updateField('customSections', newSections);
+        
+        // Also remove from sectionOrder to prevent ghost ID rendering
+        const newOrder = (data.sectionOrder || []).filter(id => id !== section.id);
+
+        if (updateField && typeof updateField === 'function' && updateMultipleFields) {
+             updateMultipleFields({
+                'customSections': newSections,
+                'sectionOrder': newOrder
+             });
+        }
     };
 
     // If empty and read-only, don't render (unless we have update capabilities)
@@ -63,7 +72,8 @@ export function CustomSectionRenderer({
                  <ThemeDeleteButton 
                     onClick={handleDeleteSection}
                     className={cn(
-                        styles.deleteButton || "bg-transparent text-slate-400 hover:text-red-500 p-1 border-none"
+                        styles.deleteButton || "bg-transparent text-slate-400 hover:text-red-500 p-1 border-none",
+                        "static" // Override theme's absolute positioning for the main section header, ensuring it stays in flow
                     )}
                 />
             )}

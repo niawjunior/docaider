@@ -11,6 +11,7 @@ interface ResumeSectionProps {
   actions?: React.ReactNode;
   children: React.ReactNode;
   className?: string; // Wrapper section class override
+  id?: string;
 }
 
 export function ResumeSection({ 
@@ -19,14 +20,15 @@ export function ResumeSection({
     onAdd, 
     actions,
     children, 
-    className 
+    className,
+    id
 }: ResumeSectionProps) {
   
   // Decoupled Style Retrieval
   const styles = getSectionStyles(theme);
 
   return (
-    <section className={cn(styles.wrapper, className)}>
+    <section id={id} className={cn(styles.wrapper, className)}>
        <div className={styles.header}>
           <h2 className={styles.title}>
               {(styles as any).decoration === true && (

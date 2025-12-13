@@ -2,9 +2,6 @@
 
 import { motion } from "framer-motion";
 import { 
-  Mail, 
-  Globe, 
-  Linkedin, 
   Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,12 +19,9 @@ export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
 
   const { mainSections } = useResumeSections({
       data,
-      sidebarIds: []
+      sidebarIds: ['contact']
   });
-  // Determine order (fallback if empty)
-  const order = (data.sectionOrder && data.sectionOrder.length > 0) 
-      ? data.sectionOrder 
-      : ["experience", "projects", "education", "skills"];
+
 
   return (
     <div 
@@ -55,10 +49,15 @@ export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
           </div>
           <nav className="hidden md:flex gap-6 text-sm font-medium text-slate-600">
             <a href="#about" className="hover:text-blue-600 transition-colors">About</a>
-            {order.map(sectionId => {
+            {mainSections.map(sectionId => {
                 const isCustom = data.customSections?.find(c => c.id === sectionId);
-                const isStandard = ['summary', 'experience', 'projects', 'education', 'skills', 'about', 'contact'].includes(sectionId);
-                
+                // "About" is handled manually above, "Contact" manually below. 
+                // We should skip them if they appear in mainSections (Summary often maps to About)
+                if (sectionId === 'summary') return null; // 'About' is manually linked above
+                if (sectionId === 'contact') return null; // 'Contact' is manually linked below
+
+                // Prevent rendering "ghost" IDs (deleted custom sections that remained in order)
+                const isStandard = ['experience', 'education', 'projects', 'skills'].includes(sectionId);
                 if (!isCustom && !isStandard) return null;
 
                 const label = isCustom 
@@ -83,6 +82,7 @@ export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
+          className="scroll-mt-24"
         >
           <div className="max-w-3xl">
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 flex flex-wrap md:flex-nowrap gap-x-3 gap-y-1 items-baseline">
@@ -138,7 +138,18 @@ export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
                        items: []
                    };
                    const newSections = [...(data.customSections || []), newSection];
-                   handleUpdate('customSections', newSections);
+                   
+                   // Ensure we have a valid order to append to
+                   const currentOrder = (data.sectionOrder && data.sectionOrder.length > 0) 
+                        ? data.sectionOrder 
+                        : ["experience", "projects", "education", "skills"]; // Portfolio defaults
+                   
+                   const newOrder = [...currentOrder, newSection.id];
+
+                   updateMultipleFields({
+                        'customSections': newSections,
+                        'sectionOrder': newOrder
+                   });
                }}>
                    <Plus className="w-4 h-4 mr-2" />
                    Add Custom Section
@@ -157,6 +168,7 @@ export const PortfolioTheme = ({ containerRef }: ThemeComponentProps) => {
                      
                      <div className="flex flex-wrap justify-center gap-4 scroll-mt-24">
                         <ContactManager 
+                           theme="portfolio"
                            layout="row" 
                            align="center"
                            itemClassName="border border-slate-200 rounded-full px-4 py-2 hover:bg-slate-100 transition-colors bg-white h-auto [&_span]:whitespace-nowrap items-center"

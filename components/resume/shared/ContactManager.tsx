@@ -119,16 +119,32 @@ export function ContactManager({ theme, className, itemClassName, readOnly, layo
                  <div className="pt-2 flex justify-center md:justify-start">
                      <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="text-sm text-neutral-500 hover:text-white hover:bg-neutral-800 gap-2">
+                            <Button variant="ghost" className={cn(
+                                "text-sm gap-2",
+                                // Theme-aware button colors
+                                (theme === 'minimal' || theme === 'portfolio') 
+                                    ? "text-slate-500 hover:text-slate-900 hover:bg-slate-100" 
+                                    : "text-neutral-500 hover:text-white hover:bg-neutral-800"
+                            )}>
                                 <Plus className="w-4 h-4" /> Add Contact
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-48 bg-neutral-900 border-neutral-800 text-neutral-300">
+                        <DropdownMenuContent align="start" className={cn(
+                            "w-48",
+                            (theme === 'minimal' || theme === 'portfolio') 
+                                ? "bg-white border-slate-200 text-slate-900" 
+                                : "bg-slate-900 border-slate-800 text-slate-50"
+                        )}>
                              {standardFields.filter(f => personalInfo[f.key] === null).map(f => (
                                  <DropdownMenuItem 
                                     key={f.key} 
                                     onClick={() => handleUpdate(`personalInfo.${f.key}`, "")} // Set to empty string to make it visible
-                                    className="hover:bg-neutral-800 focus:bg-neutral-800 cursor-pointer"
+                                    className={cn(
+                                        "cursor-pointer",
+                                        (theme === 'minimal' || theme === 'portfolio') 
+                                            ? "hover:bg-slate-100 focus:bg-slate-100 focus:text-slate-900" 
+                                            : "hover:bg-slate-800 focus:bg-slate-800 focus:text-slate-50"
+                                    )}
                                  >
                                      <f.icon className="w-4 h-4 mr-2" />
                                      {f.label}
@@ -140,7 +156,12 @@ export function ContactManager({ theme, className, itemClassName, readOnly, layo
                                     const newLinks = [...(personalInfo.additionalLinks || []), newLink];
                                     handleUpdate('personalInfo.additionalLinks', newLinks);
                                 }}
-                                className="hover:bg-neutral-800 focus:bg-neutral-800 cursor-pointer"
+                                className={cn(
+                                    "cursor-pointer",
+                                    (theme === 'minimal' || theme === 'portfolio') 
+                                        ? "hover:bg-slate-100 focus:bg-slate-100 focus:text-slate-900" 
+                                        : "hover:bg-slate-800 focus:bg-slate-800 focus:text-slate-50"
+                                )}
                              >
                                  <LinkIcon className="w-4 h-4 mr-2" />
                                  Custom Link
