@@ -186,7 +186,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
          <div
             style={{
               position: "absolute",
-              bottom: "50px",
+              bottom: "60px",
               display: "flex",
               alignItems: "center",
               gap: "10px",
